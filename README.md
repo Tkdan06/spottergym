@@ -31,6 +31,35 @@ React + TypeScript + Vite + React Router + Lucide
 
 Прод: **https://spottergym.ru**
 
+## Закрытый доступ (логин / пароль перед сайтом)
+
+Пока идёт тест, перед приложением показывается экран «Закрытый доступ».
+
+**Выключить / включить в любой момент** — файл `public/site-lock.json`:
+
+```json
+{ "enabled": true, "hint": "…" }   // закрыто
+{ "enabled": false, "hint": "…" }  // открыто всем
+```
+
+Закоммить и запушь — после деплоя флаг подхватится (без смены пароля).
+
+**Логин / пароль по умолчанию** (можно сменить):
+
+| | |
+|---|---|
+| Логин | `spotter` |
+| Пароль | `floor-test-2026` |
+
+Смена через `.env` / GitHub:
+
+- `VITE_SITE_LOCK_USER` / `VITE_SITE_LOCK_PASSWORD`
+- Repo **Variables:** `SITE_LOCK_USER`, `SITE_LOCK_ENABLED`
+- Repo **Secrets:** `SITE_LOCK_PASSWORD`
+- `VITE_SITE_LOCK_ENABLED=false` принудительно открывает сайт даже если JSON говорит `true`
+
+Это soft-gate для друзей (пароль в бандле SPA). Не путать с регистрацией пользователей внутри Spotter.
+
 ## Деплой
 
 ### 1) GitHub
