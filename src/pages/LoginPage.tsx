@@ -16,6 +16,7 @@ export function LoginPage() {
     setError('')
     try {
       await login(email, password)
+      // ProtectedRoute / GuestOnly сами решат: онбординг или /app
       navigate('/app')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось войти')

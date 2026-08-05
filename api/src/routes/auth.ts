@@ -84,8 +84,8 @@ authRoutes.post(
         isAdmin: master,
         isMasterAdmin: master,
         adminPermissions: master ? FULL_PERMISSIONS : undefined,
-        onboardingDone: master,
-        city: master ? 'Москва' : '',
+        // Всегда онбординг — даже для главного админа
+        onboardingDone: false,
       },
       include: { gyms: true, checkIns: { where: { checkedOutAt: null }, take: 1 } },
     })
