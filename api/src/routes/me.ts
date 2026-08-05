@@ -19,6 +19,14 @@ import {
   USERNAME_MIN,
   VISIT_SLOTS_MAX,
 } from '../lib/fieldLimits.js'
+import {
+  CHECK_IN_EXTEND_MS,
+  CHECK_IN_MAX_EXTENDS,
+  canExtendCheckIn,
+  defaultExpiresAt,
+  expireStaleCheckIns,
+  resolveExpiresAt,
+} from '../lib/checkInExpiry.js'
 import { notifyGymMembers } from '../lib/gymNotify.js'
 import { isAllowedAvatarDataUrl, isAllowedPhotoDataUrl } from '../lib/photos.js'
 import { serializeUser } from '../lib/serialize.js'
@@ -184,18 +192,25 @@ meRoutes.post('/check-in', async (c) => {
     return c.json({ error: 'Сначала добавь этот зал в профиль' }, 400)
   }
 
+  const now = new Date()
   await prisma.checkIn.updateMany({
     where: { userId, checkedOutAt: null },
-    data: { checkedOutAt: new Date() },
+    data: { checkedOutAt: now },
   })
 
   await prisma.checkIn.create({
-    data: { userId, gymId: body.data.gymId },
+    data: {
+      userId,
+      gymId: body.data.gymId,
+      checkedInAt: now,
+      expiresAt: defaultExpiresAt(now),
+      extendCount: 0,
+    },
   })
 
   await prisma.user.update({
     where: { id: userId },
-    data: { homeGymId: body.data.gymId, lastSeenAt: new Date(), breakUntil: null },
+    data: { homeGymId: body.data.gymId, lastSeenAt: now, breakUntil: null },
   })
 
   const user = await loadAuthedUser(userId)
@@ -232,6 +247,47 @@ meRoutes.post('/check-out', async (c) => {
     where: { id: userId },
     data: { lastSeenAt: new Date() },
   })
+  const user = await loadAuthedUser(userId)
+  return c.json({ user: user ? serializeUser(user) : null })
+})
+
+/** Still at the gym — push expiry +1h (max 2 extends). */
+meRoutes.post('/check-in/extend', async (c) => {
+  const userId = c.get('userId')
+  await expireStaleCheckIns()
+  const open = await prisma.checkIn.findFirst({
+    where: { userId, checkedOutAt: null },
+    orderBy: { checkedInAt: 'desc' },
+  })
+  if (!open) return c.json({ error: 'Сейчас ты не в зале' }, 400)
+
+  const now = new Date()
+  const expiresAt = resolveExpiresAt(open.checkedInAt, open.expiresAt)
+  if (!canExtendCheckIn(open.extendCount, expiresAt, now)) {
+    return c.json(
+      {
+        error:
+          open.extendCount >= CHECK_IN_MAX_EXTENDS
+            ? 'Лимит продлений исчерпан — отметься заново'
+            : 'Сессия уже закончилась',
+      },
+      400,
+    )
+  }
+
+  const nextExpires = new Date(Math.max(expiresAt.getTime(), now.getTime()) + CHECK_IN_EXTEND_MS)
+  await prisma.checkIn.update({
+    where: { id: open.id },
+    data: {
+      expiresAt: nextExpires,
+      extendCount: open.extendCount + 1,
+    },
+  })
+  await prisma.user.update({
+    where: { id: userId },
+    data: { lastSeenAt: now },
+  })
+
   const user = await loadAuthedUser(userId)
   return c.json({ user: user ? serializeUser(user) : null })
 })

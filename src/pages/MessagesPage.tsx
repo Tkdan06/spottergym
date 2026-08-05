@@ -1,5 +1,5 @@
-import { type FormEvent, useEffect, useState } from 'react'
-import { ArrowRight, Heart, Search, UserRound } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Heart, Search, UserRound } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { PresenceBadge } from '../components/PresenceBadge'
 import { useApp, useOtherParticipant } from '../context/useApp'
@@ -8,7 +8,7 @@ import { profileImage } from '../lib/avatar'
 import { otherParticipantId } from '../lib/conversations'
 import { searchFieldProps } from '../lib/inputAttrs'
 import { getCheckedInGymId } from '../lib/presence'
-import { formatUsername, normalizeUsername } from '../lib/username'
+import { formatUsername } from '../lib/username'
 import type { Conversation, UserProfile } from '../types'
 import './MessagesPage.css'
 
@@ -48,8 +48,10 @@ function ConversationRow({ conversation }: { conversation: Conversation }) {
           <span className="chip small">Запрос</span>
         ) : null}
       </div>
-      {conversation.unreadCount > 0 ? (
-        <i className="unread-badge">{conversation.unreadCount}</i>
+      {(conversation.unreadCount > 0 || conversation.requestStatus === 'incoming') ? (
+        <i className="unread-badge">
+          {conversation.unreadCount > 0 ? conversation.unreadCount : '!'}
+        </i>
       ) : null}
     </Link>
   )
@@ -181,27 +183,6 @@ export function MessagesPage() {
         .trim()
     : ''
 
-  const onSearch = async (e: FormEvent) => {
-    e.preventDefault()
-    setSearchError('')
-    const q = normalizeUsername(query) || query.trim().replace(/^@+/, '')
-    if (q.length < 2) {
-      setSearchError('Введи минимум 2 символа @ника или имени')
-      return
-    }
-    setSearching(true)
-    try {
-      const list = await searchUsers(q)
-      setResults(list)
-      setSearchError(list.length ? '' : 'Никого не нашли')
-    } catch (err) {
-      setResults([])
-      setSearchError(err instanceof Error ? err.message : 'Не удалось найти')
-    } finally {
-      setSearching(false)
-    }
-  }
-
   return (
     <main className="page messages-page">
       <header className="page-header messages-top">
@@ -220,42 +201,21 @@ export function MessagesPage() {
       </header>
 
       <div className="messages-find">
-        <form
-          className="find-user-form"
-          onSubmit={(e) => void onSearch(e)}
-          aria-label="Найти по @нику или имени"
-        >
-          <span className="find-user-icon" aria-hidden>
-            <Search size={16} strokeWidth={2.25} />
-          </span>
+        <label className="app-search">
+          <Search size={16} aria-hidden />
           <input
             {...searchFieldProps}
-            type="text"
-            inputMode="search"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value)
               setSearchError('')
             }}
-            placeholder="@ник или имя"
+            placeholder="@ник"
             maxLength={40}
-            size={1}
-            aria-label="Поиск по @нику или имени"
-            enterKeyHint="search"
+            aria-label="Поиск по @нику"
+            aria-busy={searching || undefined}
           />
-          <button
-            type="submit"
-            className="find-user-go"
-            disabled={searching}
-            aria-label="Найти"
-          >
-            {searching ? (
-              <span className="find-user-go-dots">…</span>
-            ) : (
-              <ArrowRight size={18} strokeWidth={2.25} />
-            )}
-          </button>
-        </form>
+        </label>
         {searchError ? <p className="feedback-error find-user-error">{searchError}</p> : null}
       </div>
 

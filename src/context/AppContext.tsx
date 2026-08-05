@@ -38,6 +38,7 @@ import {
   apiBlockUser,
   apiCheckIn,
   apiCheckOut,
+  apiExtendCheckIn,
   apiCreateTicket,
   apiFetchBlocks,
   apiFetchConversations,
@@ -71,6 +72,15 @@ import {
   setStoredToken,
 } from '../lib/apiClient'
 import { DEMO_ACCOUNT_EMAIL, DEMO_ACCOUNT_NAME, isDemoAccount } from '../lib/demoAccount'
+import { ensureWebPushSubscription, syncAppBadge } from '../lib/push'
+import {
+  buildCheckInSessionFields,
+  canExtendCheckInLocal,
+  CHECK_IN_EXTEND_MS,
+  CHECK_IN_MAX_EXTENDS,
+  getCheckInExpiresAt,
+  isCheckInExpired,
+} from '../lib/presence'
 import {
   adminFlagsForEmail,
   blockEmail,
@@ -191,6 +201,8 @@ export interface AppContextValue {
   toggleActive: (gymId?: string) => void
   checkIn: (gymId: string) => void
   checkOut: () => void
+  /** Продлить присутствие на +1 час (макс. 2 раза) */
+  extendCheckIn: () => void | Promise<void>
   joinGym: (gymId: string, makeHome?: boolean) => void
   leaveGym: (gymId: string) => void
   setHomeGym: (gymId: string) => void
@@ -380,6 +392,9 @@ function createDefaultUser(name: string, email: string, gender: Gender = 'male')
     isActive: false,
     checkedInGymId: '',
     checkedInAt: '',
+    checkedInExpiresAt: '',
+    checkInExtendCount: 0,
+    checkInCanExtend: false,
     lastSeenAt: new Date().toISOString(),
     registeredAt: new Date().toISOString(),
     onboardingDone: false,
@@ -430,6 +445,17 @@ function loadUser(): AppUser | null {
               ? raw.lastSeenAt
               : new Date().toISOString()
           : '',
+      checkedInExpiresAt:
+        Boolean(raw.isActive) && Boolean(checkedInGymId)
+          ? typeof raw.checkedInExpiresAt === 'string' && raw.checkedInExpiresAt
+            ? raw.checkedInExpiresAt
+            : ''
+          : '',
+      checkInExtendCount:
+        Boolean(raw.isActive) && Boolean(checkedInGymId)
+          ? Number(raw.checkInExtendCount) || 0
+          : 0,
+      checkInCanExtend: Boolean(raw.checkInCanExtend),
       visitSlots: Array.isArray(raw.visitSlots) ? raw.visitSlots : [],
       breakUntil: activeBreakUntil(raw.breakUntil),
       registeredAt:
@@ -444,6 +470,40 @@ function loadUser(): AppUser | null {
       adminPermissions: raw.adminPermissions,
     }),
   )
+
+  // Soft fallback: expired local sessions clear on load
+  if (normalized.isActive) {
+    const expiresAt =
+      normalized.checkedInExpiresAt ||
+      getCheckInExpiresAt(normalized) ||
+      buildCheckInSessionFields(normalized.checkedInAt).checkedInExpiresAt
+    const withExpiry: AppUser = {
+      ...normalized,
+      checkedInExpiresAt: expiresAt,
+      checkInCanExtend: canExtendCheckInLocal({
+        ...normalized,
+        checkedInExpiresAt: expiresAt,
+      }),
+    }
+    if (isCheckInExpired(withExpiry)) {
+      const cleared: AppUser = {
+        ...withExpiry,
+        isActive: false,
+        checkedInGymId: '',
+        checkedInAt: '',
+        checkedInExpiresAt: '',
+        checkInExtendCount: 0,
+        checkInCanExtend: false,
+      }
+      saveJson(STORAGE_USER, cleared)
+      if (cleared.email) saveAccountProfile(cleared)
+      return cleared
+    }
+    saveJson(STORAGE_USER, withExpiry)
+    if (withExpiry.email) saveAccountProfile(withExpiry)
+    return withExpiry
+  }
+
   saveJson(STORAGE_USER, normalized)
   if (normalized.email) saveAccountProfile(normalized)
   return normalized
@@ -602,6 +662,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [notifications, notificationPrefs],
   )
 
+  useEffect(() => {
+    void syncAppBadge(unreadNotifications)
+  }, [unreadNotifications])
+
   const patchMessageStatus = useCallback(
     (messageId: string, status: MessageStatus) => {
       setMessages((prev) => {
@@ -666,6 +730,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (email) saveAccountConversations(email, next)
   }, [])
 
+  /** Light poll: chats + notifications so nav/bell badges stay in sync outside Messages page */
+  const refreshInbox = useCallback(async () => {
+    if (!apiOnlineRef.current || !getStoredToken()) return
+    try {
+      const [notifs, list] = await Promise.all([apiFetchNotifications(), apiFetchConversations()])
+      const email = userEmailRef.current
+      setNotifications(notifs)
+      if (email) saveNotificationsForUser(email, notifs)
+      for (const row of list) {
+        if (row.other) rememberUserRef.current(row.other)
+      }
+      const next = list
+        .map(({ other: _o, ...c }) => c)
+        .sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt))
+      setConversations(next)
+      if (email) saveAccountConversations(email, next)
+    } catch {
+      /* keep cache */
+    }
+  }, [])
+
   const refreshThread = useCallback(async (conversationId: string) => {
     if (!apiOnlineRef.current || !getStoredToken() || !conversationId) return
     const { conversation, messages: thread } = await apiFetchMessages(conversationId)
@@ -709,7 +794,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setTickets(ticketsList)
       saveTickets(ticketsList)
       setBlockedUserIds(blockedIds)
-      await refreshChats()
+      try {
+        await refreshChats()
+      } catch {
+        /* notifications already applied; chats keep previous cache */
+      }
+      void ensureWebPushSubscription()
     } catch {
       /* keep local cache */
     }
@@ -765,6 +855,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!apiOnline || !user || !getStoredToken()) return
     void hydrateSocialFromApi()
   }, [apiOnline, user?.id, hydrateSocialFromApi])
+
+  // Keep chat + notification badges fresh while the app is open (not only on Messages page)
+  useEffect(() => {
+    if (!apiOnline || !user || !getStoredToken()) return
+
+    let cancelled = false
+    const tick = () => {
+      if (cancelled || document.visibilityState === 'hidden') return
+      void refreshInbox()
+    }
+
+    const id = window.setInterval(tick, 8000)
+    const onVis = () => {
+      if (document.visibilityState === 'visible') tick()
+    }
+    document.addEventListener('visibilitychange', onVis)
+    // First tick shortly after mount so badges catch up without waiting a full interval
+    const warm = window.setTimeout(tick, 1200)
+
+    return () => {
+      cancelled = true
+      window.clearInterval(id)
+      window.clearTimeout(warm)
+      document.removeEventListener('visibilitychange', onVis)
+    }
+  }, [apiOnline, user?.id, refreshInbox])
 
   // Админ-реестр с сервера
   useEffect(() => {
@@ -1042,12 +1158,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setUser((prev) => {
         if (!prev || !prev.gymIds.includes(gymId)) return prev
         const now = new Date().toISOString()
-        const sameSession = prev.isActive && prev.checkedInGymId === gymId
+        const session = buildCheckInSessionFields(now, 0)
         const next = {
           ...prev,
           isActive: true,
           checkedInGymId: gymId,
-          checkedInAt: sameSession && prev.checkedInAt ? prev.checkedInAt : now,
+          ...session,
           breakUntil: null,
           lastSeenAt: now,
         }
@@ -1072,6 +1188,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         isActive: false,
         checkedInGymId: '',
         checkedInAt: '',
+        checkedInExpiresAt: '',
+        checkInExtendCount: 0,
+        checkInCanExtend: false,
         lastSeenAt: new Date().toISOString(),
       }
       saveJson(STORAGE_USER, next)
@@ -1085,6 +1204,59 @@ export function AppProvider({ children }: { children: ReactNode }) {
     })
   }, [applyServerUser])
 
+  const extendCheckIn = useCallback(async () => {
+    const prev = user
+    if (!prev?.isActive || !canExtendCheckInLocal(prev)) return
+
+    if (apiOnlineRef.current && getStoredToken() && !isDemoAccount(prev.email)) {
+      try {
+        const me = await apiExtendCheckIn()
+        applyServerUser(me as AppUser)
+        return
+      } catch {
+        /* local fallback */
+      }
+    }
+
+    setUser((current) => {
+      if (!current?.isActive || !canExtendCheckInLocal(current)) return current
+      const expires = Date.parse(getCheckInExpiresAt(current) || '')
+      const base = Number.isFinite(expires) ? expires : Date.now()
+      const nextCount = (current.checkInExtendCount || 0) + 1
+      const next: AppUser = {
+        ...current,
+        checkedInExpiresAt: new Date(Math.max(base, Date.now()) + CHECK_IN_EXTEND_MS).toISOString(),
+        checkInExtendCount: nextCount,
+        checkInCanExtend: nextCount < CHECK_IN_MAX_EXTENDS,
+        lastSeenAt: new Date().toISOString(),
+      }
+      saveJson(STORAGE_USER, next)
+      saveAccountProfile(next)
+      return next
+    })
+  }, [user, applyServerUser])
+
+  // Auto check-out when 3h (+extends) window ends — local soft fallback + sync
+  useEffect(() => {
+    if (!user?.isActive) return
+
+    const tick = () => {
+      if (!user.isActive || !isCheckInExpired(user)) return
+      checkOut()
+    }
+
+    tick()
+    const id = window.setInterval(tick, 30_000)
+    const onVis = () => {
+      if (document.visibilityState === 'visible') tick()
+    }
+    document.addEventListener('visibilitychange', onVis)
+    return () => {
+      window.clearInterval(id)
+      document.removeEventListener('visibilitychange', onVis)
+    }
+  }, [user, checkOut])
+
   const toggleActive = useCallback(
     (gymId?: string) => {
       setUser((prev) => {
@@ -1095,6 +1267,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
             isActive: false,
             checkedInGymId: '',
             checkedInAt: '',
+            checkedInExpiresAt: '',
+            checkInExtendCount: 0,
+            checkInCanExtend: false,
             lastSeenAt: new Date().toISOString(),
           }
           saveJson(STORAGE_USER, next)
@@ -1113,11 +1288,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ''
         if (!target) return prev
         const now = new Date().toISOString()
+        const session = buildCheckInSessionFields(now, 0)
         const next = {
           ...prev,
           isActive: true,
           checkedInGymId: target,
-          checkedInAt: now,
+          ...session,
           lastSeenAt: now,
         }
         saveJson(STORAGE_USER, next)
@@ -2027,6 +2203,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       toggleActive,
       checkIn,
       checkOut,
+      extendCheckIn,
       joinGym,
       leaveGym,
       setHomeGym,
@@ -2110,6 +2287,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       toggleActive,
       checkIn,
       checkOut,
+      extendCheckIn,
       joinGym,
       leaveGym,
       setHomeGym,

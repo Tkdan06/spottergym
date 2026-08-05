@@ -32,6 +32,17 @@ export const NETWORKS = [
   'Crocus Fitness',
   'XFIT',
   'Alex Fitness',
+  'URBANFIT',
+  'Fitness House',
+  'BrightFit',
+  'A-Fitness',
+  'Orange Fitness',
+  'Balance',
+  'Физкульт',
+  'Zebra Fitness',
+  'Планета Фитнес',
+  'Nebo',
+  'Независимый',
 ] as const
 
 /** Убрать мусор из парсинга адресов: литералы "\n", лишние пробелы */

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Search } from 'lucide-react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { CityCarousel } from '../components/CityCarousel'
 import { GymCard } from '../components/GymCard'
@@ -157,13 +158,16 @@ export function OnboardingPage() {
             <p className="muted">
               Выбери один или несколько клубов · выбрано {gymIds.length}
             </p>
-            <input
-              {...searchFieldProps}
-              className="search-input"
-              placeholder="Начни вводить название или адрес"
-              value={gymQuery}
-              onChange={(e) => setGymQuery(e.target.value)}
-            />
+            <label className="app-search">
+              <Search size={16} aria-hidden />
+              <input
+                {...searchFieldProps}
+                placeholder="Клуб, район или адрес"
+                value={gymQuery}
+                onChange={(e) => setGymQuery(e.target.value)}
+                aria-label="Поиск клуба"
+              />
+            </label>
             <div className="card-list gym-pick-list">
               {cityGyms.length ? (
                 cityGyms.map((gym) => (

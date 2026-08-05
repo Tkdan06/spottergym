@@ -64,6 +64,28 @@
   min-width: 0; /* allow shrink next to photo in grid */
 }
 
+.profile-gym-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.profile-hero.mine .profile-gym-links {
+  justify-content: flex-start;
+}
+
+.profile-gym-link {
+  max-width: 100%;
+  text-decoration: none;
+}
+
+.profile-gym-link.is-here {
+  border-color: rgba(87, 242, 135, 0.45);
+  color: var(--online, #57f287);
+}
+
 .profile-hero-meta h1 {
   margin: 10px 0 6px;
   max-width: 100%;

@@ -33,6 +33,9 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN:-https://spottergym.ru,https://www.spottergym.ru}
       MASTER_ADMIN_EMAIL: ${MASTER_ADMIN_EMAIL:?Set MASTER_ADMIN_EMAIL}
       SEED_ADMIN_EMAILS: ${SEED_ADMIN_EMAILS:-}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:tkdan@ya.ru}
     ports:
       - '127.0.0.1:3001:3001'
     depends_on:

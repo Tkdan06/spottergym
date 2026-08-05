@@ -24,6 +24,7 @@ export const DEFAULT_NOTIF_PREFS: NotificationPrefs = {
   checkins: false,
   coaches: true,
   system: true,
+  workoutReminders: true,
 }
 
 export const NOTIF_PREF_LABELS: {
@@ -44,7 +45,7 @@ export const NOTIF_PREF_LABELS: {
   {
     key: 'chatRequests',
     title: 'Запросы в чат',
-    hint: 'Новые сообщения и запросы на диалог',
+    hint: 'Кто-то хочет начать переписку',
   },
   {
     key: 'checkins',
@@ -60,6 +61,11 @@ export const NOTIF_PREF_LABELS: {
     key: 'system',
     title: 'Системные',
     hint: 'Новости Spotter и ответы поддержки',
+  },
+  {
+    key: 'workoutReminders',
+    title: 'Напоминание о тренировке',
+    hint: 'За час до слота: собраться и отметить статус в зале',
   },
 ]
 
@@ -243,6 +249,8 @@ export function prefKeyForType(type: NotificationType): keyof Omit<NotificationP
     case 'system':
     case 'admin':
       return 'system'
+    case 'workout_reminder':
+      return 'workoutReminders'
     default:
       return null
   }
@@ -255,9 +263,19 @@ export function isNotificationAllowed(prefs: NotificationPrefs, type: Notificati
   return Boolean(prefs[key])
 }
 
+/** Message pings belong on the Chats badge, not in the notification feed */
+export function isMessagePingNotification(n: Pick<AppNotification, 'title'>) {
+  return n.title === 'Новое сообщение'
+}
+
+export function feedNotifications(list: AppNotification[]) {
+  return list.filter((n) => !isMessagePingNotification(n))
+}
+
 export function unreadNotificationsCount(list: AppNotification[], prefs: NotificationPrefs) {
   if (!prefs.enabled) return 0
-  return list.filter((n) => !n.read && isNotificationAllowed(prefs, n.type)).length
+  return feedNotifications(list).filter((n) => !n.read && isNotificationAllowed(prefs, n.type))
+    .length
 }
 
 export function typeLabel(type: NotificationType) {
@@ -276,6 +294,8 @@ export function typeLabel(type: NotificationType) {
       return 'Система'
     case 'admin':
       return 'Поддержка'
+    case 'workout_reminder':
+      return 'Тренировка'
     default:
       return 'Spotter'
   }

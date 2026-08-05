@@ -2,7 +2,7 @@
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  padding: 24px 16px calc(24px + var(--safe-bottom));
+  padding: calc(24px + var(--standalone-top)) 16px calc(24px + var(--safe-bottom));
   position: relative;
   z-index: 1;
 }

@@ -40,6 +40,27 @@
   margin: 0;
 }
 
+.checkin-expire-banner {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 200, 87, 0.35);
+  background: linear-gradient(135deg, rgba(255, 200, 87, 0.12), transparent 70%), var(--bg-card);
+}
+
+.checkin-expire-banner p {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.checkin-expire-note {
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
+}
+
 .checkin-other {
   border: 0;
   background: transparent;

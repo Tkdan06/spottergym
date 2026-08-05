@@ -12,6 +12,7 @@ import { otherParticipantId } from '../lib/conversations'
 import { isDemoAccount } from '../lib/demoAccount'
 import { GREETING_MESSAGE_MAX } from '../lib/fieldLimits'
 import { messageFieldProps } from '../lib/inputAttrs'
+import { getCheckedInGymId } from '../lib/presence'
 import { breakLabel, isOnBreak } from '../lib/schedule'
 import { formatUsername } from '../lib/username'
 import type { UserProfile } from '../types'
@@ -168,9 +169,25 @@ export function UserProfilePage() {
                 : 'Тренер'
               : intentLabel(person.intent)}
           </p>
-          <p className="dim">
-            {gyms.length ? gyms.map((g) => g.name).join(' · ') : 'Зал не указан'}
-          </p>
+          {gyms.length ? (
+            <div className="profile-gym-links" aria-label="Залы пользователя">
+              {gyms.map((gym) => {
+                const here = person.isActive && getCheckedInGymId(person) === gym.id
+                return (
+                  <Link
+                    key={gym.id}
+                    to={`/app/gym/${gym.id}`}
+                    className={`chip active profile-gym-link ${here ? 'is-here' : ''}`}
+                  >
+                    {gym.name}
+                    {here ? ' · сейчас' : ''}
+                  </Link>
+                )
+              })}
+            </div>
+          ) : (
+            <p className="dim">Зал не указан</p>
+          )}
           {!isAnon && person.isCoach ? (
             <span className="pill pill-coach" style={{ marginTop: 8 }}>
               Тренер

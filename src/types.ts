@@ -62,6 +62,12 @@ export interface UserProfile {
   checkedInGymId: string
   /** Когда отметился в текущем зале (ISO); пусто если не в зале */
   checkedInAt?: string
+  /** Когда авто-снимем статус (ISO) */
+  checkedInExpiresAt?: string
+  /** Сколько раз уже продлевал (+1ч), макс. 2 */
+  checkInExtendCount?: number
+  /** Можно ли нажать «Ещё здесь» */
+  checkInCanExtend?: boolean
   lastSeenAt: string
   verified?: boolean
 }
@@ -190,6 +196,7 @@ export type NotificationType =
   | 'coach'
   | 'system'
   | 'admin'
+  | 'workout_reminder'
 
 export interface AppNotification {
   id: string
@@ -212,4 +219,6 @@ export interface NotificationPrefs {
   checkins: boolean
   coaches: boolean
   system: boolean
+  /** За час до слота тренировки */
+  workoutReminders: boolean
 }

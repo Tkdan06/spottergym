@@ -12,7 +12,12 @@ const items = [
 
 export function BottomNav() {
   const { conversations } = useApp()
-  const unread = conversations.reduce((sum, c) => sum + c.unreadCount, 0)
+  const unread = conversations.reduce((sum, c) => {
+    const count = Number(c.unreadCount) || 0
+    // Incoming chat request without unread counter still deserves a badge
+    if (c.requestStatus === 'incoming' && count <= 0) return sum + 1
+    return sum + count
+  }, 0)
 
   return (
     <nav className="bottom-nav" aria-label="Основная навигация">
@@ -20,7 +25,7 @@ export function BottomNav() {
         <NavLink key={to} to={to} end={end} className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}>
           <span className="nav-icon-wrap">
             <Icon size={22} strokeWidth={2.1} />
-            {label === 'Чаты' && unread > 0 ? <i className="nav-badge">{unread}</i> : null}
+            {label === 'Чаты' && unread > 0 ? <i className="nav-badge">{unread > 99 ? '99+' : unread}</i> : null}
           </span>
           <span>{label}</span>
         </NavLink>

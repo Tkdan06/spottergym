@@ -7,42 +7,6 @@
   max-width: 100%;
 }
 
-.discover-search {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 48px;
-  padding: 0 14px;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  background: var(--bg-elevated);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.discover-search:focus-within {
-  border-color: rgba(200, 245, 66, 0.55);
-  box-shadow: 0 0 0 3px rgba(200, 245, 66, 0.12);
-}
-
-.discover-search svg {
-  color: var(--text-dim);
-  flex-shrink: 0;
-}
-
-.discover-search input {
-  width: 100%;
-  border: 0;
-  outline: none;
-  background: transparent;
-  min-height: 46px;
-  color: var(--text);
-  font: inherit;
-}
-
-.discover-search input::placeholder {
-  color: var(--text-dim);
-}
-
 .discover-networks {
   margin: 0;
   padding-top: 2px;

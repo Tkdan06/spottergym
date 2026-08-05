@@ -1,5 +1,6 @@
 import { createMiddleware } from 'hono/factory'
 import { getCookie } from 'hono/cookie'
+import { expireStaleCheckIns } from '../lib/checkInExpiry.js'
 import { prisma } from '../db.js'
 import { verifySession } from '../lib/jwt.js'
 import { serializeUser } from '../lib/serialize.js'
@@ -36,6 +37,7 @@ export const requireAuth = createMiddleware<AuthedEnv>(async (c, next) => {
 })
 
 export async function loadAuthedUser(userId: string) {
+  await expireStaleCheckIns()
   return prisma.user.findUnique({
     where: { id: userId },
     include: {

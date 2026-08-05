@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { expireStaleCheckIns } from '../lib/checkInExpiry.js'
 import { prisma } from '../db.js'
 import { listHiddenUserIds } from '../lib/blocks.js'
 import { serializeGym, serializePublicUser } from '../lib/serialize.js'
@@ -25,6 +26,7 @@ gymRoutes.get('/', async (c) => {
       )
     : gyms
 
+  await expireStaleCheckIns()
   const ids = filtered.map((g) => g.id)
   const [memberCounts, activeCounts] = await Promise.all([
     prisma.userGym.groupBy({
@@ -57,6 +59,7 @@ gymRoutes.get('/:gymId', async (c) => {
   const gym = await prisma.gym.findUnique({ where: { id: gymId } })
   if (!gym) return c.json({ error: 'Зал не найден' }, 404)
 
+  await expireStaleCheckIns()
   const [membersCount, activeNow] = await Promise.all([
     prisma.userGym.count({ where: { gymId } }),
     prisma.checkIn.count({ where: { gymId, checkedOutAt: null } }),
@@ -73,6 +76,7 @@ gymRoutes.get('/:gymId/people', requireAuth, async (c) => {
   if (!gym) return c.json({ error: 'Зал не найден' }, 404)
 
   const viewerId = c.get('userId')
+  await expireStaleCheckIns()
   const hidden = await listHiddenUserIds(viewerId)
 
   const members = await prisma.userGym.findMany({

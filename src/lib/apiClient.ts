@@ -152,6 +152,11 @@ export async function apiCheckOut() {
   return data.user
 }
 
+export async function apiExtendCheckIn() {
+  const data = await request<{ user: AppUser }>('/me/check-in/extend', { method: 'POST' })
+  return data.user
+}
+
 export async function apiJoinGym(gymId: string, makeHome = false) {
   const data = await request<{ user: AppUser }>(
     `/me/gyms/${encodeURIComponent(gymId)}${makeHome ? '?home=1' : ''}`,

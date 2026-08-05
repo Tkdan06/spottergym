@@ -26,6 +26,7 @@ const prefsSchema = z
     checkins: z.boolean().optional(),
     coaches: z.boolean().optional(),
     system: z.boolean().optional(),
+    workoutReminders: z.boolean().optional(),
   })
   .strict()
 
@@ -44,7 +45,11 @@ notificationRoutes.patch('/prefs', async (c) => {
 notificationRoutes.get('/', async (c) => {
   const userId = c.get('userId')
   const list = await prisma.notification.findMany({
-    where: { userId },
+    where: {
+      userId,
+      // Legacy: message pings used chat_request + this title; chat badge covers those now
+      NOT: { title: 'Новое сообщение' },
+    },
     orderBy: { createdAt: 'desc' },
     take: 100,
   })

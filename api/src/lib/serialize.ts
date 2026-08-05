@@ -1,5 +1,6 @@
 import type { CheckIn, Gym, User, UserGym } from '@prisma/client'
 import { resolveAdminFlags } from './admin.js'
+import { canExtendCheckIn, resolveExpiresAt } from './checkInExpiry.js'
 
 type UserWithRels = User & {
   gyms?: UserGym[]
@@ -9,7 +10,13 @@ type UserWithRels = User & {
 export function serializeUser(user: UserWithRels) {
   const flags = resolveAdminFlags(user)
   const gymIds = (user.gyms || []).map((g) => g.gymId)
-  const activeCheckIn = (user.checkIns || []).find((c) => !c.checkedOutAt)
+  const now = new Date()
+  const openCheckIn = (user.checkIns || []).find((c) => !c.checkedOutAt)
+  const expiresAt = openCheckIn
+    ? resolveExpiresAt(openCheckIn.checkedInAt, openCheckIn.expiresAt)
+    : null
+  const activeCheckIn = openCheckIn && expiresAt && expiresAt.getTime() > now.getTime() ? openCheckIn : null
+  const extendCount = activeCheckIn?.extendCount ?? 0
   const visitSlots = Array.isArray(user.visitSlots) ? user.visitSlots : []
 
   return {
@@ -38,6 +45,11 @@ export function serializeUser(user: UserWithRels) {
     isActive: Boolean(activeCheckIn),
     checkedInGymId: activeCheckIn?.gymId || '',
     checkedInAt: activeCheckIn?.checkedInAt?.toISOString() || '',
+    checkedInExpiresAt: activeCheckIn && expiresAt ? expiresAt.toISOString() : '',
+    checkInExtendCount: activeCheckIn ? extendCount : 0,
+    checkInCanExtend: Boolean(
+      activeCheckIn && expiresAt && canExtendCheckIn(extendCount, expiresAt, now),
+    ),
     lastSeenAt: user.lastSeenAt.toISOString(),
     registeredAt: user.registeredAt.toISOString(),
     onboardingDone: user.onboardingDone,
@@ -76,6 +88,9 @@ export function serializePublicUser(user: UserWithRels) {
     isActive: full.isActive,
     checkedInGymId: full.checkedInGymId,
     checkedInAt: full.checkedInAt,
+    checkedInExpiresAt: full.checkedInExpiresAt,
+    checkInExtendCount: full.checkInExtendCount,
+    checkInCanExtend: full.checkInCanExtend,
     lastSeenAt: full.lastSeenAt,
     verified: false,
   }

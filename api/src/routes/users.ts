@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
+import { expireStaleCheckIns } from '../lib/checkInExpiry.js'
 import { prisma } from '../db.js'
 import { areUsersBlocked, listHiddenUserIds } from '../lib/blocks.js'
 import { serializePublicUser } from '../lib/serialize.js'
@@ -23,6 +24,7 @@ userRoutes.get('/search', async (c) => {
     return c.json({ error: 'Введи минимум 2 символа' }, 400)
   }
   const me = c.get('userId')
+  await expireStaleCheckIns()
   const hidden = await listHiddenUserIds(me)
   const nick = q.replace(/[^a-z0-9_]/g, '')
   const nameQ = raw.replace(/^@+/, '').trim()

@@ -1,12 +1,20 @@
-import { useMemo, useState } from 'react'
-import { ArrowLeft, Bell, BellOff } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { ArrowLeft, Bell, BellOff, Smartphone } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/useApp'
 import {
   NOTIF_PREF_LABELS,
+  feedNotifications,
   isNotificationAllowed,
   typeLabel,
 } from '../lib/notifications'
+import {
+  disableWebPush,
+  enableWebPush,
+  getPushSubscriptionState,
+  isStandalonePwa,
+  pushSupported,
+} from '../lib/push'
 import './NotificationsPage.css'
 
 function timeLabel(iso: string) {
@@ -31,12 +39,52 @@ export function NotificationsPage() {
     user,
   } = useApp()
   const [tab, setTab] = useState<'feed' | 'settings'>('feed')
+  const [pushBusy, setPushBusy] = useState(false)
+  const [pushError, setPushError] = useState('')
+  const [pushState, setPushState] = useState({
+    supported: pushSupported(),
+    standalone: isStandalonePwa(),
+    permission: 'default' as NotificationPermission | 'unsupported',
+    subscribed: false,
+    configured: false,
+  })
+
+  const refreshPushState = async () => {
+    const next = await getPushSubscriptionState()
+    setPushState(next)
+  }
+
+  useEffect(() => {
+    void refreshPushState()
+  }, [tab])
 
   const visible = useMemo(
     () =>
-      notifications.filter((n) => isNotificationAllowed(notificationPrefs, n.type)),
+      feedNotifications(notifications).filter((n) =>
+        isNotificationAllowed(notificationPrefs, n.type),
+      ),
     [notifications, notificationPrefs],
   )
+
+  const pushActive = pushState.subscribed && pushState.permission === 'granted'
+
+  const onTogglePush = async () => {
+    setPushError('')
+    setPushBusy(true)
+    try {
+      if (pushActive) {
+        await disableWebPush()
+      } else {
+        await enableWebPush()
+      }
+      await refreshPushState()
+    } catch (err) {
+      setPushError(err instanceof Error ? err.message : 'Не удалось изменить пуши')
+      await refreshPushState()
+    } finally {
+      setPushBusy(false)
+    }
+  }
 
   return (
     <main className="page notifications-page">
@@ -91,6 +139,50 @@ export function NotificationsPage() {
             </div>
             <span className={`toggle ${notificationPrefs.enabled ? 'on' : ''}`} />
           </button>
+
+          <div className="push-card">
+            <div className="row">
+              <Smartphone size={18} />
+              <div>
+                <strong>Пуши на домашний экран</strong>
+                <p className="muted">
+                  Запросы в чат, лайки, ответы поддержки и напоминание за час до тренировки.
+                  Бейдж на иконке — по непрочитанным в колокольчике.
+                </p>
+              </div>
+            </div>
+
+            {!pushState.supported ? (
+              <p className="muted push-hint">Этот браузер не поддерживает Web Push.</p>
+            ) : !pushState.standalone ? (
+              <p className="muted push-hint">
+                Добавь Spotter на домашний экран (Поделиться → На экран «Домой»), открой из иконки и
+                включи пуши здесь.
+              </p>
+            ) : !pushState.configured ? (
+              <p className="muted push-hint">Пуши на сервере пока не настроены.</p>
+            ) : (
+              <button
+                type="button"
+                className="toggle-row push-toggle"
+                disabled={pushBusy}
+                onClick={() => void onTogglePush()}
+              >
+                <div>
+                  <strong>{pushActive ? 'Пуши включены' : 'Включить пуши'}</strong>
+                  <p className="muted">
+                    {pushState.permission === 'denied'
+                      ? 'Разрешение запрещено в настройках системы'
+                      : pushActive
+                        ? 'Можно выключить в любой момент'
+                        : 'Нужно разрешение системы'}
+                  </p>
+                </div>
+                <span className={`toggle ${pushActive ? 'on' : ''}`} />
+              </button>
+            )}
+            {pushError ? <p className="push-error">{pushError}</p> : null}
+          </div>
 
           <div className={`prefs-list ${notificationPrefs.enabled ? '' : 'dims'}`}>
             {NOTIF_PREF_LABELS.map((item) => (

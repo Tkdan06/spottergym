@@ -1,5 +1,5 @@
 import { type FormEvent, useMemo, useState } from 'react'
-import { ArrowLeft, Share2 } from 'lucide-react'
+import { ArrowLeft, Search, Share2 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { CityCarousel } from '../components/CityCarousel'
 import { GymCard } from '../components/GymCard'
@@ -146,7 +146,14 @@ export function SettingsPage() {
       visitSlots: sortVisitSlots(visitSlots),
       breakUntil: nextBreak,
       ...(nextBreak && user.isActive
-        ? { isActive: false, checkedInGymId: '', checkedInAt: '' }
+        ? {
+            isActive: false,
+            checkedInGymId: '',
+            checkedInAt: '',
+            checkedInExpiresAt: '',
+            checkInExtendCount: 0,
+            checkInCanExtend: false,
+          }
         : {}),
     })
     navigate('/app/profile')
@@ -275,13 +282,16 @@ export function SettingsPage() {
           label="Добавить залы из города"
           hint="Можно состоять сразу в нескольких клубах"
           afterStrip={
-            <input
-              {...searchFieldProps}
-              className="search-input"
-              placeholder="Поиск клуба в городе"
-              value={gymQuery}
-              onChange={(e) => setGymQuery(e.target.value)}
-            />
+            <label className="app-search">
+              <Search size={16} aria-hidden />
+              <input
+                {...searchFieldProps}
+                placeholder="Клуб, район или адрес"
+                value={gymQuery}
+                onChange={(e) => setGymQuery(e.target.value)}
+                aria-label="Поиск клуба в городе"
+              />
+            </label>
           }
         />
 

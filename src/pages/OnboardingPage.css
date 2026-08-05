@@ -64,7 +64,7 @@
 }
 
 .onboarding-gym-step > .muted,
-.onboarding-gym-step > .search-input {
+.onboarding-gym-step > .app-search {
   flex-shrink: 0;
 }
 

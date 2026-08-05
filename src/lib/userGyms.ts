@@ -54,9 +54,17 @@ export function withGymMembership(
 
   let checkedInGymId = user.checkedInGymId || ''
   let isActive = user.isActive
+  let checkedInAt = user.checkedInAt || ''
+  let checkedInExpiresAt = user.checkedInExpiresAt || ''
+  let checkInExtendCount = user.checkInExtendCount || 0
+  let checkInCanExtend = Boolean(user.checkInCanExtend)
   if (checkedInGymId && !gymIds.includes(checkedInGymId)) {
     checkedInGymId = ''
     isActive = false
+    checkedInAt = ''
+    checkedInExpiresAt = ''
+    checkInExtendCount = 0
+    checkInCanExtend = false
   }
 
   return {
@@ -64,6 +72,10 @@ export function withGymMembership(
     gymIds,
     homeGymId,
     checkedInGymId,
+    checkedInAt,
+    checkedInExpiresAt,
+    checkInExtendCount,
+    checkInCanExtend,
     isActive,
     lastSeenAt: new Date().toISOString(),
   }

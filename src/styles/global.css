@@ -19,7 +19,10 @@
   --radius-lg: 24px;
   --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
   --nav-h: 68px;
+  --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* Non-zero only for home-screen / PWA (see html.standalone + display-mode) */
+  --standalone-top: 0px;
   --app-max: 480px;
   --desktop-max: 1120px;
   /* Unbounded = заголовки (кириллица + спорт-вайб), Syne = бренд Spotter, Manrope = UI */
@@ -142,8 +145,22 @@ p {
   min-width: 0;
   overflow-x: clip;
   /* 16px — typical mobile content inset (iOS/Material); avoid empty top void */
-  padding: 16px 16px calc(var(--nav-h) + var(--safe-bottom) + 20px);
+  padding: calc(16px + var(--standalone-top)) 16px calc(var(--nav-h) + var(--safe-bottom) + 20px);
   box-sizing: border-box;
+}
+
+/*
+  Home-screen / “Add to Home Screen” only: with black-translucent status bar
+  content draws under the clock/battery. Safari-in-tab stays unchanged.
+*/
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  :root {
+    --standalone-top: var(--safe-top);
+  }
+}
+
+html.standalone {
+  --standalone-top: var(--safe-top);
 }
 
 /* Root tab chrome — same top “hat” on Зал / Залы / Чаты / Профиль */
@@ -208,7 +225,7 @@ p {
 
 @media (min-width: 900px) {
   .page {
-    padding: 32px 36px 40px;
+    padding: calc(32px + var(--standalone-top)) 36px 40px;
   }
 
   .app-main {
@@ -411,6 +428,60 @@ a.btn-danger {
   outline: none;
   box-sizing: border-box;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Shared search control — same look on Залы / Чаты / онбординг / настройки */
+.app-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.app-search:focus-within {
+  border-color: rgba(200, 245, 66, 0.55);
+  box-shadow: 0 0 0 3px rgba(200, 245, 66, 0.12);
+}
+
+.app-search svg {
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+.app-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  min-height: 46px;
+  padding: 0;
+  color: var(--text);
+  font: inherit;
+  font-size: 16px; /* prevents iOS zoom-on-focus */
+  box-shadow: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.app-search input::placeholder {
+  color: var(--text-dim);
+}
+
+.app-search input:focus,
+.app-search input:focus-visible {
+  outline: none;
+  box-shadow: none;
+  border-color: transparent;
 }
 
 /* Chrome: date/time имеют большой intrinsic min-width и ломают сетку */

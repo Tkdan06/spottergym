@@ -61,6 +61,35 @@
   min-width: 0;
 }
 
+.push-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.push-card .row {
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.push-hint,
+.push-error {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.push-error {
+  color: #ff8f8f;
+}
+
+.push-toggle {
+  margin: 0;
+}
+
 .prefs-list {
   display: grid;
   gap: 8px;

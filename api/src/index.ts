@@ -5,6 +5,8 @@ import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { env } from './env.js'
 import { HTTP_BODY_MAX_BYTES } from './lib/fieldLimits.js'
+import { isPushConfigured } from './lib/push.js'
+import { startWorkoutReminderLoop } from './lib/workoutReminders.js'
 import { adminRoutes } from './routes/admin.js'
 import { authRoutes } from './routes/auth.js'
 import { blockRoutes } from './routes/blocks.js'
@@ -13,6 +15,7 @@ import { gymRoutes } from './routes/gyms.js'
 import { likesRoutes } from './routes/likes.js'
 import { meRoutes } from './routes/me.js'
 import { notificationRoutes } from './routes/notifications.js'
+import { pushRoutes } from './routes/push.js'
 import { ticketRoutes } from './routes/tickets.js'
 import { userRoutes } from './routes/users.js'
 
@@ -59,6 +62,7 @@ app.route('/users', userRoutes)
 app.route('/gyms', gymRoutes)
 app.route('/likes', likesRoutes)
 app.route('/notifications', notificationRoutes)
+app.route('/push', pushRoutes)
 app.route('/tickets', ticketRoutes)
 app.route('/conversations', conversationRoutes)
 app.route('/blocks', blockRoutes)
@@ -72,4 +76,6 @@ app.onError((err, c) => {
 
 serve({ fetch: app.fetch, port: env.port }, (info) => {
   console.log(`Spotter API http://localhost:${info.port}`)
+  console.log(`[push] ${isPushConfigured() ? 'VAPID ready' : 'disabled (set VAPID_* keys)'}`)
+  startWorkoutReminderLoop()
 })

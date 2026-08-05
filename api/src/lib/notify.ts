@@ -1,5 +1,6 @@
 import type { NotificationPrefs as PrefsRow } from '@prisma/client'
 import { prisma } from '../db.js'
+import { sendPushToUser, shouldSendPush } from './push.js'
 
 export type NotifType =
   | 'gym_new_member'
@@ -9,6 +10,7 @@ export type NotifType =
   | 'coach'
   | 'system'
   | 'admin'
+  | 'workout_reminder'
 
 const TYPE_PREF: Record<NotifType, keyof Omit<PrefsRow, 'userId' | 'enabled'> | null> = {
   gym_new_member: 'gymNewMembers',
@@ -18,6 +20,7 @@ const TYPE_PREF: Record<NotifType, keyof Omit<PrefsRow, 'userId' | 'enabled'> | 
   coach: 'coaches',
   system: 'system',
   admin: 'system',
+  workout_reminder: 'workoutReminders',
 }
 
 export async function getOrCreatePrefs(userId: string) {
@@ -42,7 +45,7 @@ export async function createNotification(input: {
   const key = TYPE_PREF[input.type]
   if (key && !prefs[key]) return null
 
-  return prisma.notification.create({
+  const row = await prisma.notification.create({
     data: {
       userId: input.userId,
       type: input.type,
@@ -53,6 +56,17 @@ export async function createNotification(input: {
       actorId: input.actorId?.slice(0, 64),
     },
   })
+
+  if (shouldSendPush(input.type)) {
+    void sendPushToUser(input.userId, {
+      title: row.title,
+      body: row.body,
+      href: row.href || undefined,
+      type: row.type,
+    }).catch((err) => console.warn('[push] after notify', err))
+  }
+
+  return row
 }
 
 export function serializeNotification(n: {
@@ -88,5 +102,6 @@ export function serializePrefs(p: PrefsRow) {
     checkins: p.checkins,
     coaches: p.coaches,
     system: p.system,
+    workoutReminders: p.workoutReminders,
   }
 }

@@ -85,7 +85,7 @@ export function DiscoverPage() {
 
       {/* 1 search → 2 city → 3 network — one job per row (Material / progressive disclosure) */}
       <div className="discover-toolbar">
-        <label className="discover-search">
+        <label className="app-search">
           <Search size={16} aria-hidden />
           <input
             {...searchFieldProps}

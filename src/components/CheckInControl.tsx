@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useApp } from '../context/useApp'
 import { getGym, getUserGyms } from '../data/mock'
-import { getCheckedInGymId } from '../lib/presence'
+import {
+  canExtendCheckInLocal,
+  CHECK_IN_MAX_EXTENDS,
+  getCheckInExpiresAt,
+  getCheckedInGymId,
+  isCheckInExpiringSoon,
+} from '../lib/presence'
 import './CheckInControl.css'
 
 interface Props {
@@ -25,9 +31,18 @@ function shortGymName(name: string) {
     .trim()
 }
 
+function minutesLeftLabel(expiresAtIso: string) {
+  const left = Date.parse(expiresAtIso) - Date.now()
+  if (!Number.isFinite(left) || left <= 0) return 'скоро'
+  const mins = Math.max(1, Math.ceil(left / 60_000))
+  return `${mins} мин`
+}
+
 export function CheckInControl({ preferredGymId, compact, block, className = '' }: Props) {
-  const { user, checkIn, checkOut } = useApp()
+  const { user, checkIn, checkOut, extendCheckIn } = useApp()
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [extending, setExtending] = useState(false)
+  const [, setTick] = useState(0)
 
   useEffect(() => {
     if (!sheetOpen) return
@@ -42,6 +57,13 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
       window.removeEventListener('keydown', onKey)
     }
   }, [sheetOpen])
+
+  // Refresh warning copy while checked in
+  useEffect(() => {
+    if (!user?.isActive) return
+    const id = window.setInterval(() => setTick((n) => n + 1), 30_000)
+    return () => window.clearInterval(id)
+  }, [user?.isActive])
 
   if (!user) return null
 
@@ -59,6 +81,10 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
   const multi = gyms.length > 1
   const here = Boolean(user.isActive && checkedId && checkedId === targetId)
   const elsewhere = Boolean(user.isActive && checkedId && checkedId !== targetId)
+  const expiringSoon = isCheckInExpiringSoon(user)
+  const canExtend = canExtendCheckInLocal(user)
+  const expiresAt = getCheckInExpiresAt(user)
+  const extendsLeft = Math.max(0, CHECK_IN_MAX_EXTENDS - (user.checkInExtendCount || 0))
 
   if (!gyms.length || !targetId) {
     return (
@@ -73,6 +99,16 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
     setSheetOpen(false)
   }
 
+  const onExtend = async () => {
+    if (extending || !canExtend) return
+    setExtending(true)
+    try {
+      await extendCheckIn()
+    } finally {
+      setExtending(false)
+    }
+  }
+
   const sheet =
     sheetOpen && multi ? (
       <div className="checkin-sheet" role="dialog" aria-modal="true" aria-label="Выбор зала">
@@ -85,7 +121,7 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
         <div className="checkin-sheet-panel">
           <div className="checkin-sheet-grab" aria-hidden />
           <h3>Где отметиться?</h3>
-          <p className="muted checkin-sheet-lead">Один тап — ты в этом зале</p>
+          <p className="muted checkin-sheet-lead">Один тап — ты в этом зале · статус на 3 часа</p>
           <div className="checkin-sheet-list">
             {gyms.map((gym) => {
               const active = checkedId === gym.id && user.isActive
@@ -132,6 +168,31 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
     return (
       <>
         <div className={shellClass}>
+          {expiringSoon ? (
+            <div className="checkin-expire-banner" role="status">
+              <p>
+                Статус снимется через {expiresAt ? minutesLeftLabel(expiresAt) : '30 мин'}
+                {canExtend ? ' — ещё в зале?' : ''}
+              </p>
+              {canExtend ? (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  disabled={extending}
+                  onClick={() => void onExtend()}
+                >
+                  {extending ? 'Продлеваем…' : `Ещё здесь · +1 ч`}
+                </button>
+              ) : (
+                <p className="dim checkin-expire-note">Лимит продлений исчерпан — отметься заново</p>
+              )}
+              {canExtend && showExtras ? (
+                <p className="dim checkin-expire-note">
+                  Осталось продлений: {extendsLeft} из {CHECK_IN_MAX_EXTENDS}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
           <button type="button" className="btn btn-soft" onClick={() => checkOut()}>
             Уйти
           </button>
@@ -140,7 +201,17 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
               Другой зал
             </button>
           ) : null}
-          {showExtras ? <p className="dim checkin-hint">Сейчас: {checkedLabel}</p> : null}
+          {showExtras ? (
+            <p className="dim checkin-hint">
+              Сейчас: {checkedLabel}
+              {expiresAt && !expiringSoon
+                ? ` · до ${new Date(expiresAt).toLocaleTimeString('ru-RU', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}`
+                : ''}
+            </p>
+          ) : null}
         </div>
         {sheet}
       </>
@@ -173,6 +244,7 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
             Другой зал
           </button>
         ) : null}
+        {showExtras ? <p className="dim checkin-hint">Статус держится 3 часа, можно продлить</p> : null}
       </div>
       {sheet}
     </>

@@ -4,7 +4,7 @@
   z-index: 80;
   display: grid;
   place-items: end center;
-  padding: 12px 12px calc(12px + var(--safe-bottom));
+  padding: calc(12px + var(--standalone-top)) 12px calc(12px + var(--safe-bottom));
   animation: photo-modal-in 0.22s ease;
 }
 

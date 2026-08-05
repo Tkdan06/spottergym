@@ -103,8 +103,9 @@ conversationRoutes.post(
           status: 'pending',
           lastMessageText: text || 'Новый запрос',
           lastMessageAt: now,
-          unreadLow: low === otherId ? (text ? 1 : 0) : 0,
-          unreadHigh: high === otherId ? (text ? 1 : 0) : 0,
+          // Always mark unread for recipient so bottom-nav badge matches notifications
+          unreadLow: low === otherId ? 1 : 0,
+          unreadHigh: high === otherId ? 1 : 0,
         },
       })
 
@@ -265,16 +266,7 @@ conversationRoutes.post(
       }),
     ])
 
-    const me = await prisma.user.findUnique({ where: { id: userId }, select: { name: true } })
-    await createNotification({
-      userId: otherId,
-      type: 'chat_request',
-      title: 'Новое сообщение',
-      body: `${me?.name || 'Собеседник'}: ${text.slice(0, 80)}`,
-      href: `/app/messages/${conv.id}`,
-      actorId: userId,
-    })
-
+    // New messages only bump unread + chat badge — no notification feed item
     return c.json({ message: serializeChatMessage(message) }, 201)
   },
 )

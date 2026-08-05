@@ -153,6 +153,15 @@
 
   </head>
   <body>
+    <script>
+      ;(function () {
+        try {
+          var n = window.navigator
+          var standalone = n.standalone === true || window.matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches
+          if (standalone) document.documentElement.classList.add('standalone')
+        } catch (e) {}
+      })()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

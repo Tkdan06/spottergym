@@ -101,6 +101,7 @@ model User {
   likesReceived      Like[]              @relation("LikesReceived")
   notifications      Notification[]
   notificationPrefs  NotificationPrefs?
+  pushSubscriptions  PushSubscription[]
   feedbackTickets    FeedbackTicket[]
   conversationsLow   Conversation[]      @relation("ConvLow")
   conversationsHigh  Conversation[]      @relation("ConvHigh")
@@ -112,6 +113,33 @@ model User {
   @@index([email])
   @@index([city])
   @@index([username])
+}
+
+/** Web Push endpoints for installed PWA (home screen) */
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/** Dedup: one “собраться на тренировку” ping per slot occurrence */
+model WorkoutReminderLog {
+  id        String   @id @default(cuid())
+  userId    String
+  slotKey   String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, slotKey])
+  @@index([createdAt])
 }
 
 /** A blocked B — neither sees the other in hall/chat/likes */
@@ -223,12 +251,17 @@ model CheckIn {
   gymId        String
   checkedInAt  DateTime  @default(now())
   checkedOutAt DateTime?
+  /** When presence auto-expires (default checkedInAt + 3h, +1h per extend) */
+  expiresAt    DateTime?
+  /** How many +1h extensions used (max 2) */
+  extendCount  Int       @default(0)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   gym  Gym  @relation(fields: [gymId], references: [id], onDelete: Cascade)
 
   @@index([gymId, checkedOutAt])
   @@index([userId, checkedOutAt])
+  @@index([expiresAt, checkedOutAt])
 }
 
 /** fromUser лайкнул toUser */
@@ -265,14 +298,15 @@ model Notification {
 }
 
 model NotificationPrefs {
-  userId        String  @id
-  enabled       Boolean @default(true)
-  gymNewMembers Boolean @default(true)
-  likes         Boolean @default(true)
-  chatRequests  Boolean @default(true)
-  checkins      Boolean @default(false)
-  coaches       Boolean @default(true)
-  system        Boolean @default(true)
+  userId           String  @id
+  enabled          Boolean @default(true)
+  gymNewMembers    Boolean @default(true)
+  likes            Boolean @default(true)
+  chatRequests     Boolean @default(true)
+  checkins         Boolean @default(false)
+  coaches          Boolean @default(true)
+  system           Boolean @default(true)
+  workoutReminders Boolean @default(true)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

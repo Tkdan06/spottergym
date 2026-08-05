@@ -44,6 +44,9 @@ export const env = {
     .split(',')
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean),
+  vapidPublicKey: String(process.env.VAPID_PUBLIC_KEY || '').trim(),
+  vapidPrivateKey: String(process.env.VAPID_PRIVATE_KEY || '').trim(),
+  vapidSubject: String(process.env.VAPID_SUBJECT || 'mailto:tkdan@ya.ru').trim(),
 }
 
 export function normalizeEmail(email: string) {
