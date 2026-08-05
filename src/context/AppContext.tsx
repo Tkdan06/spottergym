@@ -97,7 +97,6 @@ import {
 } from '../lib/adminPermissions'
 import {
   isMasterAdminEmail,
-  isSeedAdminEmail,
   MASTER_ADMIN_NAME,
   normalizeEmail,
 } from '../lib/adminConfig'
@@ -164,7 +163,6 @@ import type {
   AdminPermissions,
   FeedbackTicketStatus,
   Gender,
-  Intent,
   Message,
   MessageStatus,
   NotificationPrefs,
@@ -926,7 +924,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     (data: Partial<AppUser>) => {
       // flushSync: иначе navigate('/app') успевает раньше, чем onboardingDone=true,
       // ProtectedRoute кидает обратно на /onboarding → пустой/чёрный экран
-      let payload: AppUser | null = null
+      const box: { user: AppUser | null } = { user: null }
       flushSync(() => {
         setUser((prev) => {
           if (!prev) return prev
@@ -944,30 +942,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
               onboardingDone: true,
             }) as AppUser,
           )
-          payload = next
+          box.user = next
           saveJson(STORAGE_USER, next)
           saveAccountProfile(next)
           return next
         })
       })
-      if (payload && apiOnlineRef.current && !isDemoAccount(payload.email)) {
+      const saved = box.user
+      if (saved && apiOnlineRef.current && !isDemoAccount(saved.email)) {
         void apiPatchMe({
           ...data,
           onboardingDone: true,
-          gymIds: payload.gymIds,
-          homeGymId: payload.homeGymId,
-          city: payload.city,
-          age: payload.age,
-          bio: payload.bio,
-          intent: payload.intent,
-          experienceLevel: payload.experienceLevel,
-          interests: payload.interests,
-          sports: payload.sports,
-          isCoach: payload.isCoach,
-          coachSports: payload.coachSports,
-          visitSlots: payload.visitSlots,
-          privacy: payload.privacy,
-          lookingToMeet: payload.lookingToMeet,
+          gymIds: saved.gymIds,
+          homeGymId: saved.homeGymId,
+          city: saved.city,
+          age: saved.age,
+          bio: saved.bio,
+          intent: saved.intent,
+          experienceLevel: saved.experienceLevel,
+          interests: saved.interests,
+          sports: saved.sports,
+          isCoach: saved.isCoach,
+          coachSports: saved.coachSports,
+          visitSlots: saved.visitSlots,
+          privacy: saved.privacy,
+          lookingToMeet: saved.lookingToMeet,
         }).then((me) => applyServerUser(me as AppUser)).catch(() => undefined)
       }
       window.setTimeout(() => {

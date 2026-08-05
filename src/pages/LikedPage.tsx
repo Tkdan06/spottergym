@@ -170,11 +170,11 @@ export function LikedPage({ mode = 'received' }: { mode?: LikesMode }) {
                 likedByMe={likedByMe}
                 likeMode={mode}
                 onMessage={() => {
-                  void startConversation(person.id, 'Привет! Увидел тебя в Spotter.').then(
-                    (id) => {
-                      navigate(`/app/messages/${id}`, { state: { from: listPath } })
-                    },
-                  )
+                  void Promise.resolve(
+                    startConversation(person.id, 'Привет! Увидел тебя в Spotter.'),
+                  ).then((id: string) => {
+                    navigate(`/app/messages/${id}`, { state: { from: listPath } })
+                  })
                 }}
                 onToggleLike={() => toggleLike(person.id)}
               />
