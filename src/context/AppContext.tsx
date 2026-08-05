@@ -954,7 +954,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ...data,
           onboardingDone: true as const,
           gymIds: saved.gymIds,
-          homeGymId: saved.homeGymId || saved.gymIds[0] || null,
+          homeGymId: saved.homeGymId || saved.gymIds[0] || undefined,
           city: saved.city,
           age: saved.age,
           bio: saved.bio,
