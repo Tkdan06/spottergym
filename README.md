@@ -52,9 +52,10 @@ React + TypeScript + Vite + React Router + Lucide
 | `A` | `@` | `185.199.109.153` |
 | `A` | `@` | `185.199.110.153` |
 | `A` | `@` | `185.199.111.153` |
-| `CNAME` | `www` | `<username>.github.io` |
+| `CNAME` | `www` | `tkdan06.github.io` |
 
-Либо один `CNAME` на `@` → `<username>.github.io`, если регистратор это умеет.
+Репозиторий: https://github.com/Tkdan06/spottergym  
+Временный URL Pages: https://tkdan06.github.io/spottergym/ (после привязки домена редиректит на spottergym.ru)
 
 ### 3) Альтернатива: Vercel
 
