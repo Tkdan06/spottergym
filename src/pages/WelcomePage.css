@@ -1,0 +1,104 @@
+.welcome {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 28px;
+  min-height: 100dvh;
+  background:
+    linear-gradient(180deg, rgba(11, 15, 14, 0.35) 0%, rgba(11, 15, 14, 0.82) 48%, #0b0f0e 100%),
+    url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1400&q=80&auto=format&fit=crop')
+      center/cover no-repeat;
+}
+
+.welcome-hero {
+  position: relative;
+  padding-top: clamp(48px, 14vh, 120px);
+}
+
+.welcome-glow {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200, 245, 66, 0.28), transparent 68%);
+  top: 20px;
+  left: -40px;
+  filter: blur(8px);
+  animation: pulse-dot 3.5s ease infinite;
+}
+
+.welcome-kicker {
+  position: relative;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.welcome .brand-mark {
+  position: relative;
+  font-size: clamp(3rem, 14vw, 4.5rem);
+  line-height: 0.95;
+  margin-bottom: 16px;
+}
+
+.welcome-lead {
+  position: relative;
+  max-width: 28ch;
+  color: var(--text);
+  font-size: 1.05rem;
+  line-height: 1.45;
+  margin-bottom: 28px;
+}
+
+.welcome-actions {
+  display: grid;
+  gap: 10px;
+  max-width: 360px;
+}
+
+.welcome-points {
+  display: grid;
+  gap: 10px;
+}
+
+.welcome-points article {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--radius);
+  background: rgba(18, 24, 22, 0.78);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(10px);
+}
+
+.welcome-points h3 {
+  font-size: 0.98rem;
+  margin-bottom: 4px;
+}
+
+.welcome-points p {
+  font-size: 0.88rem;
+}
+
+.welcome-points svg {
+  color: var(--accent);
+  margin-top: 2px;
+}
+
+@media (min-width: 900px) {
+  .welcome {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items: end;
+    gap: 48px;
+    padding: 48px;
+  }
+
+  .welcome-points {
+    align-self: center;
+  }
+}

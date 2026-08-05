@@ -1,0 +1,593 @@
+[
+  {
+    "name": "Москва",
+    "gymCount": 169,
+    "networks": [
+      "DDX Fitness",
+      "Spirit. Fitness",
+      "World Class",
+      "Encore Fitness",
+      "Crocus Fitness",
+      "XFIT",
+      "Alex Fitness"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Санкт-Петербург",
+    "gymCount": 24,
+    "networks": [
+      "DDX Fitness",
+      "Spirit. Fitness",
+      "Encore Fitness",
+      "XFIT"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Казань",
+    "gymCount": 7,
+    "networks": [
+      "DDX Fitness",
+      "Spirit. Fitness"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Екатеринбург",
+    "gymCount": 4,
+    "networks": [
+      "DDX Fitness",
+      "Spirit. Fitness",
+      "Encore Fitness",
+      "XFIT"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Новосибирск",
+    "gymCount": 6,
+    "networks": [
+      "DDX Fitness",
+      "XFIT"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Краснодар",
+    "gymCount": 3,
+    "networks": [
+      "DDX Fitness",
+      "XFIT"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Самара",
+    "gymCount": 4,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Ростов-на-Дону",
+    "gymCount": 2,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Уфа",
+    "gymCount": 3,
+    "networks": [
+      "DDX Fitness",
+      "Spirit. Fitness"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Челябинск",
+    "gymCount": 3,
+    "networks": [
+      "DDX Fitness",
+      "Spirit. Fitness"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Воронеж",
+    "gymCount": 5,
+    "networks": [
+      "DDX Fitness",
+      "Spirit. Fitness",
+      "XFIT"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Пермь",
+    "gymCount": 2,
+    "networks": [
+      "DDX Fitness",
+      "XFIT"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Волгоград",
+    "gymCount": 5,
+    "networks": [
+      "DDX Fitness",
+      "XFIT"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Красноярск",
+    "gymCount": 4,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Сочи",
+    "gymCount": 3,
+    "networks": [
+      "DDX Fitness",
+      "Encore Fitness"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Тюмень",
+    "gymCount": 2,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Иркутск",
+    "gymCount": 3,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Владивосток",
+    "gymCount": 4,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Новороссийск",
+    "gymCount": 3,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Омск",
+    "gymCount": 3,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Ставрополь",
+    "gymCount": 3,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Химки",
+    "gymCount": 3,
+    "networks": [
+      "DDX Fitness",
+      "XFIT"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Барнаул",
+    "gymCount": 2,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Владимир",
+    "gymCount": 2,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Зеленоград",
+    "gymCount": 2,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Липецк",
+    "gymCount": 2,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Люберцы",
+    "gymCount": 2,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Мытищи",
+    "gymCount": 2,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Нижневартовск",
+    "gymCount": 2,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Оренбург",
+    "gymCount": 2,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Саранск",
+    "gymCount": 2,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Саратов",
+    "gymCount": 2,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Ярославль",
+    "gymCount": 2,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Армавир",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Архангельск",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Астрахань",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Балашиха",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Великий Новгород",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Видное",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Волжский",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Вологда",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Геленджик",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Долгопрудный",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Домодедово",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Ивантеевка",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Ижевск",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Йошкар-Ола",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Калуга",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Королев",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Кострома",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Котельники",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Красногорск",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Магнитогорск",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Нижнекамск",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Новокузнецк",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Ногинск",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Одинцово",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Подольск",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Пушкино",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Раменское",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Реутов",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Рыбинск",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Рязань",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Смоленск",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Солнечногорск",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Сургут",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Тула",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Улан-Удэ",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Хабаровск",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Чебоксары",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Череповец",
+    "gymCount": 1,
+    "networks": [
+      "DDX Fitness"
+    ],
+    "priority": false
+  }
+]

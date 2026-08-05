@@ -1,0 +1,29 @@
+.presence-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.presence-badge.compact {
+  padding: 3px 8px;
+  font-size: 0.7rem;
+}
+
+.presence-badge.on {
+  background: rgba(87, 242, 135, 0.16);
+  color: var(--online);
+}
+
+.presence-badge.off {
+  background: rgba(148, 163, 154, 0.12);
+  color: var(--text-muted);
+}

@@ -1,0 +1,217 @@
+.profile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.icon-btn {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+}
+
+.profile-top-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn .nav-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+
+.profile-hero {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 16px;
+  justify-items: center;
+  text-align: center;
+}
+
+.profile-hero.mine {
+  grid-template-columns: auto minmax(0, 1fr);
+  justify-items: start;
+  text-align: left;
+  align-items: center;
+  gap: 16px;
+}
+
+.profile-photo-link {
+  margin-top: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.profile-photo-link:hover {
+  text-decoration: underline;
+}
+
+.profile-hero-meta {
+  width: 100%;
+}
+
+.profile-hero-meta h1 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 1.8rem;
+  margin: 10px 0 6px;
+}
+
+.profile-hero.mine .profile-hero-meta h1 {
+  justify-content: flex-start;
+}
+
+.profile-block {
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.profile-block h2 {
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.profile-block p {
+  line-height: 1.45;
+}
+
+.slots {
+  display: grid;
+  gap: 8px;
+}
+
+.slot {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+}
+
+.status-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.checkin-block {
+  display: grid;
+  gap: 12px;
+}
+
+.status-panel .toggle-row {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.my-likes-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 107, 107, 0.28);
+  background: rgba(255, 107, 107, 0.1);
+  color: #ffb0b0;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.my-likes-link:hover {
+  border-color: rgba(255, 107, 107, 0.45);
+  background: rgba(255, 107, 107, 0.16);
+}
+
+.likes-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.likes-block-head h2 {
+  margin-bottom: 0;
+}
+
+.like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-weight: 650;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.like-btn.liked {
+  border-color: rgba(255, 122, 154, 0.45);
+  background: rgba(255, 122, 154, 0.12);
+  color: #ff7a9a;
+}
+
+.profile-cta {
+  margin-top: 8px;
+  position: sticky;
+  bottom: calc(var(--nav-h) + var(--safe-bottom) + 8px);
+}
+
+.composer {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+}
+
+.composer textarea {
+  min-height: 90px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  padding: 12px;
+  resize: vertical;
+}
+
+.composer textarea::placeholder {
+  color: var(--text-dim);
+  opacity: 0.85;
+}
+
+.composer-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+@media (min-width: 900px) {
+  .profile-hero {
+    grid-template-columns: 280px 1fr;
+    align-items: end;
+  }
+
+  .profile-cta {
+    position: static;
+  }
+}

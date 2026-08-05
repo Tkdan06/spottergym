@@ -1,0 +1,147 @@
+.feedback-page,
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.feedback-tabs,
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.feedback-ticket-list {
+  display: grid;
+  gap: 10px;
+}
+
+.feedback-ticket-card {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+  color: inherit;
+}
+
+.feedback-ticket-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.feedback-status {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--bg-soft);
+  color: var(--text-muted);
+}
+
+.feedback-status.open,
+.feedback-status.new {
+  background: rgba(200, 245, 66, 0.14);
+  color: var(--accent);
+}
+
+.feedback-status.in_progress {
+  background: rgba(100, 180, 255, 0.16);
+  color: #8ec8ff;
+}
+
+.feedback-thread {
+  display: grid;
+  gap: 10px;
+}
+
+.feedback-msg {
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+}
+
+.feedback-msg--admin {
+  border-color: rgba(200, 245, 66, 0.35);
+  background: rgba(200, 245, 66, 0.08);
+}
+
+.feedback-msg-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.feedback-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.feedback-actions .btn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.admin-hub-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-hub-card {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+  text-align: left;
+  color: inherit;
+}
+
+.admin-hub-card strong {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+}
+
+.admin-user-row {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+}
+
+.admin-user-row .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.block-form {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.feedback-error {
+  color: #ff8b8b;
+  font-size: 0.9rem;
+}
+
+.feedback-notice {
+  color: var(--accent);
+  font-size: 0.9rem;
+}

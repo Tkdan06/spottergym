@@ -1,0 +1,78 @@
+.likes-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  min-width: 0;
+}
+
+.likes-row.compact {
+  margin-top: 8px;
+}
+
+.likes-row.empty {
+  justify-content: flex-start;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  gap: 6px;
+}
+
+.likes-avatars {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.likes-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--bg-card);
+  background: var(--bg-soft);
+  margin-left: -8px;
+}
+
+.likes-avatar:first-child {
+  margin-left: 0;
+}
+
+.likes-row.compact .likes-avatar {
+  width: 22px;
+  height: 22px;
+}
+
+.likes-extra {
+  margin-left: 4px;
+  min-width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  background: var(--bg-soft);
+  border: 2px solid var(--bg-card);
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.likes-row.compact .likes-extra {
+  min-width: 22px;
+  height: 22px;
+  font-size: 0.62rem;
+}
+
+.likes-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #ff7a9a;
+  font-weight: 750;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.likes-row.compact .likes-count {
+  font-size: 0.78rem;
+}

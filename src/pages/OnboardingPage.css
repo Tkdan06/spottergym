@@ -1,0 +1,94 @@
+.onboarding {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.onboarding-brand {
+  font-size: 1.25rem;
+}
+
+.stepper {
+  display: flex;
+  gap: 6px;
+  margin: 14px 0 10px;
+}
+
+.stepper .dot {
+  width: 28px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--bg-soft);
+}
+
+.stepper .dot.on {
+  background: var(--accent);
+}
+
+.onboarding h1 {
+  font-size: 1.8rem;
+}
+
+.field-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.onboarding-form {
+  gap: 18px;
+}
+
+.time-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.privacy-card {
+  text-align: left;
+  padding: 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+}
+
+.privacy-card.active {
+  border-color: rgba(200, 245, 66, 0.45);
+  background: linear-gradient(135deg, rgba(200, 245, 66, 0.1), transparent 70%), var(--bg-card);
+}
+
+.privacy-card h3 {
+  margin-bottom: 6px;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+  text-align: left;
+}
+
+.gym-pick-list {
+  max-height: min(52vh, 520px);
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.onboarding-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.onboarding-actions .btn {
+  min-width: 120px;
+}

@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!--
+      Production domain used in canonical / OG / JSON-LD / sitemap.
+      Replace https://spotter.app everywhere before release.
+    -->
+    <title>SPOTTER — знакомства в тренажёрном зале</title>
+    <meta
+      name="description"
+      content="SPOTTER — приложение для знакомств и поиска партнёров по тренировкам в твоём зале. Смотри, кто рядом, кто сейчас на тренировке, пиши и знакомься безопасно."
+    />
+    <meta
+      name="keywords"
+      content="знакомства в зале, знакомства в спортзале, найти партнёра по тренировкам, фитнес знакомства, Spotter, приложение для зала, кто в зале сейчас"
+    />
+    <meta name="author" content="SPOTTER" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="yandex" content="index, follow" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="theme-color" content="#0B0F0E" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="application-name" content="SPOTTER" />
+    <meta name="apple-mobile-web-app-title" content="SPOTTER" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <!-- Geo / language hints (helpful for Yandex RU) -->
+    <meta name="geo.region" content="RU" />
+    <meta http-equiv="content-language" content="ru" />
+
+    <link rel="canonical" href="https://spotter.app/" />
+    <link rel="alternate" href="https://spotter.app/" hreflang="ru" />
+    <link rel="alternate" href="https://spotter.app/" hreflang="x-default" />
+
+    <!-- Icons: S mark (readable in browser tab) -->
+    <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.svg?v=2" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.svg?v=2" />
+    <link rel="mask-icon" href="/favicon.svg?v=2" color="#C8F542" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Open Graph (Google Discover / social / messengers) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SPOTTER" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:url" content="https://spotter.app/" />
+    <meta property="og:title" content="SPOTTER — знакомства в тренажёрном зале" />
+    <meta
+      property="og:description"
+      content="Найди своих в зале: кто рядом, кто на тренировке и кто открыт к общению. Знакомства и тренировочные партнёры в твоём клубе."
+    />
+    <meta property="og:image" content="https://spotter.app/og-image.png" />
+    <meta property="og:image:secure_url" content="https://spotter.app/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1920" />
+    <meta property="og:image:height" content="1080" />
+    <meta property="og:image:alt" content="SPOTTER — найди своих в зале" />
+
+    <!-- Twitter / X Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SPOTTER — знакомства в тренажёрном зале" />
+    <meta
+      name="twitter:description"
+      content="Найди своих в зале: кто рядом, кто на тренировке и кто открыт к общению."
+    />
+    <meta name="twitter:image" content="https://spotter.app/og-image.png" />
+    <meta name="twitter:image:alt" content="SPOTTER — найди своих в зале" />
+
+    <!--
+      Optional verification (paste codes from Webmaster tools before release):
+      <meta name="yandex-verification" content="YOUR_YANDEX_CODE" />
+      <meta name="google-site-verification" content="YOUR_GOOGLE_CODE" />
+    -->
+
+    <!-- Structured data: WebSite + WebApplication (Google + Yandex) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://spotter.app/#organization",
+            "name": "SPOTTER",
+            "url": "https://spotter.app/",
+            "logo": "https://spotter.app/apple-touch-icon.svg",
+            "description": "Приложение для знакомств и поиска партнёров по тренировкам в спортзалах.",
+            "areaServed": "RU",
+            "sameAs": []
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://spotter.app/#website",
+            "url": "https://spotter.app/",
+            "name": "SPOTTER",
+            "inLanguage": "ru-RU",
+            "publisher": { "@id": "https://spotter.app/#organization" },
+            "description": "Знакомства в тренажёрном зале и поиск партнёров по тренировкам."
+          },
+          {
+            "@type": "WebApplication",
+            "@id": "https://spotter.app/#app",
+            "name": "SPOTTER",
+            "url": "https://spotter.app/",
+            "applicationCategory": "LifestyleApplication",
+            "operatingSystem": "Web, iOS, Android",
+            "inLanguage": "ru-RU",
+            "description": "Найди своих в зале: смотри, кто сейчас на тренировке, выбирай клуб и знакомься.",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "RUB"
+            },
+            "publisher": { "@id": "https://spotter.app/#organization" },
+            "image": "https://spotter.app/og-image.png"
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://spotter.app/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Что такое SPOTTER?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "SPOTTER — сервис знакомств и поиска партнёров по тренировкам внутри конкретных спортзалов. Можно видеть, кто сейчас в зале, и писать тем, кто открыт к общению."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Можно ли оставаться анонимом?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Да. В SPOTTER можно скрыть имя и фото и открыть профиль только когда захочешь."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Какие сети залов поддерживаются?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "В каталоге есть клубы DDX Fitness, Spirit. Fitness и World Class в городах России."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

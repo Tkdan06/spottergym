@@ -1,0 +1,158 @@
+.notifications-page {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  isolation: isolate;
+}
+
+.notifications-top .back-link {
+  margin-bottom: 8px;
+}
+
+.notifications-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.notifications-title-row h1 {
+  font-size: 1.7rem;
+}
+
+.text-link {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-weight: 650;
+  font-size: 0.88rem;
+  padding: 0;
+}
+
+.notifications-page .filter-row {
+  position: relative;
+  z-index: 2;
+  flex-wrap: wrap;
+}
+
+.master-toggle .row {
+  align-items: flex-start;
+  min-width: 0;
+  flex: 1;
+}
+
+.master-toggle .row > div {
+  min-width: 0;
+}
+
+.prefs-list {
+  display: grid;
+  gap: 8px;
+}
+
+.prefs-list.dims {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.notifications-page .card-list,
+.notifications-page .stack {
+  position: relative;
+  z-index: 1;
+}
+
+.notification-card {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+  overflow: hidden;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.notification-card.is-unread {
+  border-color: rgba(200, 245, 66, 0.45);
+  background:
+    linear-gradient(135deg, rgba(200, 245, 66, 0.1), transparent 55%),
+    var(--bg-card);
+}
+
+.notification-card.is-read {
+  opacity: 0.78;
+}
+
+.notification-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.notification-card-top .chip {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notification-card-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.notification-card-meta .dim {
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.notification-card strong {
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+}
+
+.notification-card p {
+  line-height: 1.4;
+  margin: 0;
+}
+
+.notification-unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px rgba(200, 245, 66, 0.18);
+  flex-shrink: 0;
+}
+
+.admin-form {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.admin-form h2 {
+  font-size: 1.05rem;
+}
+
+.admin-form textarea {
+  width: 100%;
+  min-height: 90px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  padding: 12px;
+  resize: vertical;
+  color: inherit;
+}

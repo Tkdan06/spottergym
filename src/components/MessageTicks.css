@@ -1,0 +1,31 @@
+.msg-ticks {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  vertical-align: -2px;
+  opacity: 0.75;
+}
+
+.msg-ticks.sending {
+  opacity: 0.55;
+}
+
+.msg-ticks.read {
+  opacity: 1;
+  color: #4fc3f7;
+}
+
+.bubble.mine .msg-ticks.read {
+  color: #1d4e8c;
+}
+
+.bubble.mine .msg-ticks.sent,
+.bubble.mine .msg-ticks.delivered,
+.bubble.mine .msg-ticks.sending {
+  color: var(--accent-ink);
+  opacity: 0.55;
+}
+
+.bubble.mine .msg-ticks.read {
+  opacity: 1;
+}

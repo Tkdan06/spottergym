@@ -1,0 +1,24 @@
+{
+  "name": "SPOTTER — знакомства в зале",
+  "short_name": "SPOTTER",
+  "description": "Найди своих в тренажёрном зале: кто рядом, кто на тренировке и кто открыт к общению.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B0F0E",
+  "theme_color": "#0B0F0E",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.svg",
+      "sizes": "180x180",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

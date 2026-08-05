@@ -1,0 +1,101 @@
+.gym-hours {
+  padding: 14px 16px;
+  margin: 0 0 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.gym-hours-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+}
+
+.gym-hours-head h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.gym-hours-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.gym-hours-list li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.92rem;
+}
+
+.gym-hours-list span {
+  color: var(--text-muted);
+}
+
+.gym-hours-list strong {
+  font-weight: 750;
+  color: var(--online);
+  white-space: nowrap;
+}
+
+.gym-hours-note {
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.gym-actions {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 18px;
+}
+
+.gym-hint {
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.gym-hero-content .pill + .pill {
+  margin-left: 6px;
+}
+
+.gym-hero {
+  position: relative;
+  min-height: 200px;
+  border-radius: var(--radius-lg);
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.gym-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(11, 15, 14, 0.15), rgba(11, 15, 14, 0.92));
+}
+
+.gym-hero-content {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 1;
+  padding: 18px;
+}
+
+.gym-hero h1 {
+  font-size: 1.7rem;
+  margin: 10px 0 8px;
+}
+
+@media (min-width: 900px) {
+  .gym-detail .card-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

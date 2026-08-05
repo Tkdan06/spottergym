@@ -1,0 +1,152 @@
+.liked-page .liked-header {
+  margin-bottom: 16px;
+}
+
+.liked-page .liked-header h1 {
+  font-size: 1.8rem;
+  margin-bottom: 6px;
+}
+
+.liked-count {
+  margin-top: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.liked-list {
+  display: grid;
+  gap: 10px;
+}
+
+.liked-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  animation: slide-in 0.35s ease both;
+}
+
+.liked-main {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+}
+
+.liked-page .avatar-wrap {
+  position: relative;
+  width: 56px;
+  height: 56px;
+}
+
+.liked-page .avatar-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+  background: var(--bg-soft);
+}
+
+.liked-page .online-dot.abs {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  box-shadow: 0 0 0 3px var(--bg-card);
+}
+
+.liked-body {
+  min-width: 0;
+}
+
+.liked-body .row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.liked-body strong {
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.liked-body .age {
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.liked-body .gym-line {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: var(--accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.liked-body .preview {
+  margin-top: 4px;
+  font-size: 0.82rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.liked-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.liked-action {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+}
+
+.liked-action.primary {
+  border-color: rgba(200, 245, 66, 0.35);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.liked-action.liked {
+  border-color: rgba(255, 107, 107, 0.35);
+  background: rgba(255, 107, 107, 0.12);
+  color: var(--danger);
+}
+
+.liked-empty {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  padding: 22px 18px;
+}
+
+.liked-empty h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.liked-empty-icon {
+  color: var(--danger);
+  opacity: 0.85;
+}
+
+.liked-empty .btn {
+  margin-top: 6px;
+}

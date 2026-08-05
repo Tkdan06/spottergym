@@ -1,0 +1,238 @@
+.floor-filters {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.floor-filters-bar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.floor-filter-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background:
+    linear-gradient(145deg, rgba(200, 245, 66, 0.1), transparent 60%),
+    var(--bg-elevated);
+  color: var(--text);
+  font-size: 0.86rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.15s ease;
+}
+
+.floor-filter-trigger:active {
+  transform: scale(0.98);
+}
+
+.floor-filter-trigger.active {
+  border-color: rgba(200, 245, 66, 0.5);
+  color: var(--accent);
+  background:
+    linear-gradient(145deg, rgba(200, 245, 66, 0.16), transparent 55%),
+    var(--bg-elevated);
+}
+
+.floor-filter-badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+}
+
+.floor-filters-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+  mask-image: linear-gradient(90deg, #000 85%, transparent);
+}
+
+.floor-filters-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.floor-filters-scroll .chip {
+  flex: 0 0 auto;
+}
+
+.floor-filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.floor-filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(200, 245, 66, 0.35);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.floor-filter-clear {
+  border: 0;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  font-weight: 650;
+  padding: 4px 6px;
+}
+
+.floor-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  align-items: end;
+  animation: floor-sheet-in 0.2s ease;
+}
+
+@keyframes floor-sheet-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.floor-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(4, 8, 6, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.floor-sheet-panel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 520px);
+  max-height: min(82dvh, 640px);
+  margin: 0 auto;
+  padding: 18px 16px calc(16px + var(--safe-bottom));
+  border-radius: 24px 24px 0 0;
+  background:
+    radial-gradient(420px 180px at 90% 0%, rgba(200, 245, 66, 0.1), transparent 55%),
+    #101614;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  animation: floor-panel-up 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes floor-panel-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.floor-sheet-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.floor-sheet-kicker {
+  margin: 0 0 2px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.floor-sheet-top h3 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.floor-sheet-body {
+  overflow-y: auto;
+  display: grid;
+  gap: 18px;
+  min-height: 0;
+  padding-right: 2px;
+}
+
+.floor-sheet-section h4 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.floor-sheet-section > .muted {
+  margin-bottom: 10px;
+  font-size: 0.84rem;
+}
+
+.floor-sheet-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.floor-sheet-actions .btn {
+  width: 100%;
+  min-height: 48px;
+  justify-content: center;
+}
+
+.floor-sheet-actions .btn:disabled {
+  opacity: 0.4;
+}
+
+@media (min-width: 720px) {
+  .floor-sheet {
+    place-items: center;
+    align-items: center;
+    padding: 24px;
+  }
+
+  .floor-sheet-panel {
+    border-radius: 24px;
+    border-bottom: 1px solid var(--line);
+    max-height: min(78vh, 620px);
+  }
+
+  .floor-filters-scroll {
+    mask-image: none;
+  }
+}

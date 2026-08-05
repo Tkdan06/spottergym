@@ -1,0 +1,41 @@
+.settings-page h1 {
+  font-size: 1.8rem;
+  margin: 8px 0 6px;
+}
+
+.settings-gym-list {
+  max-height: min(42vh, 420px);
+  overflow: auto;
+}
+
+.settings-form {
+  display: grid;
+  gap: 16px;
+  margin: 18px 0;
+}
+
+.field-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.safety {
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.safety h2 {
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.safety ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-muted);
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+}
