@@ -185,7 +185,7 @@ export interface AppContextValue {
   login: (email: string, password: string) => Promise<boolean>
   register: (name: string, email: string, password: string, gender: Gender) => Promise<boolean>
   logout: () => Promise<void>
-  completeOnboarding: (data: Partial<AppUser>) => void
+  completeOnboarding: (data: Partial<AppUser>) => void | Promise<void>
   updateProfile: (data: Partial<AppUser>) => void
   /** Быстрый check-in/out; при нескольких залах лучше checkIn + picker */
   toggleActive: (gymId?: string) => void
@@ -921,7 +921,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const completeOnboarding = useCallback(
-    (data: Partial<AppUser>) => {
+    async (data: Partial<AppUser>) => {
       // flushSync: иначе navigate('/app') успевает раньше, чем onboardingDone=true,
       // ProtectedRoute кидает обратно на /onboarding → пустой/чёрный экран
       const box: { user: AppUser | null } = { user: null }
@@ -950,11 +950,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       })
       const saved = box.user
       if (saved && apiOnlineRef.current && !isDemoAccount(saved.email)) {
-        void apiPatchMe({
+        const patch = {
           ...data,
-          onboardingDone: true,
+          onboardingDone: true as const,
           gymIds: saved.gymIds,
-          homeGymId: saved.homeGymId,
+          homeGymId: saved.homeGymId || saved.gymIds[0] || null,
           city: saved.city,
           age: saved.age,
           bio: saved.bio,
@@ -967,7 +967,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
           visitSlots: saved.visitSlots,
           privacy: saved.privacy,
           lookingToMeet: saved.lookingToMeet,
-        }).then((me) => applyServerUser(me as AppUser)).catch(() => undefined)
+        }
+        try {
+          const me = await apiPatchMe(patch)
+          applyServerUser(me as AppUser)
+        } catch {
+          // Профиль мог не пройти валидацию — флаг онбординга всё равно сохраняем
+          try {
+            const me = await apiPatchMe({ onboardingDone: true })
+            applyServerUser(me as AppUser)
+          } catch {
+            /* offline / temporary — локально уже onboardingDone */
+          }
+        }
       }
       window.setTimeout(() => {
         pushNotification({

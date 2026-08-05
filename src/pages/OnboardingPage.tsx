@@ -103,7 +103,7 @@ export function OnboardingPage() {
   const finish = () => {
     const parsedAge = typeof age === 'number' ? age : Number(age)
     if (!Number.isFinite(parsedAge) || parsedAge < 18 || parsedAge > 80) return
-    completeOnboarding({
+    void completeOnboarding({
       city,
       gymIds,
       homeGymId: gymIds[0] || '',
