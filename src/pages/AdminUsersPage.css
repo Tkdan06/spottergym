@@ -1,0 +1,67 @@
+.admin-roles-page .admin-preset-help {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.admin-roles-page .admin-preset-help h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.admin-preset-pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-role-head {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-perm-panel {
+  display: grid;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.admin-perm-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-perm-item {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  cursor: pointer;
+}
+
+.admin-perm-item.is-locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin-perm-item strong {
+  display: block;
+  font-size: 0.92rem;
+}
+
+.admin-perm-item em {
+  display: block;
+  margin-top: 2px;
+  font-style: normal;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.admin-perm-item input {
+  margin-top: 3px;
+}

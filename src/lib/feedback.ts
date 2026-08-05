@@ -1,4 +1,3 @@
-import { loadJson, saveJson } from './storage'
 import type {
   FeedbackCategoryId,
   FeedbackMessage,
@@ -6,6 +5,13 @@ import type {
   FeedbackTicketStatus,
   TicketTab,
 } from '../types'
+import {
+  ADMIN_MESSAGE_MAX,
+  FEEDBACK_MESSAGE_MAX,
+  FEEDBACK_MESSAGE_MIN,
+  clampText,
+} from './fieldLimits'
+import { loadJson, saveJson } from './storage'
 
 export const STORAGE_TICKETS = 'spotter.feedback.tickets'
 
@@ -55,7 +61,13 @@ export function saveTickets(tickets: FeedbackTicket[]) {
   saveJson(STORAGE_TICKETS, tickets)
 }
 
+/** Без автосидов — реальные аккаунты не получают демо-тикеты */
 export function seedTicketsIfEmpty() {
+  return loadTickets()
+}
+
+/** Демо-тикеты только для demo@demo.ru (вызывается при загрузке демо-аккаунта) */
+export function ensureDemoFeedbackTickets() {
   const current = loadTickets()
   if (current.length) return current
   const now = Date.now()
@@ -66,7 +78,7 @@ export function seedTicketsIfEmpty() {
       userName: 'Лера',
       userEmail: 'lera@spotter.demo',
       category: 'suggestion',
-      subject: 'Фильтры на этаже',
+      subject: 'Фильтры в зале',
       status: 'open',
       createdAt: new Date(now - 1000 * 60 * 90).toISOString(),
       updatedAt: new Date(now - 1000 * 60 * 90).toISOString(),
@@ -77,7 +89,7 @@ export function seedTicketsIfEmpty() {
           senderType: 'user',
           senderId: 'u-lera',
           senderName: 'Лера',
-          text: 'Можно добавить фильтр по уровню новичок/опытный на этаже?',
+          text: 'Можно добавить фильтр по уровню новичок/опытный в зале?',
           createdAt: new Date(now - 1000 * 60 * 90).toISOString(),
         },
       ],
@@ -148,8 +160,10 @@ export function createTicket(input: {
   category: FeedbackCategoryId
   message: string
 }): FeedbackTicket {
-  const text = input.message.trim()
-  if (text.length < 10) throw new Error('Опиши запрос от 10 символов')
+  const text = clampText(input.message.trim(), FEEDBACK_MESSAGE_MAX)
+  if (text.length < FEEDBACK_MESSAGE_MIN) {
+    throw new Error(`Опиши запрос от ${FEEDBACK_MESSAGE_MIN} символов`)
+  }
   const now = new Date().toISOString()
   const msg: FeedbackMessage = {
     id: uid('tm'),
@@ -177,6 +191,44 @@ export function createTicket(input: {
   return ticket
 }
 
+/** Админ пишет пользователю: тикет сразу «в работе», первое сообщение от админа */
+export function createAdminOutboundTicket(input: {
+  targetUserId: string
+  targetUserName: string
+  targetUserEmail: string
+  adminId: string
+  adminName: string
+  message: string
+}): FeedbackTicket {
+  const text = clampText(input.message.trim(), ADMIN_MESSAGE_MAX)
+  if (text.length < 2) throw new Error('Пустое сообщение')
+  const now = new Date().toISOString()
+  const msg: FeedbackMessage = {
+    id: uid('tm'),
+    senderType: 'admin',
+    senderId: input.adminId,
+    senderName: input.adminName,
+    text,
+    createdAt: now,
+  }
+  const ticket: FeedbackTicket = {
+    id: uid('t'),
+    userId: input.targetUserId,
+    userName: input.targetUserName,
+    userEmail: input.targetUserEmail,
+    category: 'other',
+    subject: `Админ: ${text.slice(0, 40)}`,
+    status: 'in_progress',
+    createdAt: now,
+    updatedAt: now,
+    assigneeId: input.adminId,
+    messages: [msg],
+  }
+  const next = [ticket, ...loadTickets()]
+  saveTickets(next)
+  return ticket
+}
+
 export function replyToTicket(input: {
   ticketId: string
   senderType: 'user' | 'admin'
@@ -186,7 +238,7 @@ export function replyToTicket(input: {
   closeAs?: 'resolved' | 'closed'
   takeInProgress?: boolean
 }): FeedbackTicket {
-  const text = input.message.trim()
+  const text = clampText(input.message.trim(), FEEDBACK_MESSAGE_MAX)
   if (text.length < 2) throw new Error('Пустое сообщение')
   const all = loadTickets()
   const idx = all.findIndex((t) => t.id === input.ticketId)

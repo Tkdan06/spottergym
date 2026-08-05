@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect, useMemo, useState } from 'react'
 import { ChevronDown, Search, X } from 'lucide-react'
 import { CITIES_META, type CityMeta } from '../data/mock'
+import { searchFieldProps } from '../lib/inputAttrs'
 import './CityCarousel.css'
 
 const PREVIEW_LIMIT = 12
@@ -10,6 +11,11 @@ interface Props {
   onChange: (city: string) => void
   label?: string
   hint?: string
+  /**
+   * full — карточка города + полоска (онбординг / настройки)
+   * compact — только полоска + «Ещё» (каталог залов: меньше шума)
+   */
+  variant?: 'full' | 'compact'
   /** Контент сразу под полоской городов (поиск клуба и т.п.) */
   afterStrip?: ReactNode
 }
@@ -19,6 +25,7 @@ export function CityCarousel({
   onChange,
   label = 'Город',
   hint,
+  variant = 'full',
   afterStrip,
 }: Props) {
   const [query, setQuery] = useState('')
@@ -61,20 +68,25 @@ export function CityCarousel({
   const openAll = () => setAllOpen(true)
 
   return (
-    <section className="city-picker" aria-label={label}>
-      <button type="button" className="city-picker-current" onClick={openAll}>
-        <span className="city-picker-current-text">
-          <span className="city-picker-label">{label}</span>
-          <span className="city-picker-title">{value || 'Выбери город'}</span>
-          <span className="muted city-picker-hint">
-            {selected ? `${selected.gymCount} клубов` : hint || 'Выбери город'}
+    <section
+      className={`city-picker ${variant === 'compact' ? 'city-picker--compact' : ''}`}
+      aria-label={label}
+    >
+      {variant === 'full' ? (
+        <button type="button" className="city-picker-current" onClick={openAll}>
+          <span className="city-picker-current-text">
+            <span className="city-picker-label">{label}</span>
+            <span className="city-picker-title">{value || 'Выбери город'}</span>
+            <span className="muted city-picker-hint">
+              {selected ? `${selected.gymCount} клубов` : hint || 'Выбери город'}
+            </span>
           </span>
-        </span>
-        <span className="city-picker-more">
-          Все
-          <ChevronDown size={16} />
-        </span>
-      </button>
+          <span className="city-picker-more">
+            Все
+            <ChevronDown size={16} />
+          </span>
+        </button>
+      ) : null}
 
       <div className="city-strip" role="listbox" aria-label="Популярные города">
         {previewCities.map((city) => (
@@ -87,11 +99,14 @@ export function CityCarousel({
             onClick={() => pick(city.name)}
           >
             <span className="city-chip-name">{city.name}</span>
-            <span className="city-chip-meta">{city.gymCount}</span>
+            {variant === 'full' ? (
+              <span className="city-chip-meta">{city.gymCount}</span>
+            ) : null}
           </button>
         ))}
         <button type="button" className="city-chip city-chip-more" onClick={openAll}>
           <span className="city-chip-name">Ещё</span>
+          {variant === 'compact' ? <ChevronDown size={14} aria-hidden /> : null}
         </button>
       </div>
 
@@ -124,6 +139,7 @@ export function CityCarousel({
             <label className="city-search">
               <Search size={16} />
               <input
+                {...searchFieldProps}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Найти город"

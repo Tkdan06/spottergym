@@ -34,7 +34,33 @@ export const NETWORKS = [
   'Alex Fitness',
 ] as const
 
-export const GYMS: Gym[] = gymsData as Gym[]
+/** Убрать мусор из парсинга адресов: литералы "\n", лишние пробелы */
+export function cleanGymText(value: string) {
+  return value
+    .replace(/\\n/g, ', ')
+    .replace(/\\r/g, ' ')
+    .replace(/\\t/g, ' ')
+    .replace(/[\r\n\t]+/g, ', ')
+    .replace(/\s+,/g, ',')
+    .replace(/,\s*/g, ', ')
+    .replace(/,\s*,+/g, ', ')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/^[\s,]+|[\s,]+$/g, '')
+    .trim()
+}
+
+function normalizeGym(gym: Gym): Gym {
+  return {
+    ...gym,
+    name: cleanGymText(gym.name),
+    network: cleanGymText(gym.network),
+    city: cleanGymText(gym.city),
+    district: cleanGymText(gym.district),
+    address: cleanGymText(gym.address),
+  }
+}
+
+export const GYMS: Gym[] = (gymsData as Gym[]).map(normalizeGym)
 
 export const DEMO_GYM_ID = 'gym-world-class-world-class-tverskaya-moskva'
 
@@ -64,6 +90,28 @@ export const SPORTS = [
   'Плавание',
   'Бокс',
   'Вело',
+  'Групповые тренировки',
+  'Растяжка',
+]
+
+/** Направления тренера — шире, чем личные активности */
+export const COACH_DIRECTIONS = [
+  'Персональные тренировки',
+  'Групповые тренировки',
+  'Тренажёрный зал',
+  'Силовые',
+  'Функционал',
+  'Кроссфит',
+  'Йога',
+  'Пилатес',
+  'Стретчинг / мобилити',
+  'Бокс / единоборства',
+  'Кардио',
+  'Плавание',
+  'Бег',
+  'Реабилитация',
+  'Детские / подростковые',
+  'Онлайн-тренировки',
 ]
 
 /** Уровень в зале — по ощущению, без лет стажа */
@@ -82,7 +130,39 @@ export const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 
 export const USERS: UserProfile[] = [
   {
+    id: 'u-test',
+    username: 'test',
+    name: 'Тест',
+    age: 25,
+    gender: 'male',
+    bio: 'Тестовый аккаунт для проверки поиска по @нику, лайков и чата.',
+    photos: [
+      'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80&auto=format&fit=crop',
+    ],
+    avatar: avatar('Test', 'male'),
+    gymIds: [DEMO_GYM_ID],
+    homeGymId: DEMO_GYM_ID,
+    city: 'Москва',
+    intent: 'both',
+    experienceLevel: 'confident',
+    interests: ['Знакомства', 'Тренировочный партнёр'],
+    sports: ['Силовые'],
+    isCoach: false,
+    coachSports: [],
+    visitSlots: [
+      { day: 'Пн', from: '18:00', to: '20:00' },
+      { day: 'Ср', from: '18:00', to: '20:00' },
+    ],
+    privacy: 'open',
+    lookingToMeet: true,
+    isActive: true,
+    checkedInGymId: DEMO_GYM_ID,
+    lastSeenAt: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
+    verified: true,
+  },
+  {
     id: 'u-masha',
+    username: 'masha_ddx',
     name: 'Маша',
     age: 26,
     gender: 'female',
@@ -116,6 +196,7 @@ export const USERS: UserProfile[] = [
   },
   {
     id: 'u-ivan',
+    username: 'ivan_coach',
     name: 'Иван',
     age: 29,
     gender: 'male',
@@ -148,6 +229,7 @@ export const USERS: UserProfile[] = [
   },
   {
     id: 'u-lera',
+    username: 'lera_run',
     name: 'Лера',
     age: 24,
     gender: 'female',
@@ -179,6 +261,7 @@ export const USERS: UserProfile[] = [
   },
   {
     id: 'u-anon',
+    username: 'anon_spot',
     name: 'Аноним',
     age: 27,
     gender: 'male',
@@ -203,6 +286,7 @@ export const USERS: UserProfile[] = [
   },
   {
     id: 'u-katya',
+    username: 'katya_yoga',
     name: 'Катя',
     age: 31,
     gender: 'female',
@@ -232,6 +316,7 @@ export const USERS: UserProfile[] = [
   },
   {
     id: 'u-danya',
+    username: 'danya_box',
     name: 'Даня',
     age: 28,
     gender: 'male',
@@ -360,15 +445,61 @@ export function usersInGym(gymId: string) {
 }
 
 /** Участники зала + текущий пользователь; «в зале» только для этого клуба */
-export function peopleInGym(gymId: string, currentUser?: UserProfile | null) {
+export function peopleInGym(
+  gymId: string,
+  currentUser?: UserProfile | null,
+  options?: { includeSeedPeople?: boolean },
+) {
   const withPresence = (person: UserProfile): UserProfile => ({
     ...person,
     isActive: isPresentInGym(person, gymId),
   })
-  const list = usersInGym(gymId).map(withPresence)
+  // По умолчанию без сидов — только демо-аккаунт явно включает людей из mock
+  const includeSeed = options?.includeSeedPeople === true
+  const list = includeSeed ? usersInGym(gymId).map(withPresence) : []
   if (!currentUser?.gymIds?.includes(gymId)) return list
   const asProfile = withPresence({ ...currentUser, id: currentUser.id })
   return [asProfile, ...list.filter((u) => u.id !== currentUser.id)]
+}
+
+/**
+ * Люди на странице клуба.
+ * Сиды только при includeSeedPeople (аккаунт demo@demo.ru).
+ * Без сидов — только текущий пользователь, если он в этом клубе.
+ */
+export function peopleForGymPage(
+  gymId: string,
+  currentUser?: UserProfile | null,
+  options?: { includeSeedPeople?: boolean },
+): UserProfile[] {
+  const includeSeed = options?.includeSeedPeople === true
+
+  if (!includeSeed) {
+    return peopleInGym(gymId, currentUser, { includeSeedPeople: false })
+  }
+
+  const fixed = usersInGym(gymId)
+  const browseFallback = fixed.length === 0
+  const source = browseFallback ? USERS : fixed
+
+  const asMember = (person: UserProfile): UserProfile => {
+    const gymIds = person.gymIds.includes(gymId) ? person.gymIds : [gymId, ...person.gymIds]
+    const checkedInGymId =
+      browseFallback && person.isActive ? gymId : person.checkedInGymId
+    const next = { ...person, gymIds, checkedInGymId }
+    return {
+      ...next,
+      homeGymId: person.gymIds.includes(gymId) ? person.homeGymId || gymId : gymId,
+      isActive: isPresentInGym(next, gymId),
+    }
+  }
+
+  let list = source.map(asMember)
+  if (currentUser?.gymIds?.includes(gymId)) {
+    const me = asMember({ ...currentUser, id: currentUser.id })
+    list = [me, ...list.filter((u) => u.id !== currentUser.id && u.id !== 'me')]
+  }
+  return list
 }
 
 export function getUserGyms(user: Pick<UserProfile, 'gymIds'>) {
@@ -385,14 +516,113 @@ export function getContactGym(
   return preferred ? getGym(preferred) : undefined
 }
 
+/** Короткое имя клуба без сети (сеть показываем отдельно) */
+export function shortGymName(name: string, network?: string) {
+  let next = name.trim()
+  const prefixes = [
+    network,
+    'Spirit. Fitness',
+    'Spirit Fitness',
+    'World Class',
+    'Crocus Fitness',
+    'Alex Fitness',
+    'DDX Fitness',
+    'DDX',
+    'Encore',
+    'XFIT',
+  ].filter(Boolean) as string[]
+
+  for (const prefix of prefixes) {
+    const escaped = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    next = next.replace(new RegExp(`^${escaped}\\s+`, 'i'), '')
+  }
+  return next.trim() || name.trim()
+}
+
+/**
+ * Красивый перенос названия: если длинное / много слов —
+ * последняя часть уходит на вторую строку (Matveevskiy, «Красная Площадь»).
+ */
+export function gymTitleLines(name: string, network?: string): string[] {
+  const title = shortGymName(name, network)
+  const words = title.split(/\s+/).filter(Boolean)
+  if (words.length <= 1) return [title]
+  if (title.length <= 16 && words.length === 2) return [title]
+  if (words.length === 2) return [words[0], words[1]]
+  return [words.slice(0, -1).join(' '), words[words.length - 1]]
+}
+
 export function formatGymLabel(gym: Gym | undefined) {
   if (!gym) return ''
-  const shortName = gym.name
-    .replace(/^DDX\s+/i, '')
-    .replace(/^Spirit\.?\s*Fitness\s+/i, '')
-    .replace(/^World Class\s+/i, '')
-    .trim()
+  const shortName = shortGymName(gym.name, gym.network)
   return `${gym.network} · ${shortName || gym.name}`
+}
+
+function addressKey(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/ё/g, 'е')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim()
+}
+
+/**
+ * Строка адреса без дубля названия клуба/района.
+ * «Матвеевский» уже в заголовке → в адресе только метро/улица.
+ */
+/** После «м. Станция» — запятая, если её не было */
+function polishMetroAddress(address: string) {
+  if (!/^м\./i.test(address)) return address
+  if (/^м\.\s*[^,]+,/i.test(address)) return address
+  // м. Автозаводская ТРЦ… → м. Автозаводская, ТРЦ…
+  // м. Крылатское Осенний б-р… → м. Крылатское, Осенний б-р…
+  return address.replace(
+    /^(м\.\s*\S+)\s+(?=(?:ТЦ|ТРЦ|ТОЦ|МФК|ул\.|улица|пр\.|просп\.|шоссе|б-р|наб\.|д\.|\S))/i,
+    '$1, ',
+  )
+}
+
+export function formatGymAddress(gym: Pick<Gym, 'name' | 'network' | 'district' | 'address'>) {
+  const titleKey = addressKey(shortGymName(gym.name, gym.network))
+  const district = (gym.district || '').trim()
+  const address = polishMetroAddress((gym.address || '').trim())
+  const districtKey = addressKey(district)
+  const addressKeyValue = addressKey(address)
+
+  const districtDuplicatesTitle =
+    Boolean(districtKey) &&
+    Boolean(titleKey) &&
+    (districtKey === titleKey ||
+      titleKey.includes(districtKey) ||
+      districtKey.includes(titleKey))
+
+  const addressAlreadyHasDistrict =
+    Boolean(districtKey) && addressKeyValue.includes(districtKey)
+
+  const parts: string[] = []
+  if (district && !districtDuplicatesTitle && !addressAlreadyHasDistrict) {
+    parts.push(district)
+  }
+  if (address) parts.push(address)
+  return parts.join(' · ')
+}
+
+/**
+ * Адрес для баннера: метро на первой строке, остальное — на второй.
+ * Без метро оставляем одной строкой.
+ */
+export function formatGymAddressLines(
+  gym: Pick<Gym, 'name' | 'network' | 'district' | 'address'>,
+): string[] {
+  const full = formatGymAddress(gym)
+  if (!full) return []
+
+  const metroSplit = full.match(/^(м\.\s*[^,]+),\s*(.+)$/i)
+  if (metroSplit) {
+    return [metroSplit[1].trim(), metroSplit[2].trim()]
+  }
+
+  return [full]
 }
 
 export function displayName(user: UserProfile) {

@@ -1,19 +1,22 @@
-import { Link } from 'react-router-dom'
-import { CheckInControl } from '../components/CheckInControl'
+import { type FormEvent, useEffect, useState } from 'react'
+import { ArrowRight, Heart, Search, UserRound } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
 import { PresenceBadge } from '../components/PresenceBadge'
 import { useApp, useOtherParticipant } from '../context/useApp'
 import { displayName, formatGymLabel, getContactGym, getGym } from '../data/mock'
 import { profileImage } from '../lib/avatar'
+import { otherParticipantId } from '../lib/conversations'
+import { searchFieldProps } from '../lib/inputAttrs'
 import { getCheckedInGymId } from '../lib/presence'
-import type { Conversation } from '../types'
+import { formatUsername, normalizeUsername } from '../lib/username'
+import type { Conversation, UserProfile } from '../types'
 import './MessagesPage.css'
 
 function ConversationRow({ conversation }: { conversation: Conversation }) {
   const { user } = useApp()
   const other = useOtherParticipant(conversation)
-  if (!other) return null
-  const name = displayName(other)
-  const gym = getContactGym(other, user?.gymIds || [])
+  const name = other ? displayName(other) : 'Собеседник'
+  const gym = other ? getContactGym(other, user?.gymIds || []) : undefined
   const gymLabel = formatGymLabel(gym)
   const time = new Date(conversation.updatedAt).toLocaleTimeString('ru-RU', {
     hour: '2-digit',
@@ -23,8 +26,13 @@ function ConversationRow({ conversation }: { conversation: Conversation }) {
   return (
     <Link to={`/app/messages/${conversation.id}`} className="conversation-row">
       <div className="avatar-wrap">
-        <img src={profileImage(other)} alt={name} />
-        {other.isActive ? <span className="online-dot abs" /> : null}
+        {other ? (
+          <img src={profileImage(other)} alt={name} />
+        ) : (
+          <span className="avatar-fallback" aria-hidden>
+            ?
+          </span>
+        )}
       </div>
       <div className="conversation-body">
         <div className="row">
@@ -32,7 +40,7 @@ function ConversationRow({ conversation }: { conversation: Conversation }) {
           <span className="dim time">{time}</span>
         </div>
         <div className="contact-meta">
-          <PresenceBadge active={other.isActive} compact />
+          {other ? <PresenceBadge active={other.isActive} compact /> : null}
           {gymLabel ? <span className="gym-line">{gymLabel}</span> : null}
         </div>
         <p className="muted preview">{conversation.lastMessage}</p>
@@ -47,48 +55,230 @@ function ConversationRow({ conversation }: { conversation: Conversation }) {
   )
 }
 
-export function MessagesPage() {
-  const { conversations, user } = useApp()
-  const sorted = [...conversations].sort(
-    (a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt),
+function FindResultCard({
+  person,
+  onOpen,
+}: {
+  person: UserProfile
+  onOpen: () => void
+}) {
+  const { user, toggleLike, getLikesFor } = useApp()
+  const likesInfo = getLikesFor(person.id)
+  const isSelf = Boolean(user && person.id === user.id)
+
+  return (
+    <div className="find-user-card">
+      <button type="button" className="find-user-card-main" onClick={onOpen}>
+        <div className="avatar-wrap sm">
+          <img src={profileImage(person)} alt={displayName(person)} />
+        </div>
+        <div className="find-user-card-body">
+          <strong>
+            {displayName(person)}
+            {person.privacy !== 'anonymous' ? (
+              <span className="age">, {person.age}</span>
+            ) : null}
+          </strong>
+          {person.username ? (
+            <p className="dim">{formatUsername(person.username)}</p>
+          ) : null}
+        </div>
+      </button>
+      <div className="find-user-card-actions">
+        {!isSelf ? (
+          <button
+            type="button"
+            className={`find-user-like ${likesInfo.likedByMe ? 'on' : ''}`}
+            onClick={() => void toggleLike(person.id)}
+            aria-label={likesInfo.likedByMe ? 'Убрать лайк' : 'Лайкнуть'}
+            title={likesInfo.likedByMe ? 'В лайках' : 'Лайкнуть'}
+          >
+            <Heart size={18} fill={likesInfo.likedByMe ? 'currentColor' : 'none'} />
+          </button>
+        ) : null}
+        <button
+          type="button"
+          className="find-user-open"
+          onClick={onOpen}
+          aria-label="Открыть профиль"
+        >
+          <UserRound size={16} aria-hidden />
+        </button>
+      </div>
+    </div>
   )
+}
+
+export function MessagesPage() {
+  const {
+    conversations,
+    user,
+    blockedUserIds,
+    searchUsers,
+    apiOnline,
+    refreshChats,
+  } = useApp()
+  const navigate = useNavigate()
+  const [query, setQuery] = useState('')
+  const [searching, setSearching] = useState(false)
+  const [searchError, setSearchError] = useState('')
+  const [results, setResults] = useState<UserProfile[]>([])
+
+  useEffect(() => {
+    if (!apiOnline) return
+    void refreshChats().catch(() => undefined)
+    const id = window.setInterval(() => {
+      void refreshChats().catch(() => undefined)
+    }, 5000)
+    return () => window.clearInterval(id)
+  }, [apiOnline, refreshChats])
+
+  useEffect(() => {
+    const q = query.trim().replace(/^@+/, '')
+    if (q.length < 2) {
+      setResults([])
+      setSearchError('')
+      return
+    }
+    let cancelled = false
+    const timer = window.setTimeout(() => {
+      setSearching(true)
+      void searchUsers(q)
+        .then((list) => {
+          if (cancelled) return
+          setResults(list)
+          setSearchError(list.length ? '' : 'Никого не нашли')
+        })
+        .catch((err) => {
+          if (cancelled) return
+          setResults([])
+          setSearchError(err instanceof Error ? err.message : 'Не удалось найти')
+        })
+        .finally(() => {
+          if (!cancelled) setSearching(false)
+        })
+    }, 280)
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+    }
+  }, [query, searchUsers])
+
+  const sorted = [...conversations]
+    .filter((c) => {
+      if (!blockedUserIds.length) return true
+      const otherId = otherParticipantId(c, user?.id)
+      return otherId ? !blockedUserIds.includes(otherId) : true
+    })
+    .sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt))
+
   const myGym = user ? getGym(getCheckedInGymId(user)) : undefined
   const shortGym = myGym
     ? myGym.name
         .replace(/^DDX\s+/i, '')
-        .replace(/^Spirit\.?\s*Fitness\s+/i, '')
+        .replace(/^Spirit\.?\s*Fitness\s*/i, '')
         .replace(/^World Class\s+/i, '')
         .trim()
     : ''
 
+  const onSearch = async (e: FormEvent) => {
+    e.preventDefault()
+    setSearchError('')
+    const q = normalizeUsername(query) || query.trim().replace(/^@+/, '')
+    if (q.length < 2) {
+      setSearchError('Введи минимум 2 символа @ника или имени')
+      return
+    }
+    setSearching(true)
+    try {
+      const list = await searchUsers(q)
+      setResults(list)
+      setSearchError(list.length ? '' : 'Никого не нашли')
+    } catch (err) {
+      setResults([])
+      setSearchError(err instanceof Error ? err.message : 'Не удалось найти')
+    } finally {
+      setSearching(false)
+    }
+  }
+
   return (
     <main className="page messages-page">
-      <header className="messages-header">
-        <h1>Чаты</h1>
-        <p className="muted">Сначала запрос — потом переписка.</p>
+      <header className="page-header messages-top">
+        <div className="page-header-text page-header-title-row">
+          <h1 className="page-title">Чаты</h1>
+          {user ? (
+            <span className={`messages-presence-label ${user.isActive ? 'on' : ''}`}>
+              {user.isActive
+                ? shortGym
+                  ? `Статус: в зале · ${shortGym}`
+                  : 'Статус: в зале'
+                : 'Статус: не в зале'}
+            </span>
+          ) : null}
+        </div>
       </header>
 
-      {user ? (
-        <section className={`my-presence ${user.isActive ? 'on' : ''}`}>
-          <div>
-            <strong>{user.isActive ? 'Ты сейчас в зале' : 'Ты не в зале'}</strong>
-            <p className="muted">
-              {user.isActive
-                ? `Контакты видят, что ты на тренировке${shortGym ? ` · ${shortGym}` : ''}`
-                : user.gymIds.length > 1
-                  ? 'Выбери зал, в котором ты сейчас'
-                  : 'Отметься — и в чатах появится статус «В зале»'}
-            </p>
-          </div>
-          <CheckInControl preferredGymId={user.homeGymId} compact />
-        </section>
+      <div className="messages-find">
+        <form
+          className="find-user-form"
+          onSubmit={(e) => void onSearch(e)}
+          aria-label="Найти по @нику или имени"
+        >
+          <span className="find-user-icon" aria-hidden>
+            <Search size={16} strokeWidth={2.25} />
+          </span>
+          <input
+            {...searchFieldProps}
+            type="text"
+            inputMode="search"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value)
+              setSearchError('')
+            }}
+            placeholder="@ник или имя"
+            maxLength={40}
+            size={1}
+            aria-label="Поиск по @нику или имени"
+            enterKeyHint="search"
+          />
+          <button
+            type="submit"
+            className="find-user-go"
+            disabled={searching}
+            aria-label="Найти"
+          >
+            {searching ? (
+              <span className="find-user-go-dots">…</span>
+            ) : (
+              <ArrowRight size={18} strokeWidth={2.25} />
+            )}
+          </button>
+        </form>
+        {searchError ? <p className="feedback-error find-user-error">{searchError}</p> : null}
+      </div>
+
+      {results.length ? (
+        <div className="find-user-result">
+          {results.map((person) => (
+            <FindResultCard
+              key={person.id}
+              person={person}
+              onOpen={() => navigate(`/app/user/${person.id}`)}
+            />
+          ))}
+        </div>
       ) : null}
 
       <div className="card-list">
         {sorted.length ? (
           sorted.map((c) => <ConversationRow key={c.id} conversation={c} />)
         ) : (
-          <div className="empty-state">Пока нет диалогов. Найди человека в своём зале.</div>
+          <div className="empty-copy" role="status">
+            <p className="empty-copy-title">Пока нет диалогов</p>
+            <p className="empty-copy-lead">Найди человека по @нику или в своём зале</p>
+          </div>
         )}
       </div>
     </main>

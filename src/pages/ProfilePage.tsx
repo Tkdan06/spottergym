@@ -1,21 +1,26 @@
 import { useState } from 'react'
-import { Bell, Eye, EyeOff, Heart, MessageSquareText, Settings, Shield } from 'lucide-react'
+import { Bell, Copy, Eye, EyeOff, MessageSquareText, Settings, Share2, Shield } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { CheckInControl } from '../components/CheckInControl'
+import { InviteFriendsButton } from '../components/InviteFriendsButton'
 import { LikesRow } from '../components/LikesRow'
 import { PhotoGalleryModal } from '../components/PhotoGalleryModal'
 import { ProfilePhotoCarousel } from '../components/ProfilePhotoCarousel'
+import { ScheduleSheet } from '../components/ScheduleSheet'
 import { useApp } from '../context/useApp'
 import { experienceLabel, getGym, getUserGyms, intentLabel } from '../data/mock'
 import { profileImage } from '../lib/avatar'
 import { clampPhotos } from '../lib/photos'
 import { getCheckedInGymId } from '../lib/presence'
+import { breakLabel, isOnBreak } from '../lib/schedule'
+import { formatUsername } from '../lib/username'
 import './ProfileViews.css'
 
 export function ProfilePage() {
   const { user, updateProfile, getLikesFor, getMyLikedUsers, unreadNotifications } = useApp()
   const [galleryOpen, setGalleryOpen] = useState(false)
   const [galleryIndex, setGalleryIndex] = useState(0)
+  const [scheduleOpen, setScheduleOpen] = useState(false)
   if (!user) return null
   const gyms = getUserGyms(user)
   const likesInfo = getLikesFor(user.id)
@@ -23,12 +28,16 @@ export function ProfilePage() {
   const checkedGym = getGym(getCheckedInGymId(user))
   const photoCount = user.photos.length
   const heroSrc = profileImage(user)
+  const onBreak = isOnBreak(user.breakUntil)
+  const breakText = breakLabel(user.breakUntil)
 
   return (
     <main className="page profile-view">
-      <header className="profile-top">
-        <h1>Профиль</h1>
-        <div className="profile-top-actions">
+      <header className="page-header profile-top">
+        <div className="page-header-text">
+          <h1 className="page-title">Профиль</h1>
+        </div>
+        <div className="page-header-actions profile-top-actions">
           <Link to="/app/notifications" className="icon-btn" aria-label="Уведомления">
             <Bell size={20} />
             {unreadNotifications > 0 ? <i className="nav-badge">{unreadNotifications}</i> : null}
@@ -52,9 +61,23 @@ export function ProfilePage() {
           }}
         />
         <div className="profile-hero-meta">
+          {onBreak ? <span className="pill pill-break">{breakText}</span> : null}
           <h1>
             {user.name}, {user.age}
           </h1>
+          {user.username ? (
+            <button
+              type="button"
+              className="profile-username"
+              onClick={() => {
+                void navigator.clipboard?.writeText(formatUsername(user.username)).catch(() => undefined)
+              }}
+              title="Скопировать @ник"
+            >
+              {formatUsername(user.username)}
+              <Copy size={14} aria-hidden />
+            </button>
+          ) : null}
           <p className="muted">
             {user.isCoach
               ? user.coachSports.length
@@ -91,25 +114,26 @@ export function ProfilePage() {
         onChangePhotos={(photos) => updateProfile({ photos: clampPhotos(photos) })}
       />
 
+      <section className="surface profile-block">
+        <h2>Пригласить друзей</h2>
+        <InviteFriendsButton userId={user.id} className="btn btn-primary btn-block">
+          <Share2 size={16} /> Поделиться ссылкой
+        </InviteFriendsButton>
+      </section>
+
       <section className="surface profile-block likes-block">
         <div className="section-title">
           <h2>Лайки</h2>
-          <Link to="/app/likes" className="muted">
-            Мои лайки
+          <Link to="/app/likes/sent" className="muted">
+            {myLiked.length ? `Кого я лайкнул · ${myLiked.length}` : 'Кого я лайкнул'}
           </Link>
         </div>
-        <p className="muted" style={{ marginBottom: 10 }}>
-          Кто отметил тебя — чем больше лайков, тем выше в списке клуба.
-        </p>
-        <LikesRow count={likesInfo.count} likers={likesInfo.likers} maxAvatars={6} />
-        <Link to="/app/likes" className="my-likes-link">
-          <Heart size={16} fill="currentColor" />
-          <span>
-            {myLiked.length
-              ? `Кого я лайкнул · ${myLiked.length}`
-              : 'Кого я лайкнул'}
-          </span>
-        </Link>
+        <LikesRow
+          count={likesInfo.count}
+          likers={likesInfo.likers}
+          maxAvatars={6}
+          to="/app/likes"
+        />
       </section>
 
       <section className="surface profile-block">
@@ -211,7 +235,7 @@ export function ProfilePage() {
 
       <section className="surface profile-block">
         <h2>О себе</h2>
-        <p>{user.bio || 'Добавь описание — так проще начать разговор.'}</p>
+        <p>{user.bio || 'Добавь описание — так проще начать разговор'}</p>
         <div className="chip-grid" style={{ marginTop: 12 }}>
           {experienceLabel(user.experienceLevel) ? (
             <span className="chip level">{experienceLabel(user.experienceLevel)}</span>
@@ -229,11 +253,21 @@ export function ProfilePage() {
       </section>
 
       <section className="surface profile-block">
-        <h2>Расписание</h2>
+        <div className="section-title">
+          <h2>Расписание</h2>
+          <button type="button" className="text-link muted" onClick={() => setScheduleOpen(true)}>
+            Изменить
+          </button>
+        </div>
+        {onBreak ? (
+          <p className="break-note">
+            {breakText}. Чек-ин в зал снимет статус автоматически.
+          </p>
+        ) : null}
         <div className="slots">
           {user.visitSlots.length ? (
             user.visitSlots.map((slot) => (
-              <div key={`${slot.day}-${slot.from}`} className="slot">
+              <div key={`${slot.day}-${slot.from}-${slot.to}`} className="slot">
                 <strong>{slot.day}</strong>
                 <span>
                   {slot.from}–{slot.to}
@@ -241,16 +275,25 @@ export function ProfilePage() {
               </div>
             ))
           ) : (
-            <p className="muted">Расписание пока не задано</p>
+            <p className="muted">
+              Не задано —{' '}
+              <button type="button" className="text-link" onClick={() => setScheduleOpen(true)}>
+                укажи дни и время
+              </button>
+            </p>
           )}
         </div>
       </section>
 
+      <ScheduleSheet
+        open={scheduleOpen}
+        initialSlots={user.visitSlots}
+        onClose={() => setScheduleOpen(false)}
+        onSave={(visitSlots) => updateProfile({ visitSlots })}
+      />
+
       <section className="surface profile-block">
         <h2>Обратная связь</h2>
-        <p className="muted" style={{ marginBottom: 12 }}>
-          Баги, идеи и вопросы — тикеты с перепиской с поддержкой.
-        </p>
         <div className="chip-grid">
           <Link to="/app/feedback" className="chip active">
             <MessageSquareText size={14} /> Мои обращения

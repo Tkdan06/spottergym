@@ -47,12 +47,15 @@ export function NotificationsPage() {
         <div className="notifications-title-row">
           <h1>Уведомления</h1>
           {unreadNotifications > 0 ? (
-            <button type="button" className="text-link" onClick={markAllNotificationsRead}>
+            <button
+              type="button"
+              className="notifications-mark-all"
+              onClick={markAllNotificationsRead}
+            >
               Прочитать все
             </button>
           ) : null}
         </div>
-        <p className="muted">Зал, лайки, чаты. Запросы в поддержку — в обратной связи.</p>
       </header>
 
       <div className="filter-row">
@@ -121,8 +124,9 @@ export function NotificationsPage() {
       ) : (
         <section className="card-list">
           {!notificationPrefs.enabled ? (
-            <div className="empty-state">
-              Уведомления выключены. Включи их во вкладке «Настройки».
+            <div className="empty-copy" role="status">
+              <p className="empty-copy-title">Уведомления выключены</p>
+              <p className="empty-copy-lead">Включи их во вкладке «Настройки»</p>
             </div>
           ) : visible.length ? (
             visible.map((item) => (
@@ -146,7 +150,12 @@ export function NotificationsPage() {
               </Link>
             ))
           ) : (
-            <div className="empty-state">Пока тихо. Как только в зале появится кто-то новый — напишем.</div>
+            <div className="empty-copy" role="status">
+              <p className="empty-copy-title">Пока тихо</p>
+              <p className="empty-copy-lead">
+                Как только в зале появится кто-то новый — напишем
+              </p>
+            </div>
           )}
         </section>
       )}

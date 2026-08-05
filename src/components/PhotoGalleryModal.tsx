@@ -214,7 +214,7 @@ export function PhotoGalleryModal({
           <div className="photo-modal-frame" key={`${current}-${index}`}>
             <img src={current} alt={`${name} — фото ${index + 1}`} draggable={false} />
             {showingPlaceholder ? (
-              <div className="photo-modal-empty">
+              <div className="photo-modal-empty" role="status">
                 <p>Пока нет своих фото</p>
                 <span>Добавь до {MAX_PROFILE_PHOTOS} снимков — первый станет аватаром</span>
               </div>

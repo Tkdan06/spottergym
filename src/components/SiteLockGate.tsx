@@ -96,29 +96,39 @@ export function SiteLockGate({ children }: { children: ReactNode }) {
         <h1>Закрытый доступ</h1>
         <p className="muted site-lock-hint">{hint}</p>
 
-        <label className="field">
-          <span>Логин</span>
+        <div className="field">
+          <label htmlFor="site-lock-user" className="sr-only">
+            Логин
+          </label>
           <input
+            id="site-lock-user"
+            name="username"
             autoComplete="username"
             value={user}
             onChange={(e) => setUser(e.target.value)}
             placeholder="Логин"
+            aria-label="Логин"
             required
             autoFocus
           />
-        </label>
+        </div>
 
-        <label className="field">
-          <span>Пароль</span>
+        <div className="field">
+          <label htmlFor="site-lock-password" className="sr-only">
+            Пароль
+          </label>
           <input
+            id="site-lock-password"
+            name="password"
             type="password"
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Пароль"
+            aria-label="Пароль"
             required
           />
-        </label>
+        </div>
 
         {error ? <p className="site-lock-error">{error}</p> : null}
 

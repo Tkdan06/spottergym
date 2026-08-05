@@ -9,6 +9,8 @@ import {
   statusLabel,
   ticketsForUser,
 } from '../lib/feedback'
+import { FEEDBACK_MESSAGE_MAX } from '../lib/fieldLimits'
+import { messageFieldProps } from '../lib/inputAttrs'
 import type { FeedbackCategoryId } from '../types'
 import './FeedbackPage.css'
 
@@ -40,11 +42,11 @@ export function FeedbackPage() {
 
   if (!user) return null
 
-  const onCreate = (e: FormEvent) => {
+  const onCreate = async (e: FormEvent) => {
     e.preventDefault()
     setError('')
     try {
-      const ticket = createFeedbackTicket(category, message)
+      const ticket = await createFeedbackTicket(category, message)
       setMessage('')
       setNotice('Обращение отправлено')
       setView('list')
@@ -54,15 +56,15 @@ export function FeedbackPage() {
     }
   }
 
-  const onReply = (e: FormEvent) => {
+  const onReply = async (e: FormEvent) => {
     e.preventDefault()
     if (!selected) return
     setError('')
     try {
-      replyFeedbackTicket(selected.id, reply)
+      await replyFeedbackTicket(selected.id, reply)
       setReply('')
       setNotice('Ответ отправлен')
-      refreshSupport()
+      await refreshSupport()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось ответить')
     }
@@ -98,10 +100,12 @@ export function FeedbackPage() {
         ) : (
           <form className="feedback-actions" onSubmit={onReply}>
             <textarea
+              {...messageFieldProps}
               value={reply}
               onChange={(e) => setReply(e.target.value)}
               placeholder="Ответить поддержке…"
               rows={3}
+              maxLength={FEEDBACK_MESSAGE_MAX}
             />
             <button type="submit" className="btn btn-primary btn-block" disabled={reply.trim().length < 2}>
               Отправить
@@ -136,10 +140,12 @@ export function FeedbackPage() {
             ))}
           </div>
           <textarea
+            {...messageFieldProps}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Опиши запрос от 10 символов"
             rows={5}
+            maxLength={FEEDBACK_MESSAGE_MAX}
           />
           <button type="submit" className="btn btn-primary btn-block">
             Отправить
@@ -161,7 +167,6 @@ export function FeedbackPage() {
           Написать
         </button>
       </div>
-      <p className="muted">Тикеты в поддержку. Можно переписываться, пока обращение открыто.</p>
       {user.isAdmin ? (
         <Link to="/app/admin" className="btn btn-soft btn-block">
           Открыть админку
@@ -186,7 +191,10 @@ export function FeedbackPage() {
             </button>
           ))
         ) : (
-          <div className="empty-state">Пока нет обращений. Напиши, если что-то не так.</div>
+          <div className="empty-copy" role="status">
+            <p className="empty-copy-title">Пока нет обращений</p>
+            <p className="empty-copy-lead">Напиши, если что-то не так</p>
+          </div>
         )}
       </div>
       {notice ? <p className="feedback-notice">{notice}</p> : null}

@@ -109,14 +109,17 @@ export function buildAvatarUrl(seed: string, gender: Gender = 'male') {
 /** Фото профиля или гендерный плейсхолдер */
 export function profileImage(user: Pick<UserProfile, 'photos' | 'avatar' | 'privacy' | 'name' | 'gender'>) {
   if (user.privacy === 'anonymous') {
-    return user.avatar || buildAvatarUrl(user.name, user.gender)
+    return user.avatar || buildAvatarUrl(user.name || 'user', user.gender)
   }
-  return user.photos[0] || user.avatar || buildAvatarUrl(user.name, user.gender)
+  const photo = Array.isArray(user.photos) ? user.photos[0] : undefined
+  return photo || user.avatar || buildAvatarUrl(user.name || 'user', user.gender)
 }
 
 export function withSyncedAvatar<T extends UserProfile>(user: T): T {
-  if (user.photos.length > 0) return user
-  const avatar = buildAvatarUrl(user.name, user.gender)
-  if (user.avatar === avatar) return user
-  return { ...user, avatar }
+  const photos = Array.isArray(user.photos) ? user.photos : []
+  const base = photos === user.photos ? user : { ...user, photos }
+  if (photos.length > 0) return base
+  const avatar = buildAvatarUrl(base.name || 'user', base.gender)
+  if (base.avatar === avatar) return base
+  return { ...base, avatar }
 }

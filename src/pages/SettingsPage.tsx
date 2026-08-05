@@ -1,11 +1,32 @@
 import { type FormEvent, useMemo, useState } from 'react'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Share2 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { CityCarousel } from '../components/CityCarousel'
 import { GymCard } from '../components/GymCard'
+import { InviteFriendsButton } from '../components/InviteFriendsButton'
 import { useApp } from '../context/useApp'
-import { EXPERIENCE_LEVELS, GYMS, INTERESTS, SPORTS, getGym } from '../data/mock'
-import type { ExperienceLevel, Gender, Intent } from '../types'
+import {
+  COACH_DIRECTIONS,
+  EXPERIENCE_LEVELS,
+  GYMS,
+  INTERESTS,
+  SPORTS,
+  getGym,
+  getUser,
+} from '../data/mock'
+import { isDemoAccount } from '../lib/demoAccount'
+import { buildRealGymStatsMap } from '../lib/gymStats'
+import { BIO_MAX, NAME_MAX, NAME_MIN, USERNAME_MAX, USERNAME_MIN } from '../lib/fieldLimits'
+import {
+  ageFieldProps,
+  bioFieldProps,
+  displayNameFieldProps,
+  searchFieldProps,
+} from '../lib/inputAttrs'
+import { isValidUsername, normalizeUsername } from '../lib/username'
+import { activeBreakUntil, todayISO } from '../lib/schedule'
+import type { ExperienceLevel, Gender, Intent, VisitSlot } from '../types'
+import { ScheduleEditor, sortVisitSlots } from '../components/ScheduleEditor'
 import './SettingsPage.css'
 
 const GENDERS: { value: Gender; label: string }[] = [
@@ -14,9 +35,11 @@ const GENDERS: { value: Gender; label: string }[] = [
 ]
 
 export function SettingsPage() {
-  const { user, updateProfile, logout } = useApp()
+  const { user, updateProfile, logout, blockedUserIds, unblockUser } = useApp()
   const navigate = useNavigate()
   const [name, setName] = useState(user?.name || '')
+  const [username, setUsername] = useState(user?.username || '')
+  const [usernameError, setUsernameError] = useState('')
   const [age, setAge] = useState<number | ''>(user?.age || 25)
   const [gender, setGender] = useState<Gender>(
     user?.gender === 'female' || user?.gender === 'male' ? user.gender : 'male',
@@ -34,6 +57,13 @@ export function SettingsPage() {
   const [coachSports, setCoachSports] = useState<string[]>(user?.coachSports || [])
   const [interests, setInterests] = useState<string[]>(user?.interests || [])
   const [gymQuery, setGymQuery] = useState('')
+  const [visitSlots, setVisitSlots] = useState<VisitSlot[]>(() =>
+    sortVisitSlots(user?.visitSlots || []),
+  )
+
+  const initialBreak = activeBreakUntil(user?.breakUntil)
+  const [breakOn, setBreakOn] = useState(Boolean(initialBreak))
+  const [breakUntil, setBreakUntil] = useState(initialBreak || '')
 
   const cityGyms = useMemo(() => {
     const q = gymQuery.toLowerCase().trim()
@@ -48,6 +78,23 @@ export function SettingsPage() {
     () => gymIds.map((id) => getGym(id)).filter(Boolean),
     [gymIds],
   )
+
+  const demoStats = isDemoAccount(user?.email)
+  const liveStats = useMemo(() => {
+    if (!user || demoStats) return {}
+    // Черновик выбранных залов — чтобы счётчик обновлялся до «Сохранить»
+    return buildRealGymStatsMap(
+      cityGyms.slice(0, 40).map((g) => g.id),
+      { ...user, gymIds },
+    )
+  }, [user, demoStats, cityGyms, gymIds])
+
+  const blockedPeople = useMemo(() => {
+    if (!isDemoAccount(user?.email)) return []
+    return blockedUserIds
+      .map((id) => getUser(id))
+      .filter((p): p is NonNullable<typeof p> => Boolean(p))
+  }, [blockedUserIds, user?.email])
 
   if (!user) return null
 
@@ -70,8 +117,20 @@ export function SettingsPage() {
     if (!gymIds.length) return
     const parsedAge = typeof age === 'number' ? age : Number(age)
     if (!Number.isFinite(parsedAge) || parsedAge < 18 || parsedAge > 80) return
+
+    const nextUsername = normalizeUsername(username)
+    if (!isValidUsername(nextUsername)) {
+      setUsernameError('Ник: 3–20 символов, латиница, цифры и _')
+      return
+    }
+    setUsernameError('')
+
+    const nextBreak =
+      breakOn && breakUntil && breakUntil >= todayISO() ? breakUntil : null
+
     updateProfile({
       name: name.trim(),
+      username: nextUsername,
       age: parsedAge,
       gender,
       bio: bio.trim(),
@@ -81,9 +140,14 @@ export function SettingsPage() {
       homeGymId: gymIds.includes(homeGymId) ? homeGymId : gymIds[0],
       sports,
       isCoach,
-      coachSports: isCoach ? coachSports.filter((s) => sports.includes(s)) : [],
+      coachSports: isCoach ? coachSports : [],
       interests,
       city,
+      visitSlots: sortVisitSlots(visitSlots),
+      breakUntil: nextBreak,
+      ...(nextBreak && user.isActive
+        ? { isActive: false, checkedInGymId: '', checkedInAt: '' }
+        : {}),
     })
     navigate('/app/profile')
   }
@@ -99,16 +163,41 @@ export function SettingsPage() {
       <form className="settings-form" onSubmit={onSave}>
         <div className="field">
           <label htmlFor="name">Имя</label>
-          <input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
+          <input
+            {...displayNameFieldProps}
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            minLength={NAME_MIN}
+            maxLength={NAME_MAX}
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="username">@ник</label>
+          <input
+            {...displayNameFieldProps}
+            id="username"
+            value={username}
+            onChange={(e) => {
+              setUsername(e.target.value.replace(/^@+/, '').toLowerCase())
+              setUsernameError('')
+            }}
+            required
+            minLength={USERNAME_MIN}
+            maxLength={USERNAME_MAX}
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
+            placeholder="masha_ddx"
+          />
+          {usernameError ? <p className="feedback-error">{usernameError}</p> : null}
         </div>
         <div className="field">
           <label htmlFor="age">Возраст</label>
           <input
+            {...ageFieldProps}
             id="age"
-            type="number"
-            min={18}
-            max={80}
-            inputMode="numeric"
             value={age}
             onChange={(e) => {
               const next = e.target.value
@@ -134,7 +223,16 @@ export function SettingsPage() {
         </div>
         <div className="field">
           <label htmlFor="bio">О себе</label>
-          <textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} />
+          <textarea
+            {...bioFieldProps}
+            id="bio"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            maxLength={BIO_MAX}
+          />
+          <p className="dim settings-panel-hint">
+            {bio.length}/{BIO_MAX}
+          </p>
         </div>
 
         <section className="stack">
@@ -178,6 +276,7 @@ export function SettingsPage() {
           hint="Можно состоять сразу в нескольких клубах"
           afterStrip={
             <input
+              {...searchFieldProps}
               className="search-input"
               placeholder="Поиск клуба в городе"
               value={gymQuery}
@@ -192,6 +291,9 @@ export function SettingsPage() {
               key={gym.id}
               gym={gym}
               selected={gymIds.includes(gym.id)}
+              showDemoStats={demoStats}
+              membersCount={liveStats[gym.id]?.membersCount}
+              activeNow={liveStats[gym.id]?.activeNow}
               onSelect={() => toggleGym(gym.id)}
             />
           ))}
@@ -266,9 +368,6 @@ export function SettingsPage() {
           onClick={() => {
             setIsCoach((v) => {
               if (v) setCoachSports([])
-              else if (!coachSports.length && sports.length) {
-                setCoachSports(sports.slice(0, 2))
-              }
               return !v
             })
           }}
@@ -282,17 +381,17 @@ export function SettingsPage() {
 
         {isCoach ? (
           <div>
-            <p className="field-label">Тренирую</p>
+            <p className="field-label">Чему тренирую</p>
+            <p className="muted" style={{ marginBottom: 8 }}>
+              Групповые, персональные и другие направления
+            </p>
             <div className="chip-grid">
-              {(sports.length ? sports : SPORTS).map((s) => (
+              {COACH_DIRECTIONS.map((s) => (
                 <button
                   key={s}
                   type="button"
                   className={`chip ${coachSports.includes(s) ? 'coach' : ''}`}
-                  onClick={() => {
-                    if (!sports.includes(s)) setSports((prev) => [...prev, s])
-                    toggle(coachSports, s, setCoachSports)
-                  }}
+                  onClick={() => toggle(coachSports, s, setCoachSports)}
                 >
                   {s}
                 </button>
@@ -317,32 +416,111 @@ export function SettingsPage() {
           </div>
         </div>
 
+        <section className="settings-panel">
+          <div className="settings-panel-head">
+            <h2>Расписание</h2>
+            <p className="muted">Для каждого дня — своё время</p>
+          </div>
+          <ScheduleEditor value={visitSlots} onChange={setVisitSlots} idPrefix="settings" />
+        </section>
+
+        <section className="settings-panel">
+          <button
+            type="button"
+            className="toggle-row settings-break-toggle"
+            onClick={() => {
+              setBreakOn((v) => {
+                if (v) {
+                  setBreakUntil('')
+                  return false
+                }
+                if (!breakUntil) {
+                  const d = new Date()
+                  d.setDate(d.getDate() + 7)
+                  setBreakUntil(d.toISOString().slice(0, 10))
+                }
+                return true
+              })
+            }}
+          >
+            <div>
+              <strong>Перерыв / отпуск</strong>
+              <p className="muted">В профиле будет видно, что ты не ходишь в зал</p>
+            </div>
+            <span className={`toggle ${breakOn ? 'on' : ''}`} />
+          </button>
+          {breakOn ? (
+            <div className="settings-break-fields">
+              <div className="field">
+                <label htmlFor="breakUntil">До какой даты</label>
+                <div className="settings-date-wrap">
+                  <input
+                    id="breakUntil"
+                    type="date"
+                    min={todayISO()}
+                    value={breakUntil}
+                    onChange={(e) => setBreakUntil(e.target.value)}
+                    required={breakOn}
+                  />
+                </div>
+              </div>
+              <p className="dim settings-panel-hint">
+                Статус снимется сам после этой даты — или выключи переключатель, когда вернёшься.
+              </p>
+            </div>
+          ) : null}
+        </section>
+
         <button type="submit" className="btn btn-primary btn-block" disabled={!gymIds.length}>
           Сохранить
         </button>
       </form>
 
-      <Link to="/app/feedback" className="btn btn-ghost btn-block">
-        Обратная связь
-      </Link>
-      <Link to="/app/notifications" className="btn btn-ghost btn-block">
-        Уведомления
-      </Link>
+      <div className="settings-links">
+        {user ? (
+          <InviteFriendsButton userId={user.id} className="btn btn-ghost btn-block">
+            <Share2 size={16} /> Пригласить друзей
+          </InviteFriendsButton>
+        ) : null}
+        <Link to="/app/feedback" className="btn btn-ghost btn-block">
+          Обратная связь
+        </Link>
+        <Link to="/app/notifications" className="btn btn-ghost btn-block">
+          Уведомления
+        </Link>
+      </div>
 
       <section className="safety surface">
         <h2>Безопасность</h2>
         <ul>
           <li>Встречайтесь в публичных зонах зала</li>
           <li>Не передавайте личные данные в первых сообщениях</li>
-          <li>Блокировка и жалоба доступны в полной версии продукта</li>
+          <li>
+            Заблокировать или пожаловаться можно в профиле человека — кнопки внизу карточки
+          </li>
         </ul>
+        {blockedUserIds.length ? (
+          <div className="blocked-list">
+            <p className="field-label">Чёрный список · {blockedUserIds.length}</p>
+            {blockedPeople.map((person) => (
+              <div key={person.id} className="blocked-row">
+                <span>{person.name}</span>
+                <button type="button" className="text-btn" onClick={() => void unblockUser(person.id)}>
+                  Разблокировать
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="dim blocked-empty">Пока никого не блокировал</p>
+        )}
       </section>
 
       <button
         type="button"
         className="btn btn-danger btn-block"
         onClick={() => {
-          logout()
+          void logout()
           navigate('/')
         }}
       >

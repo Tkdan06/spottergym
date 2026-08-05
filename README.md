@@ -11,21 +11,34 @@ npm install
 npm run dev
 ```
 
-Открой локальный URL Vite. Демо-вход: любой email/пароль на экране «Вход».
+Открой локальный URL Vite.
+
+### Postgres API (рекомендуется)
+
+```bash
+docker compose up -d postgres
+cd api && npm install && npm run db:setup && npm run dev
+```
+
+В другом терминале: `npm run dev` (Vite проксирует `/api` → `:3001`).
+
+Главный админ: зарегистрируй аккаунт с email из `MASTER_ADMIN_EMAIL` (по умолчанию **tkdan@ya.ru**). В production без API вход закрыт (fail closed). В dev без Docker — fallback на `localStorage`.
+
+Подробнее: [api/README.md](api/README.md) · друзья на VPS: [DEPLOY.md](DEPLOY.md).
 
 ## Что уже есть
 
 - Регистрация / вход / онбординг (город → зал → профиль → расписание → приватность)
-- «Этаж зала»: кто в твоём клубе, кто сейчас на тренировке
+- Вкладка «Зал»: кто в твоём клубе, кто сейчас на тренировке
 - Каталог залов города и участники любого зала
 - Профили: намерение (знакомства / партнёр / оба), интересы, слоты посещения
 - Анонимный режим и статус «открыт к общению»
 - Чаты с моделью request → accept
-- Локальное сохранение сессии и переписки в `localStorage`
+- Сервер: Postgres + Hono (auth Argon2/JWT, профили, залы, check-in); чаты/лайки пока в `localStorage`
 
 ## Стек
 
-React + TypeScript + Vite + React Router + Lucide
+React + TypeScript + Vite + React Router + Lucide · API: Hono + Prisma + PostgreSQL
 
 ## Домен
 
@@ -58,9 +71,12 @@ React + TypeScript + Vite + React Router + Lucide
 - Repo **Secrets:** `SITE_LOCK_PASSWORD`
 - `VITE_SITE_LOCK_ENABLED=false` принудительно открывает сайт даже если JSON говорит `true`
 
-Это soft-gate для друзей (пароль в бандле SPA). Не путать с регистрацией пользователей внутри Spotter.
+Это soft-gate (пароль в бандле SPA). Для друзей на сервере нужен ещё **nginx Basic Auth** — см. [DEPLOY.md](DEPLOY.md). Не путать с регистрацией пользователей внутри Spotter.
 
 ## Деплой
+
+**Friends beta (общий зал / профили):** VPS + Docker API + nginx — пошагово в [DEPLOY.md](DEPLOY.md).  
+GitHub Pages ниже — только статический фронт без общей БД.
 
 ### 1) GitHub
 
@@ -90,9 +106,12 @@ React + TypeScript + Vite + React Router + Lucide
 
 Импорт репозитория на [vercel.com](https://vercel.com) → Custom Domain `spottergym.ru`. Уже лежит `vercel.json` для React Router.
 
-### 4) Свой VPS (Nginx)
+### 4) Свой VPS (Nginx + API)
+
+См. полный чеклист: [DEPLOY.md](DEPLOY.md). Кратко:
 
 ```bash
+docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
 npm ci && npm run build
-# залей папку dist на сервер, пример конфига: deploy/nginx.conf
+# dist → /var/www/spottergym/dist, nginx: deploy/nginx.conf
 ```

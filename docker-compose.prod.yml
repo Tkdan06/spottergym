@@ -1,0 +1,43 @@
+# Production stack (Postgres + API). Frontend is built separately and served by nginx.
+#   cp .env.prod.example .env.prod   # fill secrets
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+#
+# Postgres is NOT published to the host. API listens on 127.0.0.1:3001 for nginx.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-spotter}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.prod}
+      POSTGRES_DB: ${POSTGRES_DB:-spotter}
+    volumes:
+      - spotter_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-spotter}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-spotter}?schema=public
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET (min 32 chars) in .env.prod}
+      PORT: '3001'
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://spottergym.ru,https://www.spottergym.ru}
+      MASTER_ADMIN_EMAIL: ${MASTER_ADMIN_EMAIL:?Set MASTER_ADMIN_EMAIL}
+      SEED_ADMIN_EMAILS: ${SEED_ADMIN_EMAILS:-}
+    ports:
+      - '127.0.0.1:3001:3001'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  spotter_pg:

@@ -1,9 +1,14 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { CityCarousel } from '../components/CityCarousel'
 import { GymCard } from '../components/GymCard'
+import { ScheduleEditor, sortVisitSlots } from '../components/ScheduleEditor'
 import { useApp } from '../context/useApp'
-import { EXPERIENCE_LEVELS, GYMS, INTERESTS, SPORTS, WEEKDAYS } from '../data/mock'
+import { COACH_DIRECTIONS, EXPERIENCE_LEVELS, GYMS, INTERESTS, SPORTS } from '../data/mock'
+import { isDemoAccount } from '../lib/demoAccount'
+import { buildRealGymStatsMap } from '../lib/gymStats'
+import { BIO_MAX, BIO_MIN } from '../lib/fieldLimits'
+import { ageFieldProps, bioFieldProps, searchFieldProps } from '../lib/inputAttrs'
 import type { ExperienceLevel, Intent, PrivacyMode, VisitSlot } from '../types'
 import './OnboardingPage.css'
 
@@ -27,9 +32,17 @@ export function OnboardingPage() {
   const [coachSports, setCoachSports] = useState<string[]>(user?.coachSports || [])
   const [lookingToMeet, setLookingToMeet] = useState(user?.lookingToMeet ?? true)
   const [privacy, setPrivacy] = useState<PrivacyMode>(user?.privacy || 'open')
-  const [selectedDays, setSelectedDays] = useState<string[]>(['Пн', 'Ср', 'Пт'])
-  const [from, setFrom] = useState('19:00')
-  const [to, setTo] = useState('21:00')
+  const [visitSlots, setVisitSlots] = useState<VisitSlot[]>(() =>
+    sortVisitSlots(
+      user?.visitSlots?.length
+        ? user.visitSlots
+        : [
+            { day: 'Пн', from: '19:00', to: '21:00' },
+            { day: 'Ср', from: '19:00', to: '21:00' },
+            { day: 'Пт', from: '19:00', to: '21:00' },
+          ],
+    ),
+  )
   const [gymQuery, setGymQuery] = useState('')
 
   const cityGyms = useMemo(() => {
@@ -41,39 +54,55 @@ export function OnboardingPage() {
     }).sort((a, b) => a.name.localeCompare(b.name, 'ru'))
   }, [city, gymQuery])
 
+  const demoStats = isDemoAccount(user?.email)
+  const liveStats = useMemo(() => {
+    if (!user || demoStats) return {}
+    return buildRealGymStatsMap(
+      cityGyms.map((g) => g.id),
+      { ...user, gymIds },
+    )
+  }, [user, demoStats, cityGyms, gymIds])
+
+  useEffect(() => {
+    if (user?.onboardingDone) {
+      navigate('/app', { replace: true })
+    }
+  }, [user?.onboardingDone, navigate])
+
   if (!user) return <Navigate to="/register" replace />
-  if (user.onboardingDone) return <Navigate to="/app" replace />
+  if (user.onboardingDone) return null
 
   const toggle = (list: string[], value: string, setter: (v: string[]) => void) => {
     setter(list.includes(value) ? list.filter((i) => i !== value) : [...list, value])
   }
 
   const toggleSport = (value: string) => {
-    setSports((prev) => {
-      const next = prev.includes(value) ? prev.filter((i) => i !== value) : [...prev, value]
-      setCoachSports((cs) => cs.filter((s) => next.includes(s)))
-      return next
-    })
+    setSports((prev) =>
+      prev.includes(value) ? prev.filter((i) => i !== value) : [...prev, value],
+    )
   }
+
+  const bioOk = bio.trim().length >= BIO_MIN
+  const ageOk = (() => {
+    const parsedAge = typeof age === 'number' ? age : Number(age)
+    return Number.isFinite(parsedAge) && parsedAge >= 18 && parsedAge <= 80
+  })()
 
   const canNext = () => {
     if (step === 0) return Boolean(city)
     if (step === 1) return gymIds.length > 0
     if (step === 2) {
-      const parsedAge = typeof age === 'number' ? age : Number(age)
-      if (!Number.isFinite(parsedAge) || parsedAge < 18 || parsedAge > 80) return false
-      if (bio.trim().length < 10 || sports.length === 0) return false
+      if (!ageOk || !bioOk || sports.length === 0) return false
       if (isCoach && coachSports.length === 0) return false
       return true
     }
-    if (step === 3) return selectedDays.length > 0
+    if (step === 3) return visitSlots.length > 0
     return true
   }
 
   const finish = () => {
     const parsedAge = typeof age === 'number' ? age : Number(age)
     if (!Number.isFinite(parsedAge) || parsedAge < 18 || parsedAge > 80) return
-    const visitSlots: VisitSlot[] = selectedDays.map((day) => ({ day, from, to }))
     completeOnboarding({
       city,
       gymIds,
@@ -88,11 +117,11 @@ export function OnboardingPage() {
       coachSports: isCoach ? coachSports : [],
       lookingToMeet,
       privacy,
-      visitSlots,
+      visitSlots: sortVisitSlots(visitSlots),
       // Пока нет своего фото — гендерный плейсхолдер из avatar
       photos: [],
     })
-    navigate('/app')
+    // переход на /app — в useEffect после onboardingDone (см. выше)
   }
 
   return (
@@ -110,6 +139,7 @@ export function OnboardingPage() {
           {step !== 0 ? <h1>{steps[step]}</h1> : null}
         </div>
 
+        <div className={`onboarding-body ${step === 1 ? 'gym-step' : ''}`}>
         {step === 0 && (
           <CityCarousel
             value={city}
@@ -123,11 +153,12 @@ export function OnboardingPage() {
         )}
 
         {step === 1 && (
-          <section className="stack">
+          <section className="stack onboarding-gym-step">
             <p className="muted">
               Выбери один или несколько клубов · выбрано {gymIds.length}
             </p>
             <input
+              {...searchFieldProps}
               className="search-input"
               placeholder="Начни вводить название или адрес"
               value={gymQuery}
@@ -140,11 +171,17 @@ export function OnboardingPage() {
                     key={gym.id}
                     gym={gym}
                     selected={gymIds.includes(gym.id)}
+                    showDemoStats={demoStats}
+                    membersCount={liveStats[gym.id]?.membersCount}
+                    activeNow={liveStats[gym.id]?.activeNow}
                     onSelect={() => toggle(gymIds, gym.id, setGymIds)}
                   />
                 ))
               ) : (
-                <div className="empty-state">В этом городе пока нет залов в демо.</div>
+                <div className="empty-copy" role="status">
+                  <p className="empty-copy-title">Пока нет залов</p>
+                  <p className="empty-copy-lead">Выбери другой город</p>
+                </div>
               )}
             </div>
           </section>
@@ -155,11 +192,8 @@ export function OnboardingPage() {
             <div className="field">
               <label htmlFor="age">Возраст</label>
               <input
+                {...ageFieldProps}
                 id="age"
-                type="number"
-                min={18}
-                max={80}
-                inputMode="numeric"
                 value={age}
                 onChange={(e) => {
                   const next = e.target.value
@@ -171,11 +205,20 @@ export function OnboardingPage() {
             <div className="field">
               <label htmlFor="bio">О себе</label>
               <textarea
+                {...bioFieldProps}
                 id="bio"
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Цели, стиль тренировок, что ищешь в зале"
+                maxLength={BIO_MAX}
               />
+              <p className="dim onboarding-field-hint">
+                {!bioOk
+                  ? `Минимум ${BIO_MIN} символов${
+                      bio.trim().length ? ` · ещё ${BIO_MIN - bio.trim().length}` : ''
+                    }`
+                  : `${bio.length}/${BIO_MAX}`}
+              </p>
             </div>
             <div>
               <p className="field-label">Что ищешь</p>
@@ -250,27 +293,25 @@ export function OnboardingPage() {
             </button>
             {isCoach ? (
               <div>
-                <p className="field-label">Тренирую</p>
+                <p className="field-label">Чему тренирую</p>
                 <p className="muted" style={{ marginBottom: 8 }}>
-                  Выбери направления из своих активностей — они будут видны на карточке.
+                  Групповые, персональные и другие направления — выбери хотя бы одно.
                 </p>
                 <div className="chip-grid">
-                  {(sports.length ? sports : SPORTS).map((s) => (
+                  {COACH_DIRECTIONS.map((s) => (
                     <button
                       key={s}
                       type="button"
                       className={`chip ${coachSports.includes(s) ? 'coach' : ''}`}
-                      onClick={() => {
-                        if (!sports.includes(s)) {
-                          setSports((prev) => [...prev, s])
-                        }
-                        toggle(coachSports, s, setCoachSports)
-                      }}
+                      onClick={() => toggle(coachSports, s, setCoachSports)}
                     >
                       {s}
                     </button>
                   ))}
                 </div>
+                {isCoach && !coachSports.length ? (
+                  <p className="dim onboarding-field-hint">Выбери направление — иначе «Дальше» неактивна</p>
+                ) : null}
               </div>
             ) : null}
             <div>
@@ -293,29 +334,8 @@ export function OnboardingPage() {
 
         {step === 3 && (
           <section className="stack">
-            <p className="muted">Когда обычно бываешь в зале — так проще пересечься.</p>
-            <div className="chip-grid">
-              {WEEKDAYS.map((day) => (
-                <button
-                  key={day}
-                  type="button"
-                  className={`chip ${selectedDays.includes(day) ? 'active' : ''}`}
-                  onClick={() => toggle(selectedDays, day, setSelectedDays)}
-                >
-                  {day}
-                </button>
-              ))}
-            </div>
-            <div className="time-row">
-              <div className="field">
-                <label htmlFor="from">С</label>
-                <input id="from" type="time" value={from} onChange={(e) => setFrom(e.target.value)} />
-              </div>
-              <div className="field">
-                <label htmlFor="to">До</label>
-                <input id="to" type="time" value={to} onChange={(e) => setTo(e.target.value)} />
-              </div>
-            </div>
+            <p className="muted">Когда обычно в зале — для каждого дня можно своё время.</p>
+            <ScheduleEditor value={visitSlots} onChange={setVisitSlots} idPrefix="onboard" />
           </section>
         )}
 
@@ -350,6 +370,7 @@ export function OnboardingPage() {
             </button>
           </section>
         )}
+        </div>
 
         <div className="onboarding-actions">
           {step > 0 ? (

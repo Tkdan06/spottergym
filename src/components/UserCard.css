@@ -105,6 +105,12 @@
   border-color: var(--line);
 }
 
+.presence-pill.break {
+  color: #ffb84d;
+  background: rgba(255, 184, 77, 0.1);
+  border-color: rgba(255, 184, 77, 0.28);
+}
+
 .presence-pill .online-dot {
   width: 7px;
   height: 7px;
@@ -136,6 +142,9 @@
 }
 
 .user-card-head h3 {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
   margin: 0;
   padding: 0;
   font-size: 1.05rem;
@@ -143,9 +152,15 @@
   font-weight: 700;
   line-height: 1.15;
   min-width: 0;
-  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.user-card-name {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .rank-badge {
@@ -162,8 +177,10 @@
 }
 
 .user-card-body .age {
+  flex-shrink: 0;
   color: var(--text-muted);
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .user-card-body .intent {
@@ -181,6 +198,7 @@
 }
 
 .user-card-body .rank-num {
+  flex-shrink: 0;
   color: var(--accent);
   margin-right: 6px;
   font-weight: 700;

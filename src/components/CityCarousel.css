@@ -7,6 +7,19 @@
   overflow: hidden;
 }
 
+.city-picker--compact {
+  gap: 0;
+}
+
+.city-picker--compact .city-chip {
+  min-height: 36px;
+  padding: 0 12px;
+}
+
+.city-picker--compact .city-chip-more {
+  gap: 4px;
+}
+
 .city-picker .icon-btn {
   width: 42px;
   height: 42px;

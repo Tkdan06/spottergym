@@ -1,13 +1,22 @@
 import { type FormEvent, useEffect, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useApp } from '../context/useApp'
+import {
+  EMAIL_MAX,
+  NAME_MAX,
+  NAME_MIN,
+  PASSWORD_MAX,
+  PASSWORD_MIN,
+} from '../lib/fieldLimits'
+import { displayNameFieldProps } from '../lib/inputAttrs'
+import { persistInviteFrom } from '../lib/inviteShare'
 import { consumeTermsAcceptedFlag } from '../lib/termsAcceptance'
 import type { Gender } from '../types'
 import './AuthPages.css'
 
 const GENDERS: { value: Gender; label: string }[] = [
-  { value: 'female', label: 'Женский' },
   { value: 'male', label: 'Мужской' },
+  { value: 'female', label: 'Женский' },
 ]
 
 type RegisterLocationState = {
@@ -18,6 +27,7 @@ export function RegisterPage() {
   const { register } = useApp()
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -27,21 +37,25 @@ export function RegisterPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
+    persistInviteFrom(searchParams.get('invite'))
+  }, [searchParams])
+
+  useEffect(() => {
     const state = location.state as RegisterLocationState | null
     if (state?.termsAccepted || consumeTermsAcceptedFlag()) {
       setTermsOk(true)
-      navigate(location.pathname, { replace: true, state: null })
+      navigate(location.pathname + location.search, { replace: true, state: null })
     }
-  }, [location.pathname, location.state, navigate])
+  }, [location.pathname, location.search, location.state, navigate])
 
   const canSubmit = Boolean(ageOk && termsOk && gender)
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
     if (!canSubmit || !gender) return
     setError('')
     try {
-      register(name.trim(), email, password, gender)
+      await register(name.trim(), email, password, gender)
       navigate('/onboarding')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось зарегистрироваться')
@@ -55,18 +69,23 @@ export function RegisterPage() {
           SPOT<span>TER</span>
         </Link>
         <h1>Регистрация</h1>
-        <p className="muted">Создай аккаунт и привяжи свой зал за пару минут.</p>
+        <p className="muted">Создай аккаунт и привяжи свой зал за пару минут</p>
 
         <form className="auth-form" onSubmit={onSubmit}>
           <div className="field">
-            <label htmlFor="name">Имя</label>
+            <label htmlFor="name" className="sr-only">
+              Имя
+            </label>
             <input
+              {...displayNameFieldProps}
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              minLength={2}
-              placeholder="Как к тебе обращаться"
+              minLength={NAME_MIN}
+              maxLength={NAME_MAX}
+              placeholder="Имя"
+              aria-label="Имя"
             />
           </div>
           <div className="field">
@@ -85,33 +104,47 @@ export function RegisterPage() {
                 </button>
               ))}
             </div>
-            <p className="auth-hint">Нужен для аватарки, если пока нет своего фото.</p>
           </div>
           <div className="field">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email" className="sr-only">
+              Email
+            </label>
             <input
               id="email"
+              name="email"
               type="email"
+              autoComplete="email"
+              inputMode="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              maxLength={EMAIL_MAX}
+              placeholder="Email"
+              aria-label="Email"
             />
           </div>
           <div className="field">
-            <label htmlFor="password">Пароль</label>
+            <label htmlFor="password" className="sr-only">
+              Пароль
+            </label>
             <input
               id="password"
+              name="password"
               type="password"
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={4}
+              minLength={PASSWORD_MIN}
+              maxLength={PASSWORD_MAX}
+              placeholder="Пароль"
+              aria-label="Пароль"
             />
           </div>
 
           <label className="age-check">
             <input type="checkbox" checked={ageOk} onChange={(e) => setAgeOk(e.target.checked)} />
-            <span>Мне есть 18 лет. Я понимаю правила безопасного общения.</span>
+            <span>Мне есть 18 лет. Я понимаю правила безопасного общения</span>
           </label>
 
           <label className="age-check terms-check">

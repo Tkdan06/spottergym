@@ -1,5 +1,7 @@
 import { useContext } from 'react'
 import { AppContext } from './AppContext'
+import { getUser } from '../data/mock'
+import { otherParticipantId } from '../lib/conversations'
 import type { Conversation } from '../types'
 
 export function useApp() {
@@ -10,6 +12,7 @@ export function useApp() {
 
 export function useOtherParticipant(conversation: Conversation) {
   const { user, directory } = useApp()
-  const otherId = conversation.participantIds.find((id) => id !== user?.id) ?? ''
-  return directory.find((u) => u.id === otherId)
+  const otherId = otherParticipantId(conversation, user?.id)
+  if (!otherId) return undefined
+  return directory.find((u) => u.id === otherId) ?? getUser(otherId)
 }

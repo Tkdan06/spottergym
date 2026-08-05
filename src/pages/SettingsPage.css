@@ -12,6 +12,8 @@
   display: grid;
   gap: 16px;
   margin: 18px 0;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .field-label {
@@ -19,6 +21,121 @@
   color: var(--text-muted);
   margin-bottom: 8px;
   font-weight: 500;
+}
+
+.settings-panel {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.settings-panel-head h2 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.settings-panel-head .muted {
+  margin: 0;
+  font-size: 0.86rem;
+}
+
+.settings-panel-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.time-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.settings-break-toggle {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.settings-break-fields {
+  display: grid;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.settings-break-fields .field {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* Chrome date: intrinsic min-width ломает блок — клип на обёртке */
+.settings-date-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  box-sizing: border-box;
+}
+
+.settings-date-wrap:focus-within {
+  border-color: rgba(200, 245, 66, 0.55);
+  box-shadow: 0 0 0 3px rgba(200, 245, 66, 0.12);
+}
+
+.settings-break-fields .settings-date-wrap input[type='date'] {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0 !important;
+  min-height: 48px;
+  margin: 0;
+  padding: 12px 12px 12px 14px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-sizing: border-box;
+  color-scheme: dark;
+  outline: none;
+  box-shadow: none;
+}
+
+.settings-break-fields .settings-date-wrap input[type='date']::-webkit-datetime-edit {
+  min-width: 0;
+  max-width: calc(100% - 28px);
+  overflow: hidden;
+}
+
+.settings-break-fields .settings-date-wrap input[type='date']::-webkit-calendar-picker-indicator {
+  width: 16px;
+  height: 16px;
+  margin: 0 0 0 4px;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.75;
+  filter: invert(1) brightness(1.1);
+  flex-shrink: 0;
+}
+
+.settings-links {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 16px;
 }
 
 .safety {
@@ -38,4 +155,38 @@
   display: grid;
   gap: 6px;
   font-size: 0.9rem;
+}
+
+.blocked-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.blocked-empty {
+  margin: 12px 0 0;
+  font-size: 0.85rem;
+}
+
+.blocked-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 40px;
+  font-size: 0.92rem;
+  font-weight: 650;
+}
+
+.blocked-row .text-btn {
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0;
+  cursor: pointer;
 }

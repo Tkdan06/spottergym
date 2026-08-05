@@ -26,6 +26,8 @@ export interface Gym {
 
 export interface UserProfile {
   id: string
+  /** Public findable handle without @ */
+  username?: string
   name: string
   age: number
   gender: Gender
@@ -34,7 +36,7 @@ export interface UserProfile {
   avatar: string
   /** Все клубы, к которым привязан пользователь */
   gymIds: string[]
-  /** Зал по умолчанию на «Этаже» */
+  /** Зал по умолчанию на главной вкладке «Зал» */
   homeGymId: string
   city: string
   intent: Intent
@@ -47,12 +49,19 @@ export interface UserProfile {
   /** Направления, в которых тренирует (из sports / каталога) */
   coachSports: string[]
   visitSlots: VisitSlot[]
+  /**
+   * Перерыв / отпуск: YYYY-MM-DD — до этой даты (включительно) не в зале.
+   * Пусто / null — обычный режим.
+   */
+  breakUntil?: string | null
   privacy: PrivacyMode
   lookingToMeet: boolean
   /** Сейчас в каком-то зале */
   isActive: boolean
   /** В каком зале сейчас (пусто, если не отметился) */
   checkedInGymId: string
+  /** Когда отметился в текущем зале (ISO); пусто если не в зале */
+  checkedInAt?: string
   lastSeenAt: string
   verified?: boolean
 }
@@ -80,12 +89,34 @@ export interface Conversation {
   requestStatus: 'accepted' | 'pending' | 'incoming'
 }
 
+/** Гранулярные права админа (главный админ всегда имеет все) */
+export type AdminPermissionKey =
+  | 'tickets'
+  | 'messageUsers'
+  | 'viewUsers'
+  | 'blockUsers'
+  | 'removeUsers'
+  | 'manageAdmins'
+
+export interface AdminPermissions {
+  tickets: boolean
+  messageUsers: boolean
+  viewUsers: boolean
+  blockUsers: boolean
+  removeUsers: boolean
+  manageAdmins: boolean
+}
+
 export interface AppUser extends UserProfile {
   email: string
   onboardingDone: boolean
+  /** ISO — когда аккаунт создан (регистрация) */
+  registeredAt: string
   isAdmin: boolean
   isMasterAdmin: boolean
+  /** @deprecated используй adminPermissions.manageAdmins */
   canGrantAdmin: boolean
+  adminPermissions: AdminPermissions
 }
 
 export type FeedbackCategoryId =
@@ -127,7 +158,28 @@ export interface AdminDirectoryUser {
   email: string
   isAdmin: boolean
   isMasterAdmin: boolean
+  /** @deprecated → adminPermissions.manageAdmins */
   canGrantAdmin: boolean
+  adminPermissions?: AdminPermissions
+  /** Снимок профиля для админки (обновляется при логине/сохранении) */
+  age?: number
+  gender?: Gender
+  city?: string
+  homeGymId?: string
+  gymIds?: string[]
+  intent?: Intent
+  experienceLevel?: ExperienceLevel
+  isCoach?: boolean
+  onboardingDone?: boolean
+  isActive?: boolean
+  checkedInGymId?: string
+  photosCount?: number
+  /** Примерный размер фото в байтах (data URL) */
+  photosBytes?: number
+  registeredAt?: string
+  lastSeenAt?: string
+  /** Сид из mock — не «живой» зарегистрированный пользователь */
+  isDemoSeed?: boolean
 }
 
 export type NotificationType =

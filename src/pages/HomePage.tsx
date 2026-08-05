@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Bell, ChevronRight } from 'lucide-react'
+import { Bell, ChevronRight, MapPin } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { CheckInControl } from '../components/CheckInControl'
 import {
@@ -10,12 +10,14 @@ import {
   type IntentFilter,
   type LevelFilter,
 } from '../components/FloorFilters'
+import { InviteFriendsButton } from '../components/InviteFriendsButton'
 import { UserCard } from '../components/UserCard'
 import { useApp } from '../context/useApp'
-import { getGym, getUserGyms, peopleInGym } from '../data/mock'
+import { getGym, getUserGyms } from '../data/mock'
 import { getHallRank, sortByLikes } from '../lib/likes'
-import { getCheckedInGymId } from '../lib/presence'
-import type { Gym } from '../types'
+import { useCheckInElapsed } from '../hooks/useCheckInElapsed'
+import { useGymPeople } from '../hooks/useGymPeople'
+import { getCheckInStartedAt, getCheckedInGymId } from '../lib/presence'
 import './HomePage.css'
 
 function shortGymName(name: string) {
@@ -23,11 +25,15 @@ function shortGymName(name: string) {
     .replace(/^DDX\s+/i, '')
     .replace(/^Spirit\.?\s*Fitness\s*/i, '')
     .replace(/^World Class\s+/i, '')
+    .replace(/^Encore\s+/i, '')
+    .replace(/^Crocus Fitness\s+/i, '')
+    .replace(/^XFIT\s+/i, '')
+    .replace(/^Alex Fitness\s+/i, '')
     .trim()
 }
 
 export function HomePage() {
-  const { user, likes, setHomeGym, unreadNotifications } = useApp()
+  const { user, likes, setHomeGym, unreadNotifications, blockedUserIds, apiOnline } = useApp()
   const [filter, setFilter] = useState<IntentFilter>('all')
   const [genderFilter, setGenderFilter] = useState<GenderFilter>('all')
   const [ageFilter, setAgeFilter] = useState<AgeFilter>('all')
@@ -37,10 +43,18 @@ export function HomePage() {
   const floorGymId = user?.homeGymId || user?.gymIds[0] || ''
   const gym = floorGymId ? getGym(floorGymId) : undefined
   const checkedInId = user ? getCheckedInGymId(user) : ''
+  const hasGym = Boolean(gym)
+
+  const { people: floorPeople } = useGymPeople({
+    gymId: floorGymId,
+    user,
+    apiOnline,
+    mode: 'floor',
+    blockedUserIds,
+  })
 
   const people = useMemo(() => {
-    if (!floorGymId) return []
-    let list = peopleInGym(floorGymId, user)
+    let list = floorPeople
     if (filter === 'active') list = list.filter((p) => p.isActive)
     if (filter === 'dating') list = list.filter((p) => p.intent === 'dating' || p.intent === 'both')
     if (filter === 'buddy') list = list.filter((p) => p.intent === 'buddy' || p.intent === 'both')
@@ -49,160 +63,149 @@ export function HomePage() {
     if (ageFilter !== 'all') list = list.filter((p) => matchesAge(p.age, ageFilter))
     if (levelFilter !== 'all') list = list.filter((p) => p.experienceLevel === levelFilter)
     return sortByLikes(list, likes)
-  }, [floorGymId, filter, genderFilter, ageFilter, levelFilter, user, likes])
+  }, [floorPeople, filter, genderFilter, ageFilter, levelFilter, likes])
 
-  if (!user) return null
+  const youHere = Boolean(
+    user && hasGym && checkedInId === gym!.id && user.isActive,
+  )
+  const sessionStartedAt = youHere && user ? getCheckInStartedAt(user) : ''
+  const sessionElapsed = useCheckInElapsed(sessionStartedAt, youHere)
 
-  const activeNow = people.filter((p) => p.isActive).length
+  if (!user) {
+    return (
+      <main className="page home-page">
+        <p className="muted">Загружаем…</p>
+      </main>
+    )
+  }
+
+  const activeNow = floorPeople.filter((p) => p.isActive).length
+  const multi = myGyms.length > 1
+  const gymLabel = hasGym ? shortGymName(gym!.name) || gym!.name : ''
 
   return (
     <main className="page home-page">
-      <header className="home-header">
-        <div>
-          <p className="muted">
-            {myGyms.length > 1 ? `Твои залы · ${myGyms.length}` : 'Твой зал'}
-          </p>
-          <h1>{gym ? shortGymName(gym.name) || gym.name : 'Выбери зал'}</h1>
-          <p className="dim">
-            {gym
-              ? `${gym.network} · ${activeNow} сейчас на тренировке`
-              : 'Зайди в каталог и добавь клуб к своим'}
-          </p>
-        </div>
-        <div className="home-actions">
+      <header className="page-header home-top">
+        <h1 className="page-title">Мой зал</h1>
+        <div className="page-header-actions">
           <Link to="/app/notifications" className="icon-btn home-bell" aria-label="Уведомления">
             <Bell size={20} />
             {unreadNotifications > 0 ? <i className="nav-badge">{unreadNotifications}</i> : null}
           </Link>
-          <CheckInControl preferredGymId={floorGymId} compact />
         </div>
       </header>
 
-      {gym ? (
-        <FloorGymHero
-          gym={gym}
-          myGyms={myGyms}
-          floorGymId={floorGymId}
-          checkedInId={checkedInId}
-          onSelectGym={setHomeGym}
-          activeNow={activeNow}
-        />
-      ) : (
-        <Link to="/app/discover" className="home-banner home-banner-empty">
-          <div className="home-banner-content">
-            <span className="pill pill-accent">Floor live</span>
-            <p>Добавь зал — и здесь появится этаж с людьми рядом.</p>
+      {!hasGym ? (
+        <section className="home-empty-floor" aria-label="Нет выбранного зала">
+          <div className="home-empty-icon" aria-hidden>
+            <MapPin size={28} />
           </div>
-        </Link>
-      )}
-
-      <FloorFilters
-        intent={filter}
-        gender={genderFilter}
-        age={ageFilter}
-        level={levelFilter}
-        onIntentChange={setFilter}
-        onGenderChange={setGenderFilter}
-        onAgeChange={setAgeFilter}
-        onLevelChange={setLevelFilter}
-      />
-
-      <section>
-        <div className="section-title">
-          <h2>Люди в зале</h2>
-          <Link to="/app/discover" className="muted">
-            {myGyms.length ? 'Добавить зал' : 'Выбрать зал'}
+          <h2>Выбери свой клуб</h2>
+          <p className="muted">Добавь зал из каталога — здесь появятся люди</p>
+          <Link to="/app/discover" className="btn btn-primary btn-block">
+            Открыть каталог залов
           </Link>
-        </div>
-        <div className="card-list">
-          {people.length ? (
-            people.map((person) => (
-              <UserCard
-                key={person.id}
-                user={person}
-                rank={getHallRank(person.id, people, likes)}
-              />
-            ))
-          ) : (
-            <div className="empty-state">
-              {gym
-                ? 'Пока никого по этому фильтру. Загляни позже или смени фильтр.'
-                : 'Добавь зал из каталога — и здесь появятся люди.'}
+        </section>
+      ) : (
+        <>
+          <section className="home-gym-block surface" aria-label="Текущий зал">
+            <div className="home-gym-block-head">
+              <div className="home-gym-network-row">
+                <p className="home-gym-network">{gym!.network}</p>
+                <Link to={`/app/gym/${gym!.id}`} className="home-gym-link">
+                  О зале <ChevronRight size={15} />
+                </Link>
+              </div>
+              <h2 className="home-gym-title">{gymLabel}</h2>
+              <p className="home-status">
+                <span className="home-status-live">
+                  {activeNow > 0 ? `${activeNow} сейчас в зале` : 'Пока никого в зале'}
+                </span>
+                {youHere ? (
+                  <span className="home-status-you">
+                    {' '}
+                    · ты тут · уже {sessionElapsed || '0:00'}
+                  </span>
+                ) : null}
+              </p>
             </div>
-          )}
-        </div>
-      </section>
+
+            <div className="home-gym-checkin">
+              <CheckInControl preferredGymId={floorGymId} block />
+            </div>
+
+            {multi ? (
+              <div className="floor-gym-switch-wrap">
+                <div className="floor-gym-switch" role="listbox" aria-label="Твои залы">
+                  {myGyms.map((g) => {
+                    const active = g.id === floorGymId
+                    const here = Boolean(user.isActive && g.id === checkedInId)
+                    return (
+                      <button
+                        key={g.id}
+                        type="button"
+                        role="option"
+                        aria-selected={active}
+                        className={`floor-gym-chip ${active ? 'active' : ''} ${here ? 'here' : ''}`}
+                        onClick={() => setHomeGym(g.id)}
+                      >
+                        <span className="floor-gym-chip-name">{shortGymName(g.name) || g.name}</span>
+                        {here ? (
+                          <span className="floor-gym-chip-dot" aria-label="ты в этом зале" />
+                        ) : null}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            ) : null}
+          </section>
+
+          <section className="home-people" aria-label="Люди в зале">
+            <div className="section-title home-people-head">
+              <h2>Люди в зале</h2>
+              <span className="home-people-count">{people.length}</span>
+            </div>
+
+            <FloorFilters
+              intent={filter}
+              gender={genderFilter}
+              age={ageFilter}
+              level={levelFilter}
+              onIntentChange={setFilter}
+              onGenderChange={setGenderFilter}
+              onAgeChange={setAgeFilter}
+              onLevelChange={setLevelFilter}
+            />
+
+            <div className="card-list">
+              {people.length ? (
+                people.map((person) => (
+                  <UserCard
+                    key={person.id}
+                    user={person}
+                    rank={getHallRank(person.id, people, likes)}
+                  />
+                ))
+              ) : (
+                <div className="empty-copy-actions">
+                  <div className="empty-copy" role="status">
+                    <p className="empty-copy-title">Пока никого по этому фильтру</p>
+                    <p className="empty-copy-lead">Загляни позже или смени фильтр</p>
+                  </div>
+                  <InviteFriendsButton
+                    userId={user.id}
+                    gymName={gymLabel}
+                    className="btn btn-soft btn-block"
+                  >
+                    Поделиться ссылкой
+                  </InviteFriendsButton>
+                </div>
+              )}
+            </div>
+          </section>
+        </>
+      )}
     </main>
-  )
-}
-
-function FloorGymHero({
-  gym,
-  myGyms,
-  floorGymId,
-  checkedInId,
-  onSelectGym,
-  activeNow,
-}: {
-  gym: Gym
-  myGyms: Gym[]
-  floorGymId: string
-  checkedInId: string
-  onSelectGym: (gymId: string) => void
-  activeNow: number
-}) {
-  const multi = myGyms.length > 1
-
-  return (
-    <section
-      className={`floor-gym-hero ${multi ? 'multi' : ''}`}
-      style={{ backgroundImage: `url(${gym.image})` }}
-      aria-label={multi ? 'Выбор зала на этаже' : 'Текущий зал'}
-    >
-      <div className="floor-gym-hero-shade" />
-
-      <div className="floor-gym-hero-body">
-        <div className="floor-gym-hero-copy">
-          <span className="pill pill-accent">Floor live</span>
-          <p>Смотри, кто рядом прямо сейчас — и пиши без неловкого «привет у зеркала».</p>
-          <p className="floor-gym-hero-stats">
-            <span className="floor-gym-hero-live">{activeNow} в зале</span>
-            <span className="floor-gym-hero-place">
-              {' '}
-              · {shortGymName(gym.name) || gym.name}
-              {checkedInId === gym.id ? ' · ты тут' : ''}
-            </span>
-          </p>
-        </div>
-
-        <Link to={`/app/gym/${gym.id}`} className="floor-gym-hero-link">
-          О зале <ChevronRight size={16} />
-        </Link>
-      </div>
-
-      {multi ? (
-        <div className="floor-gym-picker" role="listbox" aria-label="Мои залы">
-          {myGyms.map((g) => {
-            const active = g.id === floorGymId
-            const here = g.id === checkedInId
-            return (
-              <button
-                key={g.id}
-                type="button"
-                role="option"
-                aria-selected={active}
-                className={`floor-gym-pick ${active ? 'active' : ''} ${here ? 'here' : ''}`}
-                onClick={() => onSelectGym(g.id)}
-                style={{ backgroundImage: `url(${g.image})` }}
-              >
-                <span className="floor-gym-pick-shade" />
-                <span className="floor-gym-pick-name">{shortGymName(g.name) || g.name}</span>
-                {here ? <span className="floor-gym-pick-here">тут</span> : null}
-              </button>
-            )
-          })}
-        </div>
-      ) : null}
-    </section>
   )
 }

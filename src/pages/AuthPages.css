@@ -16,8 +16,12 @@
 
 .auth-form {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   margin-top: 16px;
+}
+
+.auth-form .field {
+  gap: 0;
 }
 
 .auth-switch {

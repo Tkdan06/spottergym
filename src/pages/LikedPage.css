@@ -1,10 +1,38 @@
 .liked-page .liked-header {
-  margin-bottom: 16px;
+  align-items: flex-start;
+  min-height: 0;
 }
 
-.liked-page .liked-header h1 {
-  font-size: 1.8rem;
-  margin-bottom: 6px;
+.liked-page .liked-lead {
+  margin: 6px 0 0;
+}
+
+.liked-tabs {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--bg-soft);
+  max-width: 100%;
+}
+
+.liked-tab {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  padding: 8px 10px;
+  border-radius: 11px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.liked-tab.active {
+  background: var(--bg-elevated);
+  color: var(--text);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
 }
 
 .liked-count {
@@ -64,18 +92,25 @@
   min-width: 0;
 }
 
-.liked-body .row {
+/* Identity cluster: name, age, presence — proximity (Gestalt), not spread to edges */
+.liked-title-line {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
+  min-width: 0;
 }
 
-.liked-body strong {
+.liked-title-line strong {
+  flex: 0 1 auto;
+  min-width: 0;
   font-size: 1rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.liked-title-line .presence-badge {
+  flex-shrink: 0;
 }
 
 .liked-body .age {
@@ -130,21 +165,19 @@
   color: var(--danger);
 }
 
+.liked-action:not(.primary):not(.liked) {
+  color: #ff7a9a;
+}
+
 .liked-empty {
   display: grid;
   gap: 10px;
-  justify-items: start;
+  justify-items: center;
   padding: 22px 18px;
 }
 
-.liked-empty h2 {
-  margin: 0;
-  font-size: 1.15rem;
-}
-
-.liked-empty-icon {
-  color: var(--danger);
-  opacity: 0.85;
+.liked-empty .empty-copy {
+  padding: 12px 0 0;
 }
 
 .liked-empty .btn {

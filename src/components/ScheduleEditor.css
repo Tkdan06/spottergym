@@ -1,0 +1,211 @@
+.schedule-editor {
+  display: grid;
+  gap: 6px;
+}
+
+.schedule-editor.dense {
+  gap: 5px;
+}
+
+.schedule-day {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: stretch;
+  min-height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(232, 240, 234, 0.03);
+  overflow: hidden;
+}
+
+.schedule-day.on {
+  border-color: rgba(200, 245, 66, 0.3);
+  background: rgba(200, 245, 66, 0.05);
+}
+
+.schedule-day-btn {
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-right: 1px solid var(--line);
+  border-radius: 0;
+  background: rgba(232, 240, 234, 0.04);
+  color: var(--text-muted);
+  font: inherit;
+  font-weight: 750;
+  font-size: 0.82rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.schedule-day.on .schedule-day-btn {
+  border-right-color: rgba(200, 245, 66, 0.22);
+}
+
+.schedule-day-btn.active {
+  background: var(--accent);
+  color: #111;
+  border-right-color: transparent;
+}
+
+.schedule-day-times {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+  padding: 5px 10px;
+  box-sizing: border-box;
+}
+
+/* Видимая «плитка» — Chrome плохо рисует radius на native time */
+.schedule-time-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: calc(50% - 12px);
+  height: 30px;
+  margin: 0;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #0c1210;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.schedule-time-box:focus-within {
+  border-color: rgba(200, 245, 66, 0.55);
+}
+
+.schedule-time-box input[type='time'] {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-width: 0 !important;
+  max-width: 100%;
+  margin: 0;
+  /* Одинаковые поля слева/справа — иначе Chrome сдвигает 19:00 влево из‑за иконки */
+  padding: 0 22px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-align: center;
+  box-sizing: border-box;
+  color-scheme: dark;
+}
+
+.schedule-time-box input[type='time']::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  padding: 0;
+  transform: translateY(-50%);
+  cursor: pointer;
+  opacity: 0.8;
+  filter: invert(1) brightness(1.2);
+}
+
+.schedule-time-box input[type='time']::-webkit-datetime-edit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0;
+  text-align: center;
+}
+
+.schedule-time-box input[type='time']::-webkit-datetime-edit-fields-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+}
+
+.schedule-time-box input[type='time']::-webkit-datetime-edit-text {
+  padding: 0 1px;
+  line-height: 1;
+}
+
+.schedule-time-box input[type='time']::-webkit-datetime-edit-hour-field,
+.schedule-time-box input[type='time']::-webkit-datetime-edit-minute-field,
+.schedule-time-box input[type='time']::-webkit-datetime-edit-ampm-field {
+  padding: 0 1px;
+  line-height: 1;
+}
+
+.schedule-time-box input[type='time']:focus {
+  outline: none;
+}
+
+.schedule-day-sep {
+  flex: 0 0 10px;
+  width: 10px;
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  user-select: none;
+  pointer-events: none;
+}
+
+.schedule-day-empty {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 0.82rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.schedule-editor-hint {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.schedule-editor.dense .schedule-day {
+  min-height: 38px;
+  border-radius: 10px;
+}
+
+.schedule-editor.dense .schedule-day-times {
+  padding: 4px 10px;
+  gap: 8px;
+}
+
+.schedule-editor.dense .schedule-time-box {
+  height: 28px;
+}
+
+.schedule-editor.dense .schedule-time-box input[type='time'] {
+  font-size: 0.78rem;
+  padding: 0 20px;
+}

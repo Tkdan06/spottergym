@@ -1,44 +1,253 @@
-.messages-header {
+.messages-page {
+  max-width: 100%;
+  overflow-x: clip;
+  box-sizing: border-box;
+}
+
+.messages-page .messages-top {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.messages-find {
   margin-bottom: 16px;
+  min-width: 0;
+  max-width: 100%;
 }
 
-.messages-header h1 {
-  font-size: 1.8rem;
-  margin-bottom: 4px;
+.messages-presence-label {
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  max-width: 55%;
+  text-align: right;
 }
 
-.my-presence {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 14px;
-  margin-bottom: 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--line);
-  background: var(--bg-card);
+.messages-presence-label.on {
+  color: var(--online, #57f287);
 }
 
-.my-presence.on {
-  border-color: rgba(87, 242, 135, 0.35);
-  background: linear-gradient(135deg, rgba(87, 242, 135, 0.1), transparent 70%), var(--bg-card);
+.find-user-form {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  /* Keep typed text from expanding the page width */
+  contain: inline-size;
 }
 
-.my-presence strong {
+.find-user-icon {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.find-user-form input {
   display: block;
-  margin-bottom: 4px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 44px 0 40px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  /* 16px prevents iOS zoom-on-focus */
+  font-size: 16px;
+  line-height: 1.25;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  field-sizing: fixed;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: none;
+}
+
+.find-user-form input:focus,
+.find-user-form input:focus-visible {
+  outline: none;
+  border-color: rgba(200, 245, 66, 0.45);
+  box-shadow: none;
+}
+
+.find-user-go {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  line-height: 0;
+}
+
+.find-user-go svg {
+  display: block;
+}
+
+.find-user-go-dots {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.find-user-go:hover:not(:disabled) {
+  color: var(--accent);
+  background: rgba(200, 245, 66, 0.08);
+}
+
+.find-user-go:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.find-user-error {
+  margin: 6px 0 0;
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
+.find-user-result {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.find-user-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 6px 8px 6px 6px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg-card);
+  box-sizing: border-box;
+}
+
+.find-user-card-main {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.find-user-card-main:hover {
+  background: rgba(232, 240, 234, 0.04);
+}
+
+.find-user-card-body {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.find-user-card-body strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 0.95rem;
 }
 
-.my-presence p {
-  font-size: 0.8rem;
-  max-width: 36ch;
+.find-user-card-body .age {
+  color: var(--text-muted);
+  font-weight: 600;
 }
 
-.my-presence .presence-toggle {
+.find-user-card-body .dim {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.find-user-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   flex-shrink: 0;
-  min-height: 40px;
-  padding: 0 14px;
+}
+
+.find-user-like {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.find-user-like.on {
+  color: var(--accent);
+  background: rgba(200, 245, 66, 0.12);
+}
+
+.find-user-open {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.find-user-open:hover {
+  color: var(--accent);
 }
 
 .contact-meta {
@@ -52,7 +261,7 @@
 
 .conversation-row {
   display: grid;
-  grid-template-columns: 56px 1fr auto;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
   gap: 12px;
   align-items: center;
   padding: 12px;
@@ -60,20 +269,42 @@
   background: var(--bg-card);
   border: 1px solid var(--line);
   animation: slide-in 0.35s ease both;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .avatar-wrap {
   position: relative;
   width: 56px;
   height: 56px;
+  flex-shrink: 0;
 }
 
-.avatar-wrap img {
+.avatar-wrap.sm {
+  width: 40px;
+  height: 40px;
+}
+
+.avatar-wrap img,
+.avatar-wrap .avatar-fallback {
   width: 100%;
   height: 100%;
   object-fit: cover;
   border-radius: 16px;
   background: var(--bg-soft);
+}
+
+.avatar-wrap .avatar-fallback {
+  display: grid;
+  place-items: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.avatar-wrap.sm img {
+  border-radius: 12px;
 }
 
 .online-dot.abs {
@@ -85,6 +316,7 @@
 
 .conversation-body {
   min-width: 0;
+  overflow: hidden;
 }
 
 .conversation-body .gym-line {
@@ -108,6 +340,7 @@
 .conversation-body .time {
   font-size: 0.75rem;
   margin-left: auto;
+  flex-shrink: 0;
 }
 
 .messages-page .unread-badge {
@@ -122,4 +355,9 @@
   display: grid;
   place-items: center;
   flex-shrink: 0;
+}
+
+.messages-page .card-list {
+  min-width: 0;
+  max-width: 100%;
 }

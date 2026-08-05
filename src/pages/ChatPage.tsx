@@ -7,14 +7,15 @@ import {
   useState,
 } from 'react'
 import { ArrowLeft } from 'lucide-react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { CheckInControl } from '../components/CheckInControl'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { MessageTicks } from '../components/MessageTicks'
 import { PresenceBadge } from '../components/PresenceBadge'
 import { useApp } from '../context/useApp'
-import { displayName, formatGymLabel, getContactGym, getGym, getUser } from '../data/mock'
+import { displayName, formatGymLabel, getContactGym, getUser } from '../data/mock'
 import { profileImage } from '../lib/avatar'
-import { getCheckedInGymId } from '../lib/presence'
+import { otherParticipantId } from '../lib/conversations'
+import { CHAT_MESSAGE_MAX } from '../lib/fieldLimits'
+import { messageFieldProps } from '../lib/inputAttrs'
 import './ChatPage.css'
 
 export function ChatPage() {
@@ -27,16 +28,28 @@ export function ChatPage() {
     acceptRequest,
     user,
     directory,
+    apiOnline,
+    refreshThread,
+    refreshChats,
   } = useApp()
   const navigate = useNavigate()
+  const location = useLocation()
+  const backTo =
+    typeof (location.state as { from?: unknown } | null)?.from === 'string'
+      ? (location.state as { from: string }).from
+      : null
   const [text, setText] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const threadRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const touchStartY = useRef<number | null>(null)
   const conversation = conversations.find((c) => c.id === conversationId)
-  const otherId = conversation?.participantIds.find((id) => id !== user?.id) ?? ''
-  const other = getUser(otherId) ?? directory.find((u) => u.id === otherId)
+  const otherId = conversation ? otherParticipantId(conversation, user?.id) : ''
+  const other =
+    (otherId ? directory.find((u) => u.id === otherId) : undefined) ??
+    (otherId ? getUser(otherId) : undefined)
 
   const thread = useMemo(
     () =>
@@ -47,10 +60,20 @@ export function ChatPage() {
   )
 
   useEffect(() => {
-    if (conversationId) markRead(conversationId)
-  }, [conversationId, markRead])
+    if (!conversationId || !apiOnline) return
+    void refreshThread(conversationId).catch(() => undefined)
+    void markRead(conversationId)
+  }, [conversationId, apiOnline, refreshThread, markRead])
 
-  /** Высота клавиатуры через visualViewport — композер остаётся над ней */
+  /** Poll like a messenger while the thread is open */
+  useEffect(() => {
+    if (!conversationId || !apiOnline) return
+    const id = window.setInterval(() => {
+      void refreshThread(conversationId).catch(() => undefined)
+    }, 3000)
+    return () => window.clearInterval(id)
+  }, [conversationId, apiOnline, refreshThread])
+
   useEffect(() => {
     const root = document.documentElement
     const vv = window.visualViewport
@@ -87,28 +110,43 @@ export function ChatPage() {
   const name = displayName(other)
   const contactGym = getContactGym(other, user.gymIds)
   const gymLabel = formatGymLabel(contactGym)
-  const myGym = getGym(getCheckedInGymId(user))
-  const myShortGym = myGym
-    ? myGym.name
-        .replace(/^DDX\s+/i, '')
-        .replace(/^Spirit\.?\s*Fitness\s+/i, '')
-        .replace(/^World Class\s+/i, '')
-        .trim()
-    : ''
-  const locked = conversation.requestStatus === 'pending'
+  const waiting = conversation.requestStatus === 'pending'
+  const incoming = conversation.requestStatus === 'incoming'
+  const locked = waiting
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
     const trimmed = text.trim()
-    if (!trimmed || locked) return
-    sendMessage(conversation.id, text)
+    if (!trimmed || locked || busy) return
+    setBusy(true)
+    setError('')
     setText('')
-    // синхронный focus — клавиатура не успевает закрыться (как в Telegram)
     inputRef.current?.focus({ preventScroll: true })
-    requestAnimationFrame(() => {
-      inputRef.current?.focus({ preventScroll: true })
-      bottomRef.current?.scrollIntoView({ block: 'end' })
-    })
+    try {
+      await sendMessage(conversation.id, trimmed)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось отправить')
+      setText(trimmed)
+    } finally {
+      setBusy(false)
+      requestAnimationFrame(() => {
+        inputRef.current?.focus({ preventScroll: true })
+        bottomRef.current?.scrollIntoView({ block: 'end' })
+      })
+    }
+  }
+
+  const onAccept = async () => {
+    setBusy(true)
+    setError('')
+    try {
+      await acceptRequest(conversation.id)
+      await refreshChats()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось принять')
+    } finally {
+      setBusy(false)
+    }
   }
 
   const dismissKeyboard = () => {
@@ -132,13 +170,27 @@ export function ChatPage() {
   return (
     <main className="chat-page">
       <header className="chat-header">
-        <button type="button" className="icon-btn" onClick={() => navigate('/app/messages')}>
+        <button
+          type="button"
+          className="icon-btn"
+          aria-label="Назад"
+          onClick={() => {
+            if (backTo) {
+              navigate(backTo)
+              return
+            }
+            if (window.history.length > 1) {
+              navigate(-1)
+              return
+            }
+            navigate('/app/messages')
+          }}
+        >
           <ArrowLeft size={18} />
         </button>
         <Link to={`/app/user/${other.id}`} className="chat-user">
           <div className="chat-user-avatar">
             <img src={profileImage(other)} alt={name} />
-            {other.isActive ? <span className="online-dot abs" /> : null}
           </div>
           <div>
             <strong>{name}</strong>
@@ -148,33 +200,27 @@ export function ChatPage() {
         </Link>
       </header>
 
-      <section className={`chat-my-presence ${user.isActive ? 'on' : ''}`}>
-        <div>
-          <PresenceBadge active={user.isActive} gymName={user.isActive ? myShortGym : undefined} />
-          <p className="dim">
-            {user.isActive
-              ? 'Собеседник видит, что ты сейчас в зале'
-              : user.gymIds.length > 1
-                ? 'Выбери зал, где ты сейчас'
-                : 'Нажми «Я в зале» — статус увидят в чате'}
-          </p>
-        </div>
-        <CheckInControl preferredGymId={user.homeGymId} compact />
-      </section>
-
-      {locked ? (
+      {waiting ? (
         <div className="request-banner">
           <p>Запрос отправлен. Переписка откроется, когда собеседник примет его.</p>
-          <p className="dim">В демо можно принять запрос кнопкой ниже.</p>
+        </div>
+      ) : null}
+
+      {incoming ? (
+        <div className="request-banner">
+          <p>Тебе написали — прими запрос, чтобы ответить.</p>
           <button
             type="button"
-            className="btn btn-soft"
-            onClick={() => acceptRequest(conversation.id)}
+            className="btn btn-primary"
+            disabled={busy}
+            onClick={() => void onAccept()}
           >
-            Принять запрос (демо)
+            Принять запрос
           </button>
         </div>
       ) : null}
+
+      {error ? <p className="feedback-error" style={{ margin: '0 16px' }}>{error}</p> : null}
 
       <div
         className="chat-thread"
@@ -182,7 +228,6 @@ export function ChatPage() {
         onTouchStart={onThreadTouchStart}
         onTouchMove={onThreadTouchMove}
         onPointerDown={(e) => {
-          // тап по ленте (не по пузырю-кнопке) — можно свернуть клавиатуру свайпом; клик не блюрит сразу
           if (e.pointerType === 'mouse' && e.target === threadRef.current) {
             dismissKeyboard()
           }
@@ -208,21 +253,26 @@ export function ChatPage() {
         <div ref={bottomRef} className="chat-thread-end" />
       </div>
 
-      <form className="chat-input" onSubmit={onSubmit}>
+      <form className="chat-input" onSubmit={(e) => void onSubmit(e)}>
         <input
+          {...messageFieldProps}
           ref={inputRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder={locked ? 'Дождитесь принятия запроса' : 'Сообщение'}
-          disabled={locked}
-          enterKeyHint="send"
-          autoComplete="off"
+          placeholder={
+            waiting
+              ? 'Дождитесь принятия запроса'
+              : incoming
+                ? 'Сначала прими запрос'
+                : 'Сообщение'
+          }
+          disabled={locked || incoming || busy}
+          maxLength={CHAT_MESSAGE_MAX}
         />
         <button
           className="btn btn-primary"
           type="submit"
-          disabled={locked || !text.trim()}
-          // не забираем фокус у input до submit
+          disabled={locked || incoming || busy || !text.trim()}
           onMouseDown={(e) => e.preventDefault()}
         >
           →

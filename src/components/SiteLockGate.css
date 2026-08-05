@@ -46,6 +46,7 @@
 
 .site-lock-card .field {
   margin: 0;
+  gap: 0;
 }
 
 .site-lock-card .btn {

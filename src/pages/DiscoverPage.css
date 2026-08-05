@@ -1,16 +1,10 @@
-.discover-header {
-  margin-bottom: 14px;
-}
-
-.discover-header h1 {
-  font-size: 1.8rem;
-  margin-bottom: 6px;
-}
-
-.discover-filters {
+/* Clear stack: search (primary) → city → network */
+.discover-toolbar {
   display: grid;
-  gap: 12px;
-  margin-bottom: 18px;
+  gap: 14px;
+  margin-bottom: 20px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .discover-search {
@@ -51,6 +45,7 @@
 
 .discover-networks {
   margin: 0;
+  padding-top: 2px;
 }
 
 @media (min-width: 900px) {

@@ -4,19 +4,26 @@ import { PresenceBadge } from '../components/PresenceBadge'
 import { useApp } from '../context/useApp'
 import { displayName, formatGymLabel, getContactGym, getUserGyms } from '../data/mock'
 import { profileImage } from '../lib/avatar'
+import { hasLiked } from '../lib/likes'
 import type { UserProfile } from '../types'
 import './LikedPage.css'
+
+export type LikesMode = 'received' | 'sent'
 
 function LikedRow({
   person,
   myGymIds,
+  likedByMe,
   onMessage,
-  onUnlike,
+  onToggleLike,
+  likeMode,
 }: {
   person: UserProfile
   myGymIds: string[]
+  likedByMe: boolean
   onMessage: () => void
-  onUnlike: () => void
+  onToggleLike: () => void
+  likeMode: LikesMode
 }) {
   const name = displayName(person)
   const isAnon = person.privacy === 'anonymous'
@@ -31,15 +38,21 @@ function LikedRow({
         ? 'Зал скрыт'
         : 'Зал не указан')
 
+  const likeLabel =
+    likeMode === 'received'
+      ? likedByMe
+        ? `Убрать лайк у ${name}`
+        : `Лайкнуть в ответ ${name}`
+      : `Убрать лайк у ${name}`
+
   return (
     <article className="liked-row">
       <Link to={`/app/user/${person.id}`} className="liked-main">
         <div className="avatar-wrap">
           <img src={profileImage(person)} alt={name} />
-          {person.isActive ? <span className="online-dot abs" /> : null}
         </div>
         <div className="liked-body">
-          <div className="row">
+          <div className="liked-title-line">
             <strong>
               {name}
               {!isAnon ? <span className="age">, {person.age}</span> : null}
@@ -70,24 +83,43 @@ function LikedRow({
         </button>
         <button
           type="button"
-          className="liked-action liked"
-          onClick={onUnlike}
-          aria-label={`Убрать лайк у ${name}`}
-          title="Убрать лайк"
+          className={`liked-action ${likedByMe ? 'liked' : ''}`}
+          onClick={onToggleLike}
+          aria-label={likeLabel}
+          title={
+            likeMode === 'received'
+              ? likedByMe
+                ? 'Взаимный лайк'
+                : 'Лайк в ответ'
+              : 'Убрать лайк'
+          }
         >
-          <Heart size={18} fill="currentColor" />
+          <Heart size={18} fill={likedByMe ? 'currentColor' : 'none'} />
         </button>
       </div>
     </article>
   )
 }
 
-export function LikedPage() {
-  const { user, getMyLikedUsers, toggleLike, startConversation } = useApp()
+export function LikedPage({ mode = 'received' }: { mode?: LikesMode }) {
+  const {
+    user,
+    likes,
+    getLikesFor,
+    getMyLikedUsers,
+    toggleLike,
+    startConversation,
+    blockedUserIds,
+  } = useApp()
   const navigate = useNavigate()
-  const liked = getMyLikedUsers()
 
   if (!user) return null
+
+  const listPath = mode === 'received' ? '/app/likes' : '/app/likes/sent'
+  const people =
+    mode === 'received'
+      ? getLikesFor(user.id).likers.filter((p) => !blockedUserIds.includes(p.id))
+      : getMyLikedUsers().filter((p) => !blockedUserIds.includes(p.id))
 
   return (
     <main className="page liked-page">
@@ -95,44 +127,74 @@ export function LikedPage() {
         <ArrowLeft size={18} /> Профиль
       </button>
 
-      <header className="liked-header">
-        <h1>Мои лайки</h1>
-        <p className="muted">
-          Все, кого ты отметил — из любых залов. Можно открыть профиль или написать.
-        </p>
-        <p className="liked-count">
-          {liked.length
-            ? `${liked.length} ${
-                liked.length === 1 ? 'человек' : liked.length < 5 ? 'человека' : 'человек'
-              }`
-            : 'Пока пусто'}
-        </p>
+      <header className="page-header liked-header">
+        <div className="page-header-text">
+          <h1 className="page-title">Лайки</h1>
+          <div className="liked-tabs" role="tablist" aria-label="Лайки">
+            <Link
+              to="/app/likes"
+              role="tab"
+              aria-selected={mode === 'received'}
+              className={`liked-tab ${mode === 'received' ? 'active' : ''}`}
+            >
+              Кто лайкнул
+            </Link>
+            <Link
+              to="/app/likes/sent"
+              role="tab"
+              aria-selected={mode === 'sent'}
+              className={`liked-tab ${mode === 'sent' ? 'active' : ''}`}
+            >
+              Кого я лайкнул
+            </Link>
+          </div>
+          <p className="liked-count">
+            {people.length
+              ? `${people.length} ${
+                  people.length === 1 ? 'человек' : people.length < 5 ? 'человека' : 'человек'
+                }`
+              : 'Пока пусто'}
+          </p>
+        </div>
       </header>
 
-      {liked.length ? (
+      {people.length ? (
         <div className="liked-list">
-          {liked.map((person) => (
-            <LikedRow
-              key={person.id}
-              person={person}
-              myGymIds={user.gymIds}
-              onMessage={() => {
-                const id = startConversation(person.id, 'Привет! Увидел тебя в Spotter.')
-                navigate(`/app/messages/${id}`)
-              }}
-              onUnlike={() => toggleLike(person.id)}
-            />
-          ))}
+          {people.map((person) => {
+            const likedByMe = hasLiked(likes, person.id, user.id)
+            return (
+              <LikedRow
+                key={person.id}
+                person={person}
+                myGymIds={user.gymIds}
+                likedByMe={likedByMe}
+                likeMode={mode}
+                onMessage={() => {
+                  void startConversation(person.id, 'Привет! Увидел тебя в Spotter.').then(
+                    (id) => {
+                      navigate(`/app/messages/${id}`, { state: { from: listPath } })
+                    },
+                  )
+                }}
+                onToggleLike={() => toggleLike(person.id)}
+              />
+            )
+          })}
         </div>
       ) : (
         <section className="liked-empty surface">
-          <Heart size={28} className="liked-empty-icon" />
-          <h2>Ты ещё никого не лайкнул</h2>
-          <p className="muted">
-            Отмечай людей на этаже или в профиле — они появятся здесь, даже если зал другой.
-          </p>
+          <div className="empty-copy" role="status">
+            <p className="empty-copy-title">
+              {mode === 'received' ? 'Пока никто не лайкнул' : 'Ты ещё никого не лайкнул'}
+            </p>
+            <p className="empty-copy-lead">
+              {mode === 'received'
+                ? 'Как только кто-то отметит тебя — появится здесь'
+                : 'Отмечай людей в зале или в профиле — появятся здесь'}
+            </p>
+          </div>
           <Link to="/app" className="btn btn-primary">
-            На этаж
+            В зал
           </Link>
         </section>
       )}

@@ -5,7 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:api": "npm run dev --prefix api",
+    "dev:all": "npm run dev:api & npm run dev",
+    "db:up": "docker compose up -d postgres",
+    "db:setup": "npm run db:setup --prefix api",
     "build": "tsc -b && vite build",
+    "build:api": "npm run build --prefix api",
     "lint": "oxlint",
     "preview": "vite preview"
   },

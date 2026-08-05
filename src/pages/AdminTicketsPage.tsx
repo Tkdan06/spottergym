@@ -9,6 +9,8 @@ import {
   statusLabel,
   ticketCounts,
 } from '../lib/feedback'
+import { ADMIN_MESSAGE_MAX } from '../lib/fieldLimits'
+import { messageFieldProps } from '../lib/inputAttrs'
 import type { TicketTab } from '../types'
 import './FeedbackPage.css'
 
@@ -23,7 +25,14 @@ function formatWhen(iso: string) {
 
 export function AdminTicketsPage() {
   const navigate = useNavigate()
-  const { user, tickets, adminReplyTicket, adminSetTicketStatus, refreshSupport } = useApp()
+  const {
+    user,
+    tickets,
+    adminReplyTicket,
+    adminSetTicketStatus,
+    refreshSupport,
+    canHandleTickets,
+  } = useApp()
   const [tab, setTab] = useState<TicketTab>('incoming')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [reply, setReply] = useState('')
@@ -35,12 +44,13 @@ export function AdminTicketsPage() {
   const selected = selectedId ? tickets.find((t) => t.id === selectedId) ?? null : null
 
   if (!user?.isAdmin) return <Navigate to="/app/profile" replace />
+  if (!canHandleTickets) return <Navigate to="/app/admin" replace />
 
-  const run = (fn: () => void) => {
+  const run = async (fn: () => void | Promise<void>) => {
     setError('')
     try {
-      fn()
-      refreshSupport()
+      await fn()
+      await refreshSupport()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка')
     }
@@ -49,8 +59,8 @@ export function AdminTicketsPage() {
   const onReply = (e: FormEvent, closeAs?: 'resolved' | 'closed') => {
     e.preventDefault()
     if (!selected) return
-    run(() => {
-      adminReplyTicket(selected.id, reply, closeAs)
+    void run(async () => {
+      await adminReplyTicket(selected.id, reply, closeAs)
       setReply('')
       setNotice(closeAs ? 'Обращение закрыто' : 'Ответ отправлен')
       if (closeAs) {
@@ -93,10 +103,12 @@ export function AdminTicketsPage() {
         ) : (
           <form className="feedback-actions" onSubmit={(e) => onReply(e)}>
             <textarea
+              {...messageFieldProps}
               value={reply}
               onChange={(e) => setReply(e.target.value)}
               placeholder="Ответ пользователю…"
               rows={4}
+              maxLength={ADMIN_MESSAGE_MAX}
             />
             <div className="btn-row">
               <button type="submit" className="btn btn-primary" disabled={reply.trim().length < 2}>
@@ -203,7 +215,10 @@ export function AdminTicketsPage() {
             </button>
           ))
         ) : (
-          <div className="empty-state">В этом разделе пусто.</div>
+          <div className="empty-copy" role="status">
+            <p className="empty-copy-title">Пока пусто</p>
+            <p className="empty-copy-lead">В этом разделе нет обращений</p>
+          </div>
         )}
       </div>
       {error ? <p className="feedback-error">{error}</p> : null}

@@ -1,9 +1,13 @@
 .bottom-nav {
+  /* Don't use left:50% + translateX(-50%) + width:100% — that overflows the
+     viewport before transform and creates horizontal swipe/scroll on mobile. */
   position: fixed;
-  left: 50%;
+  left: 0;
+  right: 0;
   bottom: 0;
-  transform: translateX(-50%);
   width: min(100%, var(--app-max));
+  max-width: 100%;
+  margin-inline: auto;
   height: calc(var(--nav-h) + var(--safe-bottom));
   padding: 8px 10px calc(8px + var(--safe-bottom));
   display: grid;
@@ -13,6 +17,7 @@
   border-top: 1px solid var(--line);
   backdrop-filter: blur(16px);
   z-index: 40;
+  box-sizing: border-box;
 }
 
 .nav-item {
@@ -59,8 +64,11 @@
     position: sticky;
     top: 0;
     left: auto;
-    transform: none;
+    right: auto;
+    bottom: auto;
     width: 240px;
+    max-width: none;
+    margin-inline: 0;
     height: 100dvh;
     grid-template-columns: 1fr;
     align-content: start;

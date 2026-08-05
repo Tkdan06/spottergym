@@ -1,8 +1,20 @@
 import { DEMO_GYM_ID } from '../data/mock'
+import { normalizeEmail } from './adminConfig'
+import { isDemoAccount } from './demoAccount'
+import { loadJson, saveJson } from './storage'
 import type { AppNotification, NotificationPrefs, NotificationType } from '../types'
 
 export const STORAGE_NOTIFICATIONS = 'spotter.notifications'
 export const STORAGE_NOTIF_PREFS = 'spotter.notificationPrefs'
+
+/** Ключ хранилища уведомлений конкретного аккаунта */
+export function notificationsKeyFor(email: string) {
+  return `${STORAGE_NOTIFICATIONS}:${normalizeEmail(email)}`
+}
+
+export function notificationPrefsKeyFor(email: string) {
+  return `${STORAGE_NOTIF_PREFS}:${normalizeEmail(email)}`
+}
 
 export const DEFAULT_NOTIF_PREFS: NotificationPrefs = {
   enabled: true,
@@ -56,7 +68,7 @@ export const SEED_NOTIFICATIONS: AppNotification[] = [
     id: 'n-1',
     type: 'gym_new_member',
     title: 'Новый человек в зале',
-    body: 'Лера присоединилась к World Class Тверская. Можно поздороваться на этаже.',
+    body: 'Лера присоединилась к World Class Тверская. Можно поздороваться в зале.',
     createdAt: new Date(Date.now() - 1000 * 60 * 18).toISOString(),
     read: false,
     href: '/app/user/u-lera',
@@ -107,7 +119,7 @@ export const SEED_NOTIFICATIONS: AppNotification[] = [
     id: 'n-6',
     type: 'admin',
     title: 'Ответ поддержки',
-    body: 'Спасибо за отзыв. Мы улучшаем фильтры на этаже — напиши ещё, если что-то мешает.',
+    body: 'Спасибо за отзыв. Мы улучшаем фильтры в зале — напиши ещё, если что-то мешает.',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 50).toISOString(),
     read: true,
     href: '/app/notifications',
@@ -121,9 +133,99 @@ export function normalizeNotificationPrefs(raw: Partial<NotificationPrefs> | nul
   }
 }
 
-export function normalizeNotifications(raw: AppNotification[] | null | undefined): AppNotification[] {
-  if (!Array.isArray(raw) || !raw.length) return SEED_NOTIFICATIONS.map((n) => ({ ...n }))
+export function normalizeNotifications(
+  raw: AppNotification[] | null | undefined,
+  options?: { seedIfEmpty?: boolean },
+): AppNotification[] {
+  const seedIfEmpty = Boolean(options?.seedIfEmpty)
+  if (!Array.isArray(raw)) {
+    return seedIfEmpty ? SEED_NOTIFICATIONS.map((n) => ({ ...n })) : []
+  }
+  if (!raw.length) {
+    return seedIfEmpty ? SEED_NOTIFICATIONS.map((n) => ({ ...n })) : []
+  }
   return raw.filter((n) => n && typeof n.id === 'string' && typeof n.title === 'string')
+}
+
+const SEED_NOTIFICATION_IDS = new Set(SEED_NOTIFICATIONS.map((n) => n.id))
+
+function looksLikeSeedNotifications(list: AppNotification[]) {
+  return list.some((n) => n && SEED_NOTIFICATION_IDS.has(n.id))
+}
+
+/** Загрузить ленту аккаунта. Новые профили — пусто; демо-логин может запросить seed. */
+export function loadNotificationsForUser(email: string, seedIfMissing = false): AppNotification[] {
+  const key = notificationsKeyFor(email)
+  const scoped = loadJson<AppNotification[] | null>(key, null)
+  if (Array.isArray(scoped)) {
+    // Реальные аккаунты не должны хранить демо-ленту из старых билдов
+    if (!isDemoAccount(email) && looksLikeSeedNotifications(scoped)) {
+      saveJson(key, [])
+      return []
+    }
+    return normalizeNotifications(scoped, { seedIfEmpty: false })
+  }
+  // Старый общий ключ больше не используем — иначе чужие уведомления «липли» к новым профилям
+  try {
+    localStorage.removeItem(STORAGE_NOTIFICATIONS)
+  } catch {
+    /* ignore */
+  }
+  if (seedIfMissing) {
+    const seeded = normalizeNotifications(null, { seedIfEmpty: true })
+    saveJson(key, seeded)
+    return seeded
+  }
+  saveJson(key, [])
+  return []
+}
+
+export function saveNotificationsForUser(email: string, list: AppNotification[]) {
+  saveJson(notificationsKeyFor(email), list)
+}
+
+/** Записать уведомление в ленту другого email (админ → пользователь) */
+export function appendNotificationForEmail(
+  email: string,
+  item: Omit<AppNotification, 'id' | 'createdAt' | 'read'> & { id?: string },
+) {
+  const key = normalizeEmail(email)
+  if (!key) return null
+  const prefs = loadNotificationPrefsForUser(key)
+  if (!isNotificationAllowed(prefs, item.type)) return null
+  const prev = loadNotificationsForUser(key, false)
+  const next: AppNotification[] = [
+    {
+      id: item.id || `n-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      createdAt: new Date().toISOString(),
+      read: false,
+      title: item.title,
+      body: item.body,
+      type: item.type,
+      href: item.href,
+      gymId: item.gymId,
+      actorId: item.actorId,
+    },
+    ...prev,
+  ]
+  saveNotificationsForUser(key, next)
+  return next[0]
+}
+
+export function loadNotificationPrefsForUser(email: string): NotificationPrefs {
+  const key = notificationPrefsKeyFor(email)
+  const scoped = loadJson<Partial<NotificationPrefs> | null>(key, null)
+  if (scoped && typeof scoped === 'object') {
+    return normalizeNotificationPrefs(scoped)
+  }
+  const legacy = loadJson<Partial<NotificationPrefs> | null>(STORAGE_NOTIF_PREFS, null)
+  const prefs = normalizeNotificationPrefs(legacy)
+  saveJson(key, prefs)
+  return prefs
+}
+
+export function saveNotificationPrefsForUser(email: string, prefs: NotificationPrefs) {
+  saveJson(notificationPrefsKeyFor(email), prefs)
 }
 
 export function prefKeyForType(type: NotificationType): keyof Omit<NotificationPrefs, 'enabled'> | null {

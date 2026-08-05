@@ -188,7 +188,7 @@ export function FloorFilters({
               >
                 <header className="floor-sheet-top">
                   <div>
-                    <p className="floor-sheet-kicker">Этаж</p>
+                    <p className="floor-sheet-kicker">Зал</p>
                     <h3 id={titleId}>Фильтры</h3>
                   </div>
                   <button

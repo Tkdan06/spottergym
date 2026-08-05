@@ -1,21 +1,21 @@
 import { type FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/useApp'
-import { MASTER_ADMIN_EMAIL } from '../lib/adminConfig'
+import { EMAIL_MAX, PASSWORD_MAX } from '../lib/fieldLimits'
 import './AuthPages.css'
 
 export function LoginPage() {
   const { login } = useApp()
   const navigate = useNavigate()
-  const [email, setEmail] = useState('demo@spotter.app')
-  const [password, setPassword] = useState('demo')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
-  const onSubmit = (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError('')
     try {
-      login(email, password)
+      await login(email, password)
       navigate('/app')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось войти')
@@ -29,29 +29,42 @@ export function LoginPage() {
           SPOT<span>TER</span>
         </Link>
         <h1>Вход</h1>
-        <p className="muted">Войди, чтобы увидеть кто сейчас в твоём зале.</p>
+        <p className="muted">Войди, чтобы увидеть кто сейчас в твоём зале</p>
 
         <form className="auth-form" onSubmit={onSubmit}>
           <div className="field">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email" className="sr-only">
+              Email
+            </label>
             <input
               id="email"
+              name="email"
               type="email"
+              inputMode="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              maxLength={EMAIL_MAX}
               autoComplete="email"
+              placeholder="Email"
+              aria-label="Email"
             />
           </div>
           <div className="field">
-            <label htmlFor="password">Пароль</label>
+            <label htmlFor="password" className="sr-only">
+              Пароль
+            </label>
             <input
               id="password"
+              name="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              maxLength={PASSWORD_MAX}
               autoComplete="current-password"
+              placeholder="Пароль"
+              aria-label="Пароль"
             />
           </div>
           {error ? <p className="feedback-error">{error}</p> : null}
@@ -62,9 +75,6 @@ export function LoginPage() {
 
         <p className="auth-switch muted">
           Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
-        </p>
-        <p className="dim auth-hint">
-          Демо: любой email. Админ: {MASTER_ADMIN_EMAIL} (Богдан).
         </p>
       </main>
     </div>

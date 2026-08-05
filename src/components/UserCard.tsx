@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useApp } from '../context/useApp'
 import { displayName, experienceLabel, intentLabel } from '../data/mock'
 import { profileImage } from '../lib/avatar'
+import { breakLabel, isOnBreak } from '../lib/schedule'
 import type { UserProfile } from '../types'
 import { LikesRow } from './LikesRow'
 import './UserCard.css'
@@ -19,11 +20,14 @@ export function UserCard({ user, compact, rank }: Props) {
   const name = displayName(user)
   const photo = profileImage(user)
   const isCoach = user.isCoach && user.privacy !== 'anonymous'
-  const coachSports = isCoach ? user.coachSports.slice(0, 2) : []
+  const sports = Array.isArray(user.sports) ? user.sports : []
+  const coachSports = isCoach && Array.isArray(user.coachSports) ? user.coachSports.slice(0, 2) : []
   const otherSports = (
-    user.privacy === 'anonymous' ? [] : user.sports.filter((s) => !coachSports.includes(s))
+    user.privacy === 'anonymous' ? [] : sports.filter((s) => !coachSports.includes(s))
   ).slice(0, isCoach ? 1 : 2)
   const isTop = rank === 1 && count > 0
+  const onBreak = isOnBreak(user.breakUntil)
+  const breakText = breakLabel(user.breakUntil)
 
   const profileTo = isMe ? '/app/profile' : `/app/user/${user.id}`
 
@@ -39,17 +43,23 @@ export function UserCard({ user, compact, rank }: Props) {
         <div className="user-card-media">
           <img src={photo} alt={name} />
         </div>
-        <span className={`presence-pill ${user.isActive ? 'on' : 'off'}`}>
-          <i className={user.isActive ? 'online-dot' : 'offline-dot'} aria-hidden />
-          {user.isActive ? 'В зале' : 'Не в зале'}
-        </span>
+        {onBreak ? (
+          <span className="presence-pill break" title={breakText}>
+            Перерыв
+          </span>
+        ) : (
+          <span className={`presence-pill ${user.isActive ? 'on' : 'off'}`}>
+            <i className={user.isActive ? 'online-dot' : 'offline-dot'} aria-hidden />
+            {user.isActive ? 'В зале' : 'Не в зале'}
+          </span>
+        )}
       </div>
 
       <div className="user-card-body">
         <div className="user-card-head">
           <h3>
             {rank ? <span className="rank-num">#{rank}</span> : null}
-            {name}
+            <span className="user-card-name">{name}</span>
             {user.privacy !== 'anonymous' ? <span className="age">, {user.age}</span> : null}
           </h3>
           {isTop ? <span className="rank-badge">Топ зала</span> : null}

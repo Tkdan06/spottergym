@@ -1,7 +1,17 @@
-.onboarding {
+.page.onboarding {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
+  height: 100dvh;
+  min-height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding-bottom: calc(10px + var(--safe-bottom));
+}
+
+.onboarding-top {
+  flex-shrink: 0;
 }
 
 .onboarding-brand {
@@ -11,7 +21,7 @@
 .stepper {
   display: flex;
   gap: 6px;
-  margin: 14px 0 10px;
+  margin: 12px 0 8px;
 }
 
 .stepper .dot {
@@ -26,7 +36,36 @@
 }
 
 .onboarding h1 {
-  font-size: 1.8rem;
+  font-size: 1.55rem;
+  margin: 0;
+}
+
+.onboarding-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+}
+
+/* Шаг «Зал»: список скроллится, поиск и кнопки всегда на экране */
+.onboarding-body.gym-step {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.onboarding-gym-step {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.onboarding-gym-step > .muted,
+.onboarding-gym-step > .search-input {
+  flex-shrink: 0;
 }
 
 .field-label {
@@ -76,19 +115,34 @@
 }
 
 .gym-pick-list {
-  max-height: min(52vh, 520px);
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
   padding-right: 2px;
+  overscroll-behavior: contain;
 }
 
 .onboarding-actions {
+  flex-shrink: 0;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 12px;
-  margin-top: auto;
-  padding-top: 12px;
+  margin: 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  background: var(--bg);
 }
 
 .onboarding-actions .btn {
   min-width: 120px;
+  min-height: 44px;
+}
+
+.onboarding-field-hint {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.35;
 }

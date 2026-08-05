@@ -3,6 +3,7 @@ import { AppLayout } from './components/AppLayout'
 import { GuestOnly, ProtectedRoute } from './components/ProtectedRoute'
 import { AppProvider } from './context/AppContext'
 import { AdminHubPage } from './pages/AdminHubPage'
+import { AdminPlayersPage } from './pages/AdminPlayersPage'
 import { AdminTicketsPage } from './pages/AdminTicketsPage'
 import { AdminUsersPage } from './pages/AdminUsersPage'
 import { ChatPage } from './pages/ChatPage'
@@ -45,10 +46,12 @@ export default function App() {
               <Route path="messages" element={<MessagesPage />} />
               <Route path="messages/:conversationId" element={<ChatPage />} />
               <Route path="profile" element={<ProfilePage />} />
-              <Route path="likes" element={<LikedPage />} />
+              <Route path="likes" element={<LikedPage mode="received" />} />
+              <Route path="likes/sent" element={<LikedPage mode="sent" />} />
               <Route path="feedback" element={<FeedbackPage />} />
               <Route path="feedback/:ticketId" element={<FeedbackPage />} />
               <Route path="admin" element={<AdminHubPage />} />
+              <Route path="admin/players" element={<AdminPlayersPage />} />
               <Route path="admin/tickets" element={<AdminTicketsPage />} />
               <Route path="admin/users" element={<AdminUsersPage />} />
               <Route path="notifications" element={<NotificationsPage />} />

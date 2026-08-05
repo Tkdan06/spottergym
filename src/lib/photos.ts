@@ -1,7 +1,8 @@
-/** Лимит фото в профиле — держим localStorage и будущий сервер лёгкими */
+/** Лимит фото в профиле — держим localStorage и сервер лёгкими */
 export const MAX_PROFILE_PHOTOS = 3
 
-const MAX_INPUT_BYTES = 12 * 1024 * 1024
+/** Сырой файл до сжатия — защита от гигабайтных загрузок */
+export const MAX_PHOTO_INPUT_BYTES = 1 * 1024 * 1024
 const MAX_EDGE = 1080
 const TARGET_MAX_BYTES = 280_000
 const START_QUALITY = 0.82
@@ -95,8 +96,8 @@ export async function optimizeImageFile(file: File): Promise<string> {
   if (!file.type.startsWith('image/')) {
     throw new Error('Выбери файл изображения (JPEG, PNG, WebP…)')
   }
-  if (file.size > MAX_INPUT_BYTES) {
-    throw new Error('Файл слишком большой — максимум 12 МБ')
+  if (file.size > MAX_PHOTO_INPUT_BYTES) {
+    throw new Error('Файл слишком большой — максимум 1 МБ')
   }
 
   const source = await loadDrawable(file)

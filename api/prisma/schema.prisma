@@ -1,0 +1,309 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  female
+  male
+}
+
+enum Intent {
+  dating
+  buddy
+  both
+}
+
+enum ExperienceLevel {
+  newbie
+  confident
+  experienced
+  pro
+}
+
+enum PrivacyMode {
+  open
+  anonymous
+}
+
+enum FeedbackCategory {
+  technical
+  question
+  suggestion
+  safety
+  other
+}
+
+enum FeedbackStatus {
+  new
+  open
+  in_progress
+  resolved
+  closed
+}
+
+enum FeedbackSenderType {
+  user
+  admin
+}
+
+enum ConversationStatus {
+  pending
+  accepted
+}
+
+enum ChatMessageStatus {
+  sent
+  delivered
+  read
+}
+
+model User {
+  id               String          @id @default(cuid())
+  email            String          @unique
+  passwordHash     String
+  /** Public findable handle, e.g. masha_ddx — without @ */
+  username         String          @unique
+  name             String
+  age              Int             @default(25)
+  gender           Gender          @default(male)
+  bio              String          @default("")
+  photos           String[]        @default([])
+  avatar           String          @default("")
+  city             String          @default("")
+  homeGymId        String?
+  intent           Intent          @default(both)
+  experienceLevel  ExperienceLevel @default(confident)
+  interests        String[]        @default([])
+  sports           String[]        @default([])
+  isCoach          Boolean         @default(false)
+  coachSports      String[]        @default([])
+  visitSlots       Json            @default("[]")
+  breakUntil       String?
+  privacy          PrivacyMode     @default(open)
+  lookingToMeet    Boolean         @default(true)
+  onboardingDone   Boolean         @default(false)
+  isAdmin          Boolean         @default(false)
+  isMasterAdmin    Boolean         @default(false)
+  adminPermissions Json?
+  registeredAt     DateTime        @default(now())
+  lastSeenAt       DateTime        @default(now())
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  gyms               UserGym[]
+  checkIns           CheckIn[]
+  likesGiven         Like[]              @relation("LikesGiven")
+  likesReceived      Like[]              @relation("LikesReceived")
+  notifications      Notification[]
+  notificationPrefs  NotificationPrefs?
+  feedbackTickets    FeedbackTicket[]
+  conversationsLow   Conversation[]      @relation("ConvLow")
+  conversationsHigh  Conversation[]      @relation("ConvHigh")
+  chatMessagesSent   ChatMessage[]
+  blocksGiven        UserBlock[]         @relation("BlocksGiven")
+  blocksReceived     UserBlock[]         @relation("BlocksReceived")
+  invitesSent        Invite[]            @relation("InvitesSent")
+
+  @@index([email])
+  @@index([city])
+  @@index([username])
+}
+
+/** A blocked B — neither sees the other in hall/chat/likes */
+model UserBlock {
+  id        String   @id @default(cuid())
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+
+  blocker User @relation("BlocksGiven", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked User @relation("BlocksReceived", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId])
+  @@index([blockedId])
+}
+
+/** Email ban — enforced on register/login */
+model BlockedEmail {
+  email       String   @id
+  reason      String   @default("")
+  blockedById String?
+  createdAt   DateTime @default(now())
+}
+
+model Invite {
+  id        String   @id @default(cuid())
+  inviterId String
+  inviteeId String   @unique
+  createdAt DateTime @default(now())
+
+  inviter User @relation("InvitesSent", fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@index([inviterId])
+}
+
+model Conversation {
+  id              String             @id @default(cuid())
+  /** Lexicographically smaller participant id (unique pair key) */
+  userLowId       String
+  userHighId      String
+  initiatedById   String
+  status          ConversationStatus @default(pending)
+  lastMessageText String             @default("")
+  lastMessageAt   DateTime           @default(now())
+  unreadLow       Int                @default(0)
+  unreadHigh      Int                @default(0)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  userLow  User         @relation("ConvLow", fields: [userLowId], references: [id], onDelete: Cascade)
+  userHigh User         @relation("ConvHigh", fields: [userHighId], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
+
+  @@unique([userLowId, userHighId])
+  @@index([userLowId, lastMessageAt])
+  @@index([userHighId, lastMessageAt])
+}
+
+model ChatMessage {
+  id             String            @id @default(cuid())
+  conversationId String
+  senderId       String
+  text           String
+  status         ChatMessageStatus @default(sent)
+  createdAt      DateTime          @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+}
+
+model Gym {
+  id        String   @id
+  name      String
+  network   String
+  city      String
+  district  String   @default("")
+  address   String   @default("")
+  image     String   @default("")
+  lat       Float?
+  lng       Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members  UserGym[]
+  checkIns CheckIn[]
+
+  @@index([city])
+  @@index([network])
+}
+
+model UserGym {
+  userId    String
+  gymId     String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gym  Gym  @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
+  @@id([userId, gymId])
+  @@index([gymId])
+}
+
+model CheckIn {
+  id           String    @id @default(cuid())
+  userId       String
+  gymId        String
+  checkedInAt  DateTime  @default(now())
+  checkedOutAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gym  Gym  @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
+  @@index([gymId, checkedOutAt])
+  @@index([userId, checkedOutAt])
+}
+
+/** fromUser лайкнул toUser */
+model Like {
+  id         String   @id @default(cuid())
+  fromUserId String
+  toUserId   String
+  createdAt  DateTime @default(now())
+
+  fromUser User @relation("LikesGiven", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser   User @relation("LikesReceived", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@unique([fromUserId, toUserId])
+  @@index([toUserId])
+  @@index([fromUserId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String   @default("")
+  href      String?
+  gymId     String?
+  actorId   String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, read])
+}
+
+model NotificationPrefs {
+  userId        String  @id
+  enabled       Boolean @default(true)
+  gymNewMembers Boolean @default(true)
+  likes         Boolean @default(true)
+  chatRequests  Boolean @default(true)
+  checkins      Boolean @default(false)
+  coaches       Boolean @default(true)
+  system        Boolean @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model FeedbackTicket {
+  id         String           @id @default(cuid())
+  userId     String
+  category   FeedbackCategory @default(other)
+  subject    String
+  status     FeedbackStatus   @default(open)
+  assigneeId String?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages FeedbackMessage[]
+
+  @@index([userId, updatedAt])
+  @@index([status])
+}
+
+model FeedbackMessage {
+  id         String             @id @default(cuid())
+  ticketId   String
+  senderType FeedbackSenderType
+  senderId   String
+  senderName String
+  text       String
+  createdAt  DateTime           @default(now())
+
+  ticket FeedbackTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId, createdAt])
+}

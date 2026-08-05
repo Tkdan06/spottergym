@@ -35,11 +35,53 @@
   min-height: 88px;
 }
 
-.gym-card-media .pill {
+.gym-card-presence {
   position: absolute;
-  left: 6px;
+  left: 50%;
   bottom: 6px;
+  transform: translateX(-50%);
+  z-index: 1;
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: max-content;
+  min-width: 72px;
+  max-width: none;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.gym-card-presence-label {
+  white-space: nowrap;
+}
+
+.gym-card-presence .online-dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  animation: none;
+}
+
+.gym-card-presence.is-online {
+  border: 1px solid rgba(87, 242, 135, 0.28);
+  background: rgba(12, 28, 18, 0.78);
+  color: var(--online);
+}
+
+.gym-card-presence.is-empty {
+  border: 1px solid rgba(232, 240, 234, 0.16);
+  background: rgba(14, 18, 16, 0.78);
+  color: var(--text-muted);
 }
 
 .gym-card-body {

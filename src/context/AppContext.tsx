@@ -1,34 +1,135 @@
 import {
   createContext,
   useCallback,
+  useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
+import { flushSync } from 'react-dom'
+import { DEMO_GYM_ID, USERS, normalizeExperienceLevel } from '../data/mock'
 import {
-  DEMO_GYM_ID,
-  SEED_CONVERSATIONS,
-  SEED_MESSAGES,
-  USERS,
-  normalizeExperienceLevel,
-} from '../data/mock'
+  loadAccountBags,
+  loadAccountProfile,
+  resolveContacts,
+  saveAccountContacts,
+  saveAccountConversations,
+  saveAccountLikes,
+  saveAccountMessages,
+  saveAccountProfile,
+} from '../lib/accountData'
+import { otherParticipantId } from '../lib/conversations'
+import {
+  hasAccountPassword,
+  saveAccountPassword,
+  verifyAccountPassword,
+} from '../lib/accountAuth'
+import {
+  ApiError,
+  apiAcceptConversation,
+  apiAdminBlockEmail,
+  apiAdminDeleteUser,
+  apiAdminFetchBlockedEmails,
+  apiAdminFetchUsers,
+  apiAdminOutboundTicket,
+  apiAdminPatchUserAdmin,
+  apiAdminUnblockEmail,
+  apiBlockUser,
+  apiCheckIn,
+  apiCheckOut,
+  apiCreateTicket,
+  apiFetchBlocks,
+  apiFetchConversations,
+  apiFetchLikes,
+  apiFetchMessages,
+  apiFetchNotificationPrefs,
+  apiFetchNotifications,
+  apiFetchTickets,
+  apiFetchUser,
+  apiHealth,
+  apiJoinGym,
+  apiLeaveGym,
+  apiLogin,
+  apiLogout,
+  apiLookupUsername,
+  apiMarkAllNotificationsRead,
+  apiMarkConversationRead,
+  apiMarkNotificationRead,
+  apiMe,
+  apiPatchMe,
+  apiPatchNotificationPrefs,
+  apiPatchTicketStatus,
+  apiRegister,
+  apiReplyTicket,
+  apiSearchUsers,
+  apiSendMessage,
+  apiStartConversation,
+  apiToggleLike,
+  apiUnblockUser,
+  getStoredToken,
+  setStoredToken,
+} from '../lib/apiClient'
+import { DEMO_ACCOUNT_EMAIL, DEMO_ACCOUNT_NAME, isDemoAccount } from '../lib/demoAccount'
 import {
   adminFlagsForEmail,
   blockEmail,
   isEmailBlocked,
   loadBlockedEmails,
   loadDirectory,
+  mergeStoredAccountsIntoDirectory,
+  removeUserAccount,
+  saveBlockedEmails,
+  saveDirectory,
+  setAdminPermissions as dirSetAdminPermissions,
   setCanGrantAdmin as dirSetCanGrant,
   setUserAdmin as dirSetUserAdmin,
+  syncDirectoryFromAppUser,
   unblockEmail,
-  upsertDirectoryUser,
 } from '../lib/adminDirectory'
-import { MASTER_ADMIN_NAME, normalizeEmail } from '../lib/adminConfig'
+import {
+  FULL_PERMISSIONS,
+  hasAdminPermission,
+  SUPPORT_PERMISSIONS,
+  type AdminPermissionPreset,
+  ADMIN_PRESETS,
+  normalizeAdminPermissions,
+} from '../lib/adminPermissions'
+import {
+  isMasterAdminEmail,
+  isSeedAdminEmail,
+  MASTER_ADMIN_NAME,
+  normalizeEmail,
+} from '../lib/adminConfig'
 import { buildAvatarUrl, withSyncedAvatar } from '../lib/avatar'
+import {
+  BIO_MAX,
+  CHAT_MESSAGE_MAX,
+  GREETING_MESSAGE_MAX,
+  NAME_MAX,
+  PASSWORD_MAX,
+  PASSWORD_MIN,
+  clampText,
+} from '../lib/fieldLimits'
 import { clampPhotos } from '../lib/photos'
 import {
+  generateLocalUsername,
+  isValidUsername,
+  normalizeUsername,
+} from '../lib/username'
+import { activeBreakUntil } from '../lib/schedule'
+import {
+  blockUserId,
+  loadBlockedUserIds,
+  reportReasonLabel,
+  type ReportReasonId,
+  unblockUserId,
+} from '../lib/userBlocks'
+import {
+  createAdminOutboundTicket,
   createTicket,
   replyToTicket,
+  saveTickets,
   seedTicketsIfEmpty,
   setTicketStatus,
 } from '../lib/feedback'
@@ -38,18 +139,17 @@ import {
   normalizeLikesMap,
   resolveLikers,
   resolveOutgoingLikes,
-  SEED_LIKES,
   toggleLikeInMap,
   type LikesMap,
 } from '../lib/likes'
-import { normalizeMessages } from '../lib/messages'
 import {
   DEFAULT_NOTIF_PREFS,
-  STORAGE_NOTIFICATIONS,
-  STORAGE_NOTIF_PREFS,
   isNotificationAllowed,
-  normalizeNotificationPrefs,
-  normalizeNotifications,
+  appendNotificationForEmail,
+  loadNotificationPrefsForUser,
+  loadNotificationsForUser,
+  saveNotificationPrefsForUser,
+  saveNotificationsForUser,
   unreadNotificationsCount,
 } from '../lib/notifications'
 import { loadJson, saveJson } from '../lib/storage'
@@ -61,6 +161,7 @@ import type {
   Conversation,
   FeedbackCategoryId,
   FeedbackTicket,
+  AdminPermissions,
   FeedbackTicketStatus,
   Gender,
   Intent,
@@ -81,9 +182,11 @@ export interface AppContextValue {
   notificationPrefs: NotificationPrefs
   unreadNotifications: number
   directory: typeof USERS
-  login: (email: string, password: string) => boolean
-  register: (name: string, email: string, password: string, gender: Gender) => boolean
-  logout: () => void
+  /** true = Postgres API доступен; иначе localStorage fallback */
+  apiOnline: boolean
+  login: (email: string, password: string) => Promise<boolean>
+  register: (name: string, email: string, password: string, gender: Gender) => Promise<boolean>
+  logout: () => Promise<void>
   completeOnboarding: (data: Partial<AppUser>) => void
   updateProfile: (data: Partial<AppUser>) => void
   /** Быстрый check-in/out; при нескольких залах лучше checkIn + picker */
@@ -97,10 +200,20 @@ export interface AppContextValue {
   getLikesFor: (userId: string) => { count: number; likedByMe: boolean; likers: UserProfile[] }
   /** Пользователи, которых лайкнул текущий аккаунт (любые залы) */
   getMyLikedUsers: () => UserProfile[]
-  sendMessage: (conversationId: string, text: string) => void
-  startConversation: (userId: string, text: string) => string
-  acceptRequest: (conversationId: string) => void
-  markRead: (conversationId: string) => void
+  /** Exact find by @username; caches profile in directory */
+  lookupUsername: (username: string) => Promise<UserProfile>
+  /** Partial @ник / имя — серверный поиск */
+  searchUsers: (query: string) => Promise<UserProfile[]>
+  /** Профиль по id с сервера (кэширует) */
+  fetchUserById: (userId: string) => Promise<UserProfile>
+  rememberUser: (person: UserProfile) => void
+  sendMessage: (conversationId: string, text: string) => void | Promise<void>
+  startConversation: (userId: string, text: string) => string | Promise<string>
+  acceptRequest: (conversationId: string) => void | Promise<void>
+  markRead: (conversationId: string) => void | Promise<void>
+  /** Подтянуть список чатов / тред с сервера */
+  refreshChats: () => Promise<void>
+  refreshThread: (conversationId: string) => Promise<void>
   updateNotificationPrefs: (patch: Partial<NotificationPrefs>) => void
   markNotificationRead: (id: string) => void
   markAllNotificationsRead: () => void
@@ -109,40 +222,131 @@ export interface AppContextValue {
   adminDirectory: AdminDirectoryUser[]
   blockedEmails: string[]
   canManageAdmins: boolean
-  refreshSupport: () => void
-  createFeedbackTicket: (category: FeedbackCategoryId, message: string) => FeedbackTicket
-  replyFeedbackTicket: (ticketId: string, message: string) => FeedbackTicket
+  canBlockUsers: boolean
+  canRemoveUsers: boolean
+  canViewUsers: boolean
+  canHandleTickets: boolean
+  canMessageUsers: boolean
+  refreshSupport: () => void | Promise<void>
+  createFeedbackTicket: (
+    category: FeedbackCategoryId,
+    message: string,
+  ) => Promise<FeedbackTicket>
+  replyFeedbackTicket: (ticketId: string, message: string) => Promise<FeedbackTicket>
   adminReplyTicket: (
     ticketId: string,
     message: string,
     closeAs?: 'resolved' | 'closed',
-  ) => FeedbackTicket
-  adminSetTicketStatus: (ticketId: string, status: FeedbackTicketStatus) => FeedbackTicket
-  adminSetUserAdmin: (userId: string, isAdmin: boolean) => void
+  ) => Promise<FeedbackTicket>
+  adminSetTicketStatus: (
+    ticketId: string,
+    status: FeedbackTicketStatus,
+  ) => FeedbackTicket | Promise<FeedbackTicket>
+  adminSetUserAdmin: (
+    userId: string,
+    isAdmin: boolean,
+    preset?: AdminPermissionPreset,
+  ) => void | Promise<void>
+  adminSetPermissions: (
+    userId: string,
+    permissions: AdminPermissions,
+  ) => void | Promise<void>
   adminSetCanGrant: (userId: string, canGrant: boolean) => void
-  adminBlockEmail: (email: string) => void
-  adminUnblockEmail: (email: string) => void
+  adminBlockEmail: (email: string) => void | Promise<void>
+  adminUnblockEmail: (email: string) => void | Promise<void>
+  adminRemoveUser: (email: string, alsoBlock?: boolean) => void | Promise<void>
+  /** Админ пишет пользователю (тикет + уведомление в его ленту) */
+  adminMessageUser: (target: AdminDirectoryUser, message: string) => Promise<FeedbackTicket>
+  /** Перечитать директорию и аккаунты localStorage / API */
+  refreshAdminDirectory: () => void | Promise<void>
+  /** Пользователи, которых скрыл текущий аккаунт */
+  blockedUserIds: string[]
+  isBlocked: (userId: string) => boolean
+  blockUser: (userId: string) => void | Promise<void>
+  unblockUser: (userId: string) => void | Promise<void>
+  reportUser: (
+    userId: string,
+    reason: ReportReasonId,
+    note?: string,
+  ) => Promise<FeedbackTicket>
 }
 
 const STORAGE_USER = 'spotter.user'
-const STORAGE_CHATS = 'spotter.conversations'
-const STORAGE_MSGS = 'spotter.messages'
-const STORAGE_LIKES = 'spotter.likes'
+
+function createDemoAppUser(): AppUser {
+  const demo = createDefaultUser(DEMO_ACCOUNT_NAME, DEMO_ACCOUNT_EMAIL, 'male')
+  demo.onboardingDone = true
+  demo.city = 'Москва'
+  demo.gymIds = [DEMO_GYM_ID]
+  demo.homeGymId = DEMO_GYM_ID
+  demo.bio = 'В зале 4 раза в неделю. Открыт к знакомствам и совместным тренировкам.'
+  demo.intent = 'both'
+  demo.interests = ['Знакомства', 'Силовые', 'Вечерние тренировки']
+  demo.sports = ['Силовые', 'Тренажёрный зал']
+  demo.visitSlots = [
+    { day: 'Пн', from: '19:00', to: '21:00' },
+    { day: 'Ср', from: '19:00', to: '21:00' },
+    { day: 'Пт', from: '19:00', to: '21:00' },
+  ]
+  demo.photos = []
+  return demo
+}
 
 export const AppContext = createContext<AppContextValue | null>(null)
 
 function withAdminFlags(user: AppUser): AppUser {
-  const flags = adminFlagsForEmail(user.email)
-  const next = { ...user, ...flags }
-  upsertDirectoryUser({
-    id: next.id,
-    name: next.name,
-    email: next.email,
-    isAdmin: next.isAdmin,
-    isMasterAdmin: next.isMasterAdmin,
-    canGrantAdmin: next.canGrantAdmin,
-  })
+  const local = adminFlagsForEmail(user.email)
+  const isMasterAdmin = local.isMasterAdmin || Boolean(user.isMasterAdmin)
+  const isAdmin = isMasterAdmin || local.isAdmin || Boolean(user.isAdmin)
+  const adminPermissions = isMasterAdmin
+    ? { ...FULL_PERMISSIONS }
+    : normalizeAdminPermissions(user.adminPermissions || local.adminPermissions, {
+        isAdmin,
+        isMasterAdmin,
+        canGrantAdmin: Boolean(user.canGrantAdmin || user.adminPermissions?.manageAdmins),
+      })
+  const next: AppUser = {
+    ...user,
+    isAdmin,
+    isMasterAdmin,
+    adminPermissions,
+    canGrantAdmin: adminPermissions.manageAdmins,
+    registeredAt: user.registeredAt || user.lastSeenAt || new Date().toISOString(),
+  }
+  syncDirectoryFromAppUser(next)
   return next
+}
+
+function toAdminDirectoryUser(u: AppUser): AdminDirectoryUser {
+  return {
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    isAdmin: Boolean(u.isAdmin),
+    isMasterAdmin: Boolean(u.isMasterAdmin),
+    canGrantAdmin: Boolean(u.canGrantAdmin ?? u.adminPermissions?.manageAdmins),
+    adminPermissions: u.adminPermissions,
+    age: u.age,
+    gender: u.gender,
+    city: u.city,
+    homeGymId: u.homeGymId,
+    gymIds: u.gymIds,
+    intent: u.intent,
+    experienceLevel: u.experienceLevel,
+    isCoach: u.isCoach,
+    onboardingDone: u.onboardingDone,
+    isActive: u.isActive,
+    checkedInGymId: u.checkedInGymId,
+    photosCount:
+      typeof (u as AppUser & { photosCount?: number }).photosCount === 'number'
+        ? (u as AppUser & { photosCount?: number }).photosCount
+        : Array.isArray(u.photos)
+          ? u.photos.length
+          : 0,
+    registeredAt: u.registeredAt,
+    lastSeenAt: u.lastSeenAt,
+    isDemoSeed: false,
+  }
 }
 
 function normalizeGender(value: unknown): Gender {
@@ -151,18 +355,17 @@ function normalizeGender(value: unknown): Gender {
 
 function createDefaultUser(name: string, email: string, gender: Gender = 'male'): AppUser {
   const flags = adminFlagsForEmail(email)
+  const displayName = flags.isMasterAdmin ? MASTER_ADMIN_NAME : name
   return withAdminFlags({
     id: 'me',
-    name: flags.isMasterAdmin ? MASTER_ADMIN_NAME : name,
+    username: generateLocalUsername(displayName),
+    name: displayName,
     email: normalizeEmail(email),
     age: 25,
     gender: normalizeGender(gender),
     bio: '',
     photos: [],
-    avatar: buildAvatarUrl(
-      flags.isMasterAdmin ? MASTER_ADMIN_NAME : name,
-      normalizeGender(gender),
-    ),
+    avatar: buildAvatarUrl(displayName, normalizeGender(gender)),
     gymIds: [],
     homeGymId: '',
     city: '',
@@ -173,15 +376,19 @@ function createDefaultUser(name: string, email: string, gender: Gender = 'male')
     isCoach: false,
     coachSports: [],
     visitSlots: [] as VisitSlot[],
+    breakUntil: null as string | null,
     privacy: 'open' as PrivacyMode,
     lookingToMeet: true,
     isActive: false,
     checkedInGymId: '',
+    checkedInAt: '',
     lastSeenAt: new Date().toISOString(),
+    registeredAt: new Date().toISOString(),
     onboardingDone: false,
     isAdmin: flags.isAdmin,
     isMasterAdmin: flags.isMasterAdmin,
     canGrantAdmin: flags.canGrantAdmin,
+    adminPermissions: flags.adminPermissions,
   })
 }
 
@@ -206,64 +413,187 @@ function loadUser(): AppUser | null {
       : raw.isActive
         ? gymNormalized.homeGymId || ''
         : ''
+  const existingUsername =
+    typeof raw.username === 'string' ? normalizeUsername(raw.username) : ''
   const normalized = withAdminFlags(
     withSyncedAvatar({
       ...gymNormalized,
+      username: existingUsername || generateLocalUsername(gymNormalized.name || 'user'),
+      photos: Array.isArray(raw.photos) ? raw.photos : [],
+      sports: Array.isArray(raw.sports) ? raw.sports : [],
+      interests: Array.isArray(raw.interests) ? raw.interests : [],
       isActive: Boolean(raw.isActive) && Boolean(checkedInGymId),
       checkedInGymId: raw.isActive ? checkedInGymId : '',
+      checkedInAt:
+        Boolean(raw.isActive) && Boolean(checkedInGymId)
+          ? typeof raw.checkedInAt === 'string' && raw.checkedInAt
+            ? raw.checkedInAt
+            : typeof raw.lastSeenAt === 'string'
+              ? raw.lastSeenAt
+              : new Date().toISOString()
+          : '',
+      visitSlots: Array.isArray(raw.visitSlots) ? raw.visitSlots : [],
+      breakUntil: activeBreakUntil(raw.breakUntil),
+      registeredAt:
+        typeof raw.registeredAt === 'string' && raw.registeredAt
+          ? raw.registeredAt
+          : typeof raw.lastSeenAt === 'string'
+            ? raw.lastSeenAt
+            : new Date().toISOString(),
       isAdmin: Boolean(raw.isAdmin),
       isMasterAdmin: Boolean(raw.isMasterAdmin),
       canGrantAdmin: Boolean(raw.canGrantAdmin),
+      adminPermissions: raw.adminPermissions,
     }),
   )
   saveJson(STORAGE_USER, normalized)
+  if (normalized.email) saveAccountProfile(normalized)
   return normalized
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(() => loadUser())
-  const [conversations, setConversations] = useState<Conversation[]>(() =>
-    loadJson(STORAGE_CHATS, SEED_CONVERSATIONS),
-  )
-  const [messages, setMessages] = useState<Message[]>(() =>
-    normalizeMessages(loadJson(STORAGE_MSGS, SEED_MESSAGES)),
-  )
-  const [likes, setLikes] = useState<LikesMap>(() =>
-    normalizeLikesMap(loadJson(STORAGE_LIKES, SEED_LIKES)),
-  )
-  const [notifications, setNotifications] = useState<AppNotification[]>(() =>
-    normalizeNotifications(loadJson(STORAGE_NOTIFICATIONS, null)),
-  )
-  const [notificationPrefs, setNotificationPrefs] = useState<NotificationPrefs>(() =>
-    normalizeNotificationPrefs(loadJson(STORAGE_NOTIF_PREFS, DEFAULT_NOTIF_PREFS)),
-  )
+  const [knownUsers, setKnownUsers] = useState<UserProfile[]>(() => {
+    const current = loadUser()
+    return current ? loadAccountBags(current.email).contacts : []
+  })
+  const [apiOnline, setApiOnline] = useState(false)
+  const [conversations, setConversations] = useState<Conversation[]>(() => {
+    const current = loadUser()
+    return current ? loadAccountBags(current.email).conversations : []
+  })
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const current = loadUser()
+    return current ? loadAccountBags(current.email).messages : []
+  })
+  const [likes, setLikes] = useState<LikesMap>(() => {
+    const current = loadUser()
+    return current ? loadAccountBags(current.email).likes : {}
+  })
+  const [notifications, setNotifications] = useState<AppNotification[]>(() => {
+    const current = loadUser()
+    return current ? loadNotificationsForUser(current.email, false) : []
+  })
+  const [notificationPrefs, setNotificationPrefs] = useState<NotificationPrefs>(() => {
+    const current = loadUser()
+    return current ? loadNotificationPrefsForUser(current.email) : { ...DEFAULT_NOTIF_PREFS }
+  })
   const [tickets, setTickets] = useState<FeedbackTicket[]>(() => seedTicketsIfEmpty())
   const [adminDirectory, setAdminDirectory] = useState<AdminDirectoryUser[]>(() => loadDirectory())
   const [blockedEmails, setBlockedEmails] = useState<string[]>(() => loadBlockedEmails())
+  const [blockedUserIds, setBlockedUserIds] = useState<string[]>(() =>
+    loadBlockedUserIds(loadUser()?.id || ''),
+  )
+
+  const userEmailRef = useRef(user?.email || '')
+  const apiOnlineRef = useRef(false)
+  const notificationPrefsRef = useRef(notificationPrefs)
+  useEffect(() => {
+    userEmailRef.current = user?.email || ''
+  }, [user?.email])
+  useEffect(() => {
+    apiOnlineRef.current = apiOnline
+  }, [apiOnline])
+  useEffect(() => {
+    notificationPrefsRef.current = notificationPrefs
+  }, [notificationPrefs])
+
+  // Postgres API: health + восстановление сессии по JWT
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const online = await apiHealth()
+      if (cancelled) return
+      setApiOnline(online)
+      apiOnlineRef.current = online
+
+      // Production: fail closed — no silent localStorage auth without API
+      if (!online && import.meta.env.PROD) {
+        setStoredToken(null)
+        setUser(null)
+        localStorage.removeItem(STORAGE_USER)
+        return
+      }
+
+      if (!online || !getStoredToken()) return
+      try {
+        const me = await apiMe()
+        if (cancelled) return
+        const normalized = withAdminFlags(
+          normalizeGymFields(me as AppUser) as AppUser,
+        )
+        setUser(normalized)
+        saveJson(STORAGE_USER, normalized)
+        saveAccountProfile(normalized)
+        hydrateAccountData(normalized.email)
+      } catch {
+        setStoredToken(null)
+        if (import.meta.env.PROD) {
+          setUser(null)
+          localStorage.removeItem(STORAGE_USER)
+        }
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const persistChats = useCallback((list: Conversation[]) => {
+    const email = userEmailRef.current
+    if (email) saveAccountConversations(email, list)
+  }, [])
+  const persistMsgs = useCallback((list: Message[]) => {
+    const email = userEmailRef.current
+    if (email) saveAccountMessages(email, list)
+  }, [])
+  const persistLikesMap = useCallback((map: LikesMap) => {
+    const email = userEmailRef.current
+    if (email) saveAccountLikes(email, map)
+  }, [])
+
+  const hydrateAccountData = useCallback((email: string) => {
+    userEmailRef.current = email
+    const bags = loadAccountBags(email)
+    const current = loadUser()
+    const contacts = resolveContacts(bags.conversations, bags.contacts, current?.id)
+    setConversations(bags.conversations)
+    setMessages(bags.messages)
+    setLikes(bags.likes)
+    setKnownUsers(contacts)
+    saveAccountContacts(email, contacts)
+    // seed уведомлений только для демо и только при первом создании ключа
+    setNotifications(loadNotificationsForUser(email, false))
+    setNotificationPrefs(loadNotificationPrefsForUser(email))
+  }, [])
 
   const pushNotification = useCallback(
     (item: Omit<AppNotification, 'id' | 'createdAt' | 'read'> & { id?: string }) => {
-      setNotificationPrefs((prefs) => {
-        if (!isNotificationAllowed(prefs, item.type)) return prefs
-        setNotifications((prev) => {
-          const next: AppNotification[] = [
-            {
-              id: item.id || `n-${Date.now()}`,
-              createdAt: new Date().toISOString(),
-              read: false,
-              title: item.title,
-              body: item.body,
-              type: item.type,
-              href: item.href,
-              gymId: item.gymId,
-              actorId: item.actorId,
-            },
-            ...prev,
-          ]
-          saveJson(STORAGE_NOTIFICATIONS, next)
-          return next
-        })
-        return prefs
+      const email = userEmailRef.current
+      if (!email) return
+      if (!isNotificationAllowed(notificationPrefsRef.current, item.type)) return
+
+      setNotifications((prev) => {
+        const id = item.id || `n-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+        // Стабильный id (например после онбординга) — не дублируем
+        if (item.id && prev.some((n) => n.id === item.id)) return prev
+        const next: AppNotification[] = [
+          {
+            id,
+            createdAt: new Date().toISOString(),
+            read: false,
+            title: item.title,
+            body: item.body,
+            type: item.type,
+            href: item.href,
+            gymId: item.gymId,
+            actorId: item.actorId,
+          },
+          ...prev,
+        ]
+        saveNotificationsForUser(email, next)
+        return next
       })
     },
     [],
@@ -278,7 +608,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     (messageId: string, status: MessageStatus) => {
       setMessages((prev) => {
         const next = prev.map((m) => (m.id === messageId ? { ...m, status } : m))
-        saveJson(STORAGE_MSGS, next)
+        persistMsgs(next)
         return next
       })
     },
@@ -297,127 +627,431 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [patchMessageStatus],
   )
 
-  const persistUser = useCallback((next: AppUser | null) => {
-    if (next) {
-      const normalized = withAdminFlags(normalizeGymFields(next) as AppUser)
-      setUser(normalized)
-      saveJson(STORAGE_USER, normalized)
-      setAdminDirectory(loadDirectory())
+  const persistUser = useCallback(
+    (next: AppUser | null) => {
+      if (next) {
+        const normalized = withAdminFlags(normalizeGymFields(next) as AppUser)
+        setUser(normalized)
+        saveJson(STORAGE_USER, normalized)
+        saveAccountProfile(normalized)
+        setAdminDirectory(loadDirectory())
+        setBlockedUserIds(loadBlockedUserIds(normalized.id))
+        hydrateAccountData(normalized.email)
+        return
+      }
+      setUser(null)
+      setBlockedUserIds([])
+      userEmailRef.current = ''
+      setConversations([])
+      setMessages([])
+      setLikes({})
+      setNotifications([])
+      setNotificationPrefs({ ...DEFAULT_NOTIF_PREFS })
+      localStorage.removeItem(STORAGE_USER)
+    },
+    [hydrateAccountData],
+  )
+
+  const rememberUserRef = useRef<(person: UserProfile) => void>(() => undefined)
+
+  const refreshChats = useCallback(async () => {
+    if (!apiOnlineRef.current || !getStoredToken()) return
+    const list = await apiFetchConversations()
+    for (const row of list) {
+      if (row.other) rememberUserRef.current(row.other)
+    }
+    const next = list
+      .map(({ other: _o, ...c }) => c)
+      .sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt))
+    setConversations(next)
+    const email = userEmailRef.current
+    if (email) saveAccountConversations(email, next)
+  }, [])
+
+  const refreshThread = useCallback(async (conversationId: string) => {
+    if (!apiOnlineRef.current || !getStoredToken() || !conversationId) return
+    const { conversation, messages: thread } = await apiFetchMessages(conversationId)
+    if (conversation.other) rememberUserRef.current(conversation.other)
+    const { other: _o, ...conv } = conversation
+    setConversations((prev) => {
+      const rest = prev.filter((c) => c.id !== conv.id)
+      const next = [conv, ...rest].sort(
+        (a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt),
+      )
+      const email = userEmailRef.current
+      if (email) saveAccountConversations(email, next)
+      return next
+    })
+    setMessages((prev) => {
+      const others = prev.filter((m) => m.conversationId !== conversationId)
+      const next = [...others, ...thread]
+      const email = userEmailRef.current
+      if (email) saveAccountMessages(email, next)
+      return next
+    })
+  }, [])
+
+  const hydrateSocialFromApi = useCallback(async () => {
+    if (!apiOnlineRef.current || !getStoredToken()) return
+    try {
+      const [likesMap, notifs, prefs, ticketsList, blockedIds] = await Promise.all([
+        apiFetchLikes(),
+        apiFetchNotifications(),
+        apiFetchNotificationPrefs(),
+        apiFetchTickets(),
+        apiFetchBlocks(),
+      ])
+      const email = userEmailRef.current
+      setLikes(normalizeLikesMap(likesMap))
+      if (email) saveAccountLikes(email, likesMap)
+      setNotifications(notifs)
+      if (email) saveNotificationsForUser(email, notifs)
+      setNotificationPrefs(prefs)
+      if (email) saveNotificationPrefsForUser(email, prefs)
+      setTickets(ticketsList)
+      saveTickets(ticketsList)
+      setBlockedUserIds(blockedIds)
+      await refreshChats()
+    } catch {
+      /* keep local cache */
+    }
+  }, [refreshChats])
+
+  const refreshSupport = useCallback(async () => {
+    if (apiOnlineRef.current && getStoredToken()) {
+      try {
+        const ticketsList = await apiFetchTickets()
+        setTickets(ticketsList)
+        saveTickets(ticketsList)
+        return
+      } catch {
+        /* fall through */
+      }
+    }
+    setTickets(seedTicketsIfEmpty())
+  }, [])
+
+  const refreshAdminDirectory = useCallback(async () => {
+    if (apiOnlineRef.current && getStoredToken()) {
+      try {
+        const [users, emails] = await Promise.all([
+          apiAdminFetchUsers().catch(() => null),
+          apiAdminFetchBlockedEmails().catch(() => null),
+        ])
+        if (users) {
+          const mapped = users.map(toAdminDirectoryUser)
+          saveDirectory(mapped)
+          setAdminDirectory(mapped)
+        } else {
+          setAdminDirectory(mergeStoredAccountsIntoDirectory())
+        }
+        if (emails) {
+          saveBlockedEmails(emails)
+          setBlockedEmails(emails)
+        } else {
+          setBlockedEmails(loadBlockedEmails())
+        }
+        await refreshSupport()
+        return
+      } catch {
+        /* fall through to local */
+      }
+    }
+    setAdminDirectory(mergeStoredAccountsIntoDirectory())
+    setBlockedEmails(loadBlockedEmails())
+    await refreshSupport()
+  }, [refreshSupport])
+
+  // Общие лайки / уведомления / тикеты с сервера
+  useEffect(() => {
+    if (!apiOnline || !user || !getStoredToken()) return
+    void hydrateSocialFromApi()
+  }, [apiOnline, user?.id, hydrateSocialFromApi])
+
+  // Админ-реестр с сервера
+  useEffect(() => {
+    if (!apiOnline || !user?.isAdmin || !getStoredToken()) return
+    if (
+      !hasAdminPermission(user, 'viewUsers') &&
+      !hasAdminPermission(user, 'manageAdmins') &&
+      !hasAdminPermission(user, 'blockUsers')
+    ) {
       return
     }
-    setUser(null)
-    localStorage.removeItem(STORAGE_USER)
-  }, [])
+    void refreshAdminDirectory()
+  }, [apiOnline, user?.id, user?.isAdmin, refreshAdminDirectory])
 
-  const refreshSupport = useCallback(() => {
-    setTickets(seedTicketsIfEmpty())
-    setAdminDirectory(loadDirectory())
-    setBlockedEmails(loadBlockedEmails())
-  }, [])
+  const loginLocal = useCallback(
+    (email: string, password: string) => {
+      if (import.meta.env.PROD) {
+        throw new Error('Сервер недоступен. Попробуй позже')
+      }
 
-  const login = useCallback(
-    (email: string, _password: string) => {
       const normalizedEmail = normalizeEmail(email)
+      const pass = String(password ?? '')
       if (isEmailBlocked(normalizedEmail)) {
         throw new Error('Этот email заблокирован администратором')
       }
-      const existing = loadUser()
-      if (existing && normalizeEmail(existing.email) === normalizedEmail) {
-        persistUser(existing)
+
+      if (isDemoAccount(normalizedEmail)) {
+        const saved = loadAccountProfile(normalizedEmail)
+        persistUser(saved ? (normalizeGymFields(saved) as AppUser) : createDemoAppUser())
         return true
       }
-      const flags = adminFlagsForEmail(normalizedEmail)
-      const demo = createDefaultUser(flags.isMasterAdmin ? MASTER_ADMIN_NAME : 'Алекс', normalizedEmail, 'male')
-      demo.onboardingDone = true
-      demo.city = 'Москва'
-      demo.gymIds = [DEMO_GYM_ID]
-      demo.homeGymId = DEMO_GYM_ID
-      demo.bio = flags.isMasterAdmin
-        ? 'Главный админ Spotter. Обратная связь и тикеты — через админку.'
-        : 'В зале 4 раза в неделю. Открыт к знакомствам и совместным тренировкам.'
-      demo.intent = 'both' as Intent
-      demo.interests = ['Знакомства', 'Силовые', 'Вечерние тренировки']
-      demo.sports = ['Силовые', 'Тренажёрный зал']
-      demo.visitSlots = [
-        { day: 'Пн', from: '19:00', to: '21:00' },
-        { day: 'Ср', from: '19:00', to: '21:00' },
-        { day: 'Пт', from: '19:00', to: '21:00' },
-      ]
-      demo.photos = []
-      persistUser(demo)
+
+      const saved = loadAccountProfile(normalizedEmail)
+      const session = loadUser()
+      const sessionMatch =
+        session && normalizeEmail(session.email) === normalizedEmail ? session : null
+
+      // Dev-only: no auto-create admin accounts on login
+      if (!saved && !sessionMatch) {
+        throw new Error('Аккаунт не найден')
+      }
+
+      if (hasAccountPassword(normalizedEmail)) {
+        if (!verifyAccountPassword(normalizedEmail, pass)) {
+          throw new Error('Неверный email или пароль')
+        }
+      } else if (pass.length >= PASSWORD_MIN) {
+        saveAccountPassword(normalizedEmail, pass)
+      } else {
+        throw new Error('Неверный email или пароль')
+      }
+
+      persistUser(normalizeGymFields((saved || sessionMatch) as AppUser) as AppUser)
       return true
     },
     [persistUser],
+  )
+
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const normalizedEmail = normalizeEmail(email)
+      if (isDemoAccount(normalizedEmail)) {
+        if (import.meta.env.PROD) {
+          throw new Error('Демо-вход недоступен')
+        }
+        return loginLocal(email, password)
+      }
+
+      const online = apiOnlineRef.current || (await apiHealth())
+      setApiOnline(online)
+      if (online) {
+        try {
+          const me = await apiLogin(normalizedEmail, password)
+          persistUser(withAdminFlags(normalizeGymFields(me as AppUser) as AppUser))
+          return true
+        } catch (err) {
+          if (err instanceof ApiError) throw err
+          throw new Error(err instanceof Error ? err.message : 'Не удалось войти')
+        }
+      }
+
+      return loginLocal(email, password)
+    },
+    [loginLocal, persistUser],
   )
 
   const register = useCallback(
-    (name: string, email: string, _password: string, gender: Gender) => {
+    async (name: string, email: string, password: string, gender: Gender) => {
       const normalizedEmail = normalizeEmail(email)
+      const pass = String(password ?? '')
       if (isEmailBlocked(normalizedEmail)) {
         throw new Error('Этот email заблокирован администратором')
       }
-      persistUser(createDefaultUser(name, normalizedEmail, normalizeGender(gender)))
+      if (isDemoAccount(normalizedEmail)) {
+        throw new Error('Этот email недоступен для регистрации')
+      }
+      if (pass.length < PASSWORD_MIN) {
+        throw new Error(`Пароль должен быть не короче ${PASSWORD_MIN} символов`)
+      }
+      if (pass.length > PASSWORD_MAX) {
+        throw new Error(`Пароль слишком длинный — максимум ${PASSWORD_MAX} символов`)
+      }
+      const safeName = clampText(name.trim(), NAME_MAX)
+
+      const online = apiOnlineRef.current || (await apiHealth())
+      setApiOnline(online)
+      if (online) {
+        try {
+          const me = await apiRegister({
+            name: safeName,
+            email: normalizedEmail,
+            password: pass,
+            gender: normalizeGender(gender),
+          })
+          persistUser(withAdminFlags(normalizeGymFields(me as AppUser) as AppUser))
+          return true
+        } catch (err) {
+          if (err instanceof ApiError) throw err
+          throw new Error(err instanceof Error ? err.message : 'Не удалось зарегистрироваться')
+        }
+      }
+
+      if (import.meta.env.PROD) {
+        throw new Error('Сервер недоступен. Попробуй позже')
+      }
+
+      if (loadAccountProfile(normalizedEmail)) {
+        throw new Error('Аккаунт с таким email уже есть — войди')
+      }
+      saveAccountPassword(normalizedEmail, pass)
+      persistUser(createDefaultUser(safeName, normalizedEmail, normalizeGender(gender)))
       return true
     },
     [persistUser],
   )
 
-  const logout = useCallback(() => persistUser(null), [persistUser])
+  const logout = useCallback(async () => {
+    if (apiOnlineRef.current || getStoredToken()) {
+      try {
+        await apiLogout()
+      } catch {
+        setStoredToken(null)
+      }
+    }
+    persistUser(null)
+  }, [persistUser])
+
+  const applyServerUser = useCallback((me: AppUser) => {
+    const next = withAdminFlags(normalizeGymFields(me) as AppUser)
+    setUser(next)
+    saveJson(STORAGE_USER, next)
+    saveAccountProfile(next)
+    return next
+  }, [])
 
   const completeOnboarding = useCallback(
     (data: Partial<AppUser>) => {
-      setUser((prev) => {
-        if (!prev) return prev
-        const next = withSyncedAvatar(
-          normalizeGymFields({ ...prev, ...data, onboardingDone: true }) as AppUser,
-        )
-        saveJson(STORAGE_USER, next)
-        return next
+      // flushSync: иначе navigate('/app') успевает раньше, чем onboardingDone=true,
+      // ProtectedRoute кидает обратно на /onboarding → пустой/чёрный экран
+      let payload: AppUser | null = null
+      flushSync(() => {
+        setUser((prev) => {
+          if (!prev) return prev
+          const next = withSyncedAvatar(
+            normalizeGymFields({
+              ...prev,
+              ...data,
+              photos: Array.isArray(data.photos) ? data.photos : prev.photos || [],
+              sports: Array.isArray(data.sports) ? data.sports : prev.sports || [],
+              interests: Array.isArray(data.interests) ? data.interests : prev.interests || [],
+              coachSports: Array.isArray(data.coachSports)
+                ? data.coachSports
+                : prev.coachSports || [],
+              visitSlots: Array.isArray(data.visitSlots) ? data.visitSlots : prev.visitSlots || [],
+              onboardingDone: true,
+            }) as AppUser,
+          )
+          payload = next
+          saveJson(STORAGE_USER, next)
+          saveAccountProfile(next)
+          return next
+        })
       })
-      // Демо: «соседи» по залу узнают о новичке — тебе показываем зеркальный тип уведомления
+      if (payload && apiOnlineRef.current && !isDemoAccount(payload.email)) {
+        void apiPatchMe({
+          ...data,
+          onboardingDone: true,
+          gymIds: payload.gymIds,
+          homeGymId: payload.homeGymId,
+          city: payload.city,
+          age: payload.age,
+          bio: payload.bio,
+          intent: payload.intent,
+          experienceLevel: payload.experienceLevel,
+          interests: payload.interests,
+          sports: payload.sports,
+          isCoach: payload.isCoach,
+          coachSports: payload.coachSports,
+          visitSlots: payload.visitSlots,
+          privacy: payload.privacy,
+          lookingToMeet: payload.lookingToMeet,
+        }).then((me) => applyServerUser(me as AppUser)).catch(() => undefined)
+      }
       window.setTimeout(() => {
         pushNotification({
+          id: 'n-onboarding-welcome',
           type: 'system',
-          title: 'Ты на этаже',
-          body: 'Профиль готов. Соседи по залу могут увидеть тебя в списке клуба.',
+          title: 'Профиль готов',
+          body: 'Можно отметить зал и найти своих',
           href: '/app',
         })
       }, 400)
     },
-    [pushNotification],
+    [pushNotification, applyServerUser],
   )
 
-  const updateProfile = useCallback((data: Partial<AppUser>) => {
-    setUser((prev) => {
-      if (!prev) return prev
-      const merged = normalizeGymFields({
-        ...prev,
+  const updateProfile = useCallback(
+    (data: Partial<AppUser>) => {
+      const safe: Partial<AppUser> = {
         ...data,
+        ...(data.name !== undefined ? { name: clampText(data.name.trim(), NAME_MAX) } : {}),
+        ...(data.username !== undefined
+          ? { username: normalizeUsername(data.username) }
+          : {}),
+        ...(data.bio !== undefined ? { bio: clampText(data.bio, BIO_MAX) } : {}),
         ...(data.photos !== undefined ? { photos: clampPhotos(data.photos) } : {}),
-        ...(data.gender !== undefined ? { gender: normalizeGender(data.gender) } : {}),
-        lastSeenAt: new Date().toISOString(),
-      }) as AppUser
-      const nameOrGenderChanged =
-        data.name !== undefined || data.gender !== undefined || data.photos !== undefined
-      const next = nameOrGenderChanged ? withSyncedAvatar(merged) : merged
-      saveJson(STORAGE_USER, next)
-      return next
-    })
-  }, [])
-
-  const checkIn = useCallback((gymId: string) => {
-    setUser((prev) => {
-      if (!prev || !prev.gymIds.includes(gymId)) return prev
-      const next = {
-        ...prev,
-        isActive: true,
-        checkedInGymId: gymId,
-        lastSeenAt: new Date().toISOString(),
       }
-      saveJson(STORAGE_USER, next)
-      return next
-    })
-  }, [])
+      setUser((prev) => {
+        if (!prev) return prev
+        const merged = normalizeGymFields({
+          ...prev,
+          ...safe,
+          ...(safe.gender !== undefined ? { gender: normalizeGender(safe.gender) } : {}),
+          ...(safe.breakUntil !== undefined
+            ? { breakUntil: activeBreakUntil(safe.breakUntil) }
+            : {}),
+          lastSeenAt: new Date().toISOString(),
+        }) as AppUser
+        const nameOrGenderChanged =
+          safe.name !== undefined || safe.gender !== undefined || safe.photos !== undefined
+        const next = nameOrGenderChanged ? withSyncedAvatar(merged) : merged
+        saveJson(STORAGE_USER, next)
+        saveAccountProfile(next)
+        if (apiOnlineRef.current && !isDemoAccount(next.email)) {
+          void apiPatchMe({
+            ...safe,
+            ...(safe.photos !== undefined ? { photos: next.photos } : {}),
+            gymIds: safe.gymIds ?? next.gymIds,
+            homeGymId: safe.homeGymId ?? next.homeGymId,
+          })
+            .then((me) => applyServerUser(me as AppUser))
+            .catch(() => undefined)
+        }
+        return next
+      })
+    },
+    [applyServerUser],
+  )
+
+  const checkIn = useCallback(
+    (gymId: string) => {
+      setUser((prev) => {
+        if (!prev || !prev.gymIds.includes(gymId)) return prev
+        const now = new Date().toISOString()
+        const sameSession = prev.isActive && prev.checkedInGymId === gymId
+        const next = {
+          ...prev,
+          isActive: true,
+          checkedInGymId: gymId,
+          checkedInAt: sameSession && prev.checkedInAt ? prev.checkedInAt : now,
+          breakUntil: null,
+          lastSeenAt: now,
+        }
+        saveJson(STORAGE_USER, next)
+        saveAccountProfile(next)
+        if (apiOnlineRef.current && !isDemoAccount(next.email)) {
+          void apiCheckIn(gymId)
+            .then((me) => applyServerUser(me as AppUser))
+            .catch(() => undefined)
+        }
+        return next
+      })
+    },
+    [applyServerUser],
+  )
 
   const checkOut = useCallback(() => {
     setUser((prev) => {
@@ -426,12 +1060,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ...prev,
         isActive: false,
         checkedInGymId: '',
+        checkedInAt: '',
         lastSeenAt: new Date().toISOString(),
       }
       saveJson(STORAGE_USER, next)
+      saveAccountProfile(next)
+      if (apiOnlineRef.current && !isDemoAccount(next.email)) {
+        void apiCheckOut()
+          .then((me) => applyServerUser(me as AppUser))
+          .catch(() => undefined)
+      }
       return next
     })
-  }, [])
+  }, [applyServerUser])
 
   const toggleActive = useCallback(
     (gymId?: string) => {
@@ -442,9 +1083,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
             ...prev,
             isActive: false,
             checkedInGymId: '',
+            checkedInAt: '',
             lastSeenAt: new Date().toISOString(),
           }
           saveJson(STORAGE_USER, next)
+          saveAccountProfile(next)
+          if (apiOnlineRef.current && !isDemoAccount(next.email)) {
+            void apiCheckOut()
+              .then((me) => applyServerUser(me as AppUser))
+              .catch(() => undefined)
+          }
           return next
         }
         const target =
@@ -453,82 +1101,280 @@ export function AppProvider({ children }: { children: ReactNode }) {
           prev.gymIds[0] ||
           ''
         if (!target) return prev
+        const now = new Date().toISOString()
         const next = {
           ...prev,
           isActive: true,
           checkedInGymId: target,
-          lastSeenAt: new Date().toISOString(),
+          checkedInAt: now,
+          lastSeenAt: now,
         }
         saveJson(STORAGE_USER, next)
+        saveAccountProfile(next)
+        if (apiOnlineRef.current && !isDemoAccount(next.email)) {
+          void apiCheckIn(target)
+            .then((me) => applyServerUser(me as AppUser))
+            .catch(() => undefined)
+        }
         return next
       })
     },
-    [],
+    [applyServerUser],
   )
 
-  const joinGym = useCallback((gymId: string, makeHome = false) => {
-    setUser((prev) => {
-      if (!prev) return prev
-      const next = withGymMembership(prev, gymId, true, { makeHome })
-      saveJson(STORAGE_USER, next)
+  const joinGym = useCallback(
+    (gymId: string, makeHome = false) => {
+      setUser((prev) => {
+        if (!prev) return prev
+        const next = withGymMembership(prev, gymId, true, { makeHome })
+        saveJson(STORAGE_USER, next)
+        saveAccountProfile(next)
+        if (apiOnlineRef.current && !isDemoAccount(next.email)) {
+          void apiJoinGym(gymId, makeHome)
+            .then((me) => applyServerUser(me as AppUser))
+            .catch(() => undefined)
+        }
+        return next
+      })
+    },
+    [applyServerUser],
+  )
+
+  const leaveGym = useCallback(
+    (gymId: string) => {
+      setUser((prev) => {
+        if (!prev) return prev
+        const next = withGymMembership(prev, gymId, false)
+        saveJson(STORAGE_USER, next)
+        saveAccountProfile(next)
+        if (apiOnlineRef.current && !isDemoAccount(next.email)) {
+          void apiLeaveGym(gymId)
+            .then((me) => applyServerUser(me as AppUser))
+            .catch(() => undefined)
+        }
+        return next
+      })
+    },
+    [applyServerUser],
+  )
+
+  const setHomeGym = useCallback(
+    (gymId: string) => {
+      setUser((prev) => {
+        if (!prev) return prev
+        const gymIds = prev.gymIds.includes(gymId) ? prev.gymIds : [...prev.gymIds, gymId]
+        const next = {
+          ...prev,
+          gymIds,
+          homeGymId: gymId,
+          lastSeenAt: new Date().toISOString(),
+        }
+        saveJson(STORAGE_USER, next)
+        saveAccountProfile(next)
+        if (apiOnlineRef.current && !isDemoAccount(next.email)) {
+          void apiPatchMe({ gymIds, homeGymId: gymId })
+            .then((me) => applyServerUser(me as AppUser))
+            .catch(() => undefined)
+        }
+        return next
+      })
+    },
+    [applyServerUser],
+  )
+
+  const rememberUser = useCallback((person: UserProfile) => {
+    setKnownUsers((prev) => {
+      const i = prev.findIndex((u) => u.id === person.id)
+      const next =
+        i >= 0
+          ? prev.map((u, idx) => (idx === i ? { ...u, ...person } : u))
+          : [...prev, person]
+      const email = userEmailRef.current
+      if (email) saveAccountContacts(email, next)
       return next
     })
   }, [])
 
-  const leaveGym = useCallback((gymId: string) => {
-    setUser((prev) => {
-      if (!prev) return prev
-      const next = withGymMembership(prev, gymId, false)
-      saveJson(STORAGE_USER, next)
-      return next
-    })
-  }, [])
-
-  const setHomeGym = useCallback((gymId: string) => {
-    setUser((prev) => {
-      if (!prev) return prev
-      const gymIds = prev.gymIds.includes(gymId) ? prev.gymIds : [...prev.gymIds, gymId]
-      const next = {
-        ...prev,
-        gymIds,
-        homeGymId: gymId,
-        lastSeenAt: new Date().toISOString(),
-      }
-      saveJson(STORAGE_USER, next)
-      return next
-    })
-  }, [])
+  useEffect(() => {
+    rememberUserRef.current = rememberUser
+  }, [rememberUser])
 
   const toggleLike = useCallback(
     (userId: string) => {
       if (!user || user.id === userId) return
+      if (apiOnlineRef.current && getStoredToken()) {
+        void apiToggleLike(userId)
+          .then(({ likes: next }) => {
+            const map = normalizeLikesMap(next)
+            setLikes(map)
+            persistLikesMap(map)
+          })
+          .catch(() => {
+            setLikes((prev) => {
+              const next = toggleLikeInMap(prev, userId, user.id)
+              persistLikesMap(next)
+              return next
+            })
+          })
+        return
+      }
       setLikes((prev) => {
         const next = toggleLikeInMap(prev, userId, user.id)
-        saveJson(STORAGE_LIKES, next)
+        persistLikesMap(next)
         return next
       })
     },
-    [user],
+    [user, persistLikesMap],
   )
 
   const getLikesFor = useCallback(
     (userId: string) => ({
       count: getLikeCount(likes, userId),
       likedByMe: user ? hasLiked(likes, userId, user.id) : false,
-      likers: resolveLikers(likes, userId, user),
+      likers: resolveLikers(likes, userId, user, knownUsers),
     }),
-    [likes, user],
+    [likes, user, knownUsers],
   )
 
   const getMyLikedUsers = useCallback(
-    () => (user ? resolveOutgoingLikes(likes, user.id, user) : []),
-    [likes, user],
+    () => (user ? resolveOutgoingLikes(likes, user.id, user, knownUsers) : []),
+    [likes, user, knownUsers],
+  )
+
+  const lookupUsername = useCallback(
+    async (raw: string) => {
+      const username = normalizeUsername(raw)
+      if (!isValidUsername(username)) {
+        throw new Error('Ник: 3–20 символов, латиница, цифры и _')
+      }
+      if (user?.username && normalizeUsername(user.username) === username) {
+        return user as UserProfile
+      }
+      const cached = knownUsers.find((u) => u.username && normalizeUsername(u.username) === username)
+      if (cached) return cached
+
+      // Seed / test profiles (e.g. @test) — always findable locally for QA
+      const seed = USERS.find((u) => u.username && normalizeUsername(u.username) === username)
+      if (seed) {
+        rememberUser(seed)
+        return seed
+      }
+
+      const online = apiOnlineRef.current || (await apiHealth())
+      setApiOnline(online)
+      if (!online) {
+        throw new Error('Пользователь не найден')
+      }
+      const found = await apiLookupUsername(username)
+      rememberUser(found)
+      return found
+    },
+    [user, knownUsers, rememberUser],
+  )
+
+  const searchUsers = useCallback(
+    async (raw: string) => {
+      const q = raw.trim().replace(/^@+/, '')
+      if (q.length < 2) {
+        throw new Error('Введи минимум 2 символа')
+      }
+
+      const online = apiOnlineRef.current || (await apiHealth())
+      setApiOnline(online)
+      if (online && getStoredToken()) {
+        const found = await apiSearchUsers(q)
+        for (const person of found) rememberUser(person)
+        return found
+      }
+
+      // Offline / demo: local filter by @ник or name
+      const needle = q.toLowerCase()
+      const pool = [
+        ...(user && isDemoAccount(user.email) ? USERS : []),
+        ...knownUsers,
+        ...(user ? [user as UserProfile] : []),
+      ]
+      const seen = new Set<string>()
+      const results: UserProfile[] = []
+      for (const person of pool) {
+        if (seen.has(person.id)) continue
+        seen.add(person.id)
+        const un = (person.username || '').toLowerCase()
+        const name = (person.name || '').toLowerCase()
+        if (un.includes(needle) || name.includes(needle)) results.push(person)
+        if (results.length >= 20) break
+      }
+      return results
+    },
+    [user, knownUsers, rememberUser],
+  )
+
+  const fetchUserById = useCallback(
+    async (userId: string) => {
+      if (!userId) throw new Error('Пользователь не найден')
+      if (user && user.id === userId) return user as UserProfile
+      const cached = knownUsers.find((u) => u.id === userId)
+      if (cached) return cached
+      if (user && isDemoAccount(user.email)) {
+        const seed = USERS.find((u) => u.id === userId)
+        if (seed) {
+          rememberUser(seed)
+          return seed
+        }
+      }
+      const online = apiOnlineRef.current || (await apiHealth())
+      setApiOnline(online)
+      if (!online || !getStoredToken()) {
+        throw new Error('Пользователь не найден')
+      }
+      const found = await apiFetchUser(userId)
+      rememberUser(found)
+      return found
+    },
+    [user, knownUsers, rememberUser],
   )
 
   const sendMessage = useCallback(
-    (conversationId: string, text: string) => {
-      const trimmed = text.trim()
+    async (conversationId: string, text: string) => {
+      const trimmed = clampText(text.trim(), CHAT_MESSAGE_MAX)
       if (!trimmed) return
+
+      if (apiOnlineRef.current && getStoredToken()) {
+        const optimistic: Message = {
+          id: `local-${Date.now()}`,
+          conversationId,
+          senderId: user?.id || 'me',
+          text: trimmed,
+          createdAt: new Date().toISOString(),
+          status: 'sending',
+        }
+        setMessages((prev) => {
+          const next = [...prev, optimistic]
+          persistMsgs(next)
+          return next
+        })
+        setConversations((prev) => {
+          const next = prev
+            .map((c) =>
+              c.id === conversationId
+                ? { ...c, lastMessage: trimmed, updatedAt: optimistic.createdAt, unreadCount: 0 }
+                : c,
+            )
+            .sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt))
+          persistChats(next)
+          return next
+        })
+        try {
+          await apiSendMessage(conversationId, trimmed)
+          await refreshThread(conversationId)
+          await refreshChats()
+        } catch (err) {
+          setMessages((prev) => prev.filter((m) => m.id !== optimistic.id))
+          throw err
+        }
+        return
+      }
+
       const conversation = conversations.find((c) => c.id === conversationId)
       const msg: Message = {
         id: `m-${Date.now()}`,
@@ -540,42 +1386,69 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       setMessages((prev) => {
         const next = [...prev, msg]
-        saveJson(STORAGE_MSGS, next)
+        persistMsgs(next)
         return next
       })
       setConversations((prev) => {
-        const next = prev.map((c) =>
-          c.id === conversationId
-            ? { ...c, lastMessage: msg.text, updatedAt: msg.createdAt, unreadCount: 0 }
-            : c,
-        )
-        saveJson(STORAGE_CHATS, next)
+        const next = prev
+          .map((c) =>
+            c.id === conversationId
+              ? { ...c, lastMessage: msg.text, updatedAt: msg.createdAt, unreadCount: 0 }
+              : c,
+          )
+          .sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt))
+        persistChats(next)
         return next
       })
       simulateDelivery(msg.id, conversation?.requestStatus === 'pending')
     },
-    [conversations, simulateDelivery],
+    [
+      conversations,
+      simulateDelivery,
+      user?.id,
+      persistMsgs,
+      persistChats,
+      refreshThread,
+      refreshChats,
+    ],
   )
 
   const startConversation = useCallback(
-    (userId: string, text: string) => {
-      const trimmed = text.trim()
+    async (userId: string, text: string) => {
+      if (!user) throw new Error('Нужен вход')
+      if (blockedUserIds.includes(userId)) {
+        throw new Error('Пользователь в чёрном списке')
+      }
+      const trimmed = clampText(text.trim(), GREETING_MESSAGE_MAX)
+
+      if (apiOnlineRef.current && getStoredToken()) {
+        const conv = await apiStartConversation(userId, trimmed || undefined)
+        if (conv.other) rememberUser(conv.other)
+        await refreshChats()
+        if (trimmed || conv.id) await refreshThread(conv.id).catch(() => undefined)
+        return conv.id
+      }
+
       const existing = conversations.find(
-        (c) => c.participantIds.includes('me') && c.participantIds.includes(userId),
+        (c) => otherParticipantId(c, user.id) === userId,
       )
       const conversationId = existing?.id ?? `c-${Date.now()}`
       const now = new Date().toISOString()
+      const seed = USERS.find((u) => u.id === userId)
+      if (seed) rememberUser(seed)
 
       if (existing) {
         if (trimmed) {
           const msgId = `m-${Date.now()}`
           setConversations((prev) => {
-            const next = prev.map((c) =>
-              c.id === existing.id
-                ? { ...c, lastMessage: trimmed, updatedAt: now }
-                : c,
-            )
-            saveJson(STORAGE_CHATS, next)
+            const next = prev
+              .map((c) =>
+                c.id === existing.id
+                  ? { ...c, lastMessage: trimmed, updatedAt: now }
+                  : c,
+              )
+              .sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt))
+            persistChats(next)
             return next
           })
           setMessages((prev) => {
@@ -590,7 +1463,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 status: 'sending' as const,
               },
             ]
-            saveJson(STORAGE_MSGS, next)
+            persistMsgs(next)
             return next
           })
           simulateDelivery(msgId, existing.requestStatus === 'pending')
@@ -607,8 +1480,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         requestStatus: 'pending',
       }
       setConversations((prev) => {
-        const next = [conversation, ...prev]
-        saveJson(STORAGE_CHATS, next)
+        const next = [conversation, ...prev].sort(
+          (a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt),
+        )
+        persistChats(next)
         return next
       })
       if (trimmed) {
@@ -625,64 +1500,100 @@ export function AppProvider({ children }: { children: ReactNode }) {
               status: 'sending' as const,
             },
           ]
-          saveJson(STORAGE_MSGS, next)
+          persistMsgs(next)
           return next
         })
         simulateDelivery(msgId, true)
       }
       return conversationId
     },
-    [conversations, simulateDelivery],
+    [
+      conversations,
+      simulateDelivery,
+      user,
+      blockedUserIds,
+      rememberUser,
+      persistChats,
+      persistMsgs,
+      refreshChats,
+      refreshThread,
+    ],
   )
 
-  const acceptRequest = useCallback((conversationId: string) => {
-    setConversations((prev) => {
-      const next = prev.map((c) =>
-        c.id === conversationId ? { ...c, requestStatus: 'accepted' as const } : c,
-      )
-      saveJson(STORAGE_CHATS, next)
-      return next
-    })
-    // После принятия запроса старые исходящие считаем прочитанными
-    setMessages((prev) => {
-      const next = prev.map((m) =>
-        m.conversationId === conversationId && m.senderId === 'me' && m.status !== 'read'
-          ? { ...m, status: 'read' as const }
-          : m,
-      )
-      saveJson(STORAGE_MSGS, next)
-      return next
-    })
-  }, [])
+  const acceptRequest = useCallback(
+    async (conversationId: string) => {
+      if (apiOnlineRef.current && getStoredToken()) {
+        await apiAcceptConversation(conversationId)
+        await refreshChats()
+        await refreshThread(conversationId)
+        return
+      }
+      setConversations((prev) => {
+        const next = prev.map((c) =>
+          c.id === conversationId ? { ...c, requestStatus: 'accepted' as const } : c,
+        )
+        persistChats(next)
+        return next
+      })
+      setMessages((prev) => {
+        const next = prev.map((m) =>
+          m.conversationId === conversationId && m.senderId === 'me' && m.status !== 'read'
+            ? { ...m, status: 'read' as const }
+            : m,
+        )
+        persistMsgs(next)
+        return next
+      })
+    },
+    [persistChats, persistMsgs, refreshChats, refreshThread],
+  )
 
   const updateNotificationPrefs = useCallback((patch: Partial<NotificationPrefs>) => {
     setNotificationPrefs((prev) => {
       const next = { ...prev, ...patch }
-      saveJson(STORAGE_NOTIF_PREFS, next)
+      const email = userEmailRef.current
+      if (email) saveNotificationPrefsForUser(email, next)
       return next
     })
+    if (apiOnlineRef.current && getStoredToken()) {
+      void apiPatchNotificationPrefs(patch).catch(() => undefined)
+    }
   }, [])
 
   const markNotificationRead = useCallback((id: string) => {
     setNotifications((prev) => {
       const next = prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-      saveJson(STORAGE_NOTIFICATIONS, next)
+      const email = userEmailRef.current
+      if (email) saveNotificationsForUser(email, next)
       return next
     })
+    if (apiOnlineRef.current && getStoredToken()) {
+      void apiMarkNotificationRead(id).catch(() => undefined)
+    }
   }, [])
 
   const markAllNotificationsRead = useCallback(() => {
     setNotifications((prev) => {
       const next = prev.map((n) => ({ ...n, read: true }))
-      saveJson(STORAGE_NOTIFICATIONS, next)
+      const email = userEmailRef.current
+      if (email) saveNotificationsForUser(email, next)
       return next
     })
+    if (apiOnlineRef.current && getStoredToken()) {
+      void apiMarkAllNotificationsRead().catch(() => undefined)
+    }
   }, [])
 
   const createFeedbackTicket = useCallback(
-    (category: FeedbackCategoryId, message: string) => {
+    async (category: FeedbackCategoryId, message: string) => {
       if (!user) throw new Error('Нужен вход')
       if (isEmailBlocked(user.email)) throw new Error('Email заблокирован')
+      if (apiOnlineRef.current && getStoredToken()) {
+        const ticket = await apiCreateTicket(category, message)
+        await refreshSupport()
+        await hydrateSocialFromApi()
+        return ticket
+      }
       const ticket = createTicket({
         userId: user.id,
         userName: user.name,
@@ -694,17 +1605,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
       pushNotification({
         type: 'admin',
         title: 'Обращение создано',
-        body: 'Поддержка ответит в разделе «Обратная связь».',
+        body: 'Поддержка ответит в разделе «Обратная связь»',
         href: `/app/feedback/${ticket.id}`,
       })
       return ticket
     },
-    [user, pushNotification],
+    [user, pushNotification, refreshSupport, hydrateSocialFromApi],
   )
 
   const replyFeedbackTicket = useCallback(
-    (ticketId: string, message: string) => {
+    async (ticketId: string, message: string) => {
       if (!user) throw new Error('Нужен вход')
+      if (apiOnlineRef.current && getStoredToken()) {
+        const ticket = await apiReplyTicket(ticketId, message)
+        await refreshSupport()
+        return ticket
+      }
       const ticket = replyToTicket({
         ticketId,
         senderType: 'user',
@@ -715,24 +1631,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setTickets(seedTicketsIfEmpty())
       return ticket
     },
-    [user],
+    [user, refreshSupport],
   )
 
   const adminReplyTicket = useCallback(
-    (ticketId: string, message: string, closeAs?: 'resolved' | 'closed') => {
-      if (!user?.isAdmin) throw new Error('Нужны права админа')
+    async (ticketId: string, message: string, closeAs?: 'resolved' | 'closed') => {
+      if (!hasAdminPermission(user, 'tickets')) throw new Error('Нет права отвечать на обращения')
+      if (apiOnlineRef.current && getStoredToken()) {
+        const ticket = await apiReplyTicket(ticketId, message, closeAs)
+        await refreshSupport()
+        return ticket
+      }
       const ticket = replyToTicket({
         ticketId,
         senderType: 'admin',
-        senderId: user.id,
-        senderName: user.name,
+        senderId: user!.id,
+        senderName: user!.name,
         message,
         closeAs,
         takeInProgress: !closeAs,
       })
       setTickets(seedTicketsIfEmpty())
-      if (ticket.userId === user.id || ticket.userEmail === user.email) {
-        // no-op for self
+      if (normalizeEmail(ticket.userEmail) !== normalizeEmail(user!.email)) {
+        appendNotificationForEmail(ticket.userEmail, {
+          type: 'admin',
+          title: closeAs ? 'Обращение закрыто' : 'Ответ поддержки',
+          body: message.slice(0, 120),
+          href: `/app/feedback/${ticket.id}`,
+        })
       } else {
         pushNotification({
           type: 'admin',
@@ -743,16 +1669,64 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       return ticket
     },
-    [user, pushNotification],
+    [user, pushNotification, refreshSupport],
+  )
+
+  const adminMessageUser = useCallback(
+    async (target: AdminDirectoryUser, message: string) => {
+      if (!hasAdminPermission(user, 'messageUsers')) {
+        throw new Error('Нет права писать пользователям')
+      }
+      if (isMasterAdminEmail(target.email) && !isMasterAdminEmail(user!.email)) {
+        throw new Error('Нельзя писать главному админу от имени другого админа')
+      }
+      if (isEmailBlocked(target.email)) {
+        throw new Error('Этот email заблокирован — сначала разблокируй')
+      }
+      if (apiOnlineRef.current && getStoredToken()) {
+        const ticket = await apiAdminOutboundTicket(target.id, message)
+        await refreshSupport()
+        return ticket
+      }
+      const ticket = createAdminOutboundTicket({
+        targetUserId: target.id,
+        targetUserName: target.name,
+        targetUserEmail: target.email,
+        adminId: user!.id,
+        adminName: user!.name,
+        message,
+      })
+      setTickets(seedTicketsIfEmpty())
+      appendNotificationForEmail(target.email, {
+        type: 'admin',
+        title: 'Сообщение от Spotter',
+        body: message.slice(0, 140),
+        href: `/app/feedback/${ticket.id}`,
+      })
+      if (normalizeEmail(target.email) === normalizeEmail(user!.email)) {
+        setNotifications(loadNotificationsForUser(user!.email, false))
+      }
+      return ticket
+    },
+    [user, refreshSupport],
   )
 
   const adminSetTicketStatus = useCallback(
-    (ticketId: string, status: FeedbackTicketStatus) => {
-      if (!user?.isAdmin) throw new Error('Нужны права админа')
+    async (ticketId: string, status: FeedbackTicketStatus) => {
+      if (!hasAdminPermission(user, 'tickets')) throw new Error('Нет права работать с обращениями')
+      if (apiOnlineRef.current && getStoredToken()) {
+        const ticket = await apiPatchTicketStatus(ticketId, status)
+        setTickets((prev) => {
+          const next = prev.map((t) => (t.id === ticket.id ? ticket : t))
+          saveTickets(next)
+          return next
+        })
+        return ticket
+      }
       const ticket = setTicketStatus(
         ticketId,
         status,
-        status === 'in_progress' ? user.id : undefined,
+        status === 'in_progress' ? user!.id : undefined,
       )
       setTickets(seedTicketsIfEmpty())
       return ticket
@@ -760,17 +1734,98 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [user],
   )
 
-  const canManageAdmins = Boolean(
-    user?.isMasterAdmin || (user?.isAdmin && user?.canGrantAdmin),
-  )
+  const canManageAdmins = hasAdminPermission(user, 'manageAdmins')
+  const canBlockUsers = hasAdminPermission(user, 'blockUsers')
+  const canRemoveUsers = hasAdminPermission(user, 'removeUsers')
+  const canViewUsers = hasAdminPermission(user, 'viewUsers')
+  const canHandleTickets = hasAdminPermission(user, 'tickets')
+  const canMessageUsers = hasAdminPermission(user, 'messageUsers')
 
   const adminSetUserAdmin = useCallback(
-    (userId: string, isAdmin: boolean) => {
-      if (!canManageAdmins) throw new Error('Недостаточно прав')
-      dirSetUserAdmin(userId, isAdmin, canManageAdmins)
+    async (userId: string, isAdmin: boolean, preset: AdminPermissionPreset = 'support') => {
+      if (!canManageAdmins) throw new Error('Недостаточно прав для назначения админов')
+      const presetPerms =
+        ADMIN_PRESETS.find((p) => p.id === preset)?.permissions || SUPPORT_PERMISSIONS
+      // Только главный может выдавать manageAdmins / полные права с управлением
+      let permissions = { ...presetPerms }
+      if (!user?.isMasterAdmin) {
+        permissions = { ...permissions, manageAdmins: false }
+        if (preset === 'full') {
+          permissions = {
+            ...permissions,
+            removeUsers: canRemoveUsers ? permissions.removeUsers : false,
+          }
+        }
+      }
+      if (apiOnlineRef.current && getStoredToken()) {
+        const updated = await apiAdminPatchUserAdmin(userId, {
+          isAdmin,
+          permissions: isAdmin ? permissions : undefined,
+        })
+        setAdminDirectory((prev) => {
+          const mapped = toAdminDirectoryUser(updated)
+          const next = prev.some((p) => p.id === mapped.id)
+            ? prev.map((p) => (p.id === mapped.id ? { ...p, ...mapped } : p))
+            : [...prev, mapped]
+          saveDirectory(next)
+          return next
+        })
+        if (user && user.id === updated.id) {
+          persistUser(withAdminFlags(normalizeGymFields(updated) as AppUser))
+        }
+        return
+      }
+      const updated = dirSetUserAdmin(userId, isAdmin, canManageAdmins, permissions)
       setAdminDirectory(loadDirectory())
-      if (user && user.id === userId) {
-        persistUser({ ...user, isAdmin, canGrantAdmin: isAdmin ? user.canGrantAdmin : false })
+      if (user && (user.id === userId || normalizeEmail(user.email) === normalizeEmail(updated.email))) {
+        persistUser({
+          ...user,
+          isAdmin: updated.isAdmin,
+          canGrantAdmin: updated.adminPermissions?.manageAdmins ?? false,
+          adminPermissions: updated.adminPermissions || SUPPORT_PERMISSIONS,
+        })
+      }
+    },
+    [canManageAdmins, canRemoveUsers, user, persistUser],
+  )
+
+  const adminSetPermissions = useCallback(
+    async (userId: string, permissions: AdminPermissions) => {
+      if (!canManageAdmins) throw new Error('Недостаточно прав')
+      let next = { ...permissions }
+      if (!user?.isMasterAdmin) {
+        // Обычный админ с manageAdmins не может выдавать manageAdmins и removeUsers сверх своих
+        next = {
+          ...next,
+          manageAdmins: false,
+          removeUsers: user && hasAdminPermission(user, 'removeUsers') ? next.removeUsers : false,
+        }
+      }
+      if (apiOnlineRef.current && getStoredToken()) {
+        const updated = await apiAdminPatchUserAdmin(userId, {
+          isAdmin: true,
+          permissions: next,
+        })
+        setAdminDirectory((prev) => {
+          const mapped = toAdminDirectoryUser(updated)
+          const list = prev.map((p) => (p.id === mapped.id ? { ...p, ...mapped } : p))
+          saveDirectory(list)
+          return list
+        })
+        if (user && user.id === updated.id) {
+          persistUser(withAdminFlags(normalizeGymFields(updated) as AppUser))
+        }
+        return
+      }
+      const updated = dirSetAdminPermissions(userId, next, canManageAdmins)
+      setAdminDirectory(loadDirectory())
+      if (user && (user.id === userId || normalizeEmail(user.email) === normalizeEmail(updated.email))) {
+        persistUser({
+          ...user,
+          isAdmin: true,
+          canGrantAdmin: updated.adminPermissions?.manageAdmins ?? false,
+          adminPermissions: updated.adminPermissions || SUPPORT_PERMISSIONS,
+        })
       }
     },
     [canManageAdmins, user, persistUser],
@@ -782,50 +1837,177 @@ export function AppProvider({ children }: { children: ReactNode }) {
       dirSetCanGrant(userId, canGrant, true)
       setAdminDirectory(loadDirectory())
       if (user && user.id === userId) {
-        persistUser({ ...user, canGrantAdmin: canGrant })
+        const perms = {
+          ...(user.adminPermissions || SUPPORT_PERMISSIONS),
+          manageAdmins: canGrant,
+        }
+        persistUser({ ...user, canGrantAdmin: canGrant, adminPermissions: perms })
       }
     },
     [user, persistUser],
   )
 
-  const adminBlockEmail = useCallback((email: string) => {
-    setBlockedEmails(blockEmail(email))
-  }, [])
+  const adminBlockEmail = useCallback(
+    async (email: string) => {
+      if (!canBlockUsers) throw new Error('Нет права блокировать')
+      if (isMasterAdminEmail(email)) throw new Error('Нельзя блокировать главного админа')
+      if (apiOnlineRef.current && getStoredToken()) {
+        const emails = await apiAdminBlockEmail(email)
+        saveBlockedEmails(emails)
+        setBlockedEmails(emails)
+        return
+      }
+      setBlockedEmails(blockEmail(email))
+    },
+    [canBlockUsers],
+  )
 
-  const adminUnblockEmail = useCallback((email: string) => {
-    setBlockedEmails(unblockEmail(email))
-  }, [])
+  const adminUnblockEmail = useCallback(
+    async (email: string) => {
+      if (!canBlockUsers) throw new Error('Нет права блокировать')
+      if (apiOnlineRef.current && getStoredToken()) {
+        const emails = await apiAdminUnblockEmail(email)
+        saveBlockedEmails(emails)
+        setBlockedEmails(emails)
+        return
+      }
+      setBlockedEmails(unblockEmail(email))
+    },
+    [canBlockUsers],
+  )
 
-  const markRead = useCallback((conversationId: string) => {
-    setConversations((prev) => {
-      const next = prev.map((c) =>
-        c.id === conversationId ? { ...c, unreadCount: 0 } : c,
-      )
-      saveJson(STORAGE_CHATS, next)
-      return next
-    })
-    // Входящие — прочитаны мной; исходящие в открытом чате — собеседник «прочитал»
-    setMessages((prev) => {
-      const next = prev.map((m) =>
-        m.conversationId === conversationId
-          ? { ...m, status: 'read' as const }
-          : m,
-      )
-      saveJson(STORAGE_MSGS, next)
-      return next
-    })
-  }, [])
+  const adminRemoveUser = useCallback(
+    async (email: string, alsoBlock = false) => {
+      if (!canRemoveUsers) throw new Error('Нет права удалять пользователей')
+      if (isMasterAdminEmail(email)) throw new Error('Нельзя удалить главного админа')
+      if (user && normalizeEmail(user.email) === normalizeEmail(email)) {
+        throw new Error('Нельзя удалить свой аккаунт')
+      }
+      if (apiOnlineRef.current && getStoredToken()) {
+        const target =
+          adminDirectory.find((p) => normalizeEmail(p.email) === normalizeEmail(email)) ||
+          loadDirectory().find((p) => normalizeEmail(p.email) === normalizeEmail(email))
+        if (!target?.id) throw new Error('Пользователь не найден на сервере')
+        await apiAdminDeleteUser(target.id)
+        if (alsoBlock) {
+          const emails = await apiAdminBlockEmail(email)
+          saveBlockedEmails(emails)
+          setBlockedEmails(emails)
+        }
+        await refreshAdminDirectory()
+        return
+      }
+      removeUserAccount(email, { alsoBlock })
+      setAdminDirectory(loadDirectory())
+      setBlockedEmails(loadBlockedEmails())
+      setTickets(seedTicketsIfEmpty())
+    },
+    [canRemoveUsers, user, adminDirectory, refreshAdminDirectory],
+  )
+
+  const isBlocked = useCallback(
+    (userId: string) => blockedUserIds.includes(userId),
+    [blockedUserIds],
+  )
+
+  const blockUser = useCallback(
+    async (userId: string) => {
+      if (!user) throw new Error('Нужен вход')
+      if (userId === user.id || userId === 'me') throw new Error('Нельзя заблокировать себя')
+      if (apiOnlineRef.current && getStoredToken()) {
+        const next = await apiBlockUser(userId)
+        setBlockedUserIds(next)
+      } else {
+        setBlockedUserIds(blockUserId(user.id, userId))
+      }
+      setConversations((prev) => {
+        const filtered = prev.filter((c) => otherParticipantId(c, user.id) !== userId)
+        persistChats(filtered)
+        return filtered
+      })
+    },
+    [user],
+  )
+
+  const unblockUser = useCallback(
+    async (userId: string) => {
+      if (!user) throw new Error('Нужен вход')
+      if (apiOnlineRef.current && getStoredToken()) {
+        setBlockedUserIds(await apiUnblockUser(userId))
+        return
+      }
+      setBlockedUserIds(unblockUserId(user.id, userId))
+    },
+    [user],
+  )
+
+  const reportUser = useCallback(
+    (userId: string, reason: ReportReasonId, note = '') => {
+      if (!user) throw new Error('Нужен вход')
+      const target = USERS.find((u) => u.id === userId)
+      const who = target ? `${target.name} (${userId})` : userId
+      const text = [
+        `Жалоба на пользователя: ${who}`,
+        `Причина: ${reportReasonLabel(reason)}`,
+        note.trim() ? `Комментарий: ${note.trim()}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n')
+      return createFeedbackTicket('safety', text)
+    },
+    [user, createFeedbackTicket],
+  )
+
+  const markRead = useCallback(
+    async (conversationId: string) => {
+      if (apiOnlineRef.current && getStoredToken()) {
+        try {
+          await apiMarkConversationRead(conversationId)
+          await refreshThread(conversationId)
+          await refreshChats()
+          return
+        } catch {
+          /* local fallback below */
+        }
+      }
+      setConversations((prev) => {
+        const next = prev.map((c) =>
+          c.id === conversationId ? { ...c, unreadCount: 0 } : c,
+        )
+        persistChats(next)
+        return next
+      })
+      setMessages((prev) => {
+        const next = prev.map((m) =>
+          m.conversationId === conversationId ? { ...m, status: 'read' as const } : m,
+        )
+        persistMsgs(next)
+        return next
+      })
+    },
+    [persistChats, persistMsgs, refreshChats, refreshThread],
+  )
+
+  const directory = useMemo(() => {
+    const map = new Map<string, UserProfile>()
+    if (user && isDemoAccount(user.email)) {
+      for (const u of USERS) map.set(u.id, u)
+    }
+    for (const u of knownUsers) map.set(u.id, u)
+    return [...map.values()]
+  }, [user, knownUsers])
 
   const value = useMemo<AppContextValue>(
     () => ({
       user,
+      apiOnline,
       conversations,
       messages,
       likes,
       notifications,
       notificationPrefs,
       unreadNotifications,
-      directory: USERS,
+      directory,
       login,
       register,
       logout,
@@ -840,10 +2022,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
       toggleLike,
       getLikesFor,
       getMyLikedUsers,
+      lookupUsername,
+      searchUsers,
+      fetchUserById,
+      rememberUser,
       sendMessage,
       startConversation,
       acceptRequest,
       markRead,
+      refreshChats,
+      refreshThread,
       updateNotificationPrefs,
       markNotificationRead,
       markAllNotificationsRead,
@@ -851,28 +2039,58 @@ export function AppProvider({ children }: { children: ReactNode }) {
       adminDirectory,
       blockedEmails,
       canManageAdmins,
+      canBlockUsers,
+      canRemoveUsers,
+      canViewUsers,
+      canHandleTickets,
+      canMessageUsers,
       refreshSupport,
       createFeedbackTicket,
       replyFeedbackTicket,
       adminReplyTicket,
       adminSetTicketStatus,
       adminSetUserAdmin,
+      adminSetPermissions,
       adminSetCanGrant,
       adminBlockEmail,
       adminUnblockEmail,
+      adminRemoveUser,
+      adminMessageUser,
+      refreshAdminDirectory,
+      blockedUserIds,
+      isBlocked,
+      blockUser,
+      unblockUser,
+      reportUser,
     }),
     [
       user,
+      apiOnline,
       conversations,
       messages,
       likes,
       notifications,
       notificationPrefs,
       unreadNotifications,
+      directory,
+      lookupUsername,
+      searchUsers,
+      fetchUserById,
+      rememberUser,
       tickets,
       adminDirectory,
       blockedEmails,
+      blockedUserIds,
       canManageAdmins,
+      canBlockUsers,
+      canRemoveUsers,
+      canViewUsers,
+      canHandleTickets,
+      canMessageUsers,
+      adminSetPermissions,
+      adminRemoveUser,
+      adminMessageUser,
+      refreshAdminDirectory,
       login,
       register,
       logout,
@@ -891,6 +2109,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       startConversation,
       acceptRequest,
       markRead,
+      refreshChats,
+      refreshThread,
       updateNotificationPrefs,
       markNotificationRead,
       markAllNotificationsRead,
@@ -903,6 +2123,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       adminSetCanGrant,
       adminBlockEmail,
       adminUnblockEmail,
+      isBlocked,
+      blockUser,
+      unblockUser,
+      reportUser,
     ],
   )
 

@@ -5,20 +5,34 @@
 }
 
 .checkin-control.compact {
-  justify-items: end;
+  width: 104px;
+  justify-items: stretch;
+  gap: 6px;
+}
+
+.checkin-control.block {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .checkin-control .btn {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .checkin-control.compact .btn {
-  width: auto;
-  min-width: 96px;
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0 12px;
+  font-size: 0.9rem;
 }
 
-.checkin-switch {
-  width: 100%;
+.checkin-control.block .btn {
+  min-height: 48px;
 }
 
 .checkin-hint {
@@ -26,31 +40,126 @@
   margin: 0;
 }
 
-.checkin-picker {
-  display: grid;
-  gap: 8px;
-  padding: 12px;
-  border-radius: var(--radius);
-  border: 1px solid var(--line);
-  background: var(--bg-card);
-}
-
-.checkin-picker-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.checkin-picker-head .muted {
-  margin: 0;
-}
-
-.text-btn {
+.checkin-other {
   border: 0;
   background: transparent;
   color: var(--accent);
-  font-weight: 650;
+  font: inherit;
   font-size: 0.85rem;
+  font-weight: 700;
   padding: 0;
+  text-align: center;
+  justify-self: center;
+}
+
+.checkin-control.compact .checkin-other {
+  display: none;
+}
+
+/* Bottom sheet — только если явно «Другой зал» */
+.checkin-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  align-items: end;
+}
+
+.checkin-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(4, 8, 6, 0.72);
+}
+
+.checkin-sheet-panel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 520px);
+  margin: 0 auto;
+  padding: 10px 16px calc(16px + var(--safe-bottom));
+  border-radius: 22px 22px 0 0;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  background: #101614;
+  display: grid;
+  gap: 10px;
+  animation: fade-up 0.22s ease both;
+}
+
+.checkin-sheet-grab {
+  width: 36px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line-strong);
+  margin: 2px auto 4px;
+}
+
+.checkin-sheet-panel h3 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.checkin-sheet-lead {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.checkin-sheet-list {
+  display: grid;
+  gap: 8px;
+  margin: 4px 0 6px;
+}
+
+.checkin-sheet-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+  color: inherit;
+}
+
+.checkin-sheet-row strong {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 2px;
+}
+
+.checkin-sheet-row .dim {
+  display: block;
+  font-size: 0.78rem;
+}
+
+.checkin-sheet-mark {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 750;
+  color: var(--accent);
+}
+
+.checkin-sheet-row.active {
+  border-color: rgba(200, 245, 66, 0.45);
+  background: linear-gradient(135deg, rgba(200, 245, 66, 0.12), transparent 70%), var(--bg-card);
+}
+
+.checkin-sheet-row.active .checkin-sheet-mark {
+  color: var(--online);
+}
+
+@media (min-width: 900px) {
+  .checkin-sheet {
+    align-items: center;
+    padding: 24px;
+  }
+
+  .checkin-sheet-panel {
+    border-radius: 22px;
+    border-bottom: 1px solid var(--line);
+  }
 }

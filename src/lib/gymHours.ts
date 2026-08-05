@@ -50,6 +50,11 @@ const NETWORK_HOURS: Record<string, Omit<GymHours, 'source'>> = {
 
 /** Уточнения по отдельным клубам (из карточек сетей / контактов) */
 const CLUB_HOURS: Record<string, Omit<GymHours, 'source'>> = {
+  'gym-spirit-fitness-spirit-fitness-matveevskiy-moskva': {
+    weekdays: 'Круглосуточно',
+    weekend: 'Круглосуточно',
+    label: 'Круглосуточно',
+  },
   'gym-world-class-world-class-tverskaya-moskva': {
     weekdays: '07:00–00:00',
     weekend: '09:00–00:00',

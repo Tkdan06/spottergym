@@ -1,5 +1,6 @@
 import { MapPin, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { formatGymAddress } from '../data/mock'
 import type { Gym } from '../types'
 import './GymCard.css'
 
@@ -9,16 +10,35 @@ interface Props {
   mine?: boolean
   onSelect?: () => void
   to?: string
+  /** Фейковые цифры из каталога — только для demo@demo.ru */
+  showDemoStats?: boolean
+  /** Реальные счётчики (для обычных аккаунтов) */
+  membersCount?: number
+  activeNow?: number
 }
 
-export function GymCard({ gym, selected, mine, onSelect, to }: Props) {
+export function GymCard({
+  gym,
+  selected,
+  mine,
+  onSelect,
+  to,
+  showDemoStats = false,
+  membersCount: realMembers,
+  activeNow: realActive,
+}: Props) {
+  const activeNow = showDemoStats ? gym.activeNow : (realActive ?? 0)
+  const membersCount = showDemoStats ? gym.membersCount : (realMembers ?? 0)
+
   const content = (
     <>
       <div className="gym-card-media">
         <img src={gym.image} alt={gym.name} />
-        <span className="pill pill-online">
-          <span className="online-dot" />
-          {gym.activeNow} сейчас
+        <span className={`gym-card-presence ${activeNow > 0 ? 'is-online' : 'is-empty'}`}>
+          {activeNow > 0 ? <span className="online-dot" /> : null}
+          <span className="gym-card-presence-label">
+            {activeNow > 0 ? `${activeNow} сейчас` : 'Пусто'}
+          </span>
         </span>
       </div>
       <div className="gym-card-body">
@@ -29,11 +49,11 @@ export function GymCard({ gym, selected, mine, onSelect, to }: Props) {
         <h3>{gym.name}</h3>
         <p className="muted row">
           <MapPin size={14} />
-          {[gym.district, gym.address].filter(Boolean).join(' · ')}
+          {formatGymAddress(gym)}
         </p>
         <p className="dim row">
           <Users size={14} />
-          {gym.membersCount} в Spotter
+          {membersCount > 0 ? `${membersCount} в Spotter` : 'Пока никого в Spotter'}
         </p>
       </div>
     </>

@@ -9,17 +9,16 @@ export function WelcomePage() {
         <div className="welcome-hero">
           <div className="welcome-glow" />
           <p className="welcome-kicker">Знакомства в зале</p>
-          <h1 className="brand-mark">
+          <h1 className="brand-mark" aria-label="Spotter">
             SPOT<span>TER</span>
           </h1>
           <p className="welcome-lead">
-            Найди своих в тренажёрном зале: кто рядом, кто сейчас на тренировке и кто открыт к
-            общению.
+            Найди своих в зале: кто рядом, кто на тренировке и кто открыт к общению
           </p>
           <div className="welcome-actions">
             <Link to="/register" className="btn btn-primary btn-block">
               Создать аккаунт
-              <ArrowRight size={18} />
+              <ArrowRight size={18} aria-hidden />
             </Link>
             <Link to="/login" className="btn btn-ghost btn-block">
               У меня уже есть аккаунт
@@ -29,24 +28,34 @@ export function WelcomePage() {
 
         <section className="welcome-points">
           <article>
-            <Radio size={20} />
-            <div>
+            <span className="welcome-points-icon" aria-hidden>
+              <Radio size={18} />
+            </span>
+            <div className="welcome-points-copy">
               <h3>Живой статус зала</h3>
-              <p className="muted">Видно, кто сейчас на тренировке в твоём клубе.</p>
+              <p className="muted">
+                Видно, кто сейчас на тренировке
+                <br />
+                в твоём клубе
+              </p>
             </div>
           </article>
           <article>
-            <EyeOff size={20} />
-            <div>
+            <span className="welcome-points-icon" aria-hidden>
+              <EyeOff size={18} />
+            </span>
+            <div className="welcome-points-copy">
               <h3>Анонимность по желанию</h3>
-              <p className="muted">Можно скрыть фото и имя, пока не решишь открыться.</p>
+              <p className="muted">Можно скрыть фото и имя, пока не решишь открыться</p>
             </div>
           </article>
           <article>
-            <MessageSquare size={20} />
-            <div>
+            <span className="welcome-points-icon" aria-hidden>
+              <MessageSquare size={18} />
+            </span>
+            <div className="welcome-points-copy">
               <h3>Запросы в чат</h3>
-              <p className="muted">Переписка начинается только после принятия запроса.</p>
+              <p className="muted">Переписка начинается только после принятия запроса</p>
             </div>
           </article>
         </section>

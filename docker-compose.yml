@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: spotter
+      POSTGRES_PASSWORD: spotter
+      POSTGRES_DB: spotter
+    ports:
+      - '5432:5432'
+    volumes:
+      - spotter_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U spotter -d spotter']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://spotter:spotter@postgres:5432/spotter?schema=public
+      JWT_SECRET: change-me-in-production-spotter-jwt
+      PORT: '3001'
+      CORS_ORIGIN: http://localhost:5173
+      MASTER_ADMIN_EMAIL: tkdan@ya.ru
+      SEED_ADMIN_EMAILS: ''
+    ports:
+      - '3001:3001'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  spotter_pg:

@@ -1,5 +1,6 @@
 import { USERS } from '../data/mock'
 import type { AppUser, UserProfile } from '../types'
+import { isDemoAccount } from './demoAccount'
 
 export type LikesMap = Record<string, string[]>
 
@@ -13,8 +14,13 @@ export const SEED_LIKES: LikesMap = {
   'u-anon': ['u-lera'],
 }
 
-export function normalizeLikesMap(raw: LikesMap | null | undefined): LikesMap {
-  if (!raw || typeof raw !== 'object') return { ...SEED_LIKES }
+export function normalizeLikesMap(
+  raw: LikesMap | null | undefined,
+  seedIfMissing = false,
+): LikesMap {
+  if (raw === null || raw === undefined || typeof raw !== 'object') {
+    return seedIfMissing ? { ...SEED_LIKES } : {}
+  }
   const next: LikesMap = {}
   for (const [userId, likers] of Object.entries(raw)) {
     if (!Array.isArray(likers)) continue
@@ -39,23 +45,28 @@ export function toggleLikeInMap(likes: LikesMap, targetId: string, likerId: stri
   return { ...likes, [targetId]: nextLikers }
 }
 
+function resolveUserById(
+  id: string,
+  currentUser: AppUser | null,
+  extras: UserProfile[] = [],
+): UserProfile | undefined {
+  if (currentUser && id === currentUser.id) return currentUser as UserProfile
+  const fromExtra = extras.find((u) => u.id === id)
+  if (fromExtra) return fromExtra
+  if (isDemoAccount(currentUser?.email)) return USERS.find((u) => u.id === id)
+  return undefined
+}
+
 export function resolveLikers(
   likes: LikesMap,
   targetId: string,
   currentUser: AppUser | null,
+  extras: UserProfile[] = [],
 ): UserProfile[] {
   const ids = likes[targetId] ?? []
   return ids
-    .map((id) => {
-      if (currentUser && id === currentUser.id) return currentUser as UserProfile
-      return USERS.find((u) => u.id === id)
-    })
+    .map((id) => resolveUserById(id, currentUser, extras))
     .filter((u): u is UserProfile => Boolean(u))
-}
-
-function resolveUserById(id: string, currentUser: AppUser | null): UserProfile | undefined {
-  if (currentUser && id === currentUser.id) return currentUser as UserProfile
-  return USERS.find((u) => u.id === id)
 }
 
 /** Кого лайкнул пользователь — по всем залам, не только «своему» */
@@ -63,13 +74,14 @@ export function resolveOutgoingLikes(
   likes: LikesMap,
   likerId: string,
   currentUser: AppUser | null = null,
+  extras: UserProfile[] = [],
 ): UserProfile[] {
   if (!likerId) return []
   const found: UserProfile[] = []
   for (const [targetId, likers] of Object.entries(likes)) {
     if (targetId === likerId) continue
     if (!likers?.includes(likerId)) continue
-    const person = resolveUserById(targetId, currentUser)
+    const person = resolveUserById(targetId, currentUser, extras)
     if (person) found.push(person)
   }
   return found.sort((a, b) => {

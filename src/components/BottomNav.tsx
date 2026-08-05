@@ -4,7 +4,7 @@ import { useApp } from '../context/useApp'
 import './BottomNav.css'
 
 const items = [
-  { to: '/app', label: 'Зал', icon: Dumbbell, end: true },
+  { to: '/app', label: 'Мой зал', icon: Dumbbell, end: true },
   { to: '/app/discover', label: 'Залы', icon: Search },
   { to: '/app/messages', label: 'Чаты', icon: MessageCircle },
   { to: '/app/profile', label: 'Профиль', icon: UserRound },

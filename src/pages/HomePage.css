@@ -1,24 +1,5 @@
-.home-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+.home-top {
   margin-bottom: 14px;
-}
-
-.home-header h1 {
-  font-size: clamp(1.35rem, 5vw, 1.85rem);
-  margin: 4px 0;
-  max-width: 18ch;
-  line-height: 1.15;
-}
-
-.home-actions {
-  flex-shrink: 0;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  max-width: min(240px, 52vw);
 }
 
 .home-bell {
@@ -32,192 +13,238 @@
   right: 4px;
 }
 
-.home-actions .checkin-control {
+/* Stable gym identity + check-in — contained so nothing can spill past the page */
+.home-page {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.home-gym-block {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 14px;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.home-gym-block-head {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.home-gym-network-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.home-gym-network {
+  margin: 0;
   min-width: 0;
   flex: 1;
-}
-
-.home-actions .btn {
-  min-height: 42px;
-  padding: 0 14px;
-  font-size: 0.9rem;
-}
-
-.floor-gym-hero,
-.home-banner {
-  position: relative;
-  display: grid;
-  gap: 12px;
-  min-height: 168px;
-  border-radius: var(--radius-lg);
-  background-size: cover;
-  background-position: center;
-  overflow: hidden;
-  margin-bottom: 16px;
-  border: 0;
-  box-shadow: none;
-}
-
-.floor-gym-hero-shade,
-.home-banner::after {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    160deg,
-    rgba(11, 15, 14, 0.88) 0%,
-    rgba(11, 15, 14, 0.45) 55%,
-    rgba(11, 15, 14, 0.78) 100%
-  );
-  pointer-events: none;
-}
-
-.home-banner::after {
-  content: '';
-}
-
-.floor-gym-hero-body {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  gap: 12px;
-  padding: 16px 16px 4px;
-}
-
-.floor-gym-hero-copy {
-  max-width: 36ch;
-}
-
-.floor-gym-hero-copy p {
-  margin-top: 8px;
-  line-height: 1.4;
-  font-size: 0.92rem;
-}
-
-.floor-gym-hero-stats {
-  margin-top: 10px !important;
-  font-size: 0.86rem !important;
+  font-size: 0.78rem;
   font-weight: 700;
-  line-height: 1.35;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.floor-gym-hero-live {
+.home-gym-title {
+  margin: 0;
+  font-size: clamp(1.35rem, 5.5vw, 1.75rem);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  /* 2 lines reserved — switching gyms / long names don’t jump */
+  min-height: calc(1.15em * 2);
+}
+
+.home-status {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.3;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-status-live {
   color: var(--online);
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.55);
 }
 
-.floor-gym-hero-place {
-  color: rgba(238, 245, 239, 0.92);
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.55);
+.home-status-you {
+  color: var(--text-muted);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
 }
 
-.floor-gym-hero-link {
+.home-gym-link {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  width: fit-content;
+  gap: 1px;
+  flex-shrink: 0;
   color: var(--accent);
   font-size: 0.86rem;
-  font-weight: 700;
+  font-weight: 750;
 }
 
-.floor-gym-picker {
-  position: relative;
-  z-index: 1;
+.home-gym-checkin {
+  min-width: 0;
+  max-width: 100%;
+  min-height: 48px;
+}
+
+/* Переключатель залов внутри блока зала */
+.floor-gym-switch-wrap {
+  margin: 0;
+  padding-top: 2px;
+  border-top: 1px solid var(--line);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.floor-gym-switch {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding: 0 12px 12px;
+  overscroll-behavior-x: contain;
+  padding: 12px 0 2px;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  min-width: 0;
 }
 
-.floor-gym-picker::-webkit-scrollbar {
+.floor-gym-switch::-webkit-scrollbar {
   display: none;
 }
 
-.floor-gym-pick {
-  position: relative;
-  flex: 0 0 118px;
-  height: 72px;
-  border-radius: 14px;
-  border: 2px solid transparent;
-  background-size: cover;
-  background-position: center;
-  overflow: hidden;
-  text-align: left;
-  padding: 0;
-}
-
-.floor-gym-pick-shade {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 20%, rgba(6, 10, 8, 0.88));
-}
-
-.floor-gym-pick-name {
-  position: absolute;
-  left: 8px;
-  right: 8px;
-  bottom: 8px;
-  z-index: 1;
-  font-size: 0.72rem;
-  font-weight: 750;
-  line-height: 1.2;
-  color: var(--text);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.floor-gym-pick-here {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  z-index: 1;
-  padding: 2px 6px;
+.floor-gym-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 0;
   border-radius: 999px;
+  background: var(--bg-soft);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.floor-gym-chip-name {
+  max-width: 16ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.floor-gym-chip-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--online);
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(87, 242, 135, 0.18);
+}
+
+.floor-gym-chip.active {
   background: var(--accent);
   color: var(--accent-ink);
-  font-size: 0.62rem;
-  font-weight: 800;
-  text-transform: lowercase;
 }
 
-.floor-gym-pick.active {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(200, 245, 66, 0.25);
+.floor-gym-chip.active .floor-gym-chip-dot {
+  background: var(--accent-ink);
+  box-shadow: none;
 }
 
-.floor-gym-pick.here:not(.active) {
-  border-color: rgba(87, 242, 135, 0.55);
+.floor-gym-chip.here:not(.active) {
+  color: var(--text);
+  background: rgba(87, 242, 135, 0.12);
 }
 
-.home-banner-empty {
-  display: block;
-  text-decoration: none;
+.home-people-head {
+  margin-bottom: 12px;
 }
 
-.home-banner-content {
-  position: relative;
-  z-index: 1;
-  padding: 18px;
-  max-width: 34ch;
+.home-people-count {
+  font-size: 0.9rem;
+  font-weight: 750;
+  color: var(--text-muted);
 }
 
-.home-banner-content p {
-  margin-top: 10px;
+.home-people .floor-filters {
+  margin-bottom: 14px;
+}
+
+.home-empty-floor {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  margin: 8px 0 0;
+  padding: 28px 20px 24px;
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(200, 245, 66, 0.1), transparent 70%),
+    var(--bg-card);
+  border: 1px solid var(--line);
+  text-align: center;
+}
+
+.home-empty-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.home-empty-floor h2 {
+  margin: 4px 0 0;
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.home-empty-floor > .muted {
+  margin: 0 auto;
+  max-width: 28ch;
+  font-size: 0.92rem;
   line-height: 1.4;
+}
+
+.home-empty-floor .btn {
+  margin-top: 8px;
 }
 
 @media (min-width: 900px) {
   .home-page .card-list {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .floor-gym-pick {
-    flex-basis: 140px;
-    height: 84px;
   }
 }
