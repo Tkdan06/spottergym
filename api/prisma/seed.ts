@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { PrismaClient } from '@prisma/client'
@@ -18,8 +18,24 @@ type GymJson = {
   lng?: number | null
 }
 
+function resolveGymsPath() {
+  const candidates = [
+    // Packaged with API (Docker / production)
+    resolve(__dirname, './data/gyms.json'),
+    // Local monorepo: api/prisma → ../../src/data/gyms.json
+    resolve(__dirname, '../../src/data/gyms.json'),
+  ]
+  const found = candidates.find((path) => existsSync(path))
+  if (!found) {
+    throw new Error(
+      `gyms.json not found. Tried:\n${candidates.map((p) => ` - ${p}`).join('\n')}`,
+    )
+  }
+  return found
+}
+
 async function main() {
-  const gymsPath = resolve(__dirname, '../../src/data/gyms.json')
+  const gymsPath = resolveGymsPath()
   const raw = JSON.parse(readFileSync(gymsPath, 'utf8')) as GymJson[]
   if (!Array.isArray(raw) || !raw.length) {
     throw new Error('gyms.json empty or missing')
