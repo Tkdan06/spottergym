@@ -18,9 +18,10 @@ export function buildInvitePayload(opts: {
   const url = `${SHARE_ORIGIN}/register?invite=${encodeURIComponent(opts.userId)}`
   const title = 'SPOTTER — найди своих в зале'
   const gym = opts.gymName?.trim()
+  // Текст без сырого URL: ссылка уходит отдельно в `url`, мессенджер рисует красивое OG-превью
   const text = gym
-    ? `Привет! Заходи в Spotter — ищем своих в «${gym}». Кто рядом и кто открыт к общению`
-    : 'Привет! Присоединяйся ко мне в Spotter — найди своих в зале: кто рядом, кто на тренировке и кто открыт к общению'
+    ? `Привет! Присоединяйся ко мне в Spotter — ищем своих в «${gym}».`
+    : 'Привет! Присоединяйся ко мне в Spotter — найди своих в зале.'
 
   return { title, text, url }
 }
@@ -39,7 +40,8 @@ export function canUseNativeShare(): boolean {
 
 /**
  * Open the phone OS share sheet from a direct user click.
- * Passes `url` separately so messengers unfurl a rich preview (картинка Spotter + заголовок).
+ * URL goes in `url` (or alone in fallback) so messengers show OG preview
+ * instead of dumping a long raw link into the message body when possible.
  */
 export async function shareInvite(payload: InvitePayload): Promise<ShareInviteResult> {
   if (!canUseNativeShare()) return 'unavailable'
@@ -55,10 +57,10 @@ export async function shareInvite(payload: InvitePayload): Promise<ShareInviteRe
     if (err instanceof DOMException && err.name === 'AbortError') {
       return 'cancelled'
     }
-    // Some browsers only accept a single field — URL last so it can still unfurl.
+    // Some browsers only accept text — keep invite short; link still needed to open.
     try {
       await navigator.share({
-        text: `${payload.text}\n\n${payload.url}`,
+        text: `${payload.text}\n${payload.url}`,
       })
       return 'shared'
     } catch (retryErr) {
