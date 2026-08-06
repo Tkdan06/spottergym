@@ -1,6 +1,6 @@
 import { type FormEvent, useMemo, useState } from 'react'
 import { ArrowLeft, Search, Share2 } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { CityCarousel } from '../components/CityCarousel'
 import { GymCard } from '../components/GymCard'
 import { InviteFriendsButton } from '../components/InviteFriendsButton'
@@ -97,7 +97,7 @@ export function SettingsPage() {
       .filter((p): p is NonNullable<typeof p> => Boolean(p))
   }, [blockedUserIds, user?.email])
 
-  if (!user) return null
+  if (!user) return <Navigate to="/login" replace />
 
   const toggle = (list: string[], value: string, setter: (v: string[]) => void) => {
     setter(list.includes(value) ? list.filter((i) => i !== value) : [...list, value])
@@ -532,8 +532,10 @@ export function SettingsPage() {
         type="button"
         className="btn btn-danger btn-block"
         onClick={() => {
-          void logout()
-          navigate('/')
+          void (async () => {
+            await logout()
+            navigate('/login', { replace: true })
+          })()
         }}
       >
         Выйти

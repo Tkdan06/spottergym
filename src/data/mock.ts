@@ -516,7 +516,8 @@ export function peopleForGymPage(
 }
 
 export function getUserGyms(user: Pick<UserProfile, 'gymIds'>) {
-  return user.gymIds.map((id) => getGym(id)).filter(Boolean) as Gym[]
+  const ids = Array.isArray(user.gymIds) ? user.gymIds : []
+  return ids.map((id) => getGym(id)).filter(Boolean) as Gym[]
 }
 
 /** Зал контакта для чата: общий с тобой, иначе home, иначе первый */

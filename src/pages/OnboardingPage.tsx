@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Search } from 'lucide-react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { CityCarousel } from '../components/CityCarousel'
 import { ElsewhereGymBanner } from '../components/ElsewhereGymBanner'
 import { GymCard } from '../components/GymCard'
@@ -71,7 +71,6 @@ function initialAge(userAge: number | undefined): number | '' {
 
 export function OnboardingPage() {
   const { user, completeOnboarding, apiOnline } = useApp()
-  const navigate = useNavigate()
   const draft = user ? loadOnboardingDraft(user.id) : null
 
   const [step, setStep] = useState(draft?.step ?? 0)
@@ -252,13 +251,11 @@ export function OnboardingPage() {
   }, [needElsewhere, apiOnline, demoStats, elsewhereRemote, elsewhereQuery, city])
 
   useEffect(() => {
-    if (user?.onboardingDone) {
-      clearOnboardingDraft()
-      navigate('/app', { replace: true })
-    }
-  }, [user?.onboardingDone, navigate])
+    if (user?.onboardingDone) clearOnboardingDraft()
+  }, [user?.onboardingDone])
 
   useEffect(() => {
+    if (!user || user.onboardingDone) return
     const html = document.documentElement
     const body = document.body
     const prevHtml = html.style.overflow
@@ -269,10 +266,11 @@ export function OnboardingPage() {
       html.style.overflow = prevHtml
       body.style.overflow = prevBody
     }
-  }, [])
+  }, [user, user?.onboardingDone])
 
-  if (!user) return <Navigate to="/register" replace />
-  if (user.onboardingDone) return null
+  if (!user) return <Navigate to="/login" replace />
+  // Не return null — иначе пустой фон (Safari) пока navigate не сработает
+  if (user.onboardingDone) return <Navigate to="/app" replace />
 
   const toggle = (list: string[], value: string, setter: (v: string[]) => void) => {
     setter(list.includes(value) ? list.filter((i) => i !== value) : [...list, value])

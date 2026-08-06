@@ -561,6 +561,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const userEmailRef = useRef(user?.email || '')
   const apiOnlineRef = useRef(false)
   const notificationPrefsRef = useRef(notificationPrefs)
+  /** Инкремент при login/logout — отсекает устаревшие apiLogout/apiMe */
+  const sessionEpochRef = useRef(0)
   useEffect(() => {
     userEmailRef.current = user?.email || ''
   }, [user?.email])
@@ -574,24 +576,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Postgres API: health + восстановление сессии по JWT
   useEffect(() => {
     let cancelled = false
+    const bootEpoch = sessionEpochRef.current
     ;(async () => {
       const online = await apiHealth()
-      if (cancelled) return
+      if (cancelled || bootEpoch !== sessionEpochRef.current) return
       setApiOnline(online)
       apiOnlineRef.current = online
 
-      // Production: fail closed — no silent localStorage auth without API
-      if (!online && import.meta.env.PROD) {
-        setStoredToken(null)
-        setUser(null)
-        localStorage.removeItem(STORAGE_USER)
-        return
-      }
-
+      // Не стираем сессию при кратком сбое health (Safari / сеть) — только при 401 ниже
       if (!online || !getStoredToken()) return
       try {
         const me = await apiMe()
-        if (cancelled) return
+        if (cancelled || bootEpoch !== sessionEpochRef.current) return
         const normalized = withAdminFlags(
           normalizeGymFields(me as AppUser) as AppUser,
         )
@@ -599,11 +595,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         saveJson(STORAGE_USER, normalized)
         saveAccountProfile(normalized)
         hydrateAccountData(normalized.email)
-      } catch {
-        setStoredToken(null)
-        if (import.meta.env.PROD) {
+      } catch (err) {
+        if (cancelled || bootEpoch !== sessionEpochRef.current) return
+        // Только 401 = сессия мертва. Иные ошибки / health blip — не стираем аккаунт.
+        if (err instanceof ApiError && err.status === 401) {
+          setStoredToken(null)
           setUser(null)
           localStorage.removeItem(STORAGE_USER)
+        } else if (!import.meta.env.PROD) {
+          setStoredToken(null)
         }
       }
     })()
@@ -973,7 +973,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (import.meta.env.PROD) {
           throw new Error('Демо-вход недоступен')
         }
-        return loginLocal(email, password)
+        sessionEpochRef.current += 1
+        let ok = false
+        flushSync(() => {
+          ok = loginLocal(email, password)
+        })
+        return ok
       }
 
       const online = apiOnlineRef.current || (await apiHealth())
@@ -981,7 +986,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (online) {
         try {
           const me = await apiLogin(normalizedEmail, password)
-          persistUser(withAdminFlags(normalizeGymFields(me as AppUser) as AppUser))
+          sessionEpochRef.current += 1
+          // flushSync: иначе navigate('/app') видит ещё null/старого user
+          flushSync(() => {
+            persistUser(withAdminFlags(normalizeGymFields(me as AppUser) as AppUser))
+          })
           return true
         } catch (err) {
           if (err instanceof ApiError) throw err
@@ -989,7 +998,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      return loginLocal(email, password)
+      sessionEpochRef.current += 1
+      let ok = false
+      flushSync(() => {
+        ok = loginLocal(email, password)
+      })
+      return ok
     },
     [loginLocal, persistUser],
   )
@@ -1022,7 +1036,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
             password: pass,
             gender: normalizeGender(gender),
           })
-          persistUser(withAdminFlags(normalizeGymFields(me as AppUser) as AppUser))
+          sessionEpochRef.current += 1
+          flushSync(() => {
+            persistUser(withAdminFlags(normalizeGymFields(me as AppUser) as AppUser))
+          })
           return true
         } catch (err) {
           if (err instanceof ApiError) throw err
@@ -1038,21 +1055,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
         throw new Error('Аккаунт с таким email уже есть — войди')
       }
       saveAccountPassword(normalizedEmail, pass)
-      persistUser(createDefaultUser(safeName, normalizedEmail, normalizeGender(gender)))
+      sessionEpochRef.current += 1
+      flushSync(() => {
+        persistUser(createDefaultUser(safeName, normalizedEmail, normalizeGender(gender)))
+      })
       return true
     },
     [persistUser],
   )
 
   const logout = useCallback(async () => {
-    if (apiOnlineRef.current || getStoredToken()) {
-      try {
-        await apiLogout()
-      } catch {
-        setStoredToken(null)
-      }
+    // Сначала локально выходим — иначе медленный /auth/logout в Safari
+    // может завершиться уже после нового login и стереть админ-сессию.
+    const epoch = ++sessionEpochRef.current
+    setStoredToken(null)
+    flushSync(() => {
+      persistUser(null)
+    })
+    try {
+      await apiLogout()
+    } catch {
+      /* token already cleared */
     }
-    persistUser(null)
+    // Если за время запроса уже вошли в другой аккаунт — не трогаем
+    if (epoch !== sessionEpochRef.current) return
+    setStoredToken(null)
   }, [persistUser])
 
   const applyServerUser = useCallback((me: AppUser) => {

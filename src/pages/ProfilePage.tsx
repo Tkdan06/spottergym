@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Bell, Copy, Eye, EyeOff, MessageSquareText, Settings, Share2, Shield } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { CheckInControl } from '../components/CheckInControl'
 import { InviteFriendsButton } from '../components/InviteFriendsButton'
 import { LikesRow } from '../components/LikesRow'
@@ -22,7 +22,7 @@ export function ProfilePage() {
   const [galleryOpen, setGalleryOpen] = useState(false)
   const [galleryIndex, setGalleryIndex] = useState(0)
   const [scheduleOpen, setScheduleOpen] = useState(false)
-  if (!user) return null
+  if (!user) return <Navigate to="/login" replace />
   const gyms = getUserGyms(user)
   const likesInfo = getLikesFor(user.id)
   const myLiked = getMyLikedUsers()

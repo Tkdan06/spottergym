@@ -16,8 +16,8 @@ export function LoginPage() {
     setError('')
     try {
       await login(email, password)
-      // ProtectedRoute / GuestOnly сами решат: онбординг или /app
-      navigate('/app')
+      // После flushSync в login user уже в контексте — сразу в приложение
+      navigate('/app', { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось войти')
     }
