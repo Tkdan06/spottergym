@@ -10,6 +10,8 @@
   border: 1px solid var(--line);
   transition: border-color 0.2s ease, transform 0.2s ease;
   animation: fade-up 0.4s ease both;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 120px;
 }
 
 .user-card:hover {
@@ -69,7 +71,8 @@
   background: var(--bg-soft);
 }
 
-.user-card-media img {
+.user-card-media img,
+.user-card-media .smart-image {
   width: 100%;
   height: 100%;
   object-fit: cover;

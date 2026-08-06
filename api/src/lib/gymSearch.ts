@@ -81,6 +81,8 @@ const LAT_TO_CYR_SINGLE: Record<string, string> = {
 const BRAND_ALIASES: [string, string][] = [
   ['комета', 'kometa'],
   ['comet', 'kometa'],
+  ['ломов', 'lomov'],
+  ['ломов джим', 'lomov gym'],
   ['ворлд класс', 'world class'],
   ['ворлдкласс', 'world class'],
   ['спирит', 'spirit'],

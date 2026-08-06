@@ -6,9 +6,10 @@ import { PhotoGalleryModal } from '../components/PhotoGalleryModal'
 import { ProfilePhotoCarousel } from '../components/ProfilePhotoCarousel'
 import { SafetyActions } from '../components/SafetyActions'
 import { SectionTitle } from '../components/SectionTitle'
+import { SmartImage } from '../components/SmartImage'
 import { useApp } from '../context/useApp'
 import { displayName, experienceLabel, getUser, getUserGyms, intentLabel } from '../data/mock'
-import { profileImage } from '../lib/avatar'
+import { localGenderAvatar, profileImage } from '../lib/avatar'
 import { otherParticipantId } from '../lib/conversations'
 import { isDemoAccount } from '../lib/demoAccount'
 import { GREETING_MESSAGE_MAX } from '../lib/fieldLimits'
@@ -104,6 +105,32 @@ export function UserProfilePage() {
     )
   }
 
+  if (person.isDeleted) {
+    return (
+      <main className="page">
+        <button type="button" className="back-link" onClick={() => navigate(-1)}>
+          <ArrowLeft size={18} /> Назад
+        </button>
+        <div className="empty-copy" style={{ marginTop: 24 }}>
+          <SmartImage
+            src="/images/deleted-user.svg"
+            alt=""
+            size="avatar"
+            priority
+            style={{
+              width: 72,
+              height: 72,
+              borderRadius: '50%',
+              margin: '0 auto 12px',
+            }}
+          />
+          <p className="empty-copy-title">Удалённый пользователь</p>
+          <p className="empty-copy-lead">Этот аккаунт удалён. Переписку можно открыть в чатах.</p>
+        </div>
+      </main>
+    )
+  }
+
   const name = displayName(person)
   const isAnon = person.privacy === 'anonymous'
   const isSelf = Boolean(user && person.id === user.id)
@@ -139,6 +166,7 @@ export function UserProfilePage() {
         <ProfilePhotoCarousel
           photos={galleryPhotos}
           fallbackSrc={photo}
+          errorFallbackSrc={localGenderAvatar(person.gender)}
           name={name}
           onOpen={(index) => {
             if (!galleryPhotos.length) return
@@ -202,6 +230,7 @@ export function UserProfilePage() {
         onClose={() => setGalleryOpen(false)}
         photos={galleryPhotos}
         fallbackSrc={photo}
+        errorFallbackSrc={localGenderAvatar(person.gender)}
         name={name}
         initialIndex={galleryIndex}
       />

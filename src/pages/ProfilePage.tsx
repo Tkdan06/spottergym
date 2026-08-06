@@ -10,7 +10,7 @@ import { ScheduleSheet } from '../components/ScheduleSheet'
 import { SectionTitle } from '../components/SectionTitle'
 import { useApp } from '../context/useApp'
 import { experienceLabel, getGym, getUserGyms, intentLabel } from '../data/mock'
-import { profileImage } from '../lib/avatar'
+import { localGenderAvatar, profileImage } from '../lib/avatar'
 import { clampPhotos } from '../lib/photos'
 import { getCheckedInGymId } from '../lib/presence'
 import { breakLabel, isOnBreak } from '../lib/schedule'
@@ -53,6 +53,7 @@ export function ProfilePage() {
         <ProfilePhotoCarousel
           photos={user.photos}
           fallbackSrc={heroSrc}
+          errorFallbackSrc={localGenderAvatar(user.gender)}
           name={user.name}
           mine
           emptyHint="Фото"
@@ -109,6 +110,7 @@ export function ProfilePage() {
         onClose={() => setGalleryOpen(false)}
         photos={user.photos}
         fallbackSrc={user.avatar || heroSrc}
+        errorFallbackSrc={localGenderAvatar(user.gender)}
         name={user.name}
         editable
         initialIndex={galleryIndex}

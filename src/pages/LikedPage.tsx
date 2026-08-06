@@ -1,9 +1,10 @@
 import { ArrowLeft, Heart, MessageCircle } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { PresenceBadge } from '../components/PresenceBadge'
+import { SmartImage } from '../components/SmartImage'
 import { useApp } from '../context/useApp'
 import { displayName, formatGymLabel, getContactGym, getUserGyms } from '../data/mock'
-import { profileImage } from '../lib/avatar'
+import { profileImage, profileImageFallback } from '../lib/avatar'
 import { hasLiked } from '../lib/likes'
 import type { UserProfile } from '../types'
 import './LikedPage.css'
@@ -49,7 +50,12 @@ function LikedRow({
     <article className="liked-row">
       <Link to={`/app/user/${person.id}`} className="liked-main">
         <div className="avatar-wrap">
-          <img src={profileImage(person)} alt={name} />
+          <SmartImage
+            src={profileImage(person)}
+            fallbackSrc={profileImageFallback(person)}
+            alt={name}
+            size="avatar"
+          />
         </div>
         <div className="liked-body">
           <div className="liked-title-line">

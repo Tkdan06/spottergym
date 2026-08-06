@@ -111,7 +111,7 @@ import {
   MASTER_ADMIN_NAME,
   normalizeEmail,
 } from '../lib/adminConfig'
-import { buildAvatarUrl, withSyncedAvatar } from '../lib/avatar'
+import { localGenderAvatar, withSyncedAvatar } from '../lib/avatar'
 import {
   BIO_MAX,
   CHAT_MESSAGE_MAX,
@@ -390,7 +390,7 @@ function createDefaultUser(name: string, email: string, gender: Gender = 'male')
     gender: normalizeGender(gender),
     bio: '',
     photos: [],
-    avatar: buildAvatarUrl(displayName, normalizeGender(gender)),
+    avatar: localGenderAvatar(normalizeGender(gender)),
     gymIds: [],
     homeGymId: '',
     city: '',
@@ -2164,9 +2164,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
           adminDirectory.find((p) => normalizeEmail(p.email) === normalizeEmail(email)) ||
           loadDirectory().find((p) => normalizeEmail(p.email) === normalizeEmail(email))
         if (!target?.id) throw new Error('Пользователь не найден на сервере')
-        await apiAdminDeleteUser(target.id)
+        await apiAdminDeleteUser(target.id, { alsoBlock })
         if (alsoBlock) {
-          const emails = await apiAdminBlockEmail(email)
+          // Email уже заблокирован на сервере вместе с soft-delete
+          const emails = await apiAdminFetchBlockedEmails().catch(() => loadBlockedEmails())
           saveBlockedEmails(emails)
           setBlockedEmails(emails)
         }

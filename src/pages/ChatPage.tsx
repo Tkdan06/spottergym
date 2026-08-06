@@ -12,9 +12,10 @@ import { ArrowLeft } from 'lucide-react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { MessageTicks } from '../components/MessageTicks'
 import { PresenceBadge } from '../components/PresenceBadge'
+import { SmartImage } from '../components/SmartImage'
 import { useApp } from '../context/useApp'
 import { displayName, formatGymLabel, getContactGym, getUser } from '../data/mock'
-import { profileImage } from '../lib/avatar'
+import { profileImage, profileImageFallback } from '../lib/avatar'
 import { otherParticipantId } from '../lib/conversations'
 import { CHAT_MESSAGE_MAX } from '../lib/fieldLimits'
 import { chatComposerProps } from '../lib/inputAttrs'
@@ -133,11 +134,12 @@ export function ChatPage() {
   }
 
   const name = displayName(other)
-  const contactGym = getContactGym(other, user.gymIds)
+  const deleted = Boolean(other.isDeleted)
+  const contactGym = deleted ? undefined : getContactGym(other, user.gymIds)
   const gymLabel = formatGymLabel(contactGym)
   const waiting = conversation.requestStatus === 'pending'
   const incoming = conversation.requestStatus === 'incoming'
-  const locked = waiting
+  const locked = waiting || deleted
 
   const dismissKeyboard = () => {
     inputRef.current?.blur()
@@ -246,16 +248,40 @@ export function ChatPage() {
         >
           <ArrowLeft size={18} />
         </button>
-        <Link to={`/app/user/${other.id}`} className="chat-user">
-          <div className="chat-user-avatar">
-            <img src={profileImage(other)} alt={name} />
+        {deleted ? (
+          <div className="chat-user">
+            <div className="chat-user-avatar">
+              <SmartImage
+                src={profileImage(other)}
+                fallbackSrc={profileImageFallback(other)}
+                alt={name}
+                size="avatar"
+                priority
+              />
+            </div>
+            <div>
+              <strong>{name}</strong>
+              <p className="chat-gym">Аккаунт удалён</p>
+            </div>
           </div>
-          <div>
-            <strong>{name}</strong>
-            {gymLabel ? <p className="chat-gym">{gymLabel}</p> : null}
-            <PresenceBadge active={other.isActive} compact />
-          </div>
-        </Link>
+        ) : (
+          <Link to={`/app/user/${other.id}`} className="chat-user">
+            <div className="chat-user-avatar">
+              <SmartImage
+                src={profileImage(other)}
+                fallbackSrc={profileImageFallback(other)}
+                alt={name}
+                size="avatar"
+                priority
+              />
+            </div>
+            <div>
+              <strong>{name}</strong>
+              {gymLabel ? <p className="chat-gym">{gymLabel}</p> : null}
+              <PresenceBadge active={other.isActive} compact />
+            </div>
+          </Link>
+        )}
       </header>
 
       {waiting ? (

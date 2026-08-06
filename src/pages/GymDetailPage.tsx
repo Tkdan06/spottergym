@@ -2,6 +2,8 @@ import { useMemo } from 'react'
 import { ArrowLeft, Check, Clock3, MapPin, Star } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { InviteFriendsButton } from '../components/InviteFriendsButton'
+import { SmartImage } from '../components/SmartImage'
+import { SoftLoader } from '../components/SoftLoader'
 import { UserCard } from '../components/UserCard'
 import { useApp } from '../context/useApp'
 import {
@@ -25,7 +27,7 @@ export function GymDetailPage() {
   const isHome = user?.homeGymId === gymId
   const hours = gym ? getGymHours(gym) : null
 
-  const { people: floorPeople } = useGymPeople({
+  const { people: floorPeople, loading: peopleLoading, showLoader } = useGymPeople({
     gymId,
     user,
     apiOnline,
@@ -59,7 +61,15 @@ export function GymDetailPage() {
         <ArrowLeft size={18} /> Назад
       </button>
 
-      <section className="gym-hero" style={{ backgroundImage: `url(${gym.image})` }}>
+      <section className="gym-hero">
+        <SmartImage
+          src={gym.image}
+          alt=""
+          size="hero"
+          priority
+          className="gym-hero-bg"
+          aria-hidden
+        />
         <div className="gym-hero-content">
           <div className="gym-hero-top">
             <p className="gym-hero-network">{gym.network}</p>
@@ -167,16 +177,25 @@ export function GymDetailPage() {
         <div className="section-title">
           <h2>Люди в этом зале</h2>
           <span className="muted">
-            {people.length ? `${people.length} в клубе` : 'Пока никого'}
+            {peopleLoading && !showLoader
+              ? '…'
+              : showLoader
+                ? 'загрузка'
+                : people.length
+                  ? `${people.length} в клубе`
+                  : 'Пока никого'}
           </span>
         </div>
         <div className="card-list">
-          {people.length ? (
-            people.map((person) => (
+          {showLoader ? (
+            <SoftLoader label="Загружаем людей в зале…" />
+          ) : peopleLoading ? null : people.length ? (
+            people.map((person, index) => (
               <UserCard
                 key={person.id}
                 user={person}
                 rank={getHallRank(person.id, people, likes)}
+                priority={index < 4}
               />
             ))
           ) : (

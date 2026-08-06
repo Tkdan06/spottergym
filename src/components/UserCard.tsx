@@ -1,19 +1,22 @@
 import { Link } from 'react-router-dom'
 import { useApp } from '../context/useApp'
 import { displayName, experienceLabel, intentLabel } from '../data/mock'
-import { profileImage } from '../lib/avatar'
+import { profileImage, profileImageFallback } from '../lib/avatar'
 import { breakLabel, isOnBreak } from '../lib/schedule'
 import type { UserProfile } from '../types'
 import { LikesRow } from './LikesRow'
+import { SmartImage } from './SmartImage'
 import './UserCard.css'
 
 interface Props {
   user: UserProfile
   compact?: boolean
   rank?: number
+  /** Первые карточки в списке — без lazy */
+  priority?: boolean
 }
 
-export function UserCard({ user, compact, rank }: Props) {
+export function UserCard({ user, compact, rank, priority = false }: Props) {
   const { user: me, getLikesFor } = useApp()
   const { count, likers } = getLikesFor(user.id)
   const isMe = Boolean(me && user.id === me.id)
@@ -41,7 +44,13 @@ export function UserCard({ user, compact, rank }: Props) {
 
       <div className="user-card-aside">
         <div className="user-card-media">
-          <img src={photo} alt={name} />
+          <SmartImage
+            src={photo}
+            fallbackSrc={profileImageFallback(user)}
+            alt={name}
+            size="avatar"
+            priority={priority}
+          />
         </div>
         {onBreak ? (
           <span className="presence-pill break" title={breakText}>

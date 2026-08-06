@@ -24,6 +24,7 @@ import {
   removePhotoAt,
   setMainPhoto,
 } from '../lib/photos'
+import { SmartImage } from './SmartImage'
 import './PhotoGalleryModal.css'
 
 type Props = {
@@ -32,6 +33,8 @@ type Props = {
   photos: string[]
   /** Плейсхолдер, если своих фото ещё нет */
   fallbackSrc: string
+  /** Если CDN-фото упало */
+  errorFallbackSrc?: string
   name: string
   editable?: boolean
   onChangePhotos?: (photos: string[]) => void
@@ -43,6 +46,7 @@ export function PhotoGalleryModal({
   onClose,
   photos,
   fallbackSrc,
+  errorFallbackSrc,
   name,
   editable = false,
   onChangePhotos,
@@ -212,7 +216,14 @@ export function PhotoGalleryModal({
           ) : null}
 
           <div className="photo-modal-frame" key={`${current}-${index}`}>
-            <img src={current} alt={`${name} — фото ${index + 1}`} draggable={false} />
+            <SmartImage
+              src={current}
+              fallbackSrc={errorFallbackSrc || fallbackSrc}
+              alt={`${name} — фото ${index + 1}`}
+              size="full"
+              priority
+              draggable={false}
+            />
             {showingPlaceholder ? (
               <div className="photo-modal-empty" role="status">
                 <p>Пока нет своих фото</p>
@@ -258,7 +269,12 @@ export function PhotoGalleryModal({
                 className={`photo-thumb ${i === index ? 'active' : ''} ${i === 0 ? 'main' : ''}`}
                 onClick={() => setIndex(i)}
               >
-                <img src={src} alt="" />
+                <SmartImage
+                  src={src}
+                  fallbackSrc={errorFallbackSrc || fallbackSrc}
+                  alt=""
+                  size="thumb"
+                />
               </button>
             ))}
             {canEdit && !atLimit ? (

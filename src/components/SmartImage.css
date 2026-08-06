@@ -1,0 +1,21 @@
+.smart-image {
+  display: block;
+  background: var(--bg-soft);
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.smart-image.is-loaded,
+.smart-image.is-priority {
+  opacity: 1;
+}
+
+.smart-image.is-priority:not(.is-loaded) {
+  opacity: 0.35;
+}
+
+.smart-image--empty {
+  display: block;
+  background: var(--bg-soft);
+  opacity: 1;
+}

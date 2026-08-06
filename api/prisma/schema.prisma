@@ -92,6 +92,8 @@ model User {
   adminPermissions Json?
   registeredAt     DateTime        @default(now())
   lastSeenAt       DateTime        @default(now())
+  /** Soft-delete: аккаунт анонимизирован, чаты сохраняются */
+  deletedAt        DateTime?
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 
@@ -113,6 +115,7 @@ model User {
   @@index([email])
   @@index([city])
   @@index([username])
+  @@index([deletedAt])
 }
 
 /** Web Push endpoints for installed PWA (home screen) */

@@ -461,7 +461,7 @@ export function OnboardingPage() {
                   />
                 ) : null}
                 {cityGyms.length ? (
-                  cityGyms.map((gym) => (
+                  cityGyms.map((gym, index) => (
                     <GymCard
                       key={gym.id}
                       gym={gym}
@@ -469,6 +469,7 @@ export function OnboardingPage() {
                       showDemoStats={demoStats}
                       membersCount={liveStats[gym.id]?.membersCount}
                       activeNow={liveStats[gym.id]?.activeNow}
+                      priority={index < 4}
                       onSelect={() => toggle(gymIds, gym.id, setGymIds)}
                     />
                   ))

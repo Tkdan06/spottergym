@@ -122,8 +122,9 @@ export async function buildAdminAnalytics(): Promise<AdminAnalytics> {
     blockedEmails,
     gyms,
   ] = await Promise.all([
-    prisma.user.count(),
+    prisma.user.count({ where: { deletedAt: null } }),
     prisma.user.findMany({
+      where: { deletedAt: null },
       select: {
         registeredAt: true,
         lastSeenAt: true,
@@ -133,18 +134,20 @@ export async function buildAdminAnalytics(): Promise<AdminAnalytics> {
       },
     }),
     prisma.user.findMany({
+      where: { deletedAt: null },
       select: { photos: true },
     }),
     prisma.checkIn.count({ where: { checkedOutAt: null } }),
     prisma.user.groupBy({
       by: ['city'],
       _count: { _all: true },
+      where: { deletedAt: null },
       orderBy: { _count: { city: 'desc' } },
     }),
     prisma.user.groupBy({
       by: ['homeGymId'],
       _count: { _all: true },
-      where: { homeGymId: { not: null } },
+      where: { homeGymId: { not: null }, deletedAt: null },
       orderBy: { _count: { homeGymId: 'desc' } },
     }),
     prisma.user.groupBy({

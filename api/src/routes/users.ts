@@ -31,6 +31,7 @@ userRoutes.get('/search', async (c) => {
 
   const found = await prisma.user.findMany({
     where: {
+      deletedAt: null,
       id: { notIn: [me, ...hidden] },
       OR: [
         ...(nick.length >= 2

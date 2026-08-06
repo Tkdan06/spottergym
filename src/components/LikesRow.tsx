@@ -1,8 +1,9 @@
 import { ChevronRight, Heart } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { displayName } from '../data/mock'
-import { profileImage } from '../lib/avatar'
+import { profileImage, profileImageFallback } from '../lib/avatar'
 import type { UserProfile } from '../types'
+import { SmartImage } from './SmartImage'
 import './LikesRow.css'
 
 interface Props {
@@ -56,12 +57,14 @@ export function LikesRow({ count, likers, maxAvatars = 5, compact, to }: Props) 
               const name = displayName(person)
               const src = profileImage(person)
               return (
-                <img
+                <SmartImage
                   key={person.id}
                   src={src}
+                  fallbackSrc={profileImageFallback(person)}
                   alt={to ? '' : name}
                   title={name}
                   className="likes-avatar"
+                  size="avatar"
                 />
               )
             })}

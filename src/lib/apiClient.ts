@@ -282,10 +282,12 @@ export async function apiAdminUnblockEmail(email: string) {
   return data.emails
 }
 
-export async function apiAdminDeleteUser(userId: string) {
-  await request<{ ok: boolean }>(`/admin/users/${encodeURIComponent(userId)}`, {
-    method: 'DELETE',
-  })
+export async function apiAdminDeleteUser(userId: string, options?: { alsoBlock?: boolean }) {
+  const sp = options?.alsoBlock ? '?alsoBlock=1' : ''
+  await request<{ ok: boolean }>(
+    `/admin/users/${encodeURIComponent(userId)}${sp}`,
+    { method: 'DELETE' },
+  )
 }
 
 export async function apiAdminPatchUserAdmin(

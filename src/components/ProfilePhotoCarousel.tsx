@@ -1,11 +1,14 @@
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { Images } from 'lucide-react'
 import { MAX_PROFILE_PHOTOS } from '../lib/photos'
+import { SmartImage } from './SmartImage'
 import './ProfilePhotoCarousel.css'
 
 type Props = {
   photos: string[]
   fallbackSrc: string
+  /** Если CDN-фото упало — локальный силуэт */
+  errorFallbackSrc?: string
   name: string
   /** Компактный квадрат для своего профиля */
   mine?: boolean
@@ -16,6 +19,7 @@ type Props = {
 export function ProfilePhotoCarousel({
   photos,
   fallbackSrc,
+  errorFallbackSrc,
   name,
   mine = false,
   onOpen,
@@ -91,7 +95,15 @@ export function ProfilePhotoCarousel({
         if (e.key === 'ArrowRight') go(1)
       }}
     >
-      <img key={`${current}-${safeIndex}`} src={current} alt={name} draggable={false} />
+      <SmartImage
+        key={`${current}-${safeIndex}`}
+        src={current}
+        fallbackSrc={errorFallbackSrc || fallbackSrc}
+        alt={name}
+        size="hero"
+        priority
+        draggable={false}
+      />
 
       {count > 0 ? (
         <span className="profile-carousel-count" aria-hidden>

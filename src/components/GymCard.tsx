@@ -2,6 +2,7 @@ import { MapPin, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { formatGymAddress } from '../data/mock'
 import type { Gym } from '../types'
+import { SmartImage } from './SmartImage'
 import './GymCard.css'
 
 interface Props {
@@ -15,6 +16,8 @@ interface Props {
   /** Реальные счётчики (для обычных аккаунтов) */
   membersCount?: number
   activeNow?: number
+  /** Первые карточки в списке — без lazy */
+  priority?: boolean
 }
 
 export function GymCard({
@@ -26,6 +29,7 @@ export function GymCard({
   showDemoStats = false,
   membersCount: realMembers,
   activeNow: realActive,
+  priority = false,
 }: Props) {
   const activeNow = showDemoStats ? gym.activeNow : (realActive ?? 0)
   const membersCount = showDemoStats ? gym.membersCount : (realMembers ?? 0)
@@ -33,7 +37,7 @@ export function GymCard({
   const content = (
     <>
       <div className="gym-card-media">
-        <img src={gym.image} alt={gym.name} />
+        <SmartImage src={gym.image} alt={gym.name} size="card" priority={priority} />
         <span className={`gym-card-presence ${activeNow > 0 ? 'is-online' : 'is-empty'}`}>
           {activeNow > 0 ? <span className="online-dot" /> : null}
           <span className="gym-card-presence-label">

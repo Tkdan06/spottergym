@@ -1,0 +1,47 @@
+.soft-loader {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 28px 16px;
+  text-align: center;
+}
+
+.soft-loader-ring {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(200, 245, 66, 0.18);
+  border-top-color: var(--accent);
+  animation: soft-loader-spin 0.7s linear infinite;
+}
+
+.soft-loader-label {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: var(--text-muted);
+}
+
+@keyframes soft-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .soft-loader-ring {
+    animation: soft-loader-pulse 1.2s ease-in-out infinite;
+    border-top-color: rgba(200, 245, 66, 0.18);
+    border-color: var(--accent);
+  }
+}
+
+@keyframes soft-loader-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}

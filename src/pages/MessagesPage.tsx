@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import { Heart, Search, UserRound } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { PresenceBadge } from '../components/PresenceBadge'
+import { SmartImage } from '../components/SmartImage'
 import { useApp, useOtherParticipant } from '../context/useApp'
 import { displayName, formatGymLabel, getContactGym, getGym } from '../data/mock'
-import { profileImage } from '../lib/avatar'
+import { profileImage, profileImageFallback } from '../lib/avatar'
 import { otherParticipantId } from '../lib/conversations'
 import { searchFieldProps } from '../lib/inputAttrs'
 import { getCheckedInGymId } from '../lib/presence'
@@ -15,8 +16,9 @@ import './MessagesPage.css'
 function ConversationRow({ conversation }: { conversation: Conversation }) {
   const { user } = useApp()
   const other = useOtherParticipant(conversation)
-  const name = other ? displayName(other) : 'Собеседник'
-  const gym = other ? getContactGym(other, user?.gymIds || []) : undefined
+  const deleted = Boolean(other?.isDeleted) || !other
+  const name = other ? displayName(other) : 'Удалённый пользователь'
+  const gym = other && !other.isDeleted ? getContactGym(other, user?.gymIds || []) : undefined
   const gymLabel = formatGymLabel(gym)
   const time = new Date(conversation.updatedAt).toLocaleTimeString('ru-RU', {
     hour: '2-digit',
@@ -26,21 +28,20 @@ function ConversationRow({ conversation }: { conversation: Conversation }) {
   return (
     <Link to={`/app/messages/${conversation.id}`} className="conversation-row">
       <div className="avatar-wrap">
-        {other ? (
-          <img src={profileImage(other)} alt={name} />
-        ) : (
-          <span className="avatar-fallback" aria-hidden>
-            ?
-          </span>
-        )}
+        <SmartImage
+          src={other ? profileImage(other) : '/images/deleted-user.svg'}
+          fallbackSrc={other ? profileImageFallback(other) : '/images/deleted-user.svg'}
+          alt={name}
+          size="avatar"
+        />
       </div>
       <div className="conversation-body">
         <div className="row">
-          <strong>{name}</strong>
+          <strong className={deleted ? 'dim' : undefined}>{name}</strong>
           <span className="dim time">{time}</span>
         </div>
         <div className="contact-meta">
-          {other ? <PresenceBadge active={other.isActive} compact /> : null}
+          {other && !other.isDeleted ? <PresenceBadge active={other.isActive} compact /> : null}
           {gymLabel ? <span className="gym-line">{gymLabel}</span> : null}
         </div>
         <p className="muted preview">{conversation.lastMessage}</p>
@@ -72,7 +73,12 @@ function FindResultCard({
     <div className="find-user-card">
       <button type="button" className="find-user-card-main" onClick={onOpen}>
         <div className="avatar-wrap sm">
-          <img src={profileImage(person)} alt={displayName(person)} />
+          <SmartImage
+            src={profileImage(person)}
+            fallbackSrc={profileImageFallback(person)}
+            alt={displayName(person)}
+            size="avatar"
+          />
         </div>
         <div className="find-user-card-body">
           <strong>

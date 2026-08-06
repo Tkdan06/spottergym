@@ -106,20 +106,36 @@ export function buildAvatarUrl(seed: string, gender: Gender = 'male') {
   return `https://api.dicebear.com/9.x/notionists/svg?${params.toString()}`
 }
 
+/** Локальный запасной аватар — без сети, если Unsplash / DiceBear не открылись */
+export function localGenderAvatar(gender?: Gender) {
+  return gender === 'female' ? '/images/avatar-female.svg' : '/images/avatar-male.svg'
+}
+
 /** Фото профиля или гендерный плейсхолдер */
-export function profileImage(user: Pick<UserProfile, 'photos' | 'avatar' | 'privacy' | 'name' | 'gender'>) {
+export function profileImage(
+  user: Pick<UserProfile, 'photos' | 'avatar' | 'privacy' | 'name' | 'gender' | 'isDeleted'>,
+) {
+  if (user.isDeleted) return '/images/deleted-user.svg'
   if (user.privacy === 'anonymous') {
-    return user.avatar || buildAvatarUrl(user.name || 'user', user.gender)
+    return user.avatar || localGenderAvatar(user.gender)
   }
   const photo = Array.isArray(user.photos) ? user.photos[0] : undefined
-  return photo || user.avatar || buildAvatarUrl(user.name || 'user', user.gender)
+  return photo || user.avatar || localGenderAvatar(user.gender)
+}
+
+/** Что показать, если основной src упал (CDN / сеть) */
+export function profileImageFallback(
+  user: Pick<UserProfile, 'gender' | 'isDeleted'>,
+) {
+  if (user.isDeleted) return '/images/deleted-user.svg'
+  return localGenderAvatar(user.gender)
 }
 
 export function withSyncedAvatar<T extends UserProfile>(user: T): T {
   const photos = Array.isArray(user.photos) ? user.photos : []
   const base = photos === user.photos ? user : { ...user, photos }
   if (photos.length > 0) return base
-  const avatar = buildAvatarUrl(base.name || 'user', base.gender)
+  const avatar = localGenderAvatar(base.gender)
   if (base.avatar === avatar) return base
   return { ...base, avatar }
 }

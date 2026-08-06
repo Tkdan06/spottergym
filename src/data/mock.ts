@@ -640,6 +640,7 @@ export function formatGymAddressLines(
 }
 
 export function displayName(user: UserProfile) {
+  if (user.isDeleted) return 'Удалённый пользователь'
   return user.privacy === 'anonymous' ? 'Аноним' : user.name
 }
 

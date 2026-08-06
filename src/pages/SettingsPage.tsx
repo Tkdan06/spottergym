@@ -298,7 +298,7 @@ export function SettingsPage() {
         />
 
         <div className="card-list settings-gym-list">
-          {cityGyms.slice(0, 40).map((gym) => (
+          {cityGyms.slice(0, 40).map((gym, index) => (
             <GymCard
               key={gym.id}
               gym={gym}
@@ -306,6 +306,7 @@ export function SettingsPage() {
               showDemoStats={demoStats}
               membersCount={liveStats[gym.id]?.membersCount}
               activeNow={liveStats[gym.id]?.activeNow}
+              priority={index < 4}
               onSelect={() => toggleGym(gym.id)}
             />
           ))}

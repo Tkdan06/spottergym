@@ -1,5 +1,5 @@
 import { type FormEvent, useMemo, useState } from 'react'
-import { ArrowLeft, Ban, MessageSquare, RefreshCw, ShieldAlert } from 'lucide-react'
+import { ArrowLeft, Ban, MessageSquare, RefreshCw, ShieldAlert, Trash2 } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/useApp'
 import { isMasterAdminEmail } from '../lib/adminConfig'
@@ -130,17 +130,24 @@ export function AdminPlayersPage() {
     setError('')
     setNotice('')
     const ok = window.confirm(
-      `Удалить аккаунт ${entry.email}? Профиль и данные будут удалены с сервера.`,
+      `Удалить аккаунт ${entry.email}?\n\nПрофиль исчезнет из зала и поиска. Переписки с ним сохранятся у собеседников как «Удалённый пользователь».`,
     )
     if (!ok) return
-    const alsoBlock = window.confirm('Также заблокировать этот email?')
+    const alsoBlock = window.confirm('Также заблокировать этот email (не сможет зарегистрироваться снова)?')
+    setBusy(true)
     void (async () => {
       try {
         await adminRemoveUser(entry.email, alsoBlock)
         setSelectedId(null)
-        setNotice(`Пользователь ${entry.email} удалён`)
+        setNotice(
+          alsoBlock
+            ? `${entry.email} удалён и заблокирован`
+            : `${entry.email} удалён`,
+        )
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Ошибка')
+        setError(err instanceof Error ? err.message : 'Не удалось удалить')
+      } finally {
+        setBusy(false)
       }
     })()
   }
@@ -328,31 +335,46 @@ export function AdminPlayersPage() {
                 </div>
               </dl>
 
-              <div className="admin-player-actions">
+              <div className="admin-player-actions" role="toolbar" aria-label="Действия">
                 {canBlockUsers ? (
                   <button
                     type="button"
-                    className="btn btn-danger"
+                    className="admin-action-icon"
                     onClick={() => onBlockToggle(selected)}
-                    disabled={isMasterAdminEmail(selected.email)}
+                    disabled={busy || isMasterAdminEmail(selected.email)}
+                    title={
+                      blockedEmails.includes(selected.email.toLowerCase())
+                        ? 'Разблокировать'
+                        : 'Заблокировать'
+                    }
+                    aria-label={
+                      blockedEmails.includes(selected.email.toLowerCase())
+                        ? 'Разблокировать'
+                        : 'Заблокировать'
+                    }
                   >
-                    <Ban size={16} />
-                    {blockedEmails.includes(selected.email.toLowerCase())
-                      ? 'Разблокировать'
-                      : 'Заблокировать'}
+                    <Ban size={18} />
                   </button>
                 ) : null}
                 {canRemoveUsers && !selected.isDemoSeed && !isMasterAdminEmail(selected.email) ? (
                   <button
                     type="button"
-                    className="btn btn-danger"
+                    className="admin-action-icon danger"
                     onClick={() => onRemove(selected)}
+                    disabled={busy}
+                    title="Удалить аккаунт"
+                    aria-label="Удалить аккаунт"
                   >
-                    Удалить аккаунт
+                    <Trash2 size={18} />
                   </button>
                 ) : null}
-                <Link to="/app/admin/users" className="btn btn-ghost">
-                  <ShieldAlert size={16} /> Права админа
+                <Link
+                  to="/app/admin/users"
+                  className="admin-action-icon"
+                  title="Права админа"
+                  aria-label="Права админа"
+                >
+                  <ShieldAlert size={18} />
                 </Link>
               </div>
 

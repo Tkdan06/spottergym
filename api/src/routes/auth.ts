@@ -135,6 +135,9 @@ authRoutes.post(
     if (!user) {
       return c.json({ error: LOGIN_FAIL }, 401)
     }
+    if (user.deletedAt) {
+      return c.json({ error: LOGIN_FAIL }, 401)
+    }
 
     const ok = await verifyPassword(user.passwordHash, body.data.password)
     if (!ok) {

@@ -14,8 +14,12 @@ export function TermsPage() {
   const fromRegister = params.get('from') === 'register'
 
   const accept = () => {
-    markTermsAccepted()
-    navigate('/register', { replace: true, state: { termsAccepted: true } })
+    if (fromRegister) {
+      markTermsAccepted()
+      navigate('/register', { replace: true, state: { termsAccepted: true } })
+      return
+    }
+    navigate('/', { replace: true })
   }
 
   return (
@@ -76,19 +80,9 @@ export function TermsPage() {
         </article>
 
         <footer className="terms-footer">
-          <p className="dim">
-            Контакт Администрации: <a href="mailto:info@spottergym.ru">info@spottergym.ru</a>
-          </p>
-          <p className="dim">
-            Нажимая «Я согласен», вы подтверждаете принятие Пользовательского соглашения и
-            согласие на обработку персональных данных на условиях раздела 11.
-          </p>
           <button type="button" className="btn btn-primary btn-block" onClick={accept}>
             Я согласен
           </button>
-          <Link to="/register" className="btn btn-ghost btn-block">
-            Вернуться к регистрации
-          </Link>
         </footer>
       </main>
     </div>

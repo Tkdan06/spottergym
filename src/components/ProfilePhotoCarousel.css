@@ -23,7 +23,8 @@
   border-radius: 24px;
 }
 
-.profile-carousel img {
+.profile-carousel img,
+.profile-carousel .smart-image {
   width: 100%;
   aspect-ratio: 4 / 5;
   max-height: 260px;
@@ -33,7 +34,8 @@
   animation: profile-carousel-fade 0.22s ease;
 }
 
-.profile-carousel.mine img {
+.profile-carousel.mine img,
+.profile-carousel.mine .smart-image {
   aspect-ratio: 1;
   max-height: none;
 }
@@ -104,7 +106,8 @@
     width: min(100%, 240px);
   }
 
-  .profile-carousel:not(.mine) img {
+  .profile-carousel:not(.mine) img,
+  .profile-carousel:not(.mine) .smart-image {
     max-height: 280px;
   }
 }

@@ -8,6 +8,49 @@ type UserWithRels = User & {
 }
 
 export function serializeUser(user: UserWithRels) {
+  const isDeleted = Boolean(user.deletedAt)
+  if (isDeleted) {
+    return {
+      id: user.id,
+      email: user.email,
+      username: '',
+      name: 'Удалённый пользователь',
+      age: 0,
+      gender: user.gender,
+      bio: '',
+      photos: [] as string[],
+      avatar: '',
+      gymIds: [] as string[],
+      homeGymId: '',
+      city: '',
+      intent: user.intent,
+      experienceLevel: user.experienceLevel,
+      interests: [] as string[],
+      sports: [] as string[],
+      isCoach: false,
+      coachSports: [] as string[],
+      visitSlots: [] as unknown[],
+      breakUntil: null as string | null,
+      privacy: 'open' as const,
+      lookingToMeet: false,
+      isActive: false,
+      checkedInGymId: '',
+      checkedInAt: '',
+      checkedInExpiresAt: '',
+      checkInExtendCount: 0,
+      checkInCanExtend: false,
+      lastSeenAt: user.lastSeenAt.toISOString(),
+      registeredAt: user.registeredAt.toISOString(),
+      onboardingDone: true,
+      isDeleted: true,
+      isAdmin: false,
+      isMasterAdmin: false,
+      canGrantAdmin: false,
+      adminPermissions: resolveAdminFlags({ ...user, isAdmin: false, isMasterAdmin: false })
+        .adminPermissions,
+    }
+  }
+
   const flags = resolveAdminFlags(user)
   const gymIds = (user.gyms || []).map((g) => g.gymId)
   const now = new Date()
@@ -53,6 +96,7 @@ export function serializeUser(user: UserWithRels) {
     lastSeenAt: user.lastSeenAt.toISOString(),
     registeredAt: user.registeredAt.toISOString(),
     onboardingDone: user.onboardingDone,
+    isDeleted: false,
     isAdmin: flags.isAdmin,
     isMasterAdmin: flags.isMasterAdmin,
     canGrantAdmin: flags.canGrantAdmin,
@@ -92,7 +136,28 @@ export function serializePublicUser(user: UserWithRels) {
     checkInExtendCount: full.checkInExtendCount,
     checkInCanExtend: full.checkInCanExtend,
     lastSeenAt: full.lastSeenAt,
+    isDeleted: Boolean(full.isDeleted),
     verified: false,
+  }
+
+  if (full.isDeleted) {
+    return {
+      ...base,
+      username: '',
+      name: 'Удалённый пользователь',
+      age: 0,
+      bio: '',
+      photos: [] as string[],
+      avatar: '',
+      interests: [] as string[],
+      sports: [] as string[],
+      isCoach: false,
+      coachSports: [] as string[],
+      visitSlots: [] as unknown[],
+      lookingToMeet: false,
+      isActive: false,
+      isDeleted: true,
+    }
   }
 
   if (full.privacy === 'anonymous') {

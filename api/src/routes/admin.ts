@@ -9,6 +9,7 @@ import {
 import { buildAdminAnalytics, estimatePhotosBytes } from '../lib/adminAnalytics.js'
 import { isMasterAdminEmail, normalizeEmail } from '../env.js'
 import { serializeUser } from '../lib/serialize.js'
+import { SoftDeleteError, softDeleteUser } from '../lib/softDeleteUser.js'
 import { requireAuth, type AuthedEnv } from '../middleware/auth.js'
 
 export const adminRoutes = new Hono<AuthedEnv>()
@@ -48,16 +49,19 @@ adminRoutes.get('/users', async (c) => {
 
   const q = (c.req.query('q') || '').trim().toLowerCase().slice(0, 80)
   const users = await prisma.user.findMany({
-    where: q
-      ? {
-          OR: [
-            { email: { contains: q, mode: 'insensitive' } },
-            { username: { contains: q, mode: 'insensitive' } },
-            { name: { contains: q, mode: 'insensitive' } },
-            { city: { contains: q, mode: 'insensitive' } },
-          ],
-        }
-      : undefined,
+    where: {
+      deletedAt: null,
+      ...(q
+        ? {
+            OR: [
+              { email: { contains: q, mode: 'insensitive' } },
+              { username: { contains: q, mode: 'insensitive' } },
+              { name: { contains: q, mode: 'insensitive' } },
+              { city: { contains: q, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
+    },
     include: {
       gyms: true,
       checkIns: { where: { checkedOutAt: null }, take: 1 },
@@ -140,17 +144,21 @@ adminRoutes.delete('/users/:id', async (c) => {
   if (!gate.ok) return c.json({ error: gate.error }, gate.status)
 
   const id = c.req.param('id')
-  const target = await prisma.user.findUnique({ where: { id } })
-  if (!target) return c.json({ error: 'Пользователь не найден' }, 404)
-  if (isMasterAdminEmail(target.email)) {
-    return c.json({ error: 'Нельзя удалить главного админа' }, 400)
+  const alsoBlock =
+    c.req.query('alsoBlock') === '1' ||
+    c.req.query('alsoBlock') === 'true'
+  try {
+    const result = await softDeleteUser(id, {
+      actorId: c.get('userId'),
+      alsoBlockEmail: alsoBlock,
+    })
+    return c.json({ ok: true, email: result.email })
+  } catch (err) {
+    if (err instanceof SoftDeleteError) {
+      return c.json({ error: err.message }, err.status)
+    }
+    throw err
   }
-  if (target.id === c.get('userId')) {
-    return c.json({ error: 'Нельзя удалить себя' }, 400)
-  }
-
-  await prisma.user.delete({ where: { id } })
-  return c.json({ ok: true })
 })
 
 const permsSchema = z.object({

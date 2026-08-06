@@ -38,13 +38,15 @@ export const requireAuth = createMiddleware<AuthedEnv>(async (c, next) => {
 
 export async function loadAuthedUser(userId: string) {
   await expireStaleCheckIns()
-  return prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id: userId },
     include: {
       gyms: true,
       checkIns: { where: { checkedOutAt: null }, take: 1 },
     },
   })
+  if (user?.deletedAt) return null
+  return user
 }
 
 export async function authedUserJson(userId: string) {

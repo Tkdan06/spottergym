@@ -116,6 +116,7 @@ gymRoutes.get('/:gymId/people', requireAuth, async (c) => {
     where: {
       gymId,
       userId: hidden.length ? { notIn: hidden } : undefined,
+      user: { deletedAt: null },
     },
     include: {
       user: {

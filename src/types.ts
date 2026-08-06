@@ -69,6 +69,8 @@ export interface UserProfile {
   /** Можно ли нажать «Ещё здесь» */
   checkInCanExtend?: boolean
   lastSeenAt: string
+  /** Soft-deleted account — chats kept, show «Удалённый пользователь» */
+  isDeleted?: boolean
   verified?: boolean
 }
 

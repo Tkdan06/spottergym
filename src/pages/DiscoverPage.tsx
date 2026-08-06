@@ -186,7 +186,7 @@ export function DiscoverPage() {
           />
         ) : null}
         {gyms.length ? (
-          gyms.map((gym) => (
+          gyms.map((gym, index) => (
             <GymCard
               key={gym.id}
               gym={gym}
@@ -194,6 +194,7 @@ export function DiscoverPage() {
               showDemoStats={demoStats}
               membersCount={liveStats[gym.id]?.membersCount}
               activeNow={liveStats[gym.id]?.activeNow}
+              priority={index < 4}
               to={`/app/gym/${gym.id}`}
             />
           ))

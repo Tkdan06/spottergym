@@ -11,6 +11,7 @@ import {
   type LevelFilter,
 } from '../components/FloorFilters'
 import { InviteFriendsButton } from '../components/InviteFriendsButton'
+import { SoftLoader } from '../components/SoftLoader'
 import { UserCard } from '../components/UserCard'
 import { useApp } from '../context/useApp'
 import { getGym, getUserGyms } from '../data/mock'
@@ -45,7 +46,7 @@ export function HomePage() {
   const checkedInId = user ? getCheckedInGymId(user) : ''
   const hasGym = Boolean(gym)
 
-  const { people: floorPeople } = useGymPeople({
+  const { people: floorPeople, loading: peopleLoading, showLoader } = useGymPeople({
     gymId: floorGymId,
     user,
     apiOnline,
@@ -170,7 +171,9 @@ export function HomePage() {
           <section className="home-people" aria-label="Люди в зале">
             <div className="section-title home-people-head">
               <h2 className="section-heading">Люди в зале</h2>
-              <span className="home-people-count">{people.length}</span>
+              <span className="home-people-count">
+                {peopleLoading && !showLoader ? '…' : people.length}
+              </span>
             </div>
 
             <FloorFilters
@@ -185,12 +188,15 @@ export function HomePage() {
             />
 
             <div className="card-list">
-              {people.length ? (
-                people.map((person) => (
+              {showLoader ? (
+                <SoftLoader label="Загружаем людей в зале…" />
+              ) : peopleLoading ? null : people.length ? (
+                people.map((person, index) => (
                   <UserCard
                     key={person.id}
                     user={person}
                     rank={getHallRank(person.id, people, likes)}
+                    priority={index < 4}
                   />
                 ))
               ) : (
