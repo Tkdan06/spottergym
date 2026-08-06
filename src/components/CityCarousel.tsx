@@ -4,13 +4,7 @@ import { CITIES_META, type CityMeta } from '../data/mock'
 import { searchFieldProps } from '../lib/inputAttrs'
 import './CityCarousel.css'
 
-/** Горизонтальная лента (каталог) — чуть больше, скролл ок */
-const STRIP_PREVIEW_LIMIT = 12
-/**
- * Сетка быстрых городов: 6 + «Ещё».
- * Hick’s law / Material chips: 5–7 ярлыков комфортны, 2 ряда × 3 не перегружают.
- */
-const GRID_PREVIEW_LIMIT = 6
+const PREVIEW_LIMIT = 12
 
 function byGymCountDesc(a: CityMeta, b: CityMeta) {
   if (b.gymCount !== a.gymCount) return b.gymCount - a.gymCount
@@ -23,16 +17,11 @@ interface Props {
   label?: string
   hint?: string
   /**
-   * full — карточка-селектор + быстрые города (онбординг / настройки)
-   * compact — только быстрые города (каталог залов)
+   * full — карточка-селектор («Все») + быстрая лента чипов
+   * compact — только лента + «Ещё» (каталог залов)
    */
   variant?: 'full' | 'compact'
-  /**
-   * strip — горизонтальный скролл
-   * grid — 2–3 ряда кнопок (для онбординга)
-   */
-  quickLayout?: 'strip' | 'grid'
-  /** Контент сразу под блоком быстрых городов */
+  /** Контент сразу под лентой городов */
   afterStrip?: ReactNode
 }
 
@@ -42,15 +31,12 @@ export function CityCarousel({
   label = 'Город',
   hint,
   variant = 'full',
-  quickLayout = 'strip',
   afterStrip,
 }: Props) {
   const [query, setQuery] = useState('')
   const [allOpen, setAllOpen] = useState(false)
 
   const selected = CITIES_META.find((c) => c.name === value)
-  const layout = quickLayout
-  const previewLimit = layout === 'grid' ? GRID_PREVIEW_LIMIT : STRIP_PREVIEW_LIMIT
 
   const citiesByGymCount = useMemo(
     () => [...CITIES_META].sort(byGymCountDesc),
@@ -58,13 +44,13 @@ export function CityCarousel({
   )
 
   const previewCities = useMemo(() => {
-    const base = citiesByGymCount.slice(0, previewLimit)
+    const base = citiesByGymCount.slice(0, PREVIEW_LIMIT)
     if (value && !base.some((c) => c.name === value)) {
       const current = CITIES_META.find((c) => c.name === value)
-      if (current) return [current, ...base.filter((c) => c.name !== value).slice(0, previewLimit - 1)]
+      if (current) return [current, ...base.filter((c) => c.name !== value).slice(0, PREVIEW_LIMIT - 1)]
     }
     return base
-  }, [citiesByGymCount, previewLimit, value])
+  }, [citiesByGymCount, value])
 
   const allCities = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -89,13 +75,9 @@ export function CityCarousel({
 
   const openAll = () => setAllOpen(true)
 
-  const showMeta = variant === 'full' || layout === 'grid'
-
   return (
     <section
-      className={`city-picker ${variant === 'compact' ? 'city-picker--compact' : ''} ${
-        layout === 'grid' ? 'city-picker--grid' : ''
-      }`}
+      className={`city-picker ${variant === 'compact' ? 'city-picker--compact' : 'city-picker--full'}`}
       aria-label={label}
     >
       {variant === 'full' ? (
@@ -116,11 +98,7 @@ export function CityCarousel({
         </button>
       ) : null}
 
-      <div
-        className={layout === 'grid' ? 'city-quick-grid' : 'city-strip'}
-        role="listbox"
-        aria-label="Города по числу клубов"
-      >
+      <div className="city-strip" role="listbox" aria-label="Города по числу клубов">
         {previewCities.map((city) => (
           <button
             key={city.name}
@@ -131,17 +109,15 @@ export function CityCarousel({
             onClick={() => pick(city.name)}
           >
             <span className="city-chip-name">{city.name}</span>
-            {showMeta ? <span className="city-chip-meta">{city.gymCount}</span> : null}
           </button>
         ))}
-        <button
-          type="button"
-          className={`city-chip city-chip-more${layout === 'grid' ? ' city-chip-more--grid' : ''}`}
-          onClick={openAll}
-        >
-          <span className="city-chip-name">Ещё города</span>
-          <ChevronDown size={14} aria-hidden />
-        </button>
+        {/* В full список открывает «Все» на селекторе — дубль «Ещё» не нужен */}
+        {variant === 'compact' ? (
+          <button type="button" className="city-chip city-chip-more" onClick={openAll}>
+            <span className="city-chip-name">Ещё</span>
+            <ChevronDown size={14} aria-hidden />
+          </button>
+        ) : null}
       </div>
 
       {afterStrip}

@@ -240,7 +240,6 @@ export function OnboardingPage() {
               setGymNetwork('Все сети')
             }}
             variant="full"
-            quickLayout="grid"
             label="Выбранный город"
             hint="Города по числу клубов — от большего к меньшему"
           />
