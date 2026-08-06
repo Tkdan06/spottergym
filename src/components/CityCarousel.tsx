@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useMemo, useState } from 'react'
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronDown, Search, X } from 'lucide-react'
 import { CITIES_META, type CityMeta } from '../data/mock'
 import { searchFieldProps } from '../lib/inputAttrs'
@@ -35,6 +35,7 @@ export function CityCarousel({
 }: Props) {
   const [query, setQuery] = useState('')
   const [allOpen, setAllOpen] = useState(false)
+  const searchRef = useRef<HTMLInputElement>(null)
 
   const selected = CITIES_META.find((c) => c.name === value)
 
@@ -65,6 +66,41 @@ export function CityCarousel({
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
+  }, [allOpen])
+
+  /** Поднимаем шторку над клавиатурой (iOS/Android visualViewport) */
+  useEffect(() => {
+    if (!allOpen) {
+      document.documentElement.style.removeProperty('--city-sheet-kb')
+      document.documentElement.style.removeProperty('--city-sheet-vh')
+      return
+    }
+    const root = document.documentElement
+    const sync = () => {
+      const vv = window.visualViewport
+      if (!vv) {
+        root.style.setProperty('--city-sheet-vh', `${window.innerHeight}px`)
+        root.style.setProperty('--city-sheet-kb', '0px')
+        return
+      }
+      const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop)
+      root.style.setProperty('--city-sheet-vh', `${vv.height}px`)
+      root.style.setProperty('--city-sheet-kb', `${kb}px`)
+    }
+    sync()
+    const vv = window.visualViewport
+    vv?.addEventListener('resize', sync)
+    vv?.addEventListener('scroll', sync)
+    window.addEventListener('resize', sync)
+    const t = window.setTimeout(() => searchRef.current?.focus(), 80)
+    return () => {
+      vv?.removeEventListener('resize', sync)
+      vv?.removeEventListener('scroll', sync)
+      window.removeEventListener('resize', sync)
+      window.clearTimeout(t)
+      root.style.removeProperty('--city-sheet-kb')
+      root.style.removeProperty('--city-sheet-vh')
+    }
   }, [allOpen])
 
   const pick = (city: string) => {
@@ -131,31 +167,34 @@ export function CityCarousel({
             onClick={() => setAllOpen(false)}
           />
           <div className="city-sheet-panel">
-            <div className="city-sheet-top">
-              <div>
-                <p className="city-picker-label">Все города</p>
-                <h3>Выбери город</h3>
+            <div className="city-sheet-chrome">
+              <div className="city-sheet-top">
+                <div>
+                  <p className="city-picker-label">Все города</p>
+                  <h3>Выбери город</h3>
+                </div>
+                <button
+                  type="button"
+                  className="icon-btn"
+                  aria-label="Закрыть список"
+                  onClick={() => setAllOpen(false)}
+                >
+                  <X size={18} />
+                </button>
               </div>
-              <button
-                type="button"
-                className="icon-btn"
-                aria-label="Закрыть список"
-                onClick={() => setAllOpen(false)}
-              >
-                <X size={18} />
-              </button>
-            </div>
 
-            <label className="city-search">
-              <Search size={16} />
-              <input
-                {...searchFieldProps}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Найти город"
-                aria-label="Поиск города"
-              />
-            </label>
+              <label className="city-search">
+                <Search size={16} />
+                <input
+                  {...searchFieldProps}
+                  ref={searchRef}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Найти город"
+                  aria-label="Поиск города"
+                />
+              </label>
+            </div>
 
             <div className="city-sheet-list">
               {allCities.map((city) => (

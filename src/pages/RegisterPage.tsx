@@ -69,7 +69,7 @@ export function RegisterPage() {
           SPOT<span>TER</span>
         </Link>
         <h1>Регистрация</h1>
-        <p className="muted">Создай аккаунт и привяжи свой зал за пару минут</p>
+        <p className="muted">Создай аккаунт — дальше выберешь свой зал</p>
 
         <form className="auth-form" onSubmit={onSubmit}>
           <div className="field">

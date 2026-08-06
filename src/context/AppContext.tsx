@@ -202,7 +202,9 @@ export interface AppContextValue {
   login: (email: string, password: string) => Promise<boolean>
   register: (name: string, email: string, password: string, gender: Gender) => Promise<boolean>
   logout: () => Promise<void>
-  completeOnboarding: (data: Partial<AppUser>) => void | Promise<void>
+  completeOnboarding: (
+    data: Partial<AppUser>,
+  ) => void | Promise<{ ok: true } | { ok: false; error: string }>
   updateProfile: (data: Partial<AppUser>) => void
   /** Быстрый check-in/out; при нескольких залах лучше checkIn + picker */
   toggleActive: (gymId?: string) => void
@@ -1062,13 +1064,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const completeOnboarding = useCallback(
-    async (data: Partial<AppUser>) => {
+    async (data: Partial<AppUser>): Promise<{ ok: true } | { ok: false; error: string }> => {
       // flushSync: иначе navigate('/app') успевает раньше, чем onboardingDone=true,
       // ProtectedRoute кидает обратно на /onboarding → пустой/чёрный экран
-      const box: { user: AppUser | null } = { user: null }
+      const box: { user: AppUser | null; prev: AppUser | null } = { user: null, prev: null }
       flushSync(() => {
         setUser((prev) => {
           if (!prev) return prev
+          box.prev = prev
           const next = withSyncedAvatar(
             normalizeGymFields({
               ...prev,
@@ -1090,8 +1093,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         })
       })
       const saved = box.user
+      if (!saved) {
+        return { ok: false, error: 'Не удалось сохранить профиль. Начни заново' }
+      }
+
       let syncedFromApi = false
-      if (saved && apiOnlineRef.current && !isDemoAccount(saved.email)) {
+      const needApi = apiOnlineRef.current && !isDemoAccount(saved.email)
+
+      if (needApi) {
         const patch = {
           ...data,
           onboardingDone: true as const,
@@ -1115,23 +1124,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
           applyServerUser(me as AppUser)
           syncedFromApi = true
         } catch {
-          // Профиль мог не пройти валидацию — флаг онбординга всё равно сохраняем
           try {
             const me = await apiPatchMe({ onboardingDone: true })
             applyServerUser(me as AppUser)
             syncedFromApi = true
           } catch {
-            /* offline / temporary — локально уже onboardingDone */
+            syncedFromApi = false
           }
         }
-        if (syncedFromApi) {
-          try {
-            await hydrateSocialFromApi()
-          } catch {
-            /* keep local */
+        if (!syncedFromApi) {
+          // Откат: онлайн, но сервер не принял — просим начать заново
+          const rollback = box.prev
+          if (rollback) {
+            flushSync(() => {
+              setUser(rollback)
+              saveJson(STORAGE_USER, rollback)
+              saveAccountProfile(rollback)
+            })
           }
+          return {
+            ok: false,
+            error: 'Не удалось сохранить данные. Проверь интернет и начни заново',
+          }
+        }
+        try {
+          await hydrateSocialFromApi()
+        } catch {
+          /* keep local */
         }
       }
+
       // Offline / демо: локальный welcome, если сервер не отдал ленту
       if (!syncedFromApi) {
         window.setTimeout(() => {
@@ -1144,6 +1166,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           })
         }, 400)
       }
+      return { ok: true }
     },
     [pushNotification, applyServerUser, hydrateSocialFromApi],
   )

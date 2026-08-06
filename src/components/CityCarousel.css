@@ -181,10 +181,16 @@
 
 .city-sheet {
   position: fixed;
-  inset: 0;
+  left: 0;
+  right: 0;
+  top: 0;
   z-index: 80;
+  height: var(--city-sheet-vh, 100dvh);
+  max-height: var(--city-sheet-vh, 100dvh);
   display: grid;
   align-items: end;
+  padding-bottom: var(--city-sheet-kb, 0px);
+  box-sizing: border-box;
 }
 
 .city-sheet-backdrop {
@@ -199,17 +205,24 @@
   position: relative;
   z-index: 1;
   width: min(100%, 560px);
-  max-height: min(86dvh, 720px);
+  max-height: min(calc(var(--city-sheet-vh, 100dvh) - 8px), 720px);
   margin: 0 auto;
-  padding: 18px 16px calc(18px + var(--safe-bottom));
+  padding: 14px 16px calc(14px + var(--safe-bottom));
   border-radius: 24px 24px 0 0;
   background: #101614;
   border: 1px solid var(--line);
   border-bottom: 0;
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 12px;
   animation: fade-up 0.25s ease both;
+  box-sizing: border-box;
+}
+
+.city-sheet-chrome {
+  display: grid;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .city-sheet-top {
@@ -281,11 +294,12 @@
   .city-sheet {
     align-items: center;
     padding: 24px;
+    padding-bottom: max(24px, var(--city-sheet-kb, 0px));
   }
 
   .city-sheet-panel {
     border-radius: 24px;
     border-bottom: 1px solid var(--line);
-    max-height: min(80vh, 680px);
+    max-height: min(calc(var(--city-sheet-vh, 100dvh) - 48px), 680px);
   }
 }
