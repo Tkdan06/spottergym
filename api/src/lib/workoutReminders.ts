@@ -84,8 +84,8 @@ export async function runWorkoutRemindersTick() {
       const row = await createNotification({
         userId: user.id,
         type: 'workout_reminder',
-        title: 'Пора собираться на тренировку',
-        body: `Старт в ${slot.from}. Не забудь установить статус в зале.`,
+        title: 'Пора на тренировку',
+        body: `Старт в ${slot.from}. Отметь статус в зале.`,
         href: '/app',
       })
       if (row) sent += 1

@@ -121,7 +121,7 @@ export function DiscoverPage() {
       </div>
 
       <div className="section-title">
-        <h2>Клубы</h2>
+        <h2 className="section-heading">Клубы</h2>
         <span className="muted">{gyms.length}</span>
       </div>
 

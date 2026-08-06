@@ -91,7 +91,7 @@ export function OnboardingPage() {
 
   const canNext = () => {
     if (step === 0) return Boolean(city)
-    if (step === 1) return gymIds.length > 0
+    if (step === 1) return true // зал необязателен — можно пропустить и добавить позже
     if (step === 2) {
       if (!ageOk || !bioOk || sports.length === 0) return false
       if (isCoach && coachSports.length === 0) return false
@@ -100,6 +100,8 @@ export function OnboardingPage() {
     if (step === 3) return visitSlots.length > 0
     return true
   }
+
+  const goNext = () => setStep((s) => s + 1)
 
   const finish = () => {
     const parsedAge = typeof age === 'number' ? age : Number(age)
@@ -156,7 +158,8 @@ export function OnboardingPage() {
         {step === 1 && (
           <section className="stack onboarding-gym-step">
             <p className="muted">
-              Выбери один или несколько клубов · выбрано {gymIds.length}
+              Выбери клуб, если он есть в списке
+              {gymIds.length ? ` · выбрано ${gymIds.length}` : ''}
             </p>
             <label className="app-search">
               <Search size={16} aria-hidden />
@@ -183,10 +186,27 @@ export function OnboardingPage() {
                 ))
               ) : (
                 <div className="empty-copy" role="status">
-                  <p className="empty-copy-title">Пока нет залов</p>
-                  <p className="empty-copy-lead">Выбери другой город</p>
+                  <p className="empty-copy-title">
+                    {gymQuery.trim() ? 'Такого клуба пока нет' : 'Пока нет залов в городе'}
+                  </p>
+                  <p className="empty-copy-lead">
+                    {gymQuery.trim()
+                      ? 'Можно пропустить — зал добавишь позже в настройках'
+                      : 'Смени город или пропусти шаг и добавь зал позже'}
+                  </p>
                 </div>
               )}
+            </div>
+            <div className="onboarding-gym-escape">
+              <p className="dim">
+                Нет своего клуба в списке? Ничего страшного — пропусти шаг и добавь зал позже в
+                настройках профиля.
+              </p>
+              {!gymIds.length ? (
+                <button type="button" className="btn btn-soft btn-block" onClick={goNext}>
+                  Пропустить — добавлю позже
+                </button>
+              ) : null}
             </div>
           </section>
         )}
@@ -389,9 +409,9 @@ export function OnboardingPage() {
               type="button"
               className="btn btn-primary"
               disabled={!canNext()}
-              onClick={() => setStep((s) => s + 1)}
+              onClick={goNext}
             >
-              Дальше
+              {step === 1 && !gymIds.length ? 'Пропустить' : 'Дальше'}
             </button>
           ) : (
             <button type="button" className="btn btn-primary" onClick={finish}>

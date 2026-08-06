@@ -1,5 +1,7 @@
 import {
   type FormEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
   type TouchEvent as ReactTouchEvent,
   useEffect,
   useMemo,
@@ -15,8 +17,15 @@ import { displayName, formatGymLabel, getContactGym, getUser } from '../data/moc
 import { profileImage } from '../lib/avatar'
 import { otherParticipantId } from '../lib/conversations'
 import { CHAT_MESSAGE_MAX } from '../lib/fieldLimits'
-import { messageFieldProps } from '../lib/inputAttrs'
+import { chatComposerProps } from '../lib/inputAttrs'
 import './ChatPage.css'
+
+function formatMsgTime(iso: string) {
+  return new Date(iso).toLocaleTimeString('ru-RU', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
 
 export function ChatPage() {
   const { conversationId = '' } = useParams()
@@ -41,10 +50,11 @@ export function ChatPage() {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
   const threadRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const touchStartY = useRef<number | null>(null)
+  const tapStart = useRef<{ x: number; y: number } | null>(null)
   const conversation = conversations.find((c) => c.id === conversationId)
   const otherId = conversation ? otherParticipantId(conversation, user?.id) : ''
   const other =
@@ -58,6 +68,13 @@ export function ChatPage() {
         .sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt)),
     [messages, conversationId],
   )
+
+  const resizeComposer = () => {
+    const el = inputRef.current
+    if (!el) return
+    el.style.height = '0px'
+    el.style.height = `${Math.min(Math.max(el.scrollHeight, 44), 120)}px`
+  }
 
   useEffect(() => {
     if (!conversationId || !apiOnline) return
@@ -82,6 +99,10 @@ export function ChatPage() {
     const sync = () => {
       const keyboard = Math.max(0, window.innerHeight - vv.height - vv.offsetTop)
       root.style.setProperty('--chat-keyboard', `${keyboard}px`)
+      // Keep latest messages visible above the keyboard
+      if (keyboard > 40) {
+        bottomRef.current?.scrollIntoView({ block: 'end' })
+      }
     }
 
     sync()
@@ -97,6 +118,10 @@ export function ChatPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: 'end' })
   }, [thread.length, conversationId])
+
+  useEffect(() => {
+    resizeComposer()
+  }, [text])
 
   if (!conversation || !other || !user) {
     return (
@@ -114,6 +139,18 @@ export function ChatPage() {
   const incoming = conversation.requestStatus === 'incoming'
   const locked = waiting
 
+  const dismissKeyboard = () => {
+    inputRef.current?.blur()
+  }
+
+  const keepComposerFocused = () => {
+    requestAnimationFrame(() => {
+      inputRef.current?.focus({ preventScroll: true })
+      resizeComposer()
+      bottomRef.current?.scrollIntoView({ block: 'end' })
+    })
+  }
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
     const trimmed = text.trim()
@@ -121,6 +158,7 @@ export function ChatPage() {
     setBusy(true)
     setError('')
     setText('')
+    // Telegram: after send keyboard stays open for the next message
     inputRef.current?.focus({ preventScroll: true })
     try {
       await sendMessage(conversation.id, trimmed)
@@ -129,11 +167,15 @@ export function ChatPage() {
       setText(trimmed)
     } finally {
       setBusy(false)
-      requestAnimationFrame(() => {
-        inputRef.current?.focus({ preventScroll: true })
-        bottomRef.current?.scrollIntoView({ block: 'end' })
-      })
+      keepComposerFocused()
     }
+  }
+
+  const onComposerKeyDown = (e: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key !== 'Enter' || e.shiftKey) return
+    // Mobile/desktop: Enter sends; Shift+Enter = newline
+    e.preventDefault()
+    void onSubmit(e)
   }
 
   const onAccept = async () => {
@@ -149,10 +191,6 @@ export function ChatPage() {
     }
   }
 
-  const dismissKeyboard = () => {
-    inputRef.current?.blur()
-  }
-
   const onThreadTouchStart = (e: ReactTouchEvent) => {
     touchStartY.current = e.touches[0]?.clientY ?? null
   }
@@ -161,9 +199,29 @@ export function ChatPage() {
     if (touchStartY.current == null) return
     if (document.activeElement !== inputRef.current) return
     const y = e.touches[0]?.clientY ?? touchStartY.current
-    if (y - touchStartY.current > 28) {
+    // Swipe down on thread → hide keyboard (Telegram-like)
+    if (y - touchStartY.current > 24) {
       dismissKeyboard()
       touchStartY.current = null
+    }
+  }
+
+  const onThreadPointerDown = (e: ReactPointerEvent) => {
+    if ((e.target as HTMLElement | null)?.closest('.chat-input')) {
+      tapStart.current = null
+      return
+    }
+    tapStart.current = { x: e.clientX, y: e.clientY }
+  }
+
+  const onThreadPointerUp = (e: ReactPointerEvent) => {
+    if (!tapStart.current) return
+    const dx = Math.abs(e.clientX - tapStart.current.x)
+    const dy = Math.abs(e.clientY - tapStart.current.y)
+    tapStart.current = null
+    // Tap (not scroll) on thread → hide keyboard; send keeps focus for multi-send
+    if (dx < 12 && dy < 12 && document.activeElement === inputRef.current) {
+      dismissKeyboard()
     }
   }
 
@@ -220,32 +278,40 @@ export function ChatPage() {
         </div>
       ) : null}
 
-      {error ? <p className="feedback-error" style={{ margin: '0 16px' }}>{error}</p> : null}
+      {error ? (
+        <p className="feedback-error" style={{ margin: '0 0 8px' }}>
+          {error}
+        </p>
+      ) : null}
 
       <div
         className="chat-thread"
         ref={threadRef}
         onTouchStart={onThreadTouchStart}
         onTouchMove={onThreadTouchMove}
-        onPointerDown={(e) => {
-          if (e.pointerType === 'mouse' && e.target === threadRef.current) {
-            dismissKeyboard()
-          }
+        onPointerDown={onThreadPointerDown}
+        onPointerUp={onThreadPointerUp}
+        onPointerCancel={() => {
+          tapStart.current = null
         }}
       >
         {thread.map((msg) => {
           const mine = msg.senderId === user.id || msg.senderId === 'me'
+          const time = formatMsgTime(msg.createdAt)
           return (
             <div key={msg.id} className={`bubble ${mine ? 'mine' : 'theirs'}`}>
-              <p>{msg.text}</p>
-              <div className="bubble-meta">
-                <time>
-                  {new Date(msg.createdAt).toLocaleTimeString('ru-RU', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </time>
-                {mine ? <MessageTicks status={msg.status ?? 'sent'} /> : null}
+              <div className="bubble-body">
+                {msg.text}
+                {/* Spacer reserves last-line room so absolute meta never overlaps text */}
+                <span
+                  className="bubble-meta-spacer"
+                  aria-hidden
+                  style={{ width: mine ? 58 : 40 }}
+                />
+                <span className="bubble-meta">
+                  <time dateTime={msg.createdAt}>{time}</time>
+                  {mine ? <MessageTicks status={msg.status ?? 'sent'} /> : null}
+                </span>
               </div>
             </div>
           )
@@ -253,12 +319,18 @@ export function ChatPage() {
         <div ref={bottomRef} className="chat-thread-end" />
       </div>
 
-      <form className="chat-input" onSubmit={(e) => void onSubmit(e)}>
-        <input
-          {...messageFieldProps}
+      <form
+        className="chat-input"
+        autoComplete="off"
+        onSubmit={(e) => void onSubmit(e)}
+      >
+        <textarea
+          {...chatComposerProps}
           ref={inputRef}
+          rows={1}
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onKeyDown={onComposerKeyDown}
           placeholder={
             waiting
               ? 'Дождитесь принятия запроса'
@@ -268,12 +340,15 @@ export function ChatPage() {
           }
           disabled={locked || incoming || busy}
           maxLength={CHAT_MESSAGE_MAX}
+          aria-label="Сообщение"
         />
         <button
           className="btn btn-primary"
           type="submit"
           disabled={locked || incoming || busy || !text.trim()}
-          onMouseDown={(e) => e.preventDefault()}
+          // Keep focus in composer after tap (Telegram: stay ready to type)
+          onPointerDown={(e) => e.preventDefault()}
+          aria-label="Отправить"
         >
           →
         </button>

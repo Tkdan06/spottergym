@@ -60,11 +60,11 @@ export function useGymPeople({ gymId, user, apiOnline, mode, blockedUserIds }: O
 
     let list: UserProfile[]
     if (useApi && remote) {
-      list = remote.map((p) =>
-        p.id === user.id
-          ? { ...p, ...user, isActive: isPresentInGym(user, gymId) }
-          : p,
-      )
+      // isActive с API = «отмечен где угодно»; для зала сужаем до checkedInGymId === gymId
+      list = remote.map((p) => {
+        const merged = p.id === user.id ? { ...p, ...user } : p
+        return { ...merged, isActive: isPresentInGym(merged, gymId) }
+      })
       if (!list.some((p) => p.id === user.id) && user.gymIds.includes(gymId)) {
         list = [{ ...user, isActive: isPresentInGym(user, gymId) }, ...list]
       }

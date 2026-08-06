@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { CityCarousel } from '../components/CityCarousel'
 import { GymCard } from '../components/GymCard'
 import { InviteFriendsButton } from '../components/InviteFriendsButton'
+import { SectionTitle } from '../components/SectionTitle'
 import { useApp } from '../context/useApp'
 import {
   COACH_DIRECTIONS,
@@ -114,7 +115,6 @@ export function SettingsPage() {
 
   const onSave = (e: FormEvent) => {
     e.preventDefault()
-    if (!gymIds.length) return
     const parsedAge = typeof age === 'number' ? age : Number(age)
     if (!Number.isFinite(parsedAge) || parsedAge < 18 || parsedAge > 80) return
 
@@ -137,7 +137,7 @@ export function SettingsPage() {
       intent,
       experienceLevel,
       gymIds,
-      homeGymId: gymIds.includes(homeGymId) ? homeGymId : gymIds[0],
+      homeGymId: gymIds.includes(homeGymId) ? homeGymId : gymIds[0] || '',
       sports,
       isCoach,
       coachSports: isCoach ? coachSports : [],
@@ -266,7 +266,9 @@ export function SettingsPage() {
               )}
             </div>
           ) : (
-            <p className="muted">Пока нет выбранных залов</p>
+            <p className="muted">
+              Зал ещё не выбран — добавь из списка ниже. Нет в каталоге? Напиши в обратную связь.
+            </p>
           )}
           <p className="dim" style={{ fontSize: '0.82rem' }}>
             Нажми на зал выше, чтобы открывать его на главной. Ниже можно добавить ещё.
@@ -481,7 +483,7 @@ export function SettingsPage() {
           ) : null}
         </section>
 
-        <button type="submit" className="btn btn-primary btn-block" disabled={!gymIds.length}>
+        <button type="submit" className="btn btn-primary btn-block">
           Сохранить
         </button>
       </form>
@@ -501,7 +503,7 @@ export function SettingsPage() {
       </div>
 
       <section className="safety surface">
-        <h2>Безопасность</h2>
+        <SectionTitle>Безопасность</SectionTitle>
         <ul>
           <li>Встречайтесь в публичных зонах зала</li>
           <li>Не передавайте личные данные в первых сообщениях</li>

@@ -154,6 +154,32 @@
   line-height: 1.4;
 }
 
+.welcome-legal {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 6px;
+  text-align: center;
+}
+
+.welcome-legal p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--text-dim);
+}
+
+.welcome-legal a {
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.welcome-legal a:hover {
+  color: var(--accent);
+}
+
 /* Узкие iPhone / Safari: бренд точно влезает */
 @media (max-width: 390px) {
   .welcome .brand-mark {
@@ -181,5 +207,10 @@
 
   .welcome-points {
     align-self: center;
+  }
+
+  .welcome-legal {
+    grid-column: 1 / -1;
+    text-align: left;
   }
 }

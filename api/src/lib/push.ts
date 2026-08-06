@@ -31,14 +31,27 @@ export function shouldSendPush(type: NotifType) {
   return PUSH_TYPES.has(type)
 }
 
+/** Icon badge = unread bell items + unread chat messages. */
 export async function countUnreadBadge(userId: string) {
-  return prisma.notification.count({
-    where: {
-      userId,
-      read: false,
-      NOT: { title: 'Новое сообщение' },
-    },
-  })
+  const [notifCount, lowAgg, highAgg] = await Promise.all([
+    prisma.notification.count({
+      where: {
+        userId,
+        read: false,
+        NOT: { title: 'Новое сообщение' },
+      },
+    }),
+    prisma.conversation.aggregate({
+      where: { userLowId: userId },
+      _sum: { unreadLow: true },
+    }),
+    prisma.conversation.aggregate({
+      where: { userHighId: userId },
+      _sum: { unreadHigh: true },
+    }),
+  ])
+  const chatUnread = (lowAgg._sum.unreadLow || 0) + (highAgg._sum.unreadHigh || 0)
+  return notifCount + chatUnread
 }
 
 export async function sendPushToUser(

@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './components/AppLayout'
 import { GuestOnly, ProtectedRoute } from './components/ProtectedRoute'
 import { AppProvider } from './context/AppContext'
+import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage'
 import { AdminHubPage } from './pages/AdminHubPage'
 import { AdminPlayersPage } from './pages/AdminPlayersPage'
 import { AdminTicketsPage } from './pages/AdminTicketsPage'
@@ -11,6 +12,7 @@ import { DiscoverPage } from './pages/DiscoverPage'
 import { FeedbackPage } from './pages/FeedbackPage'
 import { GymDetailPage } from './pages/GymDetailPage'
 import { HomePage } from './pages/HomePage'
+import { InstallGuidePage } from './pages/InstallGuidePage'
 import { LikedPage } from './pages/LikedPage'
 import { LoginPage } from './pages/LoginPage'
 import { MessagesPage } from './pages/MessagesPage'
@@ -20,6 +22,7 @@ import { ProfilePage } from './pages/ProfilePage'
 import { RegisterPage } from './pages/RegisterPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { TermsPage } from './pages/TermsPage'
+import { UiKitPage } from './pages/UiKitPage'
 import { UserProfilePage } from './pages/UserProfilePage'
 import { WelcomePage } from './pages/WelcomePage'
 
@@ -52,9 +55,12 @@ export default function App() {
               <Route path="feedback/:ticketId" element={<FeedbackPage />} />
               <Route path="admin" element={<AdminHubPage />} />
               <Route path="admin/players" element={<AdminPlayersPage />} />
+              <Route path="admin/analytics" element={<AdminAnalyticsPage />} />
               <Route path="admin/tickets" element={<AdminTicketsPage />} />
               <Route path="admin/users" element={<AdminUsersPage />} />
+              <Route path="admin/ui" element={<UiKitPage />} />
               <Route path="notifications" element={<NotificationsPage />} />
+              <Route path="install" element={<InstallGuidePage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
           </Route>

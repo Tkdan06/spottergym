@@ -21,8 +21,8 @@ async function setBadge(count) {
 
 self.addEventListener('push', (event) => {
   let data = {
-    title: 'SPOTTER',
-    body: 'Новое уведомление',
+    title: 'Уведомление',
+    body: '',
     href: '/app/notifications',
     type: 'system',
     unreadCount: 1,
@@ -42,10 +42,13 @@ self.addEventListener('push', (event) => {
   }
 
   const unread = Number(data.unreadCount) || 1
+  // Title + body only. On iOS PWA the OS always appends "from {app name}" — cannot be removed.
+  const title = String(data.title || 'Уведомление').trim()
+  const body = String(data.body || '').trim()
   event.waitUntil(
     Promise.all([
-      self.registration.showNotification(data.title || 'SPOTTER', {
-        body: data.body || '',
+      self.registration.showNotification(title, {
+        body,
         icon: '/og-image.png',
         badge: '/og-image.png',
         data: { href: data.href || '/app/notifications', type: data.type },

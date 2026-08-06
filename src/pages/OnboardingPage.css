@@ -64,8 +64,21 @@
 }
 
 .onboarding-gym-step > .muted,
-.onboarding-gym-step > .app-search {
+.onboarding-gym-step > .app-search,
+.onboarding-gym-step > .onboarding-gym-escape {
   flex-shrink: 0;
+}
+
+.onboarding-gym-escape {
+  display: grid;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.onboarding-gym-escape .dim {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.4;
 }
 
 .field-label {

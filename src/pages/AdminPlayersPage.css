@@ -2,6 +2,13 @@
   gap: 16px;
 }
 
+.admin-page .text-link {
+  color: var(--accent);
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .admin-players-head {
   display: flex;
   justify-content: space-between;
@@ -85,9 +92,45 @@
   line-height: 1.35;
 }
 
+.admin-rr-panel {
+  padding: 16px;
+}
+
+.admin-rr-hint {
+  margin: -4px 0 12px;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.admin-rr-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (min-width: 720px) {
+  .admin-rr-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.admin-rr-card strong {
+  font-size: 1.2rem;
+}
+
+.admin-inline-error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.9rem;
+}
+
 .admin-breakdown {
   display: grid;
   gap: 12px;
+}
+
+.admin-breakdown-card {
+  padding: 16px;
 }
 
 @media (min-width: 720px) {
@@ -96,9 +139,9 @@
   }
 }
 
-.admin-breakdown h2 {
-  margin: 0 0 8px;
-  font-size: 1rem;
+.admin-breakdown h2,
+.admin-breakdown-card .section-title {
+  margin-bottom: 8px;
 }
 
 .admin-breakdown ul {

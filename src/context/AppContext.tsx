@@ -86,6 +86,7 @@ import {
   blockEmail,
   isEmailBlocked,
   loadBlockedEmails,
+  estimatePhotosBytes,
   loadDirectory,
   mergeStoredAccountsIntoDirectory,
   removeUserAccount,
@@ -161,6 +162,12 @@ import {
   saveNotificationsForUser,
   unreadNotificationsCount,
 } from '../lib/notifications'
+import {
+  WELCOME_INSTALL_BODY,
+  WELCOME_INSTALL_HREF,
+  WELCOME_INSTALL_LOCAL_ID,
+  WELCOME_INSTALL_TITLE,
+} from '../lib/welcomeInstall'
 import { loadJson, saveJson } from '../lib/storage'
 import { normalizeGymFields, withGymMembership } from '../lib/userGyms'
 import type {
@@ -327,7 +334,17 @@ function withAdminFlags(user: AppUser): AppUser {
   return next
 }
 
-function toAdminDirectoryUser(u: AppUser): AdminDirectoryUser {
+function toAdminDirectoryUser(
+  u: AppUser & { photosCount?: number; photosBytes?: number },
+): AdminDirectoryUser {
+  const photosCount =
+    typeof u.photosCount === 'number'
+      ? u.photosCount
+      : Array.isArray(u.photos)
+        ? u.photos.length
+        : 0
+  const photosBytes =
+    typeof u.photosBytes === 'number' ? u.photosBytes : estimatePhotosBytes(u.photos)
   return {
     id: u.id,
     name: u.name,
@@ -347,12 +364,8 @@ function toAdminDirectoryUser(u: AppUser): AdminDirectoryUser {
     onboardingDone: u.onboardingDone,
     isActive: u.isActive,
     checkedInGymId: u.checkedInGymId,
-    photosCount:
-      typeof (u as AppUser & { photosCount?: number }).photosCount === 'number'
-        ? (u as AppUser & { photosCount?: number }).photosCount
-        : Array.isArray(u.photos)
-          ? u.photos.length
-          : 0,
+    photosCount,
+    photosBytes,
     registeredAt: u.registeredAt,
     lastSeenAt: u.lastSeenAt,
     isDemoSeed: false,
@@ -662,9 +675,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [notifications, notificationPrefs],
   )
 
+  const unreadChats = useMemo(
+    () =>
+      conversations.reduce((sum, c) => {
+        const count = Number(c.unreadCount) || 0
+        if (c.requestStatus === 'incoming' && count <= 0) return sum + 1
+        return sum + count
+      }, 0),
+    [conversations],
+  )
+
   useEffect(() => {
-    void syncAppBadge(unreadNotifications)
-  }, [unreadNotifications])
+    void syncAppBadge(unreadNotifications + unreadChats)
+  }, [unreadNotifications, unreadChats])
 
   const patchMessageStatus = useCallback(
     (messageId: string, status: MessageStatus) => {
@@ -777,7 +800,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const hydrateSocialFromApi = useCallback(async () => {
     if (!apiOnlineRef.current || !getStoredToken()) return
     try {
-      const [likesMap, notifs, prefs, ticketsList, blockedIds] = await Promise.all([
+      const [likesPayload, notifs, prefs, ticketsList, blockedIds] = await Promise.all([
         apiFetchLikes(),
         apiFetchNotifications(),
         apiFetchNotificationPrefs(),
@@ -785,8 +808,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
         apiFetchBlocks(),
       ])
       const email = userEmailRef.current
-      setLikes(normalizeLikesMap(likesMap))
+      const likesMap = normalizeLikesMap(likesPayload.likes)
+      setLikes(likesMap)
       if (email) saveAccountLikes(email, likesMap)
+      for (const actor of likesPayload.actors) rememberUserRef.current?.(actor)
       setNotifications(notifs)
       if (email) saveNotificationsForUser(email, notifs)
       setNotificationPrefs(prefs)
@@ -1065,6 +1090,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         })
       })
       const saved = box.user
+      let syncedFromApi = false
       if (saved && apiOnlineRef.current && !isDemoAccount(saved.email)) {
         const patch = {
           ...data,
@@ -1087,27 +1113,39 @@ export function AppProvider({ children }: { children: ReactNode }) {
         try {
           const me = await apiPatchMe(patch)
           applyServerUser(me as AppUser)
+          syncedFromApi = true
         } catch {
           // Профиль мог не пройти валидацию — флаг онбординга всё равно сохраняем
           try {
             const me = await apiPatchMe({ onboardingDone: true })
             applyServerUser(me as AppUser)
+            syncedFromApi = true
           } catch {
             /* offline / temporary — локально уже onboardingDone */
           }
         }
+        if (syncedFromApi) {
+          try {
+            await hydrateSocialFromApi()
+          } catch {
+            /* keep local */
+          }
+        }
       }
-      window.setTimeout(() => {
-        pushNotification({
-          id: 'n-onboarding-welcome',
-          type: 'system',
-          title: 'Профиль готов',
-          body: 'Можно отметить зал и найти своих',
-          href: '/app',
-        })
-      }, 400)
+      // Offline / демо: локальный welcome, если сервер не отдал ленту
+      if (!syncedFromApi) {
+        window.setTimeout(() => {
+          pushNotification({
+            id: WELCOME_INSTALL_LOCAL_ID,
+            type: 'system',
+            title: WELCOME_INSTALL_TITLE,
+            body: WELCOME_INSTALL_BODY,
+            href: WELCOME_INSTALL_HREF,
+          })
+        }, 400)
+      }
     },
-    [pushNotification, applyServerUser],
+    [pushNotification, applyServerUser, hydrateSocialFromApi],
   )
 
   const updateProfile = useCallback(
@@ -1391,10 +1429,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!user || user.id === userId) return
       if (apiOnlineRef.current && getStoredToken()) {
         void apiToggleLike(userId)
-          .then(({ likes: next }) => {
+          .then(({ likes: next, actors }) => {
             const map = normalizeLikesMap(next)
             setLikes(map)
             persistLikesMap(map)
+            for (const actor of actors) rememberUser(actor)
           })
           .catch(() => {
             setLikes((prev) => {
@@ -1411,7 +1450,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return next
       })
     },
-    [user, persistLikesMap],
+    [user, persistLikesMap, rememberUser],
   )
 
   const getLikesFor = useCallback(

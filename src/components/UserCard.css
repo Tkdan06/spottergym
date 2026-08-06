@@ -204,6 +204,7 @@
   font-weight: 700;
 }
 
+/* LikesRow.css owns card likes alignment; keep pin-to-bottom here only if needed */
 .user-card-body .likes-row {
   margin-top: auto;
   padding-top: 4px;

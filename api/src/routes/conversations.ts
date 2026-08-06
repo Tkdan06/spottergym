@@ -14,7 +14,7 @@ import {
   CHAT_MESSAGE_MAX,
   GREETING_MESSAGE_MAX,
 } from '../lib/fieldLimits.js'
-import { createNotification } from '../lib/notify.js'
+import { createNotification, pushChatMessage } from '../lib/notify.js'
 import { requireAuth, type AuthedEnv } from '../middleware/auth.js'
 import { rateLimit } from '../middleware/rateLimit.js'
 
@@ -169,6 +169,16 @@ conversationRoutes.post(
         }),
       ])
       conv = await prisma.conversation.findUniqueOrThrow({ where: { id: conv.id } })
+
+      if (conv.status === 'accepted') {
+        const meUser = await prisma.user.findUnique({ where: { id: me }, select: { name: true } })
+        void pushChatMessage({
+          userId: otherId,
+          senderName: meUser?.name || 'Новое сообщение',
+          text,
+          conversationId: conv.id,
+        }).catch((err) => console.warn('[push] chat message', err))
+      }
     }
 
     return c.json(
@@ -266,7 +276,15 @@ conversationRoutes.post(
       }),
     ])
 
-    // New messages only bump unread + chat badge — no notification feed item
+    // OS push + home-screen badge; no bell feed item (chat tab covers that)
+    const meUser = await prisma.user.findUnique({ where: { id: userId }, select: { name: true } })
+    void pushChatMessage({
+      userId: otherId,
+      senderName: meUser?.name || 'Новое сообщение',
+      text,
+      conversationId: conv.id,
+    }).catch((err) => console.warn('[push] chat message', err))
+
     return c.json({ message: serializeChatMessage(message) }, 201)
   },
 )

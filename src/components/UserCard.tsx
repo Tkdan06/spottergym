@@ -97,7 +97,7 @@ export function UserCard({ user, compact, rank }: Props) {
           )}
           {user.lookingToMeet ? <span className="chip small">Открыт к общению</span> : null}
         </div>
-        <LikesRow count={count} likers={likers} compact maxAvatars={4} />
+        <LikesRow count={count} likers={likers} compact maxAvatars={3} />
       </div>
     </Link>
   )

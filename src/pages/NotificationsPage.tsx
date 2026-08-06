@@ -15,6 +15,7 @@ import {
   isStandalonePwa,
   pushSupported,
 } from '../lib/push'
+import { isWelcomeInstallNotification } from '../lib/welcomeInstall'
 import './NotificationsPage.css'
 
 function timeLabel(iso: string) {
@@ -67,8 +68,11 @@ export function NotificationsPage() {
   )
 
   const pushActive = pushState.subscribed && pushState.permission === 'granted'
+  const canTogglePush =
+    pushState.supported && pushState.standalone && pushState.configured && pushState.permission !== 'denied'
 
   const onTogglePush = async () => {
+    if (!canTogglePush && !pushActive) return
     setPushError('')
     setPushBusy(true)
     try {
@@ -85,6 +89,15 @@ export function NotificationsPage() {
       setPushBusy(false)
     }
   }
+
+  const pushHint = (() => {
+    if (!pushState.supported) return 'Браузер не поддерживает пуши'
+    if (!pushState.configured) return 'Пуши на сервере пока недоступны'
+    if (pushState.permission === 'denied') return 'Разрешение выключено в системе'
+    if (!pushState.standalone) return null
+    if (pushActive) return 'Лайки, чаты, напоминания'
+    return 'Лайки, чаты, напоминания'
+  })()
 
   return (
     <main className="page notifications-page">
@@ -127,60 +140,45 @@ export function NotificationsPage() {
         <section className="stack">
           <button
             type="button"
-            className="toggle-row master-toggle"
+            className="toggle-row"
             onClick={() => updateNotificationPrefs({ enabled: !notificationPrefs.enabled })}
           >
             <div className="row">
-              {notificationPrefs.enabled ? <Bell size={18} /> : <BellOff size={18} />}
+              <span className="notif-setting-icon" aria-hidden>
+                {notificationPrefs.enabled ? <Bell size={20} /> : <BellOff size={20} />}
+              </span>
               <div>
                 <strong>{notificationPrefs.enabled ? 'Уведомления включены' : 'Уведомления выключены'}</strong>
-                <p className="muted">Главный переключатель для всех типов</p>
+                <p className="muted">Главный переключатель</p>
               </div>
             </div>
             <span className={`toggle ${notificationPrefs.enabled ? 'on' : ''}`} />
           </button>
 
-          <div className="push-card">
-            <div className="row">
-              <Smartphone size={18} />
-              <div>
-                <strong>Пуши на домашний экран</strong>
-                <p className="muted">
-                  Запросы в чат, лайки, ответы поддержки и напоминание за час до тренировки.
-                  Бейдж на иконке — по непрочитанным в колокольчике.
-                </p>
-              </div>
-            </div>
-
-            {!pushState.supported ? (
-              <p className="muted push-hint">Этот браузер не поддерживает Web Push.</p>
-            ) : !pushState.standalone ? (
-              <p className="muted push-hint">
-                Добавь Spotter на домашний экран (Поделиться → На экран «Домой»), открой из иконки и
-                включи пуши здесь.
-              </p>
-            ) : !pushState.configured ? (
-              <p className="muted push-hint">Пуши на сервере пока не настроены.</p>
-            ) : (
-              <button
-                type="button"
-                className="toggle-row push-toggle"
-                disabled={pushBusy}
-                onClick={() => void onTogglePush()}
-              >
+          <div className="push-settings">
+            <button
+              type="button"
+              className="toggle-row"
+              disabled={pushBusy || (!canTogglePush && !pushActive)}
+              onClick={() => void onTogglePush()}
+            >
+              <div className="row">
+                <span className="notif-setting-icon" aria-hidden>
+                  <Smartphone size={20} />
+                </span>
                 <div>
-                  <strong>{pushActive ? 'Пуши включены' : 'Включить пуши'}</strong>
-                  <p className="muted">
-                    {pushState.permission === 'denied'
-                      ? 'Разрешение запрещено в настройках системы'
-                      : pushActive
-                        ? 'Можно выключить в любой момент'
-                        : 'Нужно разрешение системы'}
-                  </p>
+                  <strong>{pushActive ? 'Пуши включены' : 'Пуши'}</strong>
+                  {pushHint ? <p className="muted">{pushHint}</p> : null}
                 </div>
-                <span className={`toggle ${pushActive ? 'on' : ''}`} />
-              </button>
-            )}
+              </div>
+              <span className={`toggle ${pushActive ? 'on' : ''}`} />
+            </button>
+
+            <Link to="/app/install" className="push-guide-link">
+              {!pushState.standalone
+                ? 'Хочешь пуши? Поставь ярлык на экран'
+                : 'Как поставить ярлык на экран'}
+            </Link>
             {pushError ? <p className="push-error">{pushError}</p> : null}
           </div>
 
@@ -221,26 +219,36 @@ export function NotificationsPage() {
               <p className="empty-copy-lead">Включи их во вкладке «Настройки»</p>
             </div>
           ) : visible.length ? (
-            visible.map((item) => (
-              <Link
-                key={item.id}
-                to={item.href || '/app/notifications'}
-                className={`notification-card ${item.read ? 'is-read' : 'is-unread'}`}
-                onClick={() => markNotificationRead(item.id)}
-              >
-                <div className="notification-card-top">
-                  <span className="chip small level">{typeLabel(item.type)}</span>
-                  <div className="notification-card-meta">
-                    <span className="dim">{timeLabel(item.createdAt)}</span>
-                    {!item.read ? (
-                      <span className="notification-unread-dot" aria-label="Непрочитано" />
-                    ) : null}
+            visible.map((item) => {
+              const installWelcome = isWelcomeInstallNotification(item)
+              return (
+                <Link
+                  key={item.id}
+                  to={item.href || '/app/notifications'}
+                  className={`notification-card ${item.read ? 'is-read' : 'is-unread'}${
+                    installWelcome ? ' is-welcome-install' : ''
+                  }`}
+                  onClick={() => markNotificationRead(item.id)}
+                >
+                  <div className="notification-card-top">
+                    <span className="chip small level">
+                      {installWelcome ? 'Совет' : typeLabel(item.type)}
+                    </span>
+                    <div className="notification-card-meta">
+                      <span className="dim">{timeLabel(item.createdAt)}</span>
+                      {!item.read ? (
+                        <span className="notification-unread-dot" aria-label="Непрочитано" />
+                      ) : null}
+                    </div>
                   </div>
-                </div>
-                <strong>{item.title}</strong>
-                <p className="muted">{item.body}</p>
-              </Link>
-            ))
+                  <strong>{item.title}</strong>
+                  <p className="muted">{item.body}</p>
+                  {installWelcome ? (
+                    <span className="notification-card-cta">Как поставить ярлык →</span>
+                  ) : null}
+                </Link>
+              )
+            })
           ) : (
             <div className="empty-copy" role="status">
               <p className="empty-copy-title">Пока тихо</p>

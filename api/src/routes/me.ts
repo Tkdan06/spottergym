@@ -31,6 +31,7 @@ import { notifyGymMembers } from '../lib/gymNotify.js'
 import { isAllowedAvatarDataUrl, isAllowedPhotoDataUrl } from '../lib/photos.js'
 import { serializeUser } from '../lib/serialize.js'
 import { isValidUsername, normalizeUsername } from '../lib/username.js'
+import { ensureWelcomeInstallNotification } from '../lib/welcomeInstall.js'
 import {
   loadAuthedUser,
   requireAuth,
@@ -155,6 +156,18 @@ meRoutes.patch('/', async (c) => {
     ...rest
   } = data
 
+  const finishingOnboarding = data.onboardingDone === true
+  const wasOnboarded = finishingOnboarding
+    ? Boolean(
+        (
+          await prisma.user.findUnique({
+            where: { id: userId },
+            select: { onboardingDone: true },
+          })
+        )?.onboardingDone,
+      )
+    : true
+
   const dataUpdate: Prisma.UserUpdateInput = {
     ...rest,
     lastSeenAt: new Date(),
@@ -174,6 +187,13 @@ meRoutes.patch('/', async (c) => {
       checkIns: { where: { checkedOutAt: null }, take: 1 },
     },
   })
+
+  // После онбординга — welcome в колокольчик со soft ask поставить ярлык (без OS push).
+  if (finishingOnboarding && !wasOnboarded) {
+    await ensureWelcomeInstallNotification(userId).catch((err) =>
+      console.warn('[welcome-install] notify failed', err),
+    )
+  }
 
   return c.json({ user: serializeUser(user) })
 })

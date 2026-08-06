@@ -22,7 +22,7 @@ export const FEEDBACK_CATEGORIES: {
 }[] = [
   { id: 'technical', label: 'Техника', hint: 'Баги и сбои' },
   { id: 'question', label: 'Вопрос', hint: 'Как пользоваться' },
-  { id: 'suggestion', label: 'Идея', hint: 'Что улучшить' },
+  { id: 'suggestion', label: 'Идея', hint: 'Улучшения и новые залы' },
   { id: 'safety', label: 'Безопасность', hint: 'Жалоба или риск' },
   { id: 'other', label: 'Другое', hint: 'Всё остальное' },
 ]

@@ -239,6 +239,10 @@
 }
 
 .home-empty-floor .btn {
+  margin-top: 4px;
+}
+
+.home-empty-floor .btn-primary {
   margin-top: 8px;
 }
 

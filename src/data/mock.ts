@@ -42,6 +42,7 @@ export const NETWORKS = [
   'Zebra Fitness',
   'Планета Фитнес',
   'Nebo',
+  'Kometa.fit',
   'Независимый',
 ] as const
 

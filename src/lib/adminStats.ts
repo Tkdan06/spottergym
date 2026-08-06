@@ -54,7 +54,8 @@ function formatGymLabel(gymId: string) {
   return `${gym.network} · ${short || gym.name}`
 }
 
-function scanSpotterStorageBytes() {
+/** Device-only Spotter localStorage footprint (not server storage). */
+export function scanDeviceStorageHint() {
   let bytes = 0
   let keys = 0
   try {
@@ -69,6 +70,10 @@ function scanSpotterStorageBytes() {
     /* ignore */
   }
   return { bytes, keys }
+}
+
+function scanSpotterStorageBytes() {
+  return scanDeviceStorageHint()
 }
 
 function enrichPlayer(entry: AdminDirectoryUser): AdminDirectoryUser {

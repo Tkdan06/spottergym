@@ -7,6 +7,7 @@ import { LikesRow } from '../components/LikesRow'
 import { PhotoGalleryModal } from '../components/PhotoGalleryModal'
 import { ProfilePhotoCarousel } from '../components/ProfilePhotoCarousel'
 import { ScheduleSheet } from '../components/ScheduleSheet'
+import { SectionTitle } from '../components/SectionTitle'
 import { useApp } from '../context/useApp'
 import { experienceLabel, getGym, getUserGyms, intentLabel } from '../data/mock'
 import { profileImage } from '../lib/avatar'
@@ -115,19 +116,22 @@ export function ProfilePage() {
       />
 
       <section className="surface profile-block">
-        <h2>Пригласить друзей</h2>
+        <SectionTitle>Пригласить друзей</SectionTitle>
         <InviteFriendsButton userId={user.id} className="btn btn-primary btn-block">
           <Share2 size={16} /> Поделиться ссылкой
         </InviteFriendsButton>
       </section>
 
       <section className="surface profile-block likes-block">
-        <div className="section-title">
-          <h2>Лайки</h2>
-          <Link to="/app/likes/sent" className="muted">
-            {myLiked.length ? `Кого я лайкнул · ${myLiked.length}` : 'Кого я лайкнул'}
-          </Link>
-        </div>
+        <SectionTitle
+          action={
+            <Link to="/app/likes/sent" className="muted">
+              {myLiked.length ? `Кого я лайкнул · ${myLiked.length}` : 'Кого я лайкнул'}
+            </Link>
+          }
+        >
+          Лайки
+        </SectionTitle>
         <LikesRow
           count={likesInfo.count}
           likers={likesInfo.likers}
@@ -137,12 +141,15 @@ export function ProfilePage() {
       </section>
 
       <section className="surface profile-block">
-        <div className="section-title">
-          <h2>Мои залы</h2>
-          <Link to="/app/discover" className="muted">
-            Добавить
-          </Link>
-        </div>
+        <SectionTitle
+          action={
+            <Link to="/app/discover" className="muted">
+              Добавить
+            </Link>
+          }
+        >
+          Мои залы
+        </SectionTitle>
         <div className="chip-grid">
           {gyms.length ? (
             gyms.map((gym) => (
@@ -234,7 +241,7 @@ export function ProfilePage() {
       </section>
 
       <section className="surface profile-block">
-        <h2>О себе</h2>
+        <SectionTitle>О себе</SectionTitle>
         <p>{user.bio || 'Добавь описание — так проще начать разговор'}</p>
         <div className="chip-grid" style={{ marginTop: 12 }}>
           {experienceLabel(user.experienceLevel) ? (
@@ -253,12 +260,15 @@ export function ProfilePage() {
       </section>
 
       <section className="surface profile-block">
-        <div className="section-title">
-          <h2>Расписание</h2>
-          <button type="button" className="text-link muted" onClick={() => setScheduleOpen(true)}>
-            Изменить
-          </button>
-        </div>
+        <SectionTitle
+          action={
+            <button type="button" className="text-link muted" onClick={() => setScheduleOpen(true)}>
+              Изменить
+            </button>
+          }
+        >
+          Расписание
+        </SectionTitle>
         {onBreak ? (
           <p className="break-note">
             {breakText}. Чек-ин в зал снимет статус автоматически.
@@ -293,7 +303,7 @@ export function ProfilePage() {
       />
 
       <section className="surface profile-block">
-        <h2>Обратная связь</h2>
+        <SectionTitle>Обратная связь</SectionTitle>
         <div className="chip-grid">
           <Link to="/app/feedback" className="chip active">
             <MessageSquareText size={14} /> Мои обращения

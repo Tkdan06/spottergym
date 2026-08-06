@@ -3,11 +3,7 @@ import { ArrowLeft, Ban, MessageSquare, RefreshCw, ShieldAlert } from 'lucide-re
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/useApp'
 import { isMasterAdminEmail } from '../lib/adminConfig'
-import {
-  collectAdminOverview,
-  formatAdminDate,
-  formatBytes,
-} from '../lib/adminStats'
+import { formatAdminDate, formatBytes } from '../lib/adminStats'
 import { experienceLabel, getGym, intentLabel } from '../data/mock'
 import { ADMIN_MESSAGE_MAX } from '../lib/fieldLimits'
 import { messageFieldProps, searchFieldProps } from '../lib/inputAttrs'
@@ -26,12 +22,12 @@ export function AdminPlayersPage() {
   const navigate = useNavigate()
   const {
     user,
-    tickets,
     blockedEmails,
     canViewUsers,
     canBlockUsers,
     canMessageUsers,
     canRemoveUsers,
+    adminDirectory,
     adminBlockEmail,
     adminUnblockEmail,
     adminRemoveUser,
@@ -45,13 +41,22 @@ export function AdminPlayersPage() {
   const [message, setMessage] = useState('')
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
-  const [tick, setTick] = useState(0)
+  const [busy, setBusy] = useState(false)
 
-  const overview = useMemo(() => collectAdminOverview(tickets), [tickets, tick, blockedEmails])
+  const players = useMemo(() => {
+    return [...adminDirectory].sort((a, b) => {
+      const ar = a.isDemoSeed ? 1 : 0
+      const br = b.isDemoSeed ? 1 : 0
+      if (ar !== br) return ar - br
+      const at = a.registeredAt ? +new Date(a.registeredAt) : 0
+      const bt = b.registeredAt ? +new Date(b.registeredAt) : 0
+      return bt - at || a.name.localeCompare(b.name, 'ru')
+    })
+  }, [adminDirectory])
 
   const list = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return overview.players.filter((p) => {
+    return players.filter((p) => {
       if (filter === 'real' && p.isDemoSeed) return false
       if (filter === 'demo' && !p.isDemoSeed) return false
       if (filter === 'active' && !p.isActive) return false
@@ -69,18 +74,21 @@ export function AdminPlayersPage() {
         .toLowerCase()
       return hay.includes(q)
     })
-  }, [overview.players, query, filter, blockedEmails])
+  }, [players, query, filter, blockedEmails])
 
   const selected =
-    overview.players.find((p) => p.id === selectedId || p.email === selectedId) || null
+    players.find((p) => p.id === selectedId || p.email === selectedId) || null
 
   if (!user?.isAdmin) return <Navigate to="/app/profile" replace />
   if (!canViewUsers) return <Navigate to="/app/admin" replace />
 
   const refresh = () => {
-    refreshAdminDirectory()
-    setTick((n) => n + 1)
-    setNotice('Данные обновлены')
+    setBusy(true)
+    setError('')
+    void Promise.resolve(refreshAdminDirectory())
+      .then(() => setNotice('Список обновлён с сервера'))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Ошибка обновления'))
+      .finally(() => setBusy(false))
   }
 
   const onBlockToggle = (entry: AdminDirectoryUser) => {
@@ -97,7 +105,6 @@ export function AdminPlayersPage() {
           await adminBlockEmail(entry.email)
           setNotice(`${entry.email} заблокирован`)
         }
-        setTick((n) => n + 1)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Ошибка')
       }
@@ -131,7 +138,6 @@ export function AdminPlayersPage() {
       try {
         await adminRemoveUser(entry.email, alsoBlock)
         setSelectedId(null)
-        setTick((n) => n + 1)
         setNotice(`Пользователь ${entry.email} удалён`)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Ошибка')
@@ -147,9 +153,9 @@ export function AdminPlayersPage() {
 
       <header className="admin-players-head">
         <div>
-          <h1>Пользователи и статистика</h1>
+          <h1>Пользователи</h1>
           <p className="muted">
-            Реестр аккаунтов в этом браузере · обновлено {formatAdminDate(overview.generatedAt)}
+            Реестр с сервера · {players.filter((p) => !p.isDemoSeed).length} аккаунтов
           </p>
         </div>
         <button
@@ -158,78 +164,19 @@ export function AdminPlayersPage() {
           onClick={refresh}
           aria-label="Обновить"
           title="Обновить"
+          disabled={busy}
         >
           <RefreshCw size={22} strokeWidth={2.4} />
         </button>
       </header>
 
-      <section className="admin-stat-grid" aria-label="Сводка">
-        <article className="admin-stat-card">
-          <span className="muted">Пользователи</span>
-          <strong>{overview.realPlayers}</strong>
-          <p className="dim">Онбординг {overview.onboarded} · в зале {overview.activeNow}</p>
-        </article>
-        <article className="admin-stat-card">
-          <span className="muted">Память Spotter</span>
-          <strong>{formatBytes(overview.storageBytes)}</strong>
-          <p className="dim">{overview.storageKeys} ключей · аккаунтов на устройстве {overview.accountsOnDevice}</p>
-        </article>
-        <article className="admin-stat-card">
-          <span className="muted">Фото</span>
-          <strong>{overview.totalPhotos}</strong>
-          <p className="dim">
-            У {overview.withPhotos} пользователей · {formatBytes(overview.photosBytes)}
-          </p>
-        </article>
-        <article className="admin-stat-card">
-          <span className="muted">Обращения</span>
-          <strong>{overview.totalTickets}</strong>
-          <p className="dim">
-            Входящие {overview.tickets.incoming} · в работе {overview.tickets.in_progress}
-          </p>
-        </article>
-        <article className="admin-stat-card">
-          <span className="muted">Пол / возраст</span>
-          <strong>
-            М {overview.byGender.male} · Ж {overview.byGender.female}
-          </strong>
-          <p className="dim">Средний возраст {overview.avgAge ?? '—'} · тренеров {overview.coaches}</p>
-        </article>
-        <article className="admin-stat-card">
-          <span className="muted">Блокировки</span>
-          <strong>{overview.blockedEmails}</strong>
-          <p className="dim">Демо-сиды в зале: {overview.demoSeeds}</p>
-        </article>
-      </section>
-
-      {(overview.byCity.length > 0 || overview.byGym.length > 0) && (
-        <section className="admin-breakdown">
-          <div>
-            <h2>Города</h2>
-            <ul>
-              {overview.byCity.slice(0, 8).map((c) => (
-                <li key={c.city}>
-                  <span>{c.city}</span>
-                  <strong>{c.count}</strong>
-                </li>
-              ))}
-              {!overview.byCity.length ? <li className="muted">Пока нет данных</li> : null}
-            </ul>
-          </div>
-          <div>
-            <h2>Залы (домашние)</h2>
-            <ul>
-              {overview.byGym.slice(0, 8).map((g) => (
-                <li key={g.gymId}>
-                  <span>{g.label}</span>
-                  <strong>{g.count}</strong>
-                </li>
-              ))}
-              {!overview.byGym.length ? <li className="muted">Пока нет данных</li> : null}
-            </ul>
-          </div>
-        </section>
-      )}
+      <p className="dim">
+        Города, залы и DAU/MAU — в{' '}
+        <Link to="/app/admin/analytics" className="text-link">
+          Аналитике
+        </Link>
+        .
+      </p>
 
       <div className="admin-players-toolbar">
         <input
@@ -439,7 +386,9 @@ export function AdminPlayersPage() {
               ) : null}
             </>
           ) : (
-            <p className="muted">Выбери пользователя слева, чтобы увидеть детали, заблокировать или написать.</p>
+            <p className="muted">
+              Выбери пользователя слева, чтобы увидеть детали, заблокировать или написать.
+            </p>
           )}
         </aside>
       </div>

@@ -129,9 +129,17 @@
   margin-bottom: 12px;
 }
 
-.profile-block h2 {
-  font-size: 1rem;
-  margin-bottom: 10px;
+/* Bare h2 in block → same as .section-heading (UI kit) */
+.profile-block > h2,
+.profile-block > .section-title {
+  margin-bottom: 12px;
+}
+
+.profile-block > h2 {
+  font-size: var(--text-section-size);
+  font-weight: var(--text-section-weight);
+  line-height: var(--text-section-line);
+  letter-spacing: var(--letter-tight);
 }
 
 .break-note {
@@ -202,20 +210,21 @@
   background: transparent;
 }
 
-.likes-block .section-title {
-  margin-bottom: 8px;
-}
-
 .likes-block-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 4px;
+  margin-bottom: 12px;
+  min-width: 0;
 }
 
 .likes-block-head h2 {
-  margin-bottom: 0;
+  margin: 0;
+  font-size: var(--text-section-size);
+  font-weight: var(--text-section-weight);
+  line-height: var(--text-section-line);
+  letter-spacing: var(--letter-tight);
 }
 
 .like-btn {

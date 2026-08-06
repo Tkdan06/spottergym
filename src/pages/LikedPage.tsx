@@ -170,9 +170,8 @@ export function LikedPage({ mode = 'received' }: { mode?: LikesMode }) {
                 likedByMe={likedByMe}
                 likeMode={mode}
                 onMessage={() => {
-                  void Promise.resolve(
-                    startConversation(person.id, 'Привет! Увидел тебя в Spotter.'),
-                  ).then((id: string) => {
+                  // Только открыть чат — без автосообщения (переписка могла уже идти)
+                  void Promise.resolve(startConversation(person.id, '')).then((id: string) => {
                     navigate(`/app/messages/${id}`, { state: { from: listPath } })
                   })
                 }}

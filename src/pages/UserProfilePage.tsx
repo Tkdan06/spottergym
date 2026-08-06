@@ -5,6 +5,7 @@ import { LikesRow } from '../components/LikesRow'
 import { PhotoGalleryModal } from '../components/PhotoGalleryModal'
 import { ProfilePhotoCarousel } from '../components/ProfilePhotoCarousel'
 import { SafetyActions } from '../components/SafetyActions'
+import { SectionTitle } from '../components/SectionTitle'
 import { useApp } from '../context/useApp'
 import { displayName, experienceLabel, getUser, getUserGyms, intentLabel } from '../data/mock'
 import { profileImage } from '../lib/avatar'
@@ -206,37 +207,42 @@ export function UserProfilePage() {
       />
 
       <section className="surface profile-block likes-block">
-        <div className="likes-block-head">
-          <h2>Лайки в зале</h2>
-          {!isSelf ? (
-            <button
-              type="button"
-              className={`like-btn ${likesInfo.likedByMe ? 'liked' : ''}`}
-              onClick={() => toggleLike(person.id)}
-              aria-pressed={likesInfo.likedByMe}
-            >
-              <Heart size={18} fill={likesInfo.likedByMe ? 'currentColor' : 'none'} />
-              {likesInfo.likedByMe ? 'Нравится' : 'Лайк'}
-            </button>
-          ) : null}
-        </div>
+        <SectionTitle
+          action={
+            !isSelf ? (
+              <button
+                type="button"
+                className={`like-btn ${likesInfo.likedByMe ? 'liked' : ''}`}
+                onClick={() => toggleLike(person.id)}
+                aria-pressed={likesInfo.likedByMe}
+              >
+                <Heart size={18} fill={likesInfo.likedByMe ? 'currentColor' : 'none'} />
+                {likesInfo.likedByMe ? 'Нравится' : 'Лайк'}
+              </button>
+            ) : undefined
+          }
+        >
+          Лайки в зале
+        </SectionTitle>
         <LikesRow count={likesInfo.count} likers={likesInfo.likers} maxAvatars={6} />
       </section>
 
       {!isAnon && person.bio ? (
         <section className="surface profile-block">
-          <h2>О себе</h2>
+          <SectionTitle>О себе</SectionTitle>
           <p>{person.bio}</p>
         </section>
       ) : (
         <section className="surface profile-block">
-          <h2>Анонимный профиль</h2>
+          <SectionTitle>Анонимный профиль</SectionTitle>
           <p className="muted">Имя и фото скрыты. Можно написать запрос — человек сам решит, открыться ли.</p>
         </section>
       )}
 
       <section className="surface profile-block">
-        <h2>{!isAnon && person.isCoach ? 'Направления и активности' : 'Активности'}</h2>
+        <SectionTitle>
+          {!isAnon && person.isCoach ? 'Направления и активности' : 'Активности'}
+        </SectionTitle>
         <div className="chip-grid">
           {isAnon ? (
             <span className="chip active">Скрыто</span>
@@ -261,9 +267,11 @@ export function UserProfilePage() {
 
       {!isAnon ? (
         <section className="surface profile-block">
-          <h2 className="row">
-            <Clock3 size={18} /> Обычно в зале
-          </h2>
+          <SectionTitle>
+            <span className="row">
+              <Clock3 size={18} aria-hidden /> Обычно в зале
+            </span>
+          </SectionTitle>
           {onBreak ? <p className="break-note">{breakText}</p> : null}
           <div className="slots">
             {person.visitSlots.length ? (

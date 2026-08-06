@@ -69,6 +69,26 @@ export async function createNotification(input: {
   return row
 }
 
+/** OS push + badge for a new chat message — does not create a bell feed item. */
+export async function pushChatMessage(input: {
+  userId: string
+  senderName: string
+  text: string
+  conversationId: string
+}) {
+  const prefs = await getOrCreatePrefs(input.userId)
+  if (!prefs.enabled) return 0
+
+  const title = (input.senderName || 'Новое сообщение').slice(0, 80)
+  const body = input.text.slice(0, 160)
+  return sendPushToUser(input.userId, {
+    title,
+    body,
+    href: `/app/messages/${input.conversationId}`,
+    type: 'chat_message',
+  })
+}
+
 export function serializeNotification(n: {
   id: string
   type: string

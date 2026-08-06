@@ -95,6 +95,13 @@ gymRoutes.get('/:gymId/people', requireAuth, async (c) => {
   })
 
   return c.json({
-    people: members.map((m) => serializePublicUser(m.user)),
+    people: members.map((m) => {
+      const person = serializePublicUser(m.user)
+      // «В зале» только если открытый чек-ин именно в этом клубе (не во всех клубах профиля)
+      return {
+        ...person,
+        isActive: Boolean(person.isActive && person.checkedInGymId === gymId),
+      }
+    }),
   })
 })

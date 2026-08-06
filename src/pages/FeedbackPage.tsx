@@ -1,6 +1,6 @@
-import { type FormEvent, useMemo, useState } from 'react'
+import { type FormEvent, useEffect, useMemo, useState } from 'react'
 import { ArrowLeft } from 'lucide-react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useApp } from '../context/useApp'
 import {
   FEEDBACK_CATEGORIES,
@@ -14,6 +14,12 @@ import { messageFieldProps } from '../lib/inputAttrs'
 import type { FeedbackCategoryId } from '../types'
 import './FeedbackPage.css'
 
+const GYM_REQUEST_TEMPLATE = `Заявка на добавление зала
+
+Город: 
+Название: 
+Адрес: `
+
 function formatWhen(iso: string) {
   return new Date(iso).toLocaleString('ru-RU', {
     day: 'numeric',
@@ -25,6 +31,7 @@ function formatWhen(iso: string) {
 
 export function FeedbackPage() {
   const { ticketId } = useParams()
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { user, tickets, createFeedbackTicket, replyFeedbackTicket, refreshSupport } = useApp()
   const [view, setView] = useState<'list' | 'create'>(ticketId ? 'list' : 'list')
@@ -33,6 +40,16 @@ export function FeedbackPage() {
   const [reply, setReply] = useState('')
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+
+  useEffect(() => {
+    if (ticketId || searchParams.get('topic') !== 'gym') return
+    const city = user?.city ? `${user.city}` : ''
+    setView('create')
+    setCategory('suggestion')
+    setMessage(
+      `Заявка на добавление зала\n\nГород: ${city}\nНазвание: \nАдрес: `,
+    )
+  }, [ticketId, searchParams, user?.city])
 
   const mine = useMemo(
     () => (user ? ticketsForUser(user.id, tickets) : []),
@@ -125,7 +142,11 @@ export function FeedbackPage() {
           <ArrowLeft size={18} /> Назад
         </button>
         <h1>Новое обращение</h1>
-        <p className="muted">Баг, идея или вопрос — ответим в этом же чате обращения.</p>
+        <p className="muted">
+          {category === 'suggestion' && message.startsWith('Заявка на добавление зала')
+            ? 'Заполни название и адрес — добавим клуб в каталог.'
+            : 'Баг, идея или вопрос — ответим в этом же чате обращения.'}
+        </p>
         <form className="feedback-actions" onSubmit={onCreate}>
           <div className="chip-grid">
             {FEEDBACK_CATEGORIES.map((c) => (
@@ -133,7 +154,12 @@ export function FeedbackPage() {
                 key={c.id}
                 type="button"
                 className={`chip ${category === c.id ? 'active' : ''}`}
-                onClick={() => setCategory(c.id)}
+                onClick={() => {
+                  setCategory(c.id)
+                  if (c.id === 'suggestion' && !message.trim()) {
+                    setMessage(GYM_REQUEST_TEMPLATE)
+                  }
+                }}
               >
                 {c.label}
               </button>

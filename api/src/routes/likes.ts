@@ -3,11 +3,17 @@ import { z } from 'zod'
 import { prisma } from '../db.js'
 import { areUsersBlocked } from '../lib/blocks.js'
 import { createNotification } from '../lib/notify.js'
+import { serializePublicUser } from '../lib/serialize.js'
 import { requireAuth, type AuthedEnv } from '../middleware/auth.js'
 
 export const likesRoutes = new Hono<AuthedEnv>()
 
 likesRoutes.use('*', requireAuth)
+
+const userInclude = {
+  gyms: true,
+  checkIns: { where: { checkedOutAt: null }, take: 1 },
+} as const
 
 /** LikesMap: targetUserId → likerIds[] */
 async function buildLikesMap() {
@@ -22,9 +28,21 @@ async function buildLikesMap() {
   return map
 }
 
+/** Public profiles for likers so every viewer resolves the same avatars. */
+async function loadLikerActors(likes: Record<string, string[]>) {
+  const likerIds = [...new Set(Object.values(likes).flat())]
+  if (!likerIds.length) return []
+  const users = await prisma.user.findMany({
+    where: { id: { in: likerIds } },
+    include: userInclude,
+  })
+  return users.map(serializePublicUser)
+}
+
 likesRoutes.get('/', async (c) => {
   const likes = await buildLikesMap()
-  return c.json({ likes })
+  const actors = await loadLikerActors(likes)
+  return c.json({ likes, actors })
 })
 
 likesRoutes.post('/:userId/toggle', async (c) => {
@@ -75,5 +93,6 @@ likesRoutes.post('/:userId/toggle', async (c) => {
   }
 
   const likes = await buildLikesMap()
-  return c.json({ liked, likes })
+  const actors = await loadLikerActors(likes)
+  return c.json({ liked, likes, actors })
 })

@@ -7,10 +7,15 @@
   height: 100svh;
   max-height: 100dvh;
   max-height: 100svh;
-  padding: calc(12px + var(--standalone-top)) 16px 0;
-  padding-bottom: calc(10px + var(--safe-bottom) + var(--chat-keyboard));
+  padding: calc(12px + var(--standalone-top)) 12px 0;
+  /* Composer sits above keyboard; safe-area only when keyboard closed */
+  padding-bottom: calc(
+    8px + max(0px, var(--safe-bottom) - min(var(--chat-keyboard), var(--safe-bottom))) +
+      var(--chat-keyboard)
+  );
   overflow: hidden;
   box-sizing: border-box;
+  transition: padding-bottom 0.12s ease-out;
 }
 
 .chat-header {
@@ -18,7 +23,8 @@
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  padding: 0 4px;
 }
 
 .chat-user {
@@ -81,12 +87,13 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 4px 0 12px;
+  gap: 6px;
+  padding: 6px 4px 14px;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .chat-thread-end {
@@ -95,71 +102,161 @@
   flex-shrink: 0;
 }
 
+/* —— Bubbles (Telegram-like tails + inline time) —— */
 .bubble {
+  --bubble-radius: 16px;
+  position: relative;
   max-width: min(82%, 420px);
-  padding: 10px 12px;
-  border-radius: 16px;
-  animation: fade-up 0.25s ease both;
+  padding: 7px 10px 6px 11px;
+  border-radius: var(--bubble-radius);
+  animation: fade-up 0.22s ease both;
+  isolation: isolate;
 }
 
-.bubble p {
-  line-height: 1.4;
+.bubble-body {
+  position: relative;
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.35;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Invisible spacer flows with text → meta sits on last line without overlap */
+.bubble-meta-spacer {
+  display: inline-block;
+  height: 1.15em;
+  vertical-align: bottom;
+  margin-inline-start: 8px;
+  pointer-events: none;
+  user-select: none;
 }
 
 .bubble-meta {
-  display: flex;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: inline-flex;
   align-items: center;
-  justify-content: flex-end;
   gap: 2px;
-  margin-top: 6px;
+  height: 1.15em;
+  font-size: 0.68rem;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.72;
 }
 
 .bubble time {
-  font-size: 0.7rem;
-  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
 }
 
 .bubble.mine {
   align-self: flex-end;
+  margin-right: 6px;
   background: var(--accent);
   color: var(--accent-ink);
-  border-bottom-right-radius: 6px;
+  border-bottom-right-radius: 5px;
 }
 
 .bubble.theirs {
   align-self: flex-start;
+  margin-left: 6px;
   background: var(--bg-card);
   border: 1px solid var(--line);
-  border-bottom-left-radius: 6px;
+  border-bottom-left-radius: 5px;
 }
 
+.bubble.theirs .bubble-meta {
+  opacity: 0.55;
+  color: var(--text-muted);
+}
+
+.bubble.mine .bubble-meta {
+  color: var(--accent-ink);
+  opacity: 0.62;
+}
+
+/* Tail — messenger “spoke” at the bottom corner */
+.bubble.mine::after,
+.bubble.theirs::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  width: 10px;
+  height: 14px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bubble.mine::after {
+  right: -5px;
+  background: var(--accent);
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+  border-bottom-left-radius: 2px;
+}
+
+.bubble.theirs::after {
+  left: -5px;
+  background: var(--bg-card);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  border-bottom-right-radius: 2px;
+  /* draw border along the outer edge */
+  box-shadow: -1px 0 0 var(--line);
+}
+
+/* —— Composer —— */
 .chat-input {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 8px;
+  align-items: end;
   flex-shrink: 0;
-  padding: 8px 0 calc(6px + var(--safe-bottom));
-  margin: 0 -2px;
+  padding: 8px 2px 6px;
+  margin: 0;
   background:
-    linear-gradient(180deg, transparent, var(--bg) 18%),
+    linear-gradient(180deg, transparent, var(--bg) 28%),
     var(--bg);
   z-index: 5;
 }
 
-.chat-input input {
-  min-height: 48px;
-  border-radius: 14px;
+.chat-input textarea {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  max-height: 120px;
+  resize: none;
+  border-radius: 18px;
   border: 1px solid var(--line);
   background: var(--bg-elevated);
-  padding: 0 14px;
-  font-size: 16px; /* iOS не зумит поле */
+  padding: 11px 14px;
+  font: inherit;
+  font-size: 16px; /* iOS: no zoom on focus */
+  line-height: 1.35;
+  color: inherit;
+  box-sizing: border-box;
+  overflow-y: auto;
+  field-sizing: content;
+}
+
+.chat-input textarea:focus {
+  outline: none;
+  border-color: rgba(200, 245, 66, 0.45);
+}
+
+.chat-input textarea:disabled {
+  opacity: 0.55;
 }
 
 .chat-input .btn {
-  width: 48px;
+  width: 44px;
+  min-height: 44px;
   padding: 0;
-  font-size: 1.2rem;
+  border-radius: 14px;
+  font-size: 1.15rem;
+  flex-shrink: 0;
 }
 
 @media (min-width: 900px) {

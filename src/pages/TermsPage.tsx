@@ -77,6 +77,9 @@ export function TermsPage() {
 
         <footer className="terms-footer">
           <p className="dim">
+            Контакт Администрации: <a href="mailto:info@spottergym.ru">info@spottergym.ru</a>
+          </p>
+          <p className="dim">
             Нажимая «Я согласен», вы подтверждаете принятие Пользовательского соглашения и
             согласие на обработку персональных данных на условиях раздела 11.
           </p>

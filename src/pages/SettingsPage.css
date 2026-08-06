@@ -37,7 +37,10 @@
 
 .settings-panel-head h2 {
   margin: 0 0 4px;
-  font-size: 1rem;
+  font-size: var(--text-section-size);
+  font-weight: var(--text-section-weight);
+  line-height: var(--text-section-line);
+  letter-spacing: var(--letter-tight);
 }
 
 .settings-panel-head .muted {
@@ -143,8 +146,7 @@
   margin-bottom: 12px;
 }
 
-.safety h2 {
-  font-size: 1rem;
+.safety .section-title {
   margin-bottom: 10px;
 }
 

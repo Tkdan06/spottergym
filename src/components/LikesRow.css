@@ -10,55 +10,76 @@
 .likes-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  justify-content: flex-start;
+  gap: 12px;
   margin-top: 10px;
   min-width: 0;
+  width: 100%;
 }
 
 .likes-row-anchor .likes-row {
   margin-top: 0;
+  justify-content: space-between;
+}
+
+/* One tight cluster: avatars + count. Never stretch the heart to the far edge. */
+.likes-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  flex: 0 1 auto;
+  width: max-content;
 }
 
 .likes-row-link {
-  padding: 10px 12px;
+  padding: 12px 12px 12px 14px;
   border-radius: 14px;
-  border: 1px solid var(--line);
-  background: var(--bg-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
   transition: border-color 0.15s ease, background 0.15s ease;
 }
 
-.likes-row-anchor:hover .likes-row-link {
-  border-color: rgba(255, 122, 154, 0.4);
+.likes-row-anchor:hover .likes-row-link,
+.likes-row-anchor:focus-visible .likes-row-link {
+  border-color: rgba(255, 122, 154, 0.35);
   background: rgba(255, 122, 154, 0.08);
 }
 
 .likes-chevron {
   flex-shrink: 0;
+  margin-left: auto;
   color: var(--text-dim);
-  margin-left: -2px;
 }
 
 .likes-row.compact {
   margin-top: 8px;
+  width: auto;
+}
+
+.likes-row.compact .likes-main {
+  gap: 7px;
 }
 
 .likes-row.empty {
-  justify-content: flex-start;
   color: var(--text-dim);
-  font-size: 0.8rem;
-  gap: 6px;
+  font-size: 0.86rem;
+}
+
+.likes-row.empty .likes-main {
+  gap: 8px;
 }
 
 .likes-avatars {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  min-width: 0;
+  flex-shrink: 0;
 }
 
 .likes-avatar {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--bg-card);
@@ -70,15 +91,24 @@
   margin-left: 0;
 }
 
+.likes-row-link .likes-avatar {
+  border-color: var(--bg-elevated, var(--bg-card));
+}
+
 .likes-row.compact .likes-avatar {
   width: 22px;
   height: 22px;
+  margin-left: -7px;
+}
+
+.likes-row.compact .likes-avatar:first-child {
+  margin-left: 0;
 }
 
 .likes-extra {
   margin-left: 4px;
-  min-width: 26px;
-  height: 26px;
+  min-width: 28px;
+  height: 28px;
   border-radius: 999px;
   display: inline-grid;
   place-items: center;
@@ -87,6 +117,10 @@
   color: var(--text-muted);
   font-size: 0.68rem;
   font-weight: 700;
+}
+
+.likes-row-link .likes-extra {
+  border-color: var(--bg-elevated, var(--bg-card));
 }
 
 .likes-row.compact .likes-extra {
@@ -98,13 +132,24 @@
 .likes-count {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   color: #ff7a9a;
-  font-weight: 750;
-  font-size: 0.85rem;
+  font-weight: 700;
+  font-size: 0.92rem;
+  line-height: 1.2;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .likes-row.compact .likes-count {
   font-size: 0.78rem;
+  gap: 4px;
+}
+
+/* Pin likes to the bottom of the card without stretching the cluster */
+.user-card-body .likes-row {
+  margin-top: auto;
+  padding-top: 4px;
+  width: auto;
+  align-self: flex-start;
 }

@@ -59,6 +59,15 @@ export function WelcomePage() {
             </div>
           </article>
         </section>
+
+        <footer className="welcome-legal">
+          <p>© {new Date().getFullYear()} Spotter. Все права защищены.</p>
+          <p>
+            <a href="mailto:info@spottergym.ru">info@spottergym.ru</a>
+            {' · '}
+            <Link to="/terms">Пользовательское соглашение</Link>
+          </p>
+        </footer>
       </main>
     </div>
   )

@@ -29,6 +29,19 @@
   --font-display: 'Unbounded', 'Manrope', sans-serif;
   --font-brand: 'Syne', 'Unbounded', sans-serif;
   --font-body: 'Manrope', 'Unbounded', sans-serif;
+  /* Typography scale — use these, don’t invent local sizes for the same role */
+  --text-page-size: 1.75rem;
+  --text-page-weight: 800;
+  --text-page-line: 1.15;
+  --text-section-size: 1.15rem;
+  --text-section-weight: 700;
+  --text-section-line: 1.25;
+  --text-body-size: 1rem;
+  --text-body-line: 1.45;
+  --text-muted-size: 0.9rem;
+  --text-dim-size: 0.84rem;
+  --text-label-size: 0.72rem;
+  --letter-tight: -0.03em;
   color-scheme: dark;
 }
 
@@ -166,10 +179,11 @@ html.standalone {
 /* Root tab chrome — same top “hat” on Зал / Залы / Чаты / Профиль */
 .page-title {
   margin: 0;
-  font-size: 1.75rem;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: var(--text-page-size);
+  line-height: var(--text-page-line);
+  letter-spacing: var(--letter-tight);
+  font-weight: var(--text-page-weight);
 }
 
 .page-header {
@@ -582,16 +596,31 @@ a.btn-danger {
   font-weight: 800;
 }
 
+/* Block / section heading — one look everywhere (profile, home, settings…) */
 .section-title {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 12px;
+  min-width: 0;
 }
 
-.section-title h2 {
-  font-size: 1.15rem;
+.section-title h2,
+.section-heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-section-size);
+  font-weight: var(--text-section-weight);
+  line-height: var(--text-section-line);
+  letter-spacing: var(--letter-tight);
+  min-width: 0;
+}
+
+.section-title .muted,
+.section-title .text-link {
+  flex-shrink: 0;
+  font-size: var(--text-muted-size);
 }
 
 .card-list {

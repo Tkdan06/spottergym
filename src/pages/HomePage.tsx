@@ -100,10 +100,16 @@ export function HomePage() {
           <div className="home-empty-icon" aria-hidden>
             <MapPin size={28} />
           </div>
-          <h2>Выбери свой клуб</h2>
-          <p className="muted">Добавь зал из каталога — здесь появятся люди</p>
-          <Link to="/app/discover" className="btn btn-primary btn-block">
-            Открыть каталог залов
+          <h2>Добавь свой клуб</h2>
+          <p className="muted">
+            Выбери зал в настройках — здесь появятся люди рядом. Если клуба нет в каталоге,
+            напиши в обратную связь — добавим.
+          </p>
+          <Link to="/app/settings" className="btn btn-primary btn-block">
+            Выбрать зал в настройках
+          </Link>
+          <Link to="/app/feedback?topic=gym" className="btn btn-soft btn-block">
+            Сообщить о своём зале
           </Link>
         </section>
       ) : (
@@ -163,7 +169,7 @@ export function HomePage() {
 
           <section className="home-people" aria-label="Люди в зале">
             <div className="section-title home-people-head">
-              <h2>Люди в зале</h2>
+              <h2 className="section-heading">Люди в зале</h2>
               <span className="home-people-count">{people.length}</span>
             </div>
 

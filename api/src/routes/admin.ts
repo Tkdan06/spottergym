@@ -6,6 +6,7 @@ import {
   resolveAdminFlags,
   type AdminPermissions,
 } from '../lib/admin.js'
+import { buildAdminAnalytics, estimatePhotosBytes } from '../lib/adminAnalytics.js'
 import { isMasterAdminEmail, normalizeEmail } from '../env.js'
 import { serializeUser } from '../lib/serialize.js'
 import { requireAuth, type AuthedEnv } from '../middleware/auth.js'
@@ -34,6 +35,13 @@ async function requirePerm(
   return { ok: true, user, flags }
 }
 
+adminRoutes.get('/analytics', async (c) => {
+  const gate = await requirePerm(c.get('userId'), 'viewUsers')
+  if (!gate.ok) return c.json({ error: gate.error }, gate.status)
+  const analytics = await buildAdminAnalytics()
+  return c.json({ analytics })
+})
+
 adminRoutes.get('/users', async (c) => {
   const gate = await requirePerm(c.get('userId'), 'viewUsers')
   if (!gate.ok) return c.json({ error: gate.error }, gate.status)
@@ -59,10 +67,19 @@ adminRoutes.get('/users', async (c) => {
   })
 
   return c.json({
-    users: users.map((u) => ({
-      ...serializeUser(u),
-      photosCount: (u.photos || []).length,
-    })),
+    users: users.map((u) => {
+      const full = serializeUser(u)
+      const photos = u.photos || []
+      // Slim payload: no photo blobs in admin directory
+      const { photos: _photos, avatar: _avatar, ...rest } = full
+      return {
+        ...rest,
+        photos: [] as string[],
+        avatar: '',
+        photosCount: photos.length,
+        photosBytes: estimatePhotosBytes(photos),
+      }
+    }),
   })
 })
 

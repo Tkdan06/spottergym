@@ -10,6 +10,7 @@ import type {
   AppNotification,
   UserProfile,
 } from '../types'
+import type { AdminAnalytics } from './adminAnalytics'
 import type { LikesMap } from './likes'
 
 const TOKEN_KEY = 'spotter.api.token'
@@ -239,10 +240,20 @@ export async function apiUnblockUser(userId: string) {
   return data.blockedUserIds
 }
 
+export type AdminUserRow = AppUser & {
+  photosCount?: number
+  photosBytes?: number
+}
+
 export async function apiAdminFetchUsers(q?: string) {
   const sp = q?.trim() ? `?q=${encodeURIComponent(q.trim())}` : ''
-  const data = await request<{ users: AppUser[] }>(`/admin/users${sp}`)
+  const data = await request<{ users: AdminUserRow[] }>(`/admin/users${sp}`)
   return data.users
+}
+
+export async function apiAdminFetchAnalytics() {
+  const data = await request<{ analytics: AdminAnalytics }>('/admin/analytics')
+  return data.analytics
 }
 
 export async function apiAdminFetchBlockedEmails() {
@@ -295,16 +306,23 @@ export async function apiPatchTicketStatus(
 }
 
 export async function apiFetchLikes() {
-  const data = await request<{ likes: LikesMap }>('/likes')
-  return data.likes
+  const data = await request<{ likes: LikesMap; actors?: UserProfile[] }>('/likes')
+  return {
+    likes: data.likes,
+    actors: Array.isArray(data.actors) ? data.actors : [],
+  }
 }
 
 export async function apiToggleLike(userId: string) {
-  const data = await request<{ liked: boolean; likes: LikesMap }>(
+  const data = await request<{ liked: boolean; likes: LikesMap; actors?: UserProfile[] }>(
     `/likes/${encodeURIComponent(userId)}/toggle`,
     { method: 'POST' },
   )
-  return data
+  return {
+    liked: data.liked,
+    likes: data.likes,
+    actors: Array.isArray(data.actors) ? data.actors : [],
+  }
 }
 
 export async function apiFetchNotifications() {

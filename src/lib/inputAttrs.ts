@@ -27,13 +27,33 @@ export const searchFieldProps = {
 /** Сообщение в чат / обращение — текст, без менеджера паролей */
 export const messageFieldProps = {
   name: 'spotter-message',
-  autoComplete: 'spotter-message',
+  autoComplete: 'off',
   autoCorrect: 'on' as const,
   autoCapitalize: 'sentences' as const,
   spellCheck: true,
   enterKeyHint: 'send' as const,
   ...noPasswordManager,
 }
+
+/**
+ * Композер чата (textarea): минимум AutoFill контактов/паролей над клавиатурой.
+ * iOS всё равно может показать QuickType — это системная панель, не форма.
+ */
+export const chatComposerProps = {
+  name: 'spotter-chat-composer',
+  autoComplete: 'off',
+  autoCorrect: 'on' as const,
+  autoCapitalize: 'sentences' as const,
+  spellCheck: true,
+  inputMode: 'text' as const,
+  enterKeyHint: 'send' as const,
+  /** Нестандартный токен: Chrome/Safari реже цепляют контакты/адреса */
+  'data-lpignore': 'true',
+  'data-1p-ignore': true,
+  'data-bwignore': true,
+  'data-form-type': 'other',
+  'data-autofill': 'false',
+} as const
 
 /** Био / «о себе» */
 export const bioFieldProps = {
