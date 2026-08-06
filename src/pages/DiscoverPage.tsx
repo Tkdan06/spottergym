@@ -1,11 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Search } from 'lucide-react'
 import { CityCarousel } from '../components/CityCarousel'
+import { ElsewhereGymBanner } from '../components/ElsewhereGymBanner'
 import { GymCard } from '../components/GymCard'
 import { useApp } from '../context/useApp'
 import { GYMS, NETWORKS } from '../data/mock'
 import { apiFetchGyms } from '../lib/apiClient'
 import { isDemoAccount } from '../lib/demoAccount'
+import {
+  buildElsewhereSuggestions,
+  ELSEWHERE_QUERY_MIN,
+  searchElsewhereLocal,
+  type ElsewhereSuggestion,
+} from '../lib/elsewhereGyms'
 import { buildRealGymStatsMap } from '../lib/gymStats'
 import { searchFieldProps } from '../lib/inputAttrs'
 import { isMemberOfGym } from '../lib/userGyms'
@@ -18,6 +25,7 @@ export function DiscoverPage() {
   const [network, setNetwork] = useState<(typeof NETWORKS)[number]>('Все сети')
   const [query, setQuery] = useState('')
   const [remoteGyms, setRemoteGyms] = useState<Gym[] | null>(null)
+  const [elsewhereRemote, setElsewhereRemote] = useState<Gym[] | null>(null)
 
   const demoStats = isDemoAccount(user?.email)
 
@@ -77,6 +85,51 @@ export function DiscoverPage() {
     )
   }, [demoStats, remoteGyms, gyms, user])
 
+  const elsewhereQuery = query.trim()
+  const needElsewhere =
+    gyms.length === 0 && elsewhereQuery.length >= ELSEWHERE_QUERY_MIN
+
+  useEffect(() => {
+    if (!needElsewhere) {
+      setElsewhereRemote(null)
+      return
+    }
+    if (!apiOnline || demoStats) {
+      setElsewhereRemote(null)
+      return
+    }
+    let cancelled = false
+    void apiFetchGyms({
+      q: elsewhereQuery,
+      elsewhere: true,
+      excludeCity: city,
+    })
+      .then((list) => {
+        if (!cancelled) setElsewhereRemote(list)
+      })
+      .catch(() => {
+        if (!cancelled) setElsewhereRemote(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [needElsewhere, apiOnline, demoStats, elsewhereQuery, city])
+
+  const elsewhereSuggestions: ElsewhereSuggestion[] = useMemo(() => {
+    if (!needElsewhere) return []
+    const source =
+      apiOnline && !demoStats && elsewhereRemote
+        ? elsewhereRemote
+        : searchElsewhereLocal(elsewhereQuery, city)
+    return buildElsewhereSuggestions(source)
+  }, [needElsewhere, apiOnline, demoStats, elsewhereRemote, elsewhereQuery, city])
+
+  const switchCityFromSearch = (next: string) => {
+    if (next === city) return
+    setCity(next)
+    setNetwork('Все сети')
+  }
+
   return (
     <main className="page discover-page">
       <header className="page-header discover-header">
@@ -126,6 +179,12 @@ export function DiscoverPage() {
       </div>
 
       <div className="card-list">
+        {elsewhereSuggestions.length ? (
+          <ElsewhereGymBanner
+            suggestions={elsewhereSuggestions}
+            onSwitchCity={switchCityFromSearch}
+          />
+        ) : null}
         {gyms.length ? (
           gyms.map((gym) => (
             <GymCard
@@ -140,8 +199,16 @@ export function DiscoverPage() {
           ))
         ) : (
           <div className="empty-copy" role="status">
-            <p className="empty-copy-title">Пока нет клубов</p>
-            <p className="empty-copy-lead">Смени город или фильтр</p>
+            <p className="empty-copy-title">
+              {elsewhereSuggestions.length
+                ? 'В этом городе такого клуба нет'
+                : 'Пока нет клубов'}
+            </p>
+            <p className="empty-copy-lead">
+              {elsewhereSuggestions.length
+                ? 'Смени город по подсказке выше'
+                : 'Смени город или фильтр'}
+            </p>
           </div>
         )}
       </div>

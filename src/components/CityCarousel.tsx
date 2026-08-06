@@ -68,14 +68,16 @@ export function CityCarousel({
     return () => window.removeEventListener('keydown', onKey)
   }, [allOpen])
 
-  /** Поднимаем шторку над клавиатурой (iOS/Android visualViewport) */
+  /** Поднимаем шторку над клавиатурой; прячем нижнее «Дальше», чтобы не перекрывало список */
   useEffect(() => {
+    const root = document.documentElement
     if (!allOpen) {
-      document.documentElement.style.removeProperty('--city-sheet-kb')
-      document.documentElement.style.removeProperty('--city-sheet-vh')
+      root.removeAttribute('data-city-sheet')
+      root.style.removeProperty('--city-sheet-kb')
+      root.style.removeProperty('--city-sheet-vh')
       return
     }
-    const root = document.documentElement
+    root.setAttribute('data-city-sheet', 'open')
     const sync = () => {
       const vv = window.visualViewport
       if (!vv) {
@@ -98,6 +100,7 @@ export function CityCarousel({
       vv?.removeEventListener('scroll', sync)
       window.removeEventListener('resize', sync)
       window.clearTimeout(t)
+      root.removeAttribute('data-city-sheet')
       root.style.removeProperty('--city-sheet-kb')
       root.style.removeProperty('--city-sheet-vh')
     }

@@ -11,6 +11,39 @@ gymRoutes.get('/', async (c) => {
   const city = c.req.query('city')?.trim().slice(0, 80)
   const network = c.req.query('network')?.trim().slice(0, 80)
   const q = c.req.query('q')?.trim().toLowerCase().slice(0, 80)
+  const elsewhere = c.req.query('elsewhere') === '1'
+  const excludeCity = c.req.query('excludeCity')?.trim().slice(0, 80)
+
+  // Подсказки «клуб в другом городе» — короткий список без тяжёлых счётчиков
+  if (elsewhere) {
+    if (!q || q.length < 3) return c.json({ gyms: [] })
+    const gyms = await prisma.gym.findMany({
+      where: {
+        ...(excludeCity ? { city: { not: excludeCity } } : {}),
+        OR: [
+          { name: { contains: q, mode: 'insensitive' } },
+          { network: { contains: q, mode: 'insensitive' } },
+          { district: { contains: q, mode: 'insensitive' } },
+          { address: { contains: q, mode: 'insensitive' } },
+        ],
+      },
+      orderBy: { name: 'asc' },
+      take: 40,
+    })
+    // Разнообразим города: до 8 клубов, не больше 2 на город
+    const picked: typeof gyms = []
+    const perCity = new Map<string, number>()
+    for (const g of gyms) {
+      const n = perCity.get(g.city) || 0
+      if (n >= 2) continue
+      perCity.set(g.city, n + 1)
+      picked.push(g)
+      if (picked.length >= 8) break
+    }
+    return c.json({
+      gyms: picked.map((g) => serializeGym(g, { membersCount: 0, activeNow: 0 })),
+    })
+  }
 
   const gyms = await prisma.gym.findMany({
     where: {

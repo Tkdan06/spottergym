@@ -178,11 +178,16 @@ export async function apiFetchGyms(params?: {
   city?: string
   network?: string
   q?: string
+  /** Поиск клубов вне excludeCity (пустой локальный результат) */
+  elsewhere?: boolean
+  excludeCity?: string
 }) {
   const sp = new URLSearchParams()
   if (params?.city) sp.set('city', params.city)
   if (params?.network) sp.set('network', params.network)
   if (params?.q) sp.set('q', params.q)
+  if (params?.elsewhere) sp.set('elsewhere', '1')
+  if (params?.excludeCity) sp.set('excludeCity', params.excludeCity)
   const qs = sp.toString()
   const data = await request<{ gyms: Gym[] }>(`/gyms${qs ? `?${qs}` : ''}`)
   return data.gyms

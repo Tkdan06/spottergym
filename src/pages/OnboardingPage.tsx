@@ -2,12 +2,19 @@ import { useEffect, useMemo, useState } from 'react'
 import { Search } from 'lucide-react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { CityCarousel } from '../components/CityCarousel'
+import { ElsewhereGymBanner } from '../components/ElsewhereGymBanner'
 import { GymCard } from '../components/GymCard'
 import { ScheduleEditor, sortVisitSlots } from '../components/ScheduleEditor'
 import { useApp } from '../context/useApp'
 import { EXPERIENCE_LEVELS, GYMS, SPORTS } from '../data/mock'
 import { apiFetchGyms } from '../lib/apiClient'
 import { isDemoAccount } from '../lib/demoAccount'
+import {
+  buildElsewhereSuggestions,
+  ELSEWHERE_QUERY_MIN,
+  searchElsewhereLocal,
+  type ElsewhereSuggestion,
+} from '../lib/elsewhereGyms'
 import { BIO_MAX, BIO_MIN } from '../lib/fieldLimits'
 import { buildRealGymStatsMap } from '../lib/gymStats'
 import { ageFieldProps, bioFieldProps, searchFieldProps } from '../lib/inputAttrs'
@@ -31,9 +38,17 @@ const STEP_LEADS = [
 
 /** Короче список — полное редактирование в настройках */
 const ONBOARDING_SPORTS = SPORTS.filter((s) =>
-  ['Тренажёрный зал', 'Силовые', 'Функционал', 'Кроссфит', 'Бег', 'Йога', 'Групповые тренировки'].includes(
-    s,
-  ),
+  [
+    'Тренажёрный зал',
+    'Силовые',
+    'Функционал',
+    'Кроссфит',
+    'Hyrox',
+    'Бег',
+    'Йога',
+    'Бокс / единоборства',
+    'Групповые тренировки',
+  ].includes(s),
 )
 
 const BIO_PROMPTS = [
@@ -86,6 +101,7 @@ export function OnboardingPage() {
   const [gymQuery, setGymQuery] = useState(draft?.gymQuery || '')
   const [gymNetwork, setGymNetwork] = useState(draft?.gymNetwork || 'Все сети')
   const [remoteGyms, setRemoteGyms] = useState<Gym[] | null>(null)
+  const [elsewhereRemote, setElsewhereRemote] = useState<Gym[] | null>(null)
   const [finishing, setFinishing] = useState(false)
   const [finishError, setFinishError] = useState('')
 
@@ -133,7 +149,8 @@ export function OnboardingPage() {
       return
     }
     let cancelled = false
-    void apiFetchGyms({ city, network: gymNetwork, q: gymQuery || undefined })
+    // Полный каталог города — сети/поиск фильтруем на клиенте, чтобы чипы не схлопывались
+    void apiFetchGyms({ city })
       .then((list) => {
         if (!cancelled) setRemoteGyms(list)
       })
@@ -143,19 +160,22 @@ export function OnboardingPage() {
     return () => {
       cancelled = true
     }
-  }, [apiOnline, demoStats, city, gymNetwork, gymQuery, step])
+  }, [apiOnline, demoStats, city, step])
+
+  const cityCatalog = useMemo(() => {
+    if (remoteGyms) return remoteGyms.filter((g) => g.city === city)
+    return GYMS.filter((g) => g.city === city)
+  }, [city, remoteGyms])
 
   const cityNetworks = useMemo(() => {
-    const source = remoteGyms ?? GYMS.filter((g) => g.city === city)
     const counts = new Map<string, number>()
-    for (const g of source) {
-      if (g.city !== city) continue
+    for (const g of cityCatalog) {
       counts.set(g.network, (counts.get(g.network) || 0) + 1)
     }
     return [...counts.entries()]
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ru'))
       .map(([network, count]) => ({ network, count }))
-  }, [city, remoteGyms])
+  }, [cityCatalog])
 
   const networkRank = useMemo(() => {
     const rank = new Map<string, number>()
@@ -164,33 +184,26 @@ export function OnboardingPage() {
   }, [cityNetworks])
 
   const cityGyms = useMemo(() => {
-    if (remoteGyms) {
-      return [...remoteGyms].sort((a, b) => {
+    const q = gymQuery.toLowerCase().trim()
+    return cityCatalog
+      .filter((g) => {
+        if (gymNetwork !== 'Все сети' && g.network !== gymNetwork) return false
+        if (!q) return true
+        return `${g.name} ${g.network} ${g.address} ${g.district}`.toLowerCase().includes(q)
+      })
+      .sort((a, b) => {
         const ar = networkRank.get(a.network) ?? 999
         const br = networkRank.get(b.network) ?? 999
         if (ar !== br) return ar - br
         return a.name.localeCompare(b.name, 'ru')
       })
-    }
-    const q = gymQuery.toLowerCase().trim()
-    return GYMS.filter((g) => {
-      if (g.city !== city) return false
-      if (gymNetwork !== 'Все сети' && g.network !== gymNetwork) return false
-      if (!q) return true
-      return `${g.name} ${g.network} ${g.address} ${g.district}`.toLowerCase().includes(q)
-    }).sort((a, b) => {
-      const ar = networkRank.get(a.network) ?? 999
-      const br = networkRank.get(b.network) ?? 999
-      if (ar !== br) return ar - br
-      return a.name.localeCompare(b.name, 'ru')
-    })
-  }, [city, gymNetwork, gymQuery, networkRank, remoteGyms])
+  }, [cityCatalog, gymNetwork, gymQuery, networkRank])
 
   const liveStats = useMemo(() => {
     if (!user || demoStats) return {}
     if (remoteGyms) {
       const map: Record<string, { membersCount: number; activeNow: number }> = {}
-      for (const g of remoteGyms) {
+      for (const g of cityGyms) {
         map[g.id] = { membersCount: g.membersCount, activeNow: g.activeNow }
       }
       return map
@@ -200,6 +213,45 @@ export function OnboardingPage() {
       { ...user, gymIds },
     )
   }, [user, demoStats, remoteGyms, cityGyms, gymIds])
+
+  const elsewhereQuery = gymQuery.trim()
+  const needElsewhere =
+    step === 1 && cityGyms.length === 0 && elsewhereQuery.length >= ELSEWHERE_QUERY_MIN
+
+  useEffect(() => {
+    if (!needElsewhere) {
+      setElsewhereRemote(null)
+      return
+    }
+    if (!apiOnline || demoStats) {
+      setElsewhereRemote(null)
+      return
+    }
+    let cancelled = false
+    void apiFetchGyms({
+      q: elsewhereQuery,
+      elsewhere: true,
+      excludeCity: city,
+    })
+      .then((list) => {
+        if (!cancelled) setElsewhereRemote(list)
+      })
+      .catch(() => {
+        if (!cancelled) setElsewhereRemote(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [needElsewhere, apiOnline, demoStats, elsewhereQuery, city])
+
+  const elsewhereSuggestions: ElsewhereSuggestion[] = useMemo(() => {
+    if (!needElsewhere) return []
+    const source =
+      apiOnline && !demoStats && elsewhereRemote
+        ? elsewhereRemote
+        : searchElsewhereLocal(elsewhereQuery, city)
+    return buildElsewhereSuggestions(source)
+  }, [needElsewhere, apiOnline, demoStats, elsewhereRemote, elsewhereQuery, city])
 
   useEffect(() => {
     if (user?.onboardingDone) {
@@ -258,6 +310,14 @@ export function OnboardingPage() {
     setCity(next)
     setGymIds([])
     setGymQuery('')
+    setGymNetwork('Все сети')
+  }
+
+  /** Смена города из поисковой подсказки — запрос оставляем */
+  const switchCityFromSearch = (next: string) => {
+    if (next === city) return
+    setCity(next)
+    setGymIds([])
     setGymNetwork('Все сети')
   }
 
@@ -398,6 +458,12 @@ export function OnboardingPage() {
                 </div>
               ) : null}
               <div className="card-list gym-pick-list">
+                {elsewhereSuggestions.length ? (
+                  <ElsewhereGymBanner
+                    suggestions={elsewhereSuggestions}
+                    onSwitchCity={switchCityFromSearch}
+                  />
+                ) : null}
                 {cityGyms.length ? (
                   cityGyms.map((gym) => (
                     <GymCard
@@ -413,14 +479,18 @@ export function OnboardingPage() {
                 ) : (
                   <div className="empty-copy" role="status">
                     <p className="empty-copy-title">
-                      {gymQuery.trim() || gymNetwork !== 'Все сети'
-                        ? 'Такого клуба пока нет'
-                        : 'Пока нет залов в городе'}
+                      {elsewhereSuggestions.length
+                        ? 'В этом городе такого клуба нет'
+                        : gymQuery.trim() || gymNetwork !== 'Все сети'
+                          ? 'Такого клуба пока нет'
+                          : 'Пока нет залов в городе'}
                     </p>
                     <p className="empty-copy-lead">
-                      {gymQuery.trim() || gymNetwork !== 'Все сети'
-                        ? 'Смени фильтр или пропусти шаг — зал добавишь позже в настройках'
-                        : 'Смени город или пропусти шаг и добавь зал позже'}
+                      {elsewhereSuggestions.length
+                        ? 'Смени город по подсказке выше — или пропусти шаг'
+                        : gymQuery.trim() || gymNetwork !== 'Все сети'
+                          ? 'Смени фильтр или пропусти шаг — зал добавишь позже в настройках'
+                          : 'Смени город или пропусти шаг и добавь зал позже'}
                     </p>
                   </div>
                 )}
@@ -540,11 +610,6 @@ export function OnboardingPage() {
           {step === 3 && (
             <section className="stack">
               <ScheduleEditor value={visitSlots} onChange={setVisitSlots} idPrefix="onboard" />
-              {!visitSlots.length ? (
-                <p className="dim onboarding-field-hint" role="status">
-                  Выбери хотя бы один день — иначе «Дальше» недоступна
-                </p>
-              ) : null}
             </section>
           )}
 
@@ -565,7 +630,7 @@ export function OnboardingPage() {
               >
                 <h3>Анонимный режим</h3>
                 <p className="muted">
-                  Вместо фото будет нейтральная картинка — открыться можно позже в чате
+                  Вместо фото будет нейтральная картинка — открыться можно позже в профиле
                 </p>
               </button>
               <button

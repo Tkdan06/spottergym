@@ -441,7 +441,9 @@ a.btn-danger {
   background: var(--bg-elevated);
   outline: none;
   box-sizing: border-box;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.2s ease;
 }
 
 /* Shared search control — same look on Залы / Чаты / онбординг / настройки */
@@ -458,12 +460,11 @@ a.btn-danger {
   border: 1px solid var(--line);
   background: var(--bg-elevated);
   box-sizing: border-box;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease;
 }
 
 .app-search:focus-within {
   border-color: rgba(200, 245, 66, 0.55);
-  box-shadow: 0 0 0 3px rgba(200, 245, 66, 0.12);
 }
 
 .app-search svg {
@@ -525,7 +526,6 @@ a.btn-danger {
 .input:focus,
 .search-input:focus {
   border-color: rgba(200, 245, 66, 0.55);
-  box-shadow: 0 0 0 3px rgba(200, 245, 66, 0.12);
 }
 
 .filter-row {

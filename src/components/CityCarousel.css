@@ -184,7 +184,7 @@
   left: 0;
   right: 0;
   top: 0;
-  z-index: 80;
+  z-index: 200;
   height: var(--city-sheet-vh, 100dvh);
   max-height: var(--city-sheet-vh, 100dvh);
   display: grid;
@@ -241,7 +241,11 @@
   display: grid;
   gap: 8px;
   padding-right: 2px;
+  /* Последние города не обрезаются у низа шторки */
+  padding-bottom: calc(20px + var(--safe-bottom));
   min-height: 0;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .city-row {
