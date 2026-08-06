@@ -45,6 +45,9 @@
     <link rel="mask-icon" href="/favicon.svg?v=2" color="#C8F542" />
     <link rel="manifest" href="/site.webmanifest" />
 
+    <!-- Welcome hero: same-origin, preload so first paint is not blank -->
+    <link rel="preload" as="image" href="/images/welcome-gym.jpg" fetchpriority="high" />
+
     <!-- Open Graph (Google Discover / social / messengers) -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="SPOTTER" />
