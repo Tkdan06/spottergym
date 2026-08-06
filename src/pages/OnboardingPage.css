@@ -14,52 +14,25 @@
 
 .onboarding-top {
   flex-shrink: 0;
-  padding-bottom: 10px;
-}
-
-.onboarding-back-slot {
-  min-height: 36px;
-  margin-bottom: 4px;
-}
-
-.onboarding-back-top {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  font-weight: 600;
-  min-height: 36px;
-}
-
-.onboarding-back-top.is-placeholder {
-  display: block;
-  width: 1px;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.onboarding-back-top:active {
-  color: var(--text);
+  /* Как page-header: плотная шапка без пустоты сверху */
+  margin-bottom: 14px;
+  padding-bottom: 0;
 }
 
 .onboarding-brand {
-  font-size: 1.25rem;
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+
+.onboarding-top .page-title {
+  margin: 0;
 }
 
 .onboarding-step-lead {
-  margin: 8px 0 0;
+  margin: 6px 0 0;
   font-size: 0.92rem;
   line-height: 1.4;
-}
-
-.onboarding h1 {
-  font-size: 1.55rem;
-  margin: 0;
 }
 
 .onboarding-missing {
@@ -79,7 +52,7 @@
 .stepper {
   display: flex;
   gap: 6px;
-  margin: 12px 0 8px;
+  margin: 10px 0 10px;
 }
 
 .stepper .dot {

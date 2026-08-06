@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { CityCarousel } from '../components/CityCarousel'
 import { GymCard } from '../components/GymCard'
@@ -214,25 +214,15 @@ export function OnboardingPage() {
     <div className="app-shell">
       <main className="page no-nav onboarding">
         <div className="onboarding-top">
-          <div className="onboarding-back-slot">
-            {step > 0 ? (
-              <button type="button" className="onboarding-back-top" onClick={goBack}>
-                <ArrowLeft size={16} aria-hidden />
-                Назад
-              </button>
-            ) : (
-              <span className="onboarding-back-top is-placeholder" aria-hidden />
-            )}
-          </div>
           <p className="brand-mark onboarding-brand">
             SPOT<span>TER</span>
           </p>
-          <div className="stepper">
+          <div className="stepper" aria-hidden>
             {steps.map((label, i) => (
               <span key={label} className={i <= step ? 'dot on' : 'dot'} title={label} />
             ))}
           </div>
-          <h1>{steps[step]}</h1>
+          <h1 className="page-title">{steps[step]}</h1>
           <p className="muted onboarding-step-lead">
             {step === 1 && gymIds.length
               ? `${STEP_LEADS[1]} · выбрано ${gymIds.length}`
