@@ -1,4 +1,5 @@
 import { GYMS } from '../data/mock'
+import { gymMatchesQuery } from './gymSearch'
 import type { Gym } from '../types'
 
 export const ELSEWHERE_QUERY_MIN = 3
@@ -13,14 +14,13 @@ export type ElsewhereSuggestion = {
 
 /** Локальный каталог: клубы вне excludeCity по строке поиска */
 export function searchElsewhereLocal(qRaw: string, excludeCity: string): Gym[] {
-  const q = qRaw.toLowerCase().trim()
+  const q = qRaw.trim()
   if (q.length < ELSEWHERE_QUERY_MIN) return []
   const picked: Gym[] = []
   const perCity = new Map<string, number>()
   for (const g of GYMS) {
     if (g.city === excludeCity) continue
-    const hay = `${g.name} ${g.network} ${g.district} ${g.address}`.toLowerCase()
-    if (!hay.includes(q)) continue
+    if (!gymMatchesQuery(g, q)) continue
     const n = perCity.get(g.city) || 0
     if (n >= 2) continue
     perCity.set(g.city, n + 1)

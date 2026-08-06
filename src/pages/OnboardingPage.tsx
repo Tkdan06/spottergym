@@ -16,6 +16,7 @@ import {
   type ElsewhereSuggestion,
 } from '../lib/elsewhereGyms'
 import { BIO_MAX, BIO_MIN } from '../lib/fieldLimits'
+import { gymMatchesQuery } from '../lib/gymSearch'
 import { buildRealGymStatsMap } from '../lib/gymStats'
 import { ageFieldProps, bioFieldProps, searchFieldProps } from '../lib/inputAttrs'
 import {
@@ -85,9 +86,7 @@ export function OnboardingPage() {
     draft?.experienceLevel ?? user?.experienceLevel ?? null,
   )
   const [sports, setSports] = useState<string[]>(draft?.sports?.length ? draft.sports : user?.sports || [])
-  const [lookingToMeet, setLookingToMeet] = useState(
-    draft?.lookingToMeet ?? user?.lookingToMeet ?? true,
-  )
+  const [lookingToMeet, setLookingToMeet] = useState(true)
   const [privacy, setPrivacy] = useState<PrivacyMode>(draft?.privacy || user?.privacy || 'open')
   const [visitSlots, setVisitSlots] = useState<VisitSlot[]>(() =>
     sortVisitSlots(
@@ -184,12 +183,11 @@ export function OnboardingPage() {
   }, [cityNetworks])
 
   const cityGyms = useMemo(() => {
-    const q = gymQuery.toLowerCase().trim()
+    const q = gymQuery.trim()
     return cityCatalog
       .filter((g) => {
         if (gymNetwork !== 'Все сети' && g.network !== gymNetwork) return false
-        if (!q) return true
-        return `${g.name} ${g.network} ${g.address} ${g.district}`.toLowerCase().includes(q)
+        return gymMatchesQuery(g, q)
       })
       .sort((a, b) => {
         const ar = networkRank.get(a.network) ?? 999

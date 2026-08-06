@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { expireStaleCheckIns } from '../lib/checkInExpiry.js'
 import { prisma } from '../db.js'
+import { expandGymQueryVariants, gymMatchesQuery } from '../lib/gymSearch.js'
 import { listHiddenUserIds } from '../lib/blocks.js'
 import { serializeGym, serializePublicUser } from '../lib/serialize.js'
 import { requireAuth, type AuthedEnv } from '../middleware/auth.js'
@@ -17,23 +18,26 @@ gymRoutes.get('/', async (c) => {
   // Подсказки «клуб в другом городе» — короткий список без тяжёлых счётчиков
   if (elsewhere) {
     if (!q || q.length < 3) return c.json({ gyms: [] })
+    const variants = expandGymQueryVariants(q).slice(0, 12)
+    const fieldOr = variants.flatMap((v) => [
+      { name: { contains: v, mode: 'insensitive' as const } },
+      { network: { contains: v, mode: 'insensitive' as const } },
+      { district: { contains: v, mode: 'insensitive' as const } },
+      { address: { contains: v, mode: 'insensitive' as const } },
+    ])
     const gyms = await prisma.gym.findMany({
       where: {
         ...(excludeCity ? { city: { not: excludeCity } } : {}),
-        OR: [
-          { name: { contains: q, mode: 'insensitive' } },
-          { network: { contains: q, mode: 'insensitive' } },
-          { district: { contains: q, mode: 'insensitive' } },
-          { address: { contains: q, mode: 'insensitive' } },
-        ],
+        OR: fieldOr,
       },
       orderBy: { name: 'asc' },
-      take: 40,
+      take: 80,
     })
+    const matched = gyms.filter((g) => gymMatchesQuery(g, q))
     // Разнообразим города: до 8 клубов, не больше 2 на город
-    const picked: typeof gyms = []
+    const picked: typeof matched = []
     const perCity = new Map<string, number>()
-    for (const g of gyms) {
+    for (const g of matched) {
       const n = perCity.get(g.city) || 0
       if (n >= 2) continue
       perCity.set(g.city, n + 1)
@@ -53,11 +57,7 @@ gymRoutes.get('/', async (c) => {
     orderBy: { name: 'asc' },
   })
 
-  const filtered = q
-    ? gyms.filter((g) =>
-        `${g.name} ${g.network} ${g.district} ${g.address}`.toLowerCase().includes(q),
-      )
-    : gyms
+  const filtered = q ? gyms.filter((g) => gymMatchesQuery(g, q)) : gyms
 
   await expireStaleCheckIns()
   const ids = filtered.map((g) => g.id)

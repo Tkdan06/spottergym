@@ -16,6 +16,7 @@ import {
   getUser,
 } from '../data/mock'
 import { isDemoAccount } from '../lib/demoAccount'
+import { gymMatchesQuery } from '../lib/gymSearch'
 import { buildRealGymStatsMap } from '../lib/gymStats'
 import { BIO_MAX, NAME_MAX, NAME_MIN, USERNAME_MAX, USERNAME_MIN } from '../lib/fieldLimits'
 import {
@@ -67,11 +68,10 @@ export function SettingsPage() {
   const [breakUntil, setBreakUntil] = useState(initialBreak || '')
 
   const cityGyms = useMemo(() => {
-    const q = gymQuery.toLowerCase().trim()
+    const q = gymQuery.trim()
     return GYMS.filter((g) => {
       if (g.city !== city) return false
-      if (!q) return true
-      return `${g.name} ${g.network} ${g.address}`.toLowerCase().includes(q)
+      return gymMatchesQuery(g, q)
     }).sort((a, b) => a.name.localeCompare(b.name, 'ru'))
   }, [city, gymQuery])
 

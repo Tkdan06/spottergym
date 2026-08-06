@@ -13,6 +13,7 @@ import {
   searchElsewhereLocal,
   type ElsewhereSuggestion,
 } from '../lib/elsewhereGyms'
+import { gymMatchesQuery } from '../lib/gymSearch'
 import { buildRealGymStatsMap } from '../lib/gymStats'
 import { searchFieldProps } from '../lib/inputAttrs'
 import { isMemberOfGym } from '../lib/userGyms'
@@ -56,12 +57,11 @@ export function DiscoverPage() {
         return a.name.localeCompare(b.name, 'ru')
       })
     }
-    const q = query.toLowerCase().trim()
+    const q = query.trim()
     return GYMS.filter((g) => {
       if (g.city !== city) return false
       if (network !== 'Все сети' && g.network !== network) return false
-      if (!q) return true
-      return `${g.name} ${g.network} ${g.district} ${g.address}`.toLowerCase().includes(q)
+      return gymMatchesQuery(g, q)
     }).sort((a, b) => {
       const am = isMemberOfGym(user, a.id) ? 0 : 1
       const bm = isMemberOfGym(user, b.id) ? 0 : 1
