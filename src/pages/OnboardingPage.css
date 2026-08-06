@@ -8,8 +8,8 @@
   max-height: 100dvh;
   overflow: hidden;
   box-sizing: border-box;
-  /* Место под fixed-панель — одинаково на всех шагах */
-  padding-bottom: calc(var(--onboarding-actions-h) + var(--safe-bottom));
+  /* Отступ под fixed-панель даём скролл-зоне (.onboarding-body), не странице */
+  padding-bottom: 0;
 }
 
 .onboarding-top {
@@ -99,7 +99,8 @@
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  padding-bottom: 12px;
+  /* Запас под fixed «Назад/Дальше» + safe-area PWA, чтобы низ формы не перекрывался */
+  padding-bottom: calc(var(--onboarding-actions-h) + var(--safe-bottom) + 28px);
 }
 
 /* Шаг «Зал»: список скроллится, поиск / сети всегда на экране */
@@ -107,7 +108,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding-bottom: 0;
+  /* padding остаётся — иначе низ списка уедет под fixed-меню */
 }
 
 .onboarding-gym-step {
@@ -193,6 +194,7 @@
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   padding-right: 2px;
+  padding-bottom: 8px;
   overscroll-behavior: contain;
 }
 

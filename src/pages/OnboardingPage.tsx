@@ -55,7 +55,7 @@ export function OnboardingPage() {
   const [lookingToMeet, setLookingToMeet] = useState(user?.lookingToMeet ?? true)
   const [privacy, setPrivacy] = useState<PrivacyMode>(user?.privacy || 'open')
   const [showOptionalAbout, setShowOptionalAbout] = useState(
-    () => Boolean(user?.isCoach || user?.interests?.length),
+    () => Boolean(user?.interests?.length),
   )
   const [visitSlots, setVisitSlots] = useState<VisitSlot[]>(() =>
     sortVisitSlots(
@@ -439,64 +439,63 @@ export function OnboardingPage() {
 
             <button
               type="button"
+              className="toggle-row"
+              onClick={() => {
+                setIsCoach((v) => {
+                  if (v) setCoachSports([])
+                  return !v
+                })
+              }}
+            >
+              <div>
+                <strong>Я тренер</strong>
+                <p className="muted">Метка в карточке и направления</p>
+              </div>
+              <span className={`toggle ${isCoach ? 'on' : ''}`} />
+            </button>
+            {isCoach ? (
+              <div>
+                <p className="field-label">Чему тренирую *</p>
+                <div className="chip-grid">
+                  {COACH_DIRECTIONS.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      className={`chip ${coachSports.includes(s) ? 'coach' : ''}`}
+                      onClick={() => toggle(coachSports, s, setCoachSports)}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            <button
+              type="button"
               className="btn btn-soft btn-block onboarding-optional-toggle"
               onClick={() => setShowOptionalAbout((v) => !v)}
               aria-expanded={showOptionalAbout}
             >
-              {showOptionalAbout ? 'Скрыть доп. поля' : 'Интересы и «я тренер» — по желанию'}
+              {showOptionalAbout ? 'Скрыть интересы' : 'Интересы — по желанию'}
             </button>
 
             {showOptionalAbout ? (
-              <>
-                <div>
-                  <p className="field-label">Интересы</p>
-                  <div className="chip-grid">
-                    {INTERESTS.map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        className={`chip ${interests.includes(s) ? 'active' : ''}`}
-                        onClick={() => toggle(interests, s, setInterests)}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
+              <div>
+                <p className="field-label">Интересы</p>
+                <div className="chip-grid">
+                  {INTERESTS.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      className={`chip ${interests.includes(s) ? 'active' : ''}`}
+                      onClick={() => toggle(interests, s, setInterests)}
+                    >
+                      {s}
+                    </button>
+                  ))}
                 </div>
-                <button
-                  type="button"
-                  className="toggle-row"
-                  onClick={() => {
-                    setIsCoach((v) => {
-                      if (v) setCoachSports([])
-                      return !v
-                    })
-                  }}
-                >
-                  <div>
-                    <strong>Я тренер</strong>
-                    <p className="muted">Метка в карточке и направления</p>
-                  </div>
-                  <span className={`toggle ${isCoach ? 'on' : ''}`} />
-                </button>
-                {isCoach ? (
-                  <div>
-                    <p className="field-label">Чему тренирую *</p>
-                    <div className="chip-grid">
-                      {COACH_DIRECTIONS.map((s) => (
-                        <button
-                          key={s}
-                          type="button"
-                          className={`chip ${coachSports.includes(s) ? 'coach' : ''}`}
-                          onClick={() => toggle(coachSports, s, setCoachSports)}
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-              </>
+              </div>
             ) : null}
           </section>
         )}
