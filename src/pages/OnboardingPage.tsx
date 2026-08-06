@@ -249,8 +249,10 @@ export function OnboardingPage() {
               setGymQuery('')
               setGymNetwork('Все сети')
             }}
-            variant="compact"
-            label="Город"
+            variant="full"
+            quickLayout="grid"
+            label="Выбранный город"
+            hint="Города по числу клубов — от большего к меньшему"
           />
         )}
 
