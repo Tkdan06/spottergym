@@ -5,6 +5,21 @@
   gap: 14px;
 }
 
+.feedback-lead {
+  margin: 8px 0 0;
+  max-width: 36ch;
+  line-height: 1.4;
+}
+
+.feedback-page .page-header {
+  margin-bottom: 0;
+}
+
+.feedback-page .empty-copy-actions .btn {
+  max-width: 280px;
+  margin-inline: auto;
+}
+
 .feedback-tabs,
 .admin-tabs {
   display: flex;

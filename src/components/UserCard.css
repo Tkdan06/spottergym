@@ -10,8 +10,7 @@
   border: 1px solid var(--line);
   transition: border-color 0.2s ease, transform 0.2s ease;
   animation: fade-up 0.4s ease both;
-  content-visibility: auto;
-  contain-intrinsic-size: auto 120px;
+  /* no content-visibility: me-tab sits at top:-9px and would be paint-clipped */
 }
 
 .user-card:hover {

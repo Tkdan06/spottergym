@@ -141,12 +141,16 @@ export function FeedbackPage() {
         <button type="button" className="back-link" onClick={() => setView('list')}>
           <ArrowLeft size={18} /> Назад
         </button>
-        <h1>Новое обращение</h1>
-        <p className="muted">
-          {category === 'suggestion' && message.startsWith('Заявка на добавление зала')
-            ? 'Заполни название и адрес — добавим клуб в каталог.'
-            : 'Баг, идея или вопрос — ответим в этом же чате обращения.'}
-        </p>
+        <header className="page-header">
+          <div className="page-header-text">
+            <h1 className="page-title">Новое обращение</h1>
+            <p className="muted feedback-lead">
+              {category === 'suggestion' && message.startsWith('Заявка на добавление зала')
+                ? 'Заполни название и адрес — добавим клуб в каталог.'
+                : 'Баг, идея или вопрос — ответим в этом же чате обращения.'}
+            </p>
+          </div>
+        </header>
         <form className="feedback-actions" onSubmit={onCreate}>
           <div className="chip-grid">
             {FEEDBACK_CATEGORIES.map((c) => (
@@ -187,42 +191,56 @@ export function FeedbackPage() {
       <button type="button" className="back-link" onClick={() => navigate('/app/profile')}>
         <ArrowLeft size={18} /> Профиль
       </button>
-      <div className="notifications-title-row">
-        <h1>Обратная связь</h1>
-        <button type="button" className="btn btn-primary" onClick={() => setView('create')}>
-          Написать
-        </button>
-      </div>
+
+      <header className="page-header">
+        <div className="page-header-text">
+          <h1 className="page-title">Обратная связь</h1>
+          <p className="muted feedback-lead">Баг, идея или вопрос — ответим здесь</p>
+        </div>
+      </header>
+
       {user.isAdmin ? (
         <Link to="/app/admin" className="btn btn-soft btn-block">
           Открыть админку
         </Link>
       ) : null}
-      <div className="feedback-ticket-list">
-        {mine.length ? (
-          mine.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              className="feedback-ticket-card"
-              onClick={() => navigate(`/app/feedback/${t.id}`)}
-            >
-              <div className="feedback-ticket-card-top">
-                <strong>{t.subject}</strong>
-                <span className={`feedback-status ${t.status}`}>{statusLabel(t.status)}</span>
-              </div>
-              <span className="dim">{categoryLabel(t.category)}</span>
-              <p className="muted">{t.messages[t.messages.length - 1]?.text}</p>
-              <span className="dim">{formatWhen(t.updatedAt)}</span>
-            </button>
-          ))
-        ) : (
+
+      {mine.length ? (
+        <>
+          <div className="feedback-ticket-list">
+            {mine.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                className="feedback-ticket-card"
+                onClick={() => navigate(`/app/feedback/${t.id}`)}
+              >
+                <div className="feedback-ticket-card-top">
+                  <strong>{t.subject}</strong>
+                  <span className={`feedback-status ${t.status}`}>{statusLabel(t.status)}</span>
+                </div>
+                <span className="dim">{categoryLabel(t.category)}</span>
+                <p className="muted">{t.messages[t.messages.length - 1]?.text}</p>
+                <span className="dim">{formatWhen(t.updatedAt)}</span>
+              </button>
+            ))}
+          </div>
+          <button type="button" className="btn btn-primary btn-block" onClick={() => setView('create')}>
+            Написать
+          </button>
+        </>
+      ) : (
+        <div className="empty-copy-actions">
           <div className="empty-copy" role="status">
             <p className="empty-copy-title">Пока нет обращений</p>
             <p className="empty-copy-lead">Напиши, если что-то не так</p>
           </div>
-        )}
-      </div>
+          <button type="button" className="btn btn-primary btn-block" onClick={() => setView('create')}>
+            Написать
+          </button>
+        </div>
+      )}
+
       {notice ? <p className="feedback-notice">{notice}</p> : null}
     </main>
   )

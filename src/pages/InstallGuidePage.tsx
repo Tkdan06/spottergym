@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { ArrowLeft, Share, Smartphone } from 'lucide-react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import './InstallGuidePage.css'
 
 type SectionId = 'safari' | 'chrome-ios' | 'chrome-android'
@@ -11,23 +11,10 @@ const SECTIONS: { id: SectionId; label: string }[] = [
   { id: 'chrome-android', label: 'Chrome · Android' },
 ]
 
-function detectSection(): SectionId {
-  const nav = window.navigator as Navigator & { standalone?: boolean; userAgent?: string }
-  const ua = nav.userAgent || ''
-  if (/Android/i.test(ua)) return 'chrome-android'
-  // Chrome / Edge / Firefox on iOS — all WebKit; chrome-ios covers the share-sheet path
-  if (/CriOS|EdgiOS|FxiOS|OPiOS/i.test(ua)) return 'chrome-ios'
-  return 'safari'
-}
-
 export function InstallGuidePage() {
   const navigate = useNavigate()
-  const location = useLocation()
-  const backTo =
-    typeof (location.state as { from?: unknown } | null)?.from === 'string'
-      ? String((location.state as { from: string }).from)
-      : ''
-  const [active, setActive] = useState<SectionId>('safari')
+  /** Highlight only after the user taps a jump chip — never auto-pick on entry */
+  const [active, setActive] = useState<SectionId | null>(null)
   const safariRef = useRef<HTMLElement>(null)
   const chromeIosRef = useRef<HTMLElement>(null)
   const chromeAndroidRef = useRef<HTMLElement>(null)
@@ -38,43 +25,23 @@ export function InstallGuidePage() {
     return chromeAndroidRef.current
   }
 
-  useEffect(() => {
-    const next = detectSection()
-    setActive(next)
-    const t = window.setTimeout(() => {
-      const el =
-        next === 'safari'
-          ? safariRef.current
-          : next === 'chrome-ios'
-            ? chromeIosRef.current
-            : chromeAndroidRef.current
-      el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 80)
-    return () => window.clearTimeout(t)
-  }, [])
-
   const scrollTo = (id: SectionId) => {
     setActive(id)
     refFor(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
+  const goBack = () => {
+    // Always pop history — never push /notifications again (that trapped users in install ↔ notifications)
+    if (window.history.length > 1) {
+      navigate(-1)
+      return
+    }
+    navigate('/app/notifications')
+  }
+
   return (
     <main className="page install-guide-page">
-      <button
-        type="button"
-        className="back-link"
-        onClick={() => {
-          if (backTo.startsWith('/')) {
-            navigate(backTo)
-            return
-          }
-          if (window.history.length > 1) {
-            navigate(-1)
-            return
-          }
-          navigate('/app/notifications')
-        }}
-      >
+      <button type="button" className="back-link" onClick={goBack}>
         <ArrowLeft size={18} /> Назад
       </button>
 
@@ -88,7 +55,7 @@ export function InstallGuidePage() {
         </div>
       </header>
 
-      <nav className="install-guide-nav filter-row" aria-label="Браузер">
+      <nav className="install-guide-nav filter-row" aria-label="Быстрый переход к браузеру">
         {SECTIONS.map((s) => (
           <button
             key={s.id}

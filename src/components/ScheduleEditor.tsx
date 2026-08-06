@@ -5,14 +5,6 @@ import './ScheduleEditor.css'
 const DEFAULT_FROM = '19:00'
 const DEFAULT_TO = '21:00'
 
-const TIME_PRESETS = [
-  { from: '07:00', to: '09:00', label: '7–9' },
-  { from: '12:00', to: '14:00', label: '12–14' },
-  { from: '18:00', to: '20:00', label: '18–20' },
-  { from: '19:00', to: '21:00', label: '19–21' },
-  { from: '20:00', to: '22:00', label: '20–22' },
-] as const
-
 export function sortVisitSlots(slots: VisitSlot[]): VisitSlot[] {
   const order = new Map(WEEKDAYS.map((d, i) => [d, i]))
   return [...slots].sort(
@@ -75,45 +67,28 @@ export function ScheduleEditor({ value, onChange, idPrefix = 'sched', dense }: P
               {day}
             </button>
             {on && slot ? (
-              <div className="schedule-day-body">
-                <div className="schedule-presets" role="group" aria-label={`${day}, быстрое время`}>
-                  {TIME_PRESETS.map((p) => {
-                    const active = slot.from === p.from && slot.to === p.to
-                    return (
-                      <button
-                        key={p.label}
-                        type="button"
-                        className={`chip ${active ? 'active' : ''}`}
-                        onClick={() => setDay(day, { day, from: p.from, to: p.to })}
-                      >
-                        {p.label}
-                      </button>
-                    )
-                  })}
-                </div>
-                <div className="schedule-day-times">
-                  <label className="schedule-time-box" htmlFor={fromId}>
-                    <input
-                      id={fromId}
-                      type="time"
-                      value={slot.from}
-                      aria-label={`${day}, с`}
-                      onChange={(e) => setDay(day, { ...slot, from: e.target.value })}
-                    />
-                  </label>
-                  <span className="schedule-day-sep" aria-hidden>
-                    –
-                  </span>
-                  <label className="schedule-time-box" htmlFor={toId}>
-                    <input
-                      id={toId}
-                      type="time"
-                      value={slot.to}
-                      aria-label={`${day}, до`}
-                      onChange={(e) => setDay(day, { ...slot, to: e.target.value })}
-                    />
-                  </label>
-                </div>
+              <div className="schedule-day-times">
+                <label className="schedule-time-box" htmlFor={fromId}>
+                  <input
+                    id={fromId}
+                    type="time"
+                    value={slot.from}
+                    aria-label={`${day}, с`}
+                    onChange={(e) => setDay(day, { ...slot, from: e.target.value })}
+                  />
+                </label>
+                <span className="schedule-day-sep" aria-hidden>
+                  –
+                </span>
+                <label className="schedule-time-box" htmlFor={toId}>
+                  <input
+                    id={toId}
+                    type="time"
+                    value={slot.to}
+                    aria-label={`${day}, до`}
+                    onChange={(e) => setDay(day, { ...slot, to: e.target.value })}
+                  />
+                </label>
               </div>
             ) : (
               <button

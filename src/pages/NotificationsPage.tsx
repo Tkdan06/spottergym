@@ -120,7 +120,14 @@ export function NotificationsPage() {
   return (
     <main className="page notifications-page">
       <header className="notifications-top">
-        <button type="button" className="back-link" onClick={() => navigate(-1)}>
+        <button
+          type="button"
+          className="back-link"
+          onClick={() => {
+            if (window.history.length > 1) navigate(-1)
+            else navigate('/app')
+          }}
+        >
           <ArrowLeft size={18} /> Назад
         </button>
         <div className="notifications-title-row">
@@ -192,11 +199,7 @@ export function NotificationsPage() {
               <span className={`toggle ${pushActive ? 'on' : ''}`} />
             </button>
 
-            <Link
-              to="/app/install"
-              state={{ from: '/app/notifications?tab=settings' }}
-              className="push-guide-link"
-            >
+            <Link to="/app/install" className="push-guide-link">
               {!pushState.standalone
                 ? 'Хочешь пуши? Поставь ярлык на экран'
                 : 'Как поставить ярлык на экран'}
