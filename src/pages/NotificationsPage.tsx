@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, Bell, BellOff, Smartphone } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useApp } from '../context/useApp'
 import {
   NOTIF_PREF_LABELS,
@@ -28,8 +28,15 @@ function timeLabel(iso: string) {
   return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
 }
 
+type NotifTab = 'feed' | 'settings'
+
+function parseTab(value: string | null): NotifTab {
+  return value === 'settings' ? 'settings' : 'feed'
+}
+
 export function NotificationsPage() {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const {
     notifications,
     notificationPrefs,
@@ -39,7 +46,18 @@ export function NotificationsPage() {
     markAllNotificationsRead,
     user,
   } = useApp()
-  const [tab, setTab] = useState<'feed' | 'settings'>('feed')
+  const tab = parseTab(searchParams.get('tab'))
+  const setTab = (next: NotifTab) => {
+    setSearchParams(
+      (prev) => {
+        const params = new URLSearchParams(prev)
+        if (next === 'feed') params.delete('tab')
+        else params.set('tab', next)
+        return params
+      },
+      { replace: true },
+    )
+  }
   const [pushBusy, setPushBusy] = useState(false)
   const [pushError, setPushError] = useState('')
   const [pushState, setPushState] = useState({
@@ -174,7 +192,11 @@ export function NotificationsPage() {
               <span className={`toggle ${pushActive ? 'on' : ''}`} />
             </button>
 
-            <Link to="/app/install" className="push-guide-link">
+            <Link
+              to="/app/install"
+              state={{ from: '/app/notifications?tab=settings' }}
+              className="push-guide-link"
+            >
               {!pushState.standalone
                 ? 'Хочешь пуши? Поставь ярлык на экран'
                 : 'Как поставить ярлык на экран'}

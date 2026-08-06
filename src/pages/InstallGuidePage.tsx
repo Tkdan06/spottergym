@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, Share, Smartphone } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import './InstallGuidePage.css'
 
 type SectionId = 'safari' | 'chrome-ios' | 'chrome-android'
@@ -22,6 +22,11 @@ function detectSection(): SectionId {
 
 export function InstallGuidePage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const backTo =
+    typeof (location.state as { from?: unknown } | null)?.from === 'string'
+      ? String((location.state as { from: string }).from)
+      : ''
   const [active, setActive] = useState<SectionId>('safari')
   const safariRef = useRef<HTMLElement>(null)
   const chromeIosRef = useRef<HTMLElement>(null)
@@ -55,7 +60,21 @@ export function InstallGuidePage() {
 
   return (
     <main className="page install-guide-page">
-      <button type="button" className="back-link" onClick={() => navigate(-1)}>
+      <button
+        type="button"
+        className="back-link"
+        onClick={() => {
+          if (backTo.startsWith('/')) {
+            navigate(backTo)
+            return
+          }
+          if (window.history.length > 1) {
+            navigate(-1)
+            return
+          }
+          navigate('/app/notifications')
+        }}
+      >
         <ArrowLeft size={18} /> Назад
       </button>
 

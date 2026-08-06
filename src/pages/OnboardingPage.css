@@ -1,21 +1,79 @@
 .page.onboarding {
+  --onboarding-actions-h: 72px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0;
   height: 100dvh;
   min-height: 100dvh;
   max-height: 100dvh;
   overflow: hidden;
   box-sizing: border-box;
-  padding-bottom: calc(10px + var(--safe-bottom));
+  /* Место под fixed-панель — одинаково на всех шагах */
+  padding-bottom: calc(var(--onboarding-actions-h) + var(--safe-bottom));
 }
 
 .onboarding-top {
   flex-shrink: 0;
+  padding-bottom: 10px;
+}
+
+.onboarding-back-slot {
+  min-height: 36px;
+  margin-bottom: 4px;
+}
+
+.onboarding-back-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  min-height: 36px;
+}
+
+.onboarding-back-top.is-placeholder {
+  display: block;
+  width: 1px;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.onboarding-back-top:active {
+  color: var(--text);
 }
 
 .onboarding-brand {
   font-size: 1.25rem;
+}
+
+.onboarding-step-lead {
+  margin: 8px 0 0;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.onboarding h1 {
+  font-size: 1.55rem;
+  margin: 0;
+}
+
+.onboarding-missing {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.onboarding-bio-prompts {
+  margin: 0 0 10px;
+}
+
+.onboarding-optional-toggle {
+  margin-top: 4px;
 }
 
 .stepper {
@@ -35,24 +93,21 @@
   background: var(--accent);
 }
 
-.onboarding h1 {
-  font-size: 1.55rem;
-  margin: 0;
-}
-
 .onboarding-body {
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 4px;
+  overscroll-behavior: contain;
+  padding-bottom: 12px;
 }
 
-/* Шаг «Зал»: список скроллится, поиск и кнопки всегда на экране */
+/* Шаг «Зал»: список скроллится, поиск / сети всегда на экране */
 .onboarding-body.gym-step {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  padding-bottom: 0;
 }
 
 .onboarding-gym-step {
@@ -60,25 +115,29 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
-.onboarding-gym-step > .muted,
 .onboarding-gym-step > .app-search,
-.onboarding-gym-step > .onboarding-gym-escape {
+.onboarding-gym-step > .onboarding-networks {
   flex-shrink: 0;
 }
 
-.onboarding-gym-escape {
-  display: grid;
-  gap: 10px;
-  padding-top: 4px;
+.onboarding-networks {
+  margin: 0;
+  padding-bottom: 2px;
 }
 
-.onboarding-gym-escape .dim {
-  margin: 0;
-  font-size: 0.84rem;
-  line-height: 1.4;
+.onboarding-networks .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.onboarding-networks .chip-count {
+  font-size: 0.72rem;
+  font-weight: 600;
+  opacity: 0.72;
 }
 
 .field-label {
@@ -137,21 +196,55 @@
   overscroll-behavior: contain;
 }
 
+/*
+  Нижняя панель закреплена к viewport — не участвует в скролле контента
+  и одинакова по высоте/позиции на всех шагах.
+*/
 .onboarding-actions {
-  flex-shrink: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin: 0;
-  padding-top: 10px;
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 30;
+  width: min(100%, var(--app-max));
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  height: calc(var(--onboarding-actions-h) + var(--safe-bottom));
+  padding: 12px 16px calc(12px + var(--safe-bottom));
   border-top: 1px solid var(--line);
   background: var(--bg);
+  box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.28);
+}
+
+/*
+  Dual actions: equal columns (Material / common onboarding).
+  Single primary (step 0): full width.
+*/
+.onboarding-actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+  gap: 12px;
+  height: 48px;
+}
+
+.onboarding-actions-row.is-single {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 900px) {
+  .onboarding-actions {
+    width: min(100%, var(--desktop-max));
+    padding-left: 36px;
+    padding-right: 36px;
+  }
 }
 
 .onboarding-actions .btn {
-  min-width: 120px;
-  min-height: 44px;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  height: 48px;
+  padding: 0 12px;
 }
 
 .onboarding-field-hint {

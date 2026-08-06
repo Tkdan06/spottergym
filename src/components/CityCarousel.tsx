@@ -6,6 +6,11 @@ import './CityCarousel.css'
 
 const PREVIEW_LIMIT = 12
 
+function byGymCountDesc(a: CityMeta, b: CityMeta) {
+  if (b.gymCount !== a.gymCount) return b.gymCount - a.gymCount
+  return a.name.localeCompare(b.name, 'ru')
+}
+
 interface Props {
   value: string
   onChange: (city: string) => void
@@ -33,22 +38,25 @@ export function CityCarousel({
 
   const selected = CITIES_META.find((c) => c.name === value)
 
+  const citiesByGymCount = useMemo(
+    () => [...CITIES_META].sort(byGymCountDesc),
+    [],
+  )
+
   const previewCities = useMemo(() => {
-    const priority = CITIES_META.filter((c) => c.priority)
-    const rest = CITIES_META.filter((c) => !c.priority)
-    const base = [...priority, ...rest].slice(0, PREVIEW_LIMIT)
+    const base = citiesByGymCount.slice(0, PREVIEW_LIMIT)
     if (value && !base.some((c) => c.name === value)) {
       const current = CITIES_META.find((c) => c.name === value)
       if (current) return [current, ...base.slice(0, PREVIEW_LIMIT - 1)]
     }
     return base
-  }, [value])
+  }, [citiesByGymCount, value])
 
   const allCities = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return CITIES_META
-    return CITIES_META.filter((c) => c.name.toLowerCase().includes(q))
-  }, [query])
+    if (!q) return citiesByGymCount
+    return citiesByGymCount.filter((c) => c.name.toLowerCase().includes(q))
+  }, [citiesByGymCount, query])
 
   useEffect(() => {
     if (!allOpen) return
@@ -88,7 +96,7 @@ export function CityCarousel({
         </button>
       ) : null}
 
-      <div className="city-strip" role="listbox" aria-label="Популярные города">
+      <div className="city-strip" role="listbox" aria-label="Города по числу клубов">
         {previewCities.map((city) => (
           <button
             key={city.name}

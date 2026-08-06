@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Search } from 'lucide-react'
+import { ArrowLeft, Search } from 'lucide-react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { CityCarousel } from '../components/CityCarousel'
 import { GymCard } from '../components/GymCard'
@@ -13,7 +13,28 @@ import { ageFieldProps, bioFieldProps, searchFieldProps } from '../lib/inputAttr
 import type { ExperienceLevel, Intent, PrivacyMode, VisitSlot } from '../types'
 import './OnboardingPage.css'
 
-const steps = ['Город', 'Зал', 'О себе', 'Расписание', 'Приватность']
+const steps = ['Город', 'Зал', 'О себе', 'Расписание', 'Приватность'] as const
+
+/** Одна подсказка под заголовком — одинаковый паттерн на всех шагах */
+const STEP_LEADS = [
+  'Выбери город — список от большего числа клубов к меньшему',
+  'Выбери клуб из списка или нажми «Пропустить» и добавь позже',
+  'Быстрые ответы о себе — поля со звёздочкой обязательны',
+  'Когда обычно в зале — для каждого дня можно своё время',
+  'Как тебя видят другие и открыт ли ты к знакомству',
+] as const
+
+const BIO_PROMPTS = [
+  'Ищу компанию для тренировок',
+  'Открыт к знакомствам в зале',
+  'Новичок — буду рад советам',
+  'Силовые, прогресс и дисциплина',
+]
+
+function initialAge(userAge: number | undefined): number | '' {
+  if (typeof userAge === 'number' && userAge >= 18 && userAge <= 80) return userAge
+  return ''
+}
 
 export function OnboardingPage() {
   const { user, completeOnboarding } = useApp()
@@ -21,11 +42,11 @@ export function OnboardingPage() {
   const [step, setStep] = useState(0)
   const [city, setCity] = useState(user?.city || 'Москва')
   const [gymIds, setGymIds] = useState<string[]>(user?.gymIds?.length ? user.gymIds : [])
-  const [age, setAge] = useState<number | ''>(user?.age || 25)
+  const [age, setAge] = useState<number | ''>(() => initialAge(user?.age))
   const [bio, setBio] = useState(user?.bio || '')
-  const [intent, setIntent] = useState<Intent>(user?.intent || 'both')
-  const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>(
-    user?.experienceLevel || 'confident',
+  const [intent, setIntent] = useState<Intent | null>(user?.intent || null)
+  const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel | null>(
+    user?.experienceLevel || null,
   )
   const [interests, setInterests] = useState<string[]>(user?.interests || [])
   const [sports, setSports] = useState<string[]>(user?.sports || [])
@@ -33,6 +54,9 @@ export function OnboardingPage() {
   const [coachSports, setCoachSports] = useState<string[]>(user?.coachSports || [])
   const [lookingToMeet, setLookingToMeet] = useState(user?.lookingToMeet ?? true)
   const [privacy, setPrivacy] = useState<PrivacyMode>(user?.privacy || 'open')
+  const [showOptionalAbout, setShowOptionalAbout] = useState(
+    () => Boolean(user?.isCoach || user?.interests?.length),
+  )
   const [visitSlots, setVisitSlots] = useState<VisitSlot[]>(() =>
     sortVisitSlots(
       user?.visitSlots?.length
@@ -45,15 +69,39 @@ export function OnboardingPage() {
     ),
   )
   const [gymQuery, setGymQuery] = useState('')
+  const [gymNetwork, setGymNetwork] = useState('Все сети')
+
+  const cityNetworks = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const g of GYMS) {
+      if (g.city !== city) continue
+      counts.set(g.network, (counts.get(g.network) || 0) + 1)
+    }
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ru'))
+      .map(([network, count]) => ({ network, count }))
+  }, [city])
+
+  const networkRank = useMemo(() => {
+    const rank = new Map<string, number>()
+    cityNetworks.forEach((row, i) => rank.set(row.network, i))
+    return rank
+  }, [cityNetworks])
 
   const cityGyms = useMemo(() => {
     const q = gymQuery.toLowerCase().trim()
     return GYMS.filter((g) => {
       if (g.city !== city) return false
+      if (gymNetwork !== 'Все сети' && g.network !== gymNetwork) return false
       if (!q) return true
       return `${g.name} ${g.network} ${g.address} ${g.district}`.toLowerCase().includes(q)
-    }).sort((a, b) => a.name.localeCompare(b.name, 'ru'))
-  }, [city, gymQuery])
+    }).sort((a, b) => {
+      const ar = networkRank.get(a.network) ?? 999
+      const br = networkRank.get(b.network) ?? 999
+      if (ar !== br) return ar - br
+      return a.name.localeCompare(b.name, 'ru')
+    })
+  }, [city, gymNetwork, gymQuery, networkRank])
 
   const demoStats = isDemoAccount(user?.email)
   const liveStats = useMemo(() => {
@@ -69,6 +117,20 @@ export function OnboardingPage() {
       navigate('/app', { replace: true })
     }
   }, [user?.onboardingDone, navigate])
+
+  // Не даём document/body скроллить страницу целиком — иначе «уедет» нижняя панель
+  useEffect(() => {
+    const html = document.documentElement
+    const body = document.body
+    const prevHtml = html.style.overflow
+    const prevBody = body.style.overflow
+    html.style.overflow = 'hidden'
+    body.style.overflow = 'hidden'
+    return () => {
+      html.style.overflow = prevHtml
+      body.style.overflow = prevBody
+    }
+  }, [])
 
   if (!user) return <Navigate to="/register" replace />
   if (user.onboardingDone) return null
@@ -88,24 +150,45 @@ export function OnboardingPage() {
     const parsedAge = typeof age === 'number' ? age : Number(age)
     return Number.isFinite(parsedAge) && parsedAge >= 18 && parsedAge <= 80
   })()
+  const intentOk = intent !== null
+  const experienceOk = experienceLevel !== null
+
+  const aboutMissing = (() => {
+    if (step !== 2) return [] as string[]
+    const missing: string[] = []
+    if (!ageOk) missing.push('возраст')
+    if (!intentOk) missing.push('цель')
+    if (!experienceOk) missing.push('уровень')
+    if (!sports.length) missing.push('активность')
+    if (!bioOk) missing.push('о себе')
+    if (isCoach && coachSports.length === 0) missing.push('направления тренера')
+    return missing
+  })()
 
   const canNext = () => {
     if (step === 0) return Boolean(city)
     if (step === 1) return true // зал необязателен — можно пропустить и добавить позже
-    if (step === 2) {
-      if (!ageOk || !bioOk || sports.length === 0) return false
-      if (isCoach && coachSports.length === 0) return false
-      return true
-    }
+    if (step === 2) return aboutMissing.length === 0
     if (step === 3) return visitSlots.length > 0
     return true
   }
 
+  const goBack = () => setStep((s) => Math.max(0, s - 1))
   const goNext = () => setStep((s) => s + 1)
+
+  const applyBioPrompt = (prompt: string) => {
+    setBio((prev) => {
+      const trimmed = prev.trim()
+      if (!trimmed) return prompt
+      if (trimmed.includes(prompt)) return trimmed
+      return `${trimmed.replace(/[.!?]*$/, '')}. ${prompt}`
+    })
+  }
 
   const finish = () => {
     const parsedAge = typeof age === 'number' ? age : Number(age)
     if (!Number.isFinite(parsedAge) || parsedAge < 18 || parsedAge > 80) return
+    if (!intent || !experienceLevel) return
     void completeOnboarding({
       city,
       gymIds,
@@ -131,6 +214,16 @@ export function OnboardingPage() {
     <div className="app-shell">
       <main className="page no-nav onboarding">
         <div className="onboarding-top">
+          <div className="onboarding-back-slot">
+            {step > 0 ? (
+              <button type="button" className="onboarding-back-top" onClick={goBack}>
+                <ArrowLeft size={16} aria-hidden />
+                Назад
+              </button>
+            ) : (
+              <span className="onboarding-back-top is-placeholder" aria-hidden />
+            )}
+          </div>
           <p className="brand-mark onboarding-brand">
             SPOT<span>TER</span>
           </p>
@@ -139,7 +232,12 @@ export function OnboardingPage() {
               <span key={label} className={i <= step ? 'dot on' : 'dot'} title={label} />
             ))}
           </div>
-          {step !== 0 ? <h1>{steps[step]}</h1> : null}
+          <h1>{steps[step]}</h1>
+          <p className="muted onboarding-step-lead">
+            {step === 1 && gymIds.length
+              ? `${STEP_LEADS[1]} · выбрано ${gymIds.length}`
+              : STEP_LEADS[step]}
+          </p>
         </div>
 
         <div className={`onboarding-body ${step === 1 ? 'gym-step' : ''}`}>
@@ -149,18 +247,15 @@ export function OnboardingPage() {
             onChange={(next) => {
               setCity(next)
               setGymQuery('')
+              setGymNetwork('Все сети')
             }}
-            label="Шаг 1 · Город"
-            hint="Листай карусель — сначала крупные города, дальше вся Россия"
+            variant="compact"
+            label="Город"
           />
         )}
 
         {step === 1 && (
           <section className="stack onboarding-gym-step">
-            <p className="muted">
-              Выбери клуб, если он есть в списке
-              {gymIds.length ? ` · выбрано ${gymIds.length}` : ''}
-            </p>
             <label className="app-search">
               <Search size={16} aria-hidden />
               <input
@@ -171,6 +266,28 @@ export function OnboardingPage() {
                 aria-label="Поиск клуба"
               />
             </label>
+            {cityNetworks.length ? (
+              <div className="filter-row onboarding-networks" role="toolbar" aria-label="Сети">
+                <button
+                  type="button"
+                  className={`chip ${gymNetwork === 'Все сети' ? 'active' : ''}`}
+                  onClick={() => setGymNetwork('Все сети')}
+                >
+                  Все сети
+                </button>
+                {cityNetworks.map(({ network, count }) => (
+                  <button
+                    key={network}
+                    type="button"
+                    className={`chip ${gymNetwork === network ? 'active' : ''}`}
+                    onClick={() => setGymNetwork(network)}
+                  >
+                    {network.replace(' Fitness', '').replace('. Fitness', '')}
+                    <span className="chip-count">{count}</span>
+                  </button>
+                ))}
+              </div>
+            ) : null}
             <div className="card-list gym-pick-list">
               {cityGyms.length ? (
                 cityGyms.map((gym) => (
@@ -187,65 +304,52 @@ export function OnboardingPage() {
               ) : (
                 <div className="empty-copy" role="status">
                   <p className="empty-copy-title">
-                    {gymQuery.trim() ? 'Такого клуба пока нет' : 'Пока нет залов в городе'}
+                    {gymQuery.trim() || gymNetwork !== 'Все сети'
+                      ? 'Такого клуба пока нет'
+                      : 'Пока нет залов в городе'}
                   </p>
                   <p className="empty-copy-lead">
-                    {gymQuery.trim()
-                      ? 'Можно пропустить — зал добавишь позже в настройках'
+                    {gymQuery.trim() || gymNetwork !== 'Все сети'
+                      ? 'Смени фильтр или пропусти шаг — зал добавишь позже в настройках'
                       : 'Смени город или пропусти шаг и добавь зал позже'}
                   </p>
                 </div>
               )}
-            </div>
-            <div className="onboarding-gym-escape">
-              <p className="dim">
-                Нет своего клуба в списке? Ничего страшного — пропусти шаг и добавь зал позже в
-                настройках профиля.
-              </p>
-              {!gymIds.length ? (
-                <button type="button" className="btn btn-soft btn-block" onClick={goNext}>
-                  Пропустить — добавлю позже
-                </button>
-              ) : null}
             </div>
           </section>
         )}
 
         {step === 2 && (
           <section className="stack onboarding-form">
+            {aboutMissing.length ? (
+              <p className="onboarding-missing dim" role="status">
+                Осталось: {aboutMissing.join(', ')}
+              </p>
+            ) : null}
+
             <div className="field">
-              <label htmlFor="age">Возраст</label>
+              <label htmlFor="age">Возраст *</label>
               <input
                 {...ageFieldProps}
                 id="age"
                 value={age}
+                placeholder="Например, 28"
                 onChange={(e) => {
                   const next = e.target.value
-                  setAge(next === '' ? '' : Number(next))
+                  if (next === '') {
+                    setAge('')
+                    return
+                  }
+                  const n = Number(next)
+                  if (Number.isFinite(n)) setAge(n)
                 }}
                 required
               />
+              <p className="dim onboarding-field-hint">От 18 до 80</p>
             </div>
-            <div className="field">
-              <label htmlFor="bio">О себе</label>
-              <textarea
-                {...bioFieldProps}
-                id="bio"
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="Цели, стиль тренировок, что ищешь в зале"
-                maxLength={BIO_MAX}
-              />
-              <p className="dim onboarding-field-hint">
-                {!bioOk
-                  ? `Минимум ${BIO_MIN} символов${
-                      bio.trim().length ? ` · ещё ${BIO_MIN - bio.trim().length}` : ''
-                    }`
-                  : `${bio.length}/${BIO_MAX}`}
-              </p>
-            </div>
+
             <div>
-              <p className="field-label">Что ищешь</p>
+              <p className="field-label">Что ищешь *</p>
               <div className="chip-grid">
                 {(
                   [
@@ -265,11 +369,9 @@ export function OnboardingPage() {
                 ))}
               </div>
             </div>
+
             <div>
-              <p className="field-label">Уровень</p>
-              <p className="muted" style={{ marginBottom: 8 }}>
-                Как себя чувствуешь в зале — без стажа в годах
-              </p>
+              <p className="field-label">Уровень в зале *</p>
               <div className="chip-grid">
                 {EXPERIENCE_LEVELS.map((level) => (
                   <button
@@ -284,8 +386,12 @@ export function OnboardingPage() {
                 ))}
               </div>
             </div>
+
             <div>
-              <p className="field-label">Виды активности</p>
+              <p className="field-label">
+                Виды активности *{' '}
+                <span className="dim">{sports.length ? `· ${sports.length}` : '· выбери хотя бы один'}</span>
+              </p>
               <div className="chip-grid">
                 {SPORTS.map((s) => (
                   <button
@@ -299,66 +405,102 @@ export function OnboardingPage() {
                 ))}
               </div>
             </div>
-            <button
-              type="button"
-              className="toggle-row"
-              onClick={() => {
-                setIsCoach((v) => {
-                  if (v) setCoachSports([])
-                  return !v
-                })
-              }}
-            >
-              <div>
-                <strong>Я тренер</strong>
-                <p className="muted">Карточка с меткой «Тренер» и направлениями</p>
-              </div>
-              <span className={`toggle ${isCoach ? 'on' : ''}`} />
-            </button>
-            {isCoach ? (
-              <div>
-                <p className="field-label">Чему тренирую</p>
-                <p className="muted" style={{ marginBottom: 8 }}>
-                  Групповые, персональные и другие направления — выбери хотя бы одно.
-                </p>
-                <div className="chip-grid">
-                  {COACH_DIRECTIONS.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      className={`chip ${coachSports.includes(s) ? 'coach' : ''}`}
-                      onClick={() => toggle(coachSports, s, setCoachSports)}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-                {isCoach && !coachSports.length ? (
-                  <p className="dim onboarding-field-hint">Выбери направление — иначе «Дальше» неактивна</p>
-                ) : null}
-              </div>
-            ) : null}
-            <div>
-              <p className="field-label">Интересы</p>
-              <div className="chip-grid">
-                {INTERESTS.map((s) => (
+
+            <div className="field">
+              <label htmlFor="bio">О себе *</label>
+              <div className="filter-row onboarding-bio-prompts" role="group" aria-label="Быстрые фразы">
+                {BIO_PROMPTS.map((prompt) => (
                   <button
-                    key={s}
+                    key={prompt}
                     type="button"
-                    className={`chip ${interests.includes(s) ? 'active' : ''}`}
-                    onClick={() => toggle(interests, s, setInterests)}
+                    className="chip"
+                    onClick={() => applyBioPrompt(prompt)}
                   >
-                    {s}
+                    {prompt}
                   </button>
                 ))}
               </div>
+              <textarea
+                {...bioFieldProps}
+                id="bio"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Можно нажать фразу выше или написать своими словами"
+                maxLength={BIO_MAX}
+              />
+              <p className="dim onboarding-field-hint">
+                {!bioOk
+                  ? `Ещё ${Math.max(0, BIO_MIN - bio.trim().length)} символов до минимума`
+                  : `${bio.length}/${BIO_MAX}`}
+              </p>
             </div>
+
+            <button
+              type="button"
+              className="btn btn-soft btn-block onboarding-optional-toggle"
+              onClick={() => setShowOptionalAbout((v) => !v)}
+              aria-expanded={showOptionalAbout}
+            >
+              {showOptionalAbout ? 'Скрыть доп. поля' : 'Интересы и «я тренер» — по желанию'}
+            </button>
+
+            {showOptionalAbout ? (
+              <>
+                <div>
+                  <p className="field-label">Интересы</p>
+                  <div className="chip-grid">
+                    {INTERESTS.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        className={`chip ${interests.includes(s) ? 'active' : ''}`}
+                        onClick={() => toggle(interests, s, setInterests)}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="toggle-row"
+                  onClick={() => {
+                    setIsCoach((v) => {
+                      if (v) setCoachSports([])
+                      return !v
+                    })
+                  }}
+                >
+                  <div>
+                    <strong>Я тренер</strong>
+                    <p className="muted">Метка в карточке и направления</p>
+                  </div>
+                  <span className={`toggle ${isCoach ? 'on' : ''}`} />
+                </button>
+                {isCoach ? (
+                  <div>
+                    <p className="field-label">Чему тренирую *</p>
+                    <div className="chip-grid">
+                      {COACH_DIRECTIONS.map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          className={`chip ${coachSports.includes(s) ? 'coach' : ''}`}
+                          onClick={() => toggle(coachSports, s, setCoachSports)}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </>
+            ) : null}
           </section>
         )}
 
         {step === 3 && (
           <section className="stack">
-            <p className="muted">Когда обычно в зале — для каждого дня можно своё время.</p>
             <ScheduleEditor value={visitSlots} onChange={setVisitSlots} idPrefix="onboard" />
           </section>
         )}
@@ -397,27 +539,29 @@ export function OnboardingPage() {
         </div>
 
         <div className="onboarding-actions">
-          {step > 0 ? (
-            <button type="button" className="btn btn-ghost" onClick={() => setStep((s) => s - 1)}>
-              Назад
-            </button>
-          ) : (
-            <span />
-          )}
-          {step < steps.length - 1 ? (
-            <button
-              type="button"
-              className="btn btn-primary"
-              disabled={!canNext()}
-              onClick={goNext}
-            >
-              {step === 1 && !gymIds.length ? 'Пропустить' : 'Дальше'}
-            </button>
-          ) : (
-            <button type="button" className="btn btn-primary" onClick={finish}>
-              В зал
-            </button>
-          )}
+          <div
+            className={`onboarding-actions-row${step === 0 ? ' is-single' : ''}`}
+          >
+            {step > 0 ? (
+              <button type="button" className="btn btn-soft" onClick={goBack}>
+                Назад
+              </button>
+            ) : null}
+            {step < steps.length - 1 ? (
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={!canNext()}
+                onClick={goNext}
+              >
+                {step === 1 && !gymIds.length ? 'Пропустить' : 'Дальше'}
+              </button>
+            ) : (
+              <button type="button" className="btn btn-primary" onClick={finish}>
+                В зал
+              </button>
+            )}
+          </div>
         </div>
       </main>
     </div>
