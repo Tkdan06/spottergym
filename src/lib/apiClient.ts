@@ -81,7 +81,14 @@ async function request<T>(
   }
 
   if (!res.ok) {
-    throw new ApiError(data.error || `Ошибка ${res.status}`, res.status)
+    const raw = (data.error || '').trim()
+    const message =
+      !raw || /^not found$/i.test(raw)
+        ? res.status === 404
+          ? 'Сервис временно недоступен или ещё обновляется. Попробуй через минуту.'
+          : `Ошибка ${res.status}`
+        : raw
+    throw new ApiError(message, res.status)
   }
   return data as T
 }

@@ -68,7 +68,7 @@ app.route('/conversations', conversationRoutes)
 app.route('/blocks', blockRoutes)
 app.route('/admin', adminRoutes)
 
-app.notFound((c) => c.json({ error: 'Not found' }, 404))
+app.notFound((c) => c.json({ error: 'Не найдено' }, 404))
 app.onError((err, c) => {
   console.error(err)
   return c.json({ error: 'Внутренняя ошибка сервера' }, 500)

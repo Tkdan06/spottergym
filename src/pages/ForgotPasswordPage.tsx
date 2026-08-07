@@ -18,12 +18,16 @@ export function ForgotPasswordPage() {
       await apiForgotPassword(email.trim())
       setDone(true)
     } catch (err) {
-      setError(
+      const raw =
         err instanceof ApiError
           ? err.message
           : err instanceof Error
             ? err.message
-            : 'Не удалось отправить письмо',
+            : 'Не удалось отправить письмо'
+      setError(
+        /^not found$/i.test(raw)
+          ? 'Сервис восстановления ещё обновляется. Подожди минуту и попробуй снова.'
+          : raw,
       )
     } finally {
       setPending(false)
