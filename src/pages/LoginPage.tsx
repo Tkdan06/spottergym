@@ -1,15 +1,29 @@
-import { type FormEvent, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { type FormEvent, useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/useApp'
 import { EMAIL_MAX, PASSWORD_MAX } from '../lib/fieldLimits'
 import './AuthPages.css'
 
+type LoginLocationState = {
+  resetOk?: boolean
+}
+
 export function LoginPage() {
   const { login } = useApp()
   const navigate = useNavigate()
+  const location = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
+
+  useEffect(() => {
+    const state = location.state as LoginLocationState | null
+    if (state?.resetOk) {
+      setNotice('Пароль обновлён — войди с новым паролем')
+      navigate(location.pathname, { replace: true, state: null })
+    }
+  }, [location.pathname, location.state, navigate])
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -67,7 +81,15 @@ export function LoginPage() {
               placeholder="Пароль"
               aria-label="Пароль"
             />
+            <p className="auth-forgot">
+              <Link to="/forgot-password">Забыли пароль?</Link>
+            </p>
           </div>
+          {notice ? (
+            <p className="feedback-success" role="status">
+              {notice}
+            </p>
+          ) : null}
           {error ? <p className="feedback-error">{error}</p> : null}
           <button className="btn btn-primary btn-block" type="submit">
             Войти

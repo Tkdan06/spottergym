@@ -47,6 +47,15 @@ export const env = {
   vapidPublicKey: String(process.env.VAPID_PUBLIC_KEY || '').trim(),
   vapidPrivateKey: String(process.env.VAPID_PRIVATE_KEY || '').trim(),
   vapidSubject: String(process.env.VAPID_SUBJECT || 'mailto:tkdan@ya.ru').trim(),
+  /** Sendsay account login (for API URL path) */
+  sendsayLogin: String(process.env.SENDSAY_LOGIN || '').trim(),
+  sendsayApiKey: String(process.env.SENDSAY_APIKEY || '').trim(),
+  sendsayFromEmail: String(process.env.SENDSAY_FROM_EMAIL || 'noreply@spottergym.ru').trim(),
+  sendsayFromName: String(process.env.SENDSAY_FROM_NAME || 'Spotter').trim(),
+  /** Public web origin for reset links */
+  appPublicUrl: String(process.env.APP_PUBLIC_URL || 'http://localhost:5173')
+    .trim()
+    .replace(/\/$/, ''),
 }
 
 export function normalizeEmail(email: string) {

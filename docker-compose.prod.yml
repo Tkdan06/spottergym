@@ -36,6 +36,11 @@ services:
       VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
       VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
       VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:tkdan@ya.ru}
+      SENDSAY_LOGIN: ${SENDSAY_LOGIN:-}
+      SENDSAY_APIKEY: ${SENDSAY_APIKEY:-}
+      SENDSAY_FROM_EMAIL: ${SENDSAY_FROM_EMAIL:-noreply@spottergym.ru}
+      SENDSAY_FROM_NAME: ${SENDSAY_FROM_NAME:-Spotter}
+      APP_PUBLIC_URL: ${APP_PUBLIC_URL:-https://spottergym.ru}
     ports:
       - '127.0.0.1:3001:3001'
     depends_on:

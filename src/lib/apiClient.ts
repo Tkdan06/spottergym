@@ -127,6 +127,27 @@ export async function apiLogout() {
   }
 }
 
+export async function apiChangePassword(currentPassword: string, newPassword: string) {
+  await request<{ ok: boolean }>('/auth/change-password', {
+    method: 'POST',
+    json: { currentPassword, newPassword },
+  })
+}
+
+export async function apiForgotPassword(email: string) {
+  return request<{ ok: boolean; message?: string }>('/auth/forgot-password', {
+    method: 'POST',
+    json: { email },
+  })
+}
+
+export async function apiResetPassword(token: string, newPassword: string) {
+  return request<{ ok: boolean; message?: string }>('/auth/reset-password', {
+    method: 'POST',
+    json: { token, newPassword },
+  })
+}
+
 export async function apiMe() {
   const data = await request<{ user: AppUser }>('/auth/me')
   return data.user

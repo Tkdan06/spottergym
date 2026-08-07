@@ -12,11 +12,13 @@ import { AdminUsersPage } from './pages/AdminUsersPage'
 import { ChatPage } from './pages/ChatPage'
 import { DiscoverPage } from './pages/DiscoverPage'
 import { FeedbackPage } from './pages/FeedbackPage'
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { GymDetailPage } from './pages/GymDetailPage'
 import { HomePage } from './pages/HomePage'
 import { InstallGuidePage } from './pages/InstallGuidePage'
 import { LikedPage } from './pages/LikedPage'
 import { LoginPage } from './pages/LoginPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { MessagesPage } from './pages/MessagesPage'
 import { NotificationsPage } from './pages/NotificationsPage'
 import { OnboardingPage } from './pages/OnboardingPage'
@@ -37,9 +39,11 @@ export default function App() {
             <Route path="/" element={<WelcomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           </Route>
 
           <Route path="/terms" element={<TermsPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
 
           <Route element={<ProtectedRoute />}>

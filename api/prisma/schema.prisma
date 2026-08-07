@@ -111,11 +111,27 @@ model User {
   blocksGiven        UserBlock[]         @relation("BlocksGiven")
   blocksReceived     UserBlock[]         @relation("BlocksReceived")
   invitesSent        Invite[]            @relation("InvitesSent")
+  passwordResetTokens PasswordResetToken[]
 
   @@index([email])
   @@index([city])
   @@index([username])
   @@index([deletedAt])
+}
+
+/** One-time password reset links (raw token never stored — only sha256 hash). */
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 /** Web Push endpoints for installed PWA (home screen) */

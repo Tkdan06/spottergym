@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, Plus, Share2, X } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { ChangePasswordForm } from '../components/ChangePasswordForm'
 import { InviteFriendsButton } from '../components/InviteFriendsButton'
 import { SectionTitle } from '../components/SectionTitle'
 import { useApp } from '../context/useApp'
@@ -466,6 +467,8 @@ export function SettingsPage() {
           Уведомления
         </Link>
       </div>
+
+      <ChangePasswordForm />
 
       <section className="safety surface">
         <SectionTitle>Безопасность</SectionTitle>
