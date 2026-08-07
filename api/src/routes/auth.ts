@@ -27,7 +27,8 @@ import {
   consumePasswordResetToken,
   issuePasswordResetForUser,
 } from '../lib/passwordReset.js'
-import { rateLimit } from '../middleware/rateLimit.js'
+import { logPasswordResetEvent } from '../lib/passwordResetAnalytics.js'
+import { clientIp, rateLimit } from '../middleware/rateLimit.js'
 
 const registerSchema = z.object({
   name: z.string().trim().min(NAME_MIN).max(NAME_MAX),
@@ -252,17 +253,39 @@ authRoutes.post(
     }
 
     const email = normalizeEmail(body.data.email)
+    const ip = clientIp(c)
     // Same response whether or not the account exists (anti-enumeration)
     const user = await prisma.user.findUnique({
       where: { email },
       select: { id: true, email: true, name: true, deletedAt: true },
     })
 
-    if (user && !user.deletedAt && !(await isEmailBlocked(email))) {
+    if (!user || user.deletedAt) {
+      await logPasswordResetEvent({ email, ip, status: 'no_account' })
+    } else if (await isEmailBlocked(email)) {
+      await logPasswordResetEvent({
+        email,
+        userId: user.id,
+        ip,
+        status: 'blocked',
+      })
+    } else {
       try {
-        await issuePasswordResetForUser(user)
+        const result = await issuePasswordResetForUser(user)
+        await logPasswordResetEvent({
+          email,
+          userId: user.id,
+          ip,
+          status: result.sent ? 'sent' : 'send_failed',
+        })
       } catch (err) {
         console.warn('[password-reset] send failed', err)
+        await logPasswordResetEvent({
+          email,
+          userId: user.id,
+          ip,
+          status: 'send_failed',
+        })
         // Still return OK to the client — do not leak mail infra status
       }
     }
@@ -294,6 +317,10 @@ authRoutes.post(
     }
 
     const passwordHash = await hashPassword(body.data.newPassword)
+    const user = await prisma.user.findUnique({
+      where: { id: consumed.userId },
+      select: { email: true },
+    })
     await prisma.$transaction([
       prisma.user.update({
         where: { id: consumed.userId },
@@ -308,6 +335,15 @@ authRoutes.post(
         data: { usedAt: new Date() },
       }),
     ])
+
+    if (user?.email) {
+      await logPasswordResetEvent({
+        email: user.email,
+        userId: consumed.userId,
+        ip: clientIp(c),
+        status: 'completed',
+      })
+    }
 
     return c.json({ ok: true, message: 'Пароль обновлён — войди с новым паролем' })
   },

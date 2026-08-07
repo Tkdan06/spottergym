@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   BarChart3,
   HardDrive,
+  KeyRound,
   MapPin,
   MessagesSquare,
   Palette,
@@ -163,6 +164,22 @@ export function AdminHubPage() {
               })}
             </div>
           </section>
+
+          <Link to="/app/admin/password-resets" className="surface admin-inline-metric">
+            <div>
+              <strong>Сброс пароля</strong>
+              <p className="dim">
+                24ч {analytics?.passwordResets?.last24h ?? '—'} · 7д{' '}
+                {analytics?.passwordResets?.last7d ?? '—'} · сменили{' '}
+                {analytics?.passwordResets?.completed7d ?? '—'} · email{' '}
+                {analytics?.passwordResets?.uniqueEmails7d ?? '—'}
+                {analytics?.passwordResets && analytics.passwordResets.noAccount7d > 0
+                  ? ` · нет аккаунта ${analytics.passwordResets.noAccount7d}`
+                  : ''}
+              </p>
+            </div>
+            <span className="muted">Подробнее</span>
+          </Link>
         </>
       ) : (
         <p className="muted">Нет права viewUsers — метрики скрыты. Доступны разделы по твоим правам.</p>
@@ -196,6 +213,13 @@ export function AdminHubPage() {
               <strong>Память</strong>
               <p className="muted">
                 Фото {analytics?.totalPhotos ?? '—'} · {formatBytes(analytics?.photosBytes ?? 0)}
+              </p>
+            </Link>
+            <Link to="/app/admin/password-resets" className="admin-hub-card">
+              <KeyRound size={20} />
+              <strong>Сброс пароля</strong>
+              <p className="muted">
+                7д {analytics?.passwordResets?.last7d ?? '—'} запросов · спам и забывчивость
               </p>
             </Link>
           </>

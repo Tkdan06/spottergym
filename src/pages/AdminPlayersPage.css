@@ -142,6 +142,78 @@
   font-size: 0.9rem;
 }
 
+.admin-inline-metric {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  text-decoration: none;
+  color: inherit;
+  margin-bottom: 4px;
+}
+
+.admin-inline-metric strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.admin-inline-metric .dim {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.admin-reset-row {
+  align-items: flex-start !important;
+}
+
+.admin-reset-row-main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.admin-reset-meta {
+  font-size: 0.78rem;
+  word-break: break-all;
+}
+
+.admin-reset-feed {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.admin-reset-feed > li {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-reset-feed > li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.admin-reset-feed-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+
+.admin-reset-feed-email {
+  margin: 4px 0 0;
+  font-size: 0.88rem;
+}
+
+.admin-reset-feed-ip {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+}
+
 .admin-breakdown {
   display: grid;
   gap: 12px;

@@ -134,6 +134,24 @@ model PasswordResetToken {
   @@index([expiresAt])
 }
 
+/**
+ * Audit log for forgot/reset password (admin spam & forgetfulness analytics).
+ * status: sent | no_account | blocked | send_failed | completed | rate_limited
+ */
+model PasswordResetEvent {
+  id        String   @id @default(cuid())
+  email     String
+  userId    String?
+  ip        String   @default("")
+  status    String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([email])
+  @@index([status])
+  @@index([userId])
+}
+
 /** Web Push endpoints for installed PWA (home screen) */
 model PushSubscription {
   id        String   @id @default(cuid())

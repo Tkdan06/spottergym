@@ -8,7 +8,7 @@ function clientKey(ip: string, route: string) {
   return `${route}:${ip}`
 }
 
-function clientIp(c: { req: { header: (name: string) => string | undefined } }) {
+export function clientIp(c: { req: { header: (name: string) => string | undefined } }) {
   const xf = c.req.header('x-forwarded-for')
   if (xf) return xf.split(',')[0]?.trim() || 'unknown'
   return c.req.header('x-real-ip') || 'unknown'

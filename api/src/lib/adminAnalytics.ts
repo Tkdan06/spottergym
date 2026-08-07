@@ -1,5 +1,9 @@
 import { prisma } from '../db.js'
 import { expireStaleCheckIns } from './checkInExpiry.js'
+import {
+  buildPasswordResetSummary,
+  type PasswordResetSummary,
+} from './passwordResetAnalytics.js'
 
 /** Europe/Moscow is UTC+3 year-round */
 const MSK_OFFSET_MS = 3 * 60 * 60 * 1000
@@ -34,6 +38,7 @@ export type AdminAnalytics = {
   /** Align with FE ticketCounts: incoming = new|open, closed = resolved|closed */
   tickets: { incoming: number; in_progress: number; closed: number; total: number }
   blockedEmails: number
+  passwordResets: PasswordResetSummary
 }
 
 function utf8ByteLength(value: string) {
@@ -238,6 +243,8 @@ export async function buildAdminAnalytics(): Promise<AdminAnalytics> {
   const avgAge =
     avgAgeRaw != null && Number.isFinite(avgAgeRaw) ? Math.round(avgAgeRaw * 10) / 10 : null
 
+  const passwordResets = await buildPasswordResetSummary()
+
   return {
     timezone: 'Europe/Moscow',
     generatedAt: now.toISOString(),
@@ -257,5 +264,6 @@ export async function buildAdminAnalytics(): Promise<AdminAnalytics> {
     avgAge,
     tickets,
     blockedEmails,
+    passwordResets,
   }
 }

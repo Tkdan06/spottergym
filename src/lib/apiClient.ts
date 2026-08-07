@@ -289,6 +289,40 @@ export async function apiAdminFetchAnalytics() {
   return data.analytics
 }
 
+export type PasswordResetAnalytics = {
+  summary: {
+    last24h: number
+    last7d: number
+    last30d: number
+    completed7d: number
+    uniqueEmails7d: number
+    noAccount7d: number
+  }
+  status7d: Record<string, number>
+  topEmails: {
+    email: string
+    count: number
+    lastAt: string | null
+    userId: string | null
+    name: string | null
+    username: string | null
+  }[]
+  recent: {
+    id: string
+    email: string
+    userId: string | null
+    name: string | null
+    username: string | null
+    ip: string
+    status: string
+    createdAt: string
+  }[]
+}
+
+export async function apiAdminFetchPasswordResets() {
+  return request<PasswordResetAnalytics>('/admin/password-resets')
+}
+
 export async function apiAdminFetchBlockedEmails() {
   const data = await request<{ emails: string[] }>('/admin/blocked-emails')
   return data.emails

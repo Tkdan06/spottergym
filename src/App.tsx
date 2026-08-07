@@ -5,6 +5,7 @@ import { AppProvider } from './context/AppContext'
 import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage'
 import { AdminGeographyPage } from './pages/AdminGeographyPage'
 import { AdminHubPage } from './pages/AdminHubPage'
+import { AdminPasswordResetsPage } from './pages/AdminPasswordResetsPage'
 import { AdminPlayersPage } from './pages/AdminPlayersPage'
 import { AdminStoragePage } from './pages/AdminStoragePage'
 import { AdminTicketsPage } from './pages/AdminTicketsPage'
@@ -64,6 +65,7 @@ export default function App() {
               <Route path="admin/analytics" element={<AdminAnalyticsPage />} />
               <Route path="admin/geography" element={<AdminGeographyPage />} />
               <Route path="admin/storage" element={<AdminStoragePage />} />
+              <Route path="admin/password-resets" element={<AdminPasswordResetsPage />} />
               <Route path="admin/tickets" element={<AdminTicketsPage />} />
               <Route path="admin/users" element={<AdminUsersPage />} />
               <Route path="admin/ui" element={<UiKitPage />} />

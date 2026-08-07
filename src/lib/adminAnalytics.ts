@@ -27,6 +27,14 @@ export type AdminAnalytics = {
   avgAge: number | null
   tickets: { incoming: number; in_progress: number; closed: number; total: number }
   blockedEmails: number
+  passwordResets?: {
+    last24h: number
+    last7d: number
+    last30d: number
+    completed7d: number
+    uniqueEmails7d: number
+    noAccount7d: number
+  }
 }
 
 export function formatRetentionRate(rate: number | null) {

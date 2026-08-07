@@ -7,6 +7,7 @@ import {
   type AdminPermissions,
 } from '../lib/admin.js'
 import { buildAdminAnalytics, estimatePhotosBytes } from '../lib/adminAnalytics.js'
+import { buildPasswordResetAnalytics } from '../lib/passwordResetAnalytics.js'
 import { isMasterAdminEmail, normalizeEmail } from '../env.js'
 import { serializeUser } from '../lib/serialize.js'
 import { SoftDeleteError, softDeleteUser } from '../lib/softDeleteUser.js'
@@ -41,6 +42,13 @@ adminRoutes.get('/analytics', async (c) => {
   if (!gate.ok) return c.json({ error: gate.error }, gate.status)
   const analytics = await buildAdminAnalytics()
   return c.json({ analytics })
+})
+
+adminRoutes.get('/password-resets', async (c) => {
+  const gate = await requirePerm(c.get('userId'), 'viewUsers')
+  if (!gate.ok) return c.json({ error: gate.error }, gate.status)
+  const data = await buildPasswordResetAnalytics()
+  return c.json(data)
 })
 
 adminRoutes.get('/users', async (c) => {
