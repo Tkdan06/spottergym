@@ -1,6 +1,6 @@
-import { type FormEvent, useMemo, useState } from 'react'
+import { type FormEvent, useEffect, useMemo, useState } from 'react'
 import { ArrowLeft } from 'lucide-react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { useApp } from '../context/useApp'
 import {
   categoryLabel,
@@ -25,6 +25,7 @@ function formatWhen(iso: string) {
 
 export function AdminTicketsPage() {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const {
     user,
     tickets,
@@ -38,6 +39,17 @@ export function AdminTicketsPage() {
   const [reply, setReply] = useState('')
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+
+  const deepTicketId = searchParams.get('ticket')
+  useEffect(() => {
+    void refreshSupport()
+  }, [refreshSupport])
+  useEffect(() => {
+    if (!deepTicketId) return
+    if (!tickets.some((t) => t.id === deepTicketId)) return
+    setSelectedId(deepTicketId)
+    setSearchParams({}, { replace: true })
+  }, [deepTicketId, tickets, setSearchParams])
 
   const counts = ticketCounts(tickets)
   const list = useMemo(() => filterTicketsByTab(tickets, tab), [tickets, tab])

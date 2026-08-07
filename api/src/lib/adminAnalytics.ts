@@ -3,7 +3,7 @@ import { expireStaleCheckIns } from './checkInExpiry.js'
 
 /** Europe/Moscow is UTC+3 year-round */
 const MSK_OFFSET_MS = 3 * 60 * 60 * 1000
-const RR_DAYS = [1, 3, 7, 14, 30] as const
+const RR_DAYS = [1, 3, 7, 14, 30, 60] as const
 const RR_COHORT_WINDOW = 28
 
 export type AdminRetentionPoint = {

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Search } from 'lucide-react'
+import { ArrowLeft, Search } from 'lucide-react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { CityCarousel } from '../components/CityCarousel'
 import { ElsewhereGymBanner } from '../components/ElsewhereGymBanner'
 import { GymCard } from '../components/GymCard'
@@ -22,6 +23,9 @@ import './DiscoverPage.css'
 
 export function DiscoverPage() {
   const { user, apiOnline } = useApp()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const fromSettings = searchParams.get('from') === 'settings'
   const [city, setCity] = useState(user?.city || 'Москва')
   const [network, setNetwork] = useState<(typeof NETWORKS)[number]>('Все сети')
   const [query, setQuery] = useState('')
@@ -29,6 +33,8 @@ export function DiscoverPage() {
   const [elsewhereRemote, setElsewhereRemote] = useState<Gym[] | null>(null)
 
   const demoStats = isDemoAccount(user?.email)
+  const gymLink = (gymId: string) =>
+    fromSettings ? `/app/gym/${gymId}?from=settings` : `/app/gym/${gymId}`
 
   useEffect(() => {
     if (!apiOnline || demoStats) {
@@ -132,8 +138,24 @@ export function DiscoverPage() {
 
   return (
     <main className="page discover-page">
+      {fromSettings ? (
+        <button
+          type="button"
+          className="back-link"
+          onClick={() => navigate('/app/settings')}
+        >
+          <ArrowLeft size={18} /> Настройки
+        </button>
+      ) : null}
       <header className="page-header discover-header">
-        <h1 className="page-title">Залы</h1>
+        <div className="page-header-text">
+          <h1 className="page-title">{fromSettings ? 'Каталог залов' : 'Залы'}</h1>
+          {fromSettings ? (
+            <p className="muted discover-settings-lead">
+              Выбери город и клуб — добавишь в «Мои залы», потом вернёшься в настройки.
+            </p>
+          ) : null}
+        </div>
       </header>
 
       {/* 1 search → 2 city → 3 network — one job per row (Material / progressive disclosure) */}
@@ -195,7 +217,7 @@ export function DiscoverPage() {
               membersCount={liveStats[gym.id]?.membersCount}
               activeNow={liveStats[gym.id]?.activeNow}
               priority={index < 4}
-              to={`/app/gym/${gym.id}`}
+              to={gymLink(gym.id)}
             />
           ))
         ) : (

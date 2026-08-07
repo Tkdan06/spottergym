@@ -165,7 +165,7 @@
 
 .conversation-row {
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr) auto;
+  grid-template-columns: 56px minmax(0, 1fr);
   gap: 12px;
   align-items: center;
   padding: 12px;
@@ -176,6 +176,16 @@
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.conversation-row.is-unread {
+  border-color: rgba(200, 245, 66, 0.28);
+  background:
+    linear-gradient(135deg, rgba(200, 245, 66, 0.06), transparent 55%),
+    var(--bg-card);
 }
 
 .avatar-wrap {
@@ -183,6 +193,25 @@
   width: 56px;
   height: 56px;
   flex-shrink: 0;
+}
+
+.conversation-row .pin-mark {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 0 0 2px var(--bg-card);
+  pointer-events: none;
+}
+
+.conversation-row.is-pinned {
+  border-color: rgba(200, 245, 66, 0.22);
 }
 
 .avatar-wrap.sm {
@@ -234,12 +263,35 @@
   max-width: 100%;
 }
 
+.conversation-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  min-width: 0;
+}
+
+.conversation-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
 .conversation-body .preview {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-top: 4px;
   font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+.conversation-body .preview.is-unread {
+  color: var(--text);
+  font-weight: 650;
 }
 
 .conversation-body .time {
@@ -248,21 +300,97 @@
   flex-shrink: 0;
 }
 
+.conversation-body .time.is-unread {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.conversation-row.is-unread .conversation-body > .row strong {
+  font-weight: 800;
+}
+
 .messages-page .unread-badge {
+  flex-shrink: 0;
   min-width: 22px;
   height: 22px;
+  padding: 0 6px;
   border-radius: 999px;
   background: var(--accent);
   color: var(--accent-ink);
   font-style: normal;
-  font-size: 0.75rem;
-  font-weight: 700;
-  display: grid;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+  display: inline-grid;
   place-items: center;
-  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.12);
 }
 
 .messages-page .card-list {
   min-width: 0;
   max-width: 100%;
+}
+
+.chat-pin-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  align-items: end;
+}
+
+.chat-pin-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(4, 8, 6, 0.72);
+}
+
+.chat-pin-sheet-panel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 480px);
+  margin: 0 auto;
+  padding: 10px 16px calc(16px + var(--safe-bottom));
+  border-radius: 22px 22px 0 0;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  background: #101614;
+  display: grid;
+  gap: 10px;
+  animation: fade-up 0.22s ease both;
+}
+
+.chat-pin-sheet-grab {
+  width: 36px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line-strong);
+  margin: 2px auto 4px;
+}
+
+.chat-pin-sheet-hint {
+  margin: 0;
+  text-align: center;
+  font-size: 0.88rem;
+}
+
+.chat-pin-sheet-panel .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+@media (min-width: 900px) {
+  .chat-pin-sheet {
+    align-items: center;
+    padding: 24px;
+  }
+
+  .chat-pin-sheet-panel {
+    border-radius: 22px;
+    border-bottom: 1px solid var(--line);
+  }
 }

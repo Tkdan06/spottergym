@@ -1,29 +1,23 @@
-import { type FormEvent, useMemo, useState } from 'react'
-import { ArrowLeft, Search, Share2 } from 'lucide-react'
+import { type FormEvent, useEffect, useMemo, useState } from 'react'
+import { ArrowLeft, Plus, Share2, X } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
-import { CityCarousel } from '../components/CityCarousel'
-import { GymCard } from '../components/GymCard'
 import { InviteFriendsButton } from '../components/InviteFriendsButton'
 import { SectionTitle } from '../components/SectionTitle'
 import { useApp } from '../context/useApp'
 import {
   COACH_DIRECTIONS,
   EXPERIENCE_LEVELS,
-  GYMS,
   INTERESTS,
   SPORTS,
   getGym,
   getUser,
 } from '../data/mock'
 import { isDemoAccount } from '../lib/demoAccount'
-import { gymMatchesQuery } from '../lib/gymSearch'
-import { buildRealGymStatsMap } from '../lib/gymStats'
 import { BIO_MAX, NAME_MAX, NAME_MIN, USERNAME_MAX, USERNAME_MIN } from '../lib/fieldLimits'
 import {
   ageFieldProps,
   bioFieldProps,
   displayNameFieldProps,
-  searchFieldProps,
 } from '../lib/inputAttrs'
 import { isValidUsername, normalizeUsername } from '../lib/username'
 import { activeBreakUntil, todayISO } from '../lib/schedule'
@@ -58,7 +52,6 @@ export function SettingsPage() {
   const [isCoach, setIsCoach] = useState(user?.isCoach ?? false)
   const [coachSports, setCoachSports] = useState<string[]>(user?.coachSports || [])
   const [interests, setInterests] = useState<string[]>(user?.interests || [])
-  const [gymQuery, setGymQuery] = useState('')
   const [visitSlots, setVisitSlots] = useState<VisitSlot[]>(() =>
     sortVisitSlots(user?.visitSlots || []),
   )
@@ -67,28 +60,18 @@ export function SettingsPage() {
   const [breakOn, setBreakOn] = useState(Boolean(initialBreak))
   const [breakUntil, setBreakUntil] = useState(initialBreak || '')
 
-  const cityGyms = useMemo(() => {
-    const q = gymQuery.trim()
-    return GYMS.filter((g) => {
-      if (g.city !== city) return false
-      return gymMatchesQuery(g, q)
-    }).sort((a, b) => a.name.localeCompare(b.name, 'ru'))
-  }, [city, gymQuery])
+  // Sync after catalog join/leave (settings remount or live user update)
+  useEffect(() => {
+    if (!user) return
+    setGymIds(user.gymIds || [])
+    setHomeGymId(user.homeGymId || '')
+    setCity(user.city || 'Москва')
+  }, [user?.gymIds?.join(','), user?.homeGymId, user?.city])
 
   const selectedGyms = useMemo(
     () => gymIds.map((id) => getGym(id)).filter(Boolean),
     [gymIds],
   )
-
-  const demoStats = isDemoAccount(user?.email)
-  const liveStats = useMemo(() => {
-    if (!user || demoStats) return {}
-    // Черновик выбранных залов — чтобы счётчик обновлялся до «Сохранить»
-    return buildRealGymStatsMap(
-      cityGyms.slice(0, 40).map((g) => g.id),
-      { ...user, gymIds },
-    )
-  }, [user, demoStats, cityGyms, gymIds])
 
   const blockedPeople = useMemo(() => {
     if (!isDemoAccount(user?.email)) return []
@@ -242,75 +225,56 @@ export function SettingsPage() {
           </p>
         </div>
 
-        <section className="stack">
+        <section className="stack settings-gyms">
           <div className="section-title">
             <h2>Мои залы · {selectedGyms.length}</h2>
-            <Link to="/app/discover" className="muted">
-              Каталог
-            </Link>
           </div>
           {selectedGyms.length ? (
-            <div className="chip-grid">
-              {selectedGyms.map((gym) =>
-                gym ? (
-                  <button
-                    key={gym.id}
-                    type="button"
-                    className={`chip ${homeGymId === gym.id ? 'active' : ''}`}
-                    onClick={() => setHomeGymId(gym.id)}
-                    title="Сделать основным на главной"
-                  >
-                    {gym.name}
-                  </button>
-                ) : null,
-              )}
-            </div>
+            <>
+              <div className="chip-grid settings-gym-chips">
+                {selectedGyms.map((gym) =>
+                  gym ? (
+                    <div
+                      key={gym.id}
+                      className={`settings-gym-chip ${homeGymId === gym.id ? 'is-home' : ''}`}
+                    >
+                      <button
+                        type="button"
+                        className="settings-gym-chip-main"
+                        onClick={() => setHomeGymId(gym.id)}
+                        title="Открывать на главной"
+                      >
+                        {gym.name}
+                        {homeGymId === gym.id ? (
+                          <span className="settings-gym-home-tag">главный</span>
+                        ) : null}
+                      </button>
+                      <button
+                        type="button"
+                        className="settings-gym-chip-remove"
+                        aria-label={`Убрать ${gym.name}`}
+                        onClick={() => toggleGym(gym.id)}
+                      >
+                        <X size={14} aria-hidden />
+                      </button>
+                    </div>
+                  ) : null,
+                )}
+              </div>
+              <p className="dim settings-panel-hint">
+                Нажми зал — сделать главным на «Мой зал». Крестик — убрать из списка.
+              </p>
+            </>
           ) : (
             <p className="muted">
-              Зал ещё не выбран — добавь из списка ниже. Нет в каталоге? Напиши в обратную связь.
+              Зал ещё не выбран. Открой каталог — там город и клубы. Нет в каталоге? Напиши в
+              обратную связь.
             </p>
           )}
-          <p className="dim" style={{ fontSize: '0.82rem' }}>
-            Нажми на зал выше, чтобы открывать его на главной. Ниже можно добавить ещё.
-          </p>
+          <Link to="/app/discover?from=settings" className="btn btn-soft btn-block">
+            <Plus size={18} aria-hidden /> Добавить зал в каталоге
+          </Link>
         </section>
-
-        <CityCarousel
-          value={city}
-          onChange={(next) => {
-            setCity(next)
-            setGymQuery('')
-          }}
-          label="Добавить залы из города"
-          hint="Можно состоять сразу в нескольких клубах"
-          afterStrip={
-            <label className="app-search">
-              <Search size={16} aria-hidden />
-              <input
-                {...searchFieldProps}
-                placeholder="Клуб, район или адрес"
-                value={gymQuery}
-                onChange={(e) => setGymQuery(e.target.value)}
-                aria-label="Поиск клуба в городе"
-              />
-            </label>
-          }
-        />
-
-        <div className="card-list settings-gym-list">
-          {cityGyms.slice(0, 40).map((gym, index) => (
-            <GymCard
-              key={gym.id}
-              gym={gym}
-              selected={gymIds.includes(gym.id)}
-              showDemoStats={demoStats}
-              membersCount={liveStats[gym.id]?.membersCount}
-              activeNow={liveStats[gym.id]?.activeNow}
-              priority={index < 4}
-              onSelect={() => toggleGym(gym.id)}
-            />
-          ))}
-        </div>
 
         <div>
           <p className="field-label">Намерение</p>

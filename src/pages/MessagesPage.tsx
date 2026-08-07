@@ -1,59 +1,146 @@
-import { useEffect, useState } from 'react'
-import { Heart, Search, UserRound } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Heart, Pin, PinOff, Search, UserRound } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { PresenceBadge } from '../components/PresenceBadge'
 import { SmartImage } from '../components/SmartImage'
 import { useApp, useOtherParticipant } from '../context/useApp'
 import { displayName, formatGymLabel, getContactGym, getGym } from '../data/mock'
 import { profileImage, profileImageFallback } from '../lib/avatar'
-import { otherParticipantId } from '../lib/conversations'
+import { formatDialogTime } from '../lib/formatDialogTime'
 import { searchFieldProps } from '../lib/inputAttrs'
 import { getCheckedInGymId } from '../lib/presence'
 import { formatUsername } from '../lib/username'
 import type { Conversation, UserProfile } from '../types'
 import './MessagesPage.css'
 
-function ConversationRow({ conversation }: { conversation: Conversation }) {
-  const { user } = useApp()
+const LONG_PRESS_MS = 480
+
+function sortConversations(list: Conversation[]) {
+  return [...list].sort((a, b) => {
+    const ap = a.pinned && a.pinnedAt ? +new Date(a.pinnedAt) : 0
+    const bp = b.pinned && b.pinnedAt ? +new Date(b.pinnedAt) : 0
+    if (ap !== bp) {
+      if (ap && bp) return bp - ap
+      if (ap) return -1
+      if (bp) return 1
+    }
+    return +new Date(b.updatedAt) - +new Date(a.updatedAt)
+  })
+}
+
+function ConversationRow({
+  conversation,
+  onLongPress,
+}: {
+  conversation: Conversation
+  onLongPress: (c: Conversation) => void
+}) {
+  const { user, isBlocked } = useApp()
   const other = useOtherParticipant(conversation)
   const deleted = Boolean(other?.isDeleted) || !other
   const name = other ? displayName(other) : 'Удалённый пользователь'
   const gym = other && !other.isDeleted ? getContactGym(other, user?.gymIds || []) : undefined
   const gymLabel = formatGymLabel(gym)
-  const time = new Date(conversation.updatedAt).toLocaleTimeString('ru-RU', {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  const time = formatDialogTime(conversation.updatedAt)
+  const unread = Math.max(0, Number(conversation.unreadCount) || 0)
+  const incoming = conversation.requestStatus === 'incoming'
+  const hasUnread = unread > 0 || incoming
+  const pinned = Boolean(conversation.pinned)
+  const blocked = Boolean(other && isBlocked(other.id))
+  const badgeLabel = unread > 0 ? (unread > 99 ? '99+' : String(unread)) : '!'
+  const longTimer = useRef<number | null>(null)
+  const longFired = useRef(false)
+
+  const clearLong = () => {
+    if (longTimer.current != null) {
+      window.clearTimeout(longTimer.current)
+      longTimer.current = null
+    }
+  }
+
+  const startLong = () => {
+    clearLong()
+    longFired.current = false
+    longTimer.current = window.setTimeout(() => {
+      longFired.current = true
+      longTimer.current = null
+      if (navigator.vibrate) navigator.vibrate(12)
+      onLongPress(conversation)
+    }, LONG_PRESS_MS)
+  }
 
   return (
-    <Link to={`/app/messages/${conversation.id}`} className="conversation-row">
+    <Link
+      to={`/app/messages/${conversation.id}`}
+      className={`conversation-row${hasUnread ? ' is-unread' : ''}${pinned ? ' is-pinned' : ''}`}
+      aria-label={
+        [
+          pinned ? 'Закреплён' : '',
+          name,
+          hasUnread ? (unread > 0 ? `${unread} непрочитанных` : 'новый запрос') : '',
+        ]
+          .filter(Boolean)
+          .join(', ')
+      }
+      onPointerDown={startLong}
+      onPointerUp={clearLong}
+      onPointerCancel={clearLong}
+      onPointerLeave={clearLong}
+      onContextMenu={(e) => {
+        e.preventDefault()
+        onLongPress(conversation)
+      }}
+      onClick={(e) => {
+        if (longFired.current) {
+          e.preventDefault()
+          longFired.current = false
+        }
+      }}
+    >
       <div className="avatar-wrap">
         <SmartImage
           src={other ? profileImage(other) : '/images/deleted-user.svg'}
           fallbackSrc={other ? profileImageFallback(other) : '/images/deleted-user.svg'}
-          alt={name}
+          alt=""
           size="avatar"
         />
+        {pinned ? (
+          <span className="pin-mark" aria-hidden title="Закреплён">
+            <Pin size={11} />
+          </span>
+        ) : null}
       </div>
       <div className="conversation-body">
         <div className="row">
           <strong className={deleted ? 'dim' : undefined}>{name}</strong>
-          <span className="dim time">{time}</span>
+          <time
+            className={`time${hasUnread ? ' is-unread' : ' dim'}`}
+            dateTime={conversation.updatedAt}
+          >
+            {time}
+          </time>
         </div>
         <div className="contact-meta">
           {other && !other.isDeleted ? <PresenceBadge active={other.isActive} compact /> : null}
           {gymLabel ? <span className="gym-line">{gymLabel}</span> : null}
         </div>
-        <p className="muted preview">{conversation.lastMessage}</p>
-        {conversation.requestStatus !== 'accepted' ? (
-          <span className="chip small">Запрос</span>
-        ) : null}
+        <div className="conversation-preview-row">
+          <p className={`preview${hasUnread ? ' is-unread' : ' muted'}`}>
+            {conversation.lastMessage || (incoming ? 'Запрос на переписку' : 'Нет сообщений')}
+          </p>
+          {hasUnread ? (
+            <span className="unread-badge" aria-hidden>
+              {badgeLabel}
+            </span>
+          ) : null}
+        </div>
+        <div className="conversation-flags">
+          {blocked ? <span className="chip small">Заблокирован</span> : null}
+          {conversation.requestStatus !== 'accepted' ? (
+            <span className="chip small">Запрос</span>
+          ) : null}
+        </div>
       </div>
-      {(conversation.unreadCount > 0 || conversation.requestStatus === 'incoming') ? (
-        <i className="unread-badge">
-          {conversation.unreadCount > 0 ? conversation.unreadCount : '!'}
-        </i>
-      ) : null}
     </Link>
   )
 }
@@ -121,16 +208,18 @@ export function MessagesPage() {
   const {
     conversations,
     user,
-    blockedUserIds,
     searchUsers,
     apiOnline,
     refreshChats,
+    togglePinConversation,
   } = useApp()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [searching, setSearching] = useState(false)
   const [searchError, setSearchError] = useState('')
   const [results, setResults] = useState<UserProfile[]>([])
+  const [sheetConv, setSheetConv] = useState<Conversation | null>(null)
+  const [pinBusy, setPinBusy] = useState(false)
 
   useEffect(() => {
     if (!apiOnline) return
@@ -140,6 +229,20 @@ export function MessagesPage() {
     }, 5000)
     return () => window.clearInterval(id)
   }, [apiOnline, refreshChats])
+
+  useEffect(() => {
+    if (!sheetConv) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSheetConv(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = prev
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [sheetConv])
 
   useEffect(() => {
     const q = query.trim().replace(/^@+/, '')
@@ -172,13 +275,8 @@ export function MessagesPage() {
     }
   }, [query, searchUsers])
 
-  const sorted = [...conversations]
-    .filter((c) => {
-      if (!blockedUserIds.length) return true
-      const otherId = otherParticipantId(c, user?.id)
-      return otherId ? !blockedUserIds.includes(otherId) : true
-    })
-    .sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt))
+  // Telegram: blocked chats stay in the list (history + unblock from the thread)
+  const sorted = sortConversations(conversations)
 
   const myGym = user ? getGym(getCheckedInGymId(user)) : undefined
   const shortGym = myGym
@@ -188,6 +286,17 @@ export function MessagesPage() {
         .replace(/^World Class\s+/i, '')
         .trim()
     : ''
+
+  const onTogglePin = async () => {
+    if (!sheetConv || pinBusy) return
+    setPinBusy(true)
+    try {
+      await togglePinConversation(sheetConv.id, !sheetConv.pinned)
+      setSheetConv(null)
+    } finally {
+      setPinBusy(false)
+    }
+  }
 
   return (
     <main className="page messages-page">
@@ -239,7 +348,9 @@ export function MessagesPage() {
 
       <div className="card-list">
         {sorted.length ? (
-          sorted.map((c) => <ConversationRow key={c.id} conversation={c} />)
+          sorted.map((c) => (
+            <ConversationRow key={c.id} conversation={c} onLongPress={setSheetConv} />
+          ))
         ) : (
           <div className="empty-copy" role="status">
             <p className="empty-copy-title">Пока нет диалогов</p>
@@ -247,6 +358,51 @@ export function MessagesPage() {
           </div>
         )}
       </div>
+
+      {sheetConv ? (
+        <div className="chat-pin-sheet" role="dialog" aria-modal="true" aria-label="Действия с чатом">
+          <button
+            type="button"
+            className="chat-pin-sheet-backdrop"
+            aria-label="Закрыть"
+            onClick={() => setSheetConv(null)}
+          />
+          <div className="chat-pin-sheet-panel">
+            <div className="chat-pin-sheet-grab" aria-hidden />
+            <p className="muted chat-pin-sheet-hint">Удерживай чат, чтобы закрепить сверху</p>
+            <button
+              type="button"
+              className="btn btn-primary btn-block"
+              disabled={pinBusy}
+              onClick={() => void onTogglePin()}
+            >
+              {sheetConv.pinned ? (
+                <>
+                  <PinOff size={18} aria-hidden /> Открепить
+                </>
+              ) : (
+                <>
+                  <Pin size={18} aria-hidden /> Закрепить сверху
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost btn-block"
+              onClick={() => {
+                const id = sheetConv.id
+                setSheetConv(null)
+                navigate(`/app/messages/${id}`)
+              }}
+            >
+              Открыть чат
+            </button>
+            <button type="button" className="btn btn-soft btn-block" onClick={() => setSheetConv(null)}>
+              Отмена
+            </button>
+          </div>
+        </div>
+      ) : null}
     </main>
   )
 }

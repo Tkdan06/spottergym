@@ -435,3 +435,11 @@ export async function apiMarkConversationRead(conversationId: string) {
     method: 'POST',
   })
 }
+
+export async function apiPinConversation(conversationId: string, pinned?: boolean) {
+  const data = await request<{ conversation: ApiConversation }>(
+    `/conversations/${encodeURIComponent(conversationId)}/pin`,
+    { method: 'POST', json: pinned === undefined ? {} : { pinned } },
+  )
+  return data.conversation
+}

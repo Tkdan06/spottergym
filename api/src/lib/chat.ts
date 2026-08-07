@@ -27,6 +27,10 @@ export function unreadFor(conv: Conversation, userId: string) {
   return conv.userLowId === userId ? conv.unreadLow : conv.unreadHigh
 }
 
+export function pinnedAtFor(conv: Conversation, userId: string): Date | null {
+  return conv.userLowId === userId ? conv.pinnedLowAt : conv.pinnedHighAt
+}
+
 export function requestStatusFor(conv: Conversation, userId: string) {
   if (conv.status === 'accepted') return 'accepted' as const
   return conv.initiatedById === userId ? ('pending' as const) : ('incoming' as const)
@@ -38,6 +42,7 @@ export function serializeConversation(
   other?: Parameters<typeof serializePublicUser>[0] | null,
 ) {
   const otherId = otherUserId(conv, viewerId)
+  const pinnedAt = pinnedAtFor(conv, viewerId)
   return {
     id: conv.id,
     participantIds: [viewerId, otherId] as [string, string],
@@ -45,6 +50,8 @@ export function serializeConversation(
     updatedAt: conv.lastMessageAt.toISOString(),
     unreadCount: unreadFor(conv, viewerId),
     requestStatus: requestStatusFor(conv, viewerId),
+    pinned: Boolean(pinnedAt),
+    pinnedAt: pinnedAt ? pinnedAt.toISOString() : null,
     other: other ? serializePublicUser(other) : undefined,
   }
 }

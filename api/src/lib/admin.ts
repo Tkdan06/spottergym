@@ -1,5 +1,6 @@
 import type { User } from '@prisma/client'
-import { isMasterAdminEmail } from '../env.js'
+import { prisma } from '../db.js'
+import { env, isMasterAdminEmail } from '../env.js'
 
 export type AdminPermissions = {
   tickets: boolean
@@ -68,4 +69,29 @@ export function resolveAdminFlags(
     canGrantAdmin: adminPermissions.manageAdmins,
     adminPermissions,
   }
+}
+
+/** Admins with tickets permission (incl. master), optionally excluding the actor. */
+export async function listTicketAdminIds(excludeUserId?: string): Promise<string[]> {
+  const candidates = await prisma.user.findMany({
+    where: {
+      deletedAt: null,
+      OR: [{ isAdmin: true }, { email: env.masterAdminEmail }],
+    },
+    select: {
+      id: true,
+      email: true,
+      isAdmin: true,
+      isMasterAdmin: true,
+      adminPermissions: true,
+    },
+  })
+
+  return candidates
+    .filter((u) => {
+      if (excludeUserId && u.id === excludeUserId) return false
+      const flags = resolveAdminFlags(u)
+      return flags.isAdmin && flags.adminPermissions.tickets
+    })
+    .map((u) => u.id)
 }

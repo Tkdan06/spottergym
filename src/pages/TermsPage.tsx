@@ -8,6 +8,11 @@ import {
 import { markTermsAccepted } from '../lib/termsAcceptance'
 import './TermsPage.css'
 
+/** Titles in content include "1. …"; TOC keeps that number, headings show the name only. */
+function sectionHeading(title: string) {
+  return title.replace(/^\d+\.\s*/, '')
+}
+
 export function TermsPage() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
@@ -41,19 +46,19 @@ export function TermsPage() {
 
         <nav className="terms-toc" aria-label="Содержание">
           <p className="terms-toc-title">Содержание</p>
-          <ol>
+          <ul>
             {TERMS_SECTIONS.map((section) => (
               <li key={section.id}>
                 <a href={`#${section.id}`}>{section.title}</a>
               </li>
             ))}
-          </ol>
+          </ul>
         </nav>
 
         <article className="terms-body">
           {TERMS_SECTIONS.map((section) => (
             <section key={section.id} id={section.id} className="terms-section">
-              <h2>{section.title}</h2>
+              <h2>{sectionHeading(section.title)}</h2>
               {section.paragraphs.map((text) => (
                 <p key={text.slice(0, 48)}>{text}</p>
               ))}

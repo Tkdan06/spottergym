@@ -39,11 +39,15 @@ export async function createNotification(input: {
   href?: string
   gymId?: string
   actorId?: string
+  /** Skip user prefs (e.g. critical admin ticket alerts). */
+  force?: boolean
 }) {
-  const prefs = await getOrCreatePrefs(input.userId)
-  if (!prefs.enabled) return null
-  const key = TYPE_PREF[input.type]
-  if (key && !prefs[key]) return null
+  if (!input.force) {
+    const prefs = await getOrCreatePrefs(input.userId)
+    if (!prefs.enabled) return null
+    const key = TYPE_PREF[input.type]
+    if (key && !prefs[key]) return null
+  }
 
   const row = await prisma.notification.create({
     data: {
@@ -57,7 +61,7 @@ export async function createNotification(input: {
     },
   })
 
-  if (shouldSendPush(input.type)) {
+  if (shouldSendPush(input.type) || input.force) {
     void sendPushToUser(input.userId, {
       title: row.title,
       body: row.body,

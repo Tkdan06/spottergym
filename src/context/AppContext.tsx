@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react'
 import { flushSync } from 'react-dom'
-import { DEMO_GYM_ID, USERS, normalizeExperienceLevel } from '../data/mock'
+import { DEMO_GYM_ID, USERS, getGym, normalizeExperienceLevel } from '../data/mock'
 import {
   loadAccountBags,
   loadAccountProfile,
@@ -57,6 +57,7 @@ import {
   apiMarkAllNotificationsRead,
   apiMarkConversationRead,
   apiMarkNotificationRead,
+  apiPinConversation,
   apiMe,
   apiPatchMe,
   apiPatchNotificationPrefs,
@@ -230,6 +231,8 @@ export interface AppContextValue {
   startConversation: (userId: string, text: string) => string | Promise<string>
   acceptRequest: (conversationId: string) => void | Promise<void>
   markRead: (conversationId: string) => void | Promise<void>
+  /** Закрепить / открепить чат (только для текущего пользователя) */
+  togglePinConversation: (conversationId: string, pinned?: boolean) => void | Promise<void>
   /** Подтянуть список чатов / тред с сервера */
   refreshChats: () => Promise<void>
   refreshThread: (conversationId: string) => Promise<void>
@@ -1401,12 +1404,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     (gymId: string, makeHome = false) => {
       setUser((prev) => {
         if (!prev) return prev
-        const next = withGymMembership(prev, gymId, true, { makeHome })
+        const gym = getGym(gymId)
+        const next = {
+          ...withGymMembership(prev, gymId, true, { makeHome }),
+          // Catalog → settings: city follows the club you just added
+          ...(gym?.city ? { city: gym.city } : {}),
+        }
         saveJson(STORAGE_USER, next)
         saveAccountProfile(next)
         if (apiOnlineRef.current && !isDemoAccount(next.email)) {
           void apiJoinGym(gymId, makeHome)
-            .then((me) => applyServerUser(me as AppUser))
+            .then(async (me) => {
+              applyServerUser(me as AppUser)
+              if (gym?.city && gym.city !== me.city) {
+                const patched = await apiPatchMe({ city: gym.city })
+                applyServerUser(patched as AppUser)
+              }
+            })
             .catch(() => undefined)
         }
         return next
@@ -1615,6 +1629,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const trimmed = clampText(text.trim(), CHAT_MESSAGE_MAX)
       if (!trimmed) return
 
+      const convForBlock = conversations.find((c) => c.id === conversationId)
+      const peerId = convForBlock ? otherParticipantId(convForBlock, user?.id) : ''
+      if (peerId && blockedUserIds.includes(peerId)) {
+        throw new Error('Нельзя писать: пользователь в блоке')
+      }
+
       if (apiOnlineRef.current && getStoredToken()) {
         const optimistic: Message = {
           id: `local-${Date.now()}`,
@@ -1680,6 +1700,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     },
     [
       conversations,
+      blockedUserIds,
       simulateDelivery,
       user?.id,
       persistMsgs,
@@ -2191,17 +2212,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     async (userId: string) => {
       if (!user) throw new Error('Нужен вход')
       if (userId === user.id || userId === 'me') throw new Error('Нельзя заблокировать себя')
+      // Telegram-style: keep chat + history; only mark blocked (hide from hall / no new DMs)
       if (apiOnlineRef.current && getStoredToken()) {
         const next = await apiBlockUser(userId)
         setBlockedUserIds(next)
       } else {
         setBlockedUserIds(blockUserId(user.id, userId))
       }
-      setConversations((prev) => {
-        const filtered = prev.filter((c) => otherParticipantId(c, user.id) !== userId)
-        persistChats(filtered)
-        return filtered
-      })
     },
     [user],
   )
@@ -2265,6 +2282,46 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [persistChats, persistMsgs, refreshChats, refreshThread],
   )
 
+  const togglePinConversation = useCallback(
+    async (conversationId: string, pinned?: boolean) => {
+      const applyLocal = (nextPinned: boolean) => {
+        setConversations((prev) => {
+          const next = prev.map((c) =>
+            c.id === conversationId
+              ? {
+                  ...c,
+                  pinned: nextPinned,
+                  pinnedAt: nextPinned ? new Date().toISOString() : null,
+                }
+              : c,
+          )
+          persistChats(next)
+          return next
+        })
+      }
+
+      if (apiOnlineRef.current && getStoredToken()) {
+        try {
+          const updated = await apiPinConversation(conversationId, pinned)
+          setConversations((prev) => {
+            const next = prev.map((c) => (c.id === conversationId ? { ...c, ...updated } : c))
+            persistChats(next)
+            return next
+          })
+          if (updated.other) rememberUser(updated.other)
+          return
+        } catch {
+          /* local fallback */
+        }
+      }
+
+      const current = conversations.find((c) => c.id === conversationId)
+      const nextPinned = typeof pinned === 'boolean' ? pinned : !current?.pinned
+      applyLocal(nextPinned)
+    },
+    [conversations, persistChats, rememberUser],
+  )
+
   const directory = useMemo(() => {
     const map = new Map<string, UserProfile>()
     if (user && isDemoAccount(user.email)) {
@@ -2308,6 +2365,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       startConversation,
       acceptRequest,
       markRead,
+      togglePinConversation,
       refreshChats,
       refreshThread,
       updateNotificationPrefs,
@@ -2388,6 +2446,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       startConversation,
       acceptRequest,
       markRead,
+      togglePinConversation,
       refreshChats,
       refreshThread,
       updateNotificationPrefs,

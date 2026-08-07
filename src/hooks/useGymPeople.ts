@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { peopleForGymPage, peopleInGym } from '../data/mock'
 import { apiFetchGymPeople } from '../lib/apiClient'
 import { isDemoAccount } from '../lib/demoAccount'
@@ -29,27 +29,44 @@ function withSelfOnFloor(list: UserProfile[], user: AppUser, gymId: string) {
 /**
  * When API is online — members from Postgres.
  * Demo / offline — local mock helpers (dev only for offline).
+ *
+ * Check-in / check-out does NOT refetch: own status is merged from `user` locally
+ * so the floor list does not blink. Full reload runs on gym / account change.
  */
 export function useGymPeople({ gymId, user, apiOnline, mode, blockedUserIds }: Options) {
   const [remote, setRemote] = useState<UserProfile[] | null>(null)
   const [loading, setLoading] = useState(false)
   const [showLoader, setShowLoader] = useState(false)
+  /** Last successful fetch key — avoid wiping list on presence-only updates */
+  const loadedKeyRef = useRef<string | null>(null)
 
   const demo = Boolean(user && isDemoAccount(user.email))
   const useApi = Boolean(gymId && user && apiOnline && !demo)
+  const gymIdsKey = user?.gymIds?.join(',') ?? ''
+  const fetchKey = useApi && user ? `${user.id}:${gymId}:${gymIdsKey}` : ''
 
   useEffect(() => {
-    if (!useApi || !gymId) {
+    if (!useApi || !gymId || !fetchKey) {
       setRemote(null)
       setLoading(false)
+      loadedKeyRef.current = null
       return
     }
+
+    // Same hall already loaded — skip. Check-in only updates `user` in useMemo.
+    if (loadedKeyRef.current === fetchKey) return
+
     let cancelled = false
+    // Invalidate cache while in flight so A→B→A still refetches A
+    loadedKeyRef.current = null
     setRemote(null)
     setLoading(true)
+
     void apiFetchGymPeople(gymId)
       .then((people) => {
-        if (!cancelled) setRemote(people)
+        if (cancelled) return
+        setRemote(people)
+        loadedKeyRef.current = fetchKey
       })
       .catch(() => {
         if (!cancelled) setRemote([])
@@ -57,17 +74,11 @@ export function useGymPeople({ gymId, user, apiOnline, mode, blockedUserIds }: O
       .finally(() => {
         if (!cancelled) setLoading(false)
       })
+
     return () => {
       cancelled = true
     }
-  }, [
-    useApi,
-    gymId,
-    user?.id,
-    user?.isActive,
-    user?.checkedInGymId,
-    user?.gymIds?.join(','),
-  ])
+  }, [useApi, gymId, fetchKey])
 
   // Лоадер только если ответ дольше 1 с — быстрые ответы без мигания
   useEffect(() => {

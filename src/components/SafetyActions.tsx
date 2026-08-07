@@ -78,7 +78,7 @@ export function SafetyActions({ person }: Props) {
         await blockUser(person.id)
         setDone('blocked')
         setMode('idle')
-        navigate('/app', { replace: true })
+        // Stay on profile (Telegram): chat history remains; Unblock is in ⋯ menu
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Не удалось заблокировать')
       }
@@ -143,6 +143,9 @@ export function SafetyActions({ person }: Props) {
         </div>
       ) : null}
 
+      {done === 'blocked' ? (
+        <p className="dim safety-note">Заблокирован. Чат и история сохранены.</p>
+      ) : null}
       {done === 'reported' ? (
         <p className="dim safety-note">Жалоба отправлена в поддержку</p>
       ) : null}
@@ -160,7 +163,8 @@ export function SafetyActions({ person }: Props) {
             <div className="safety-sheet-grab" aria-hidden />
             <h3>Заблокировать {name}?</h3>
             <p className="muted">
-              Профиль исчезнет из зала и из чатов. Разблокировать можно в настройках.
+              Пропадёт из зала и не сможет писать тебе. История чата сохранится — открой чат и
+              нажми «Разблокировать», когда захочешь.
             </p>
             <button type="button" className="btn btn-danger btn-block" onClick={onBlock}>
               Заблокировать

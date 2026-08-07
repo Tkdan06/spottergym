@@ -41,6 +41,8 @@ export function ChatPage() {
     apiOnline,
     refreshThread,
     refreshChats,
+    isBlocked,
+    unblockUser,
   } = useApp()
   const navigate = useNavigate()
   const location = useLocation()
@@ -135,11 +137,12 @@ export function ChatPage() {
 
   const name = displayName(other)
   const deleted = Boolean(other.isDeleted)
+  const blocked = !deleted && isBlocked(other.id)
   const contactGym = deleted ? undefined : getContactGym(other, user.gymIds)
   const gymLabel = formatGymLabel(contactGym)
   const waiting = conversation.requestStatus === 'pending'
   const incoming = conversation.requestStatus === 'incoming'
-  const locked = waiting || deleted
+  const locked = waiting || deleted || blocked
 
   const dismissKeyboard = () => {
     inputRef.current?.blur()
@@ -188,6 +191,18 @@ export function ChatPage() {
       await refreshChats()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось принять')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const onUnblock = async () => {
+    setBusy(true)
+    setError('')
+    try {
+      await unblockUser(other.id)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось разблокировать')
     } finally {
       setBusy(false)
     }
@@ -304,6 +319,20 @@ export function ChatPage() {
         </div>
       ) : null}
 
+      {blocked ? (
+        <div className="request-banner blocked-banner">
+          <p>Вы заблокировали этого пользователя. История сообщений сохранена.</p>
+          <button
+            type="button"
+            className="btn btn-soft"
+            disabled={busy}
+            onClick={() => void onUnblock()}
+          >
+            Разблокировать
+          </button>
+        </div>
+      ) : null}
+
       {error ? (
         <p className="feedback-error" style={{ margin: '0 0 8px' }}>
           {error}
@@ -345,40 +374,46 @@ export function ChatPage() {
         <div ref={bottomRef} className="chat-thread-end" />
       </div>
 
-      <form
-        className="chat-input"
-        autoComplete="off"
-        onSubmit={(e) => void onSubmit(e)}
-      >
-        <textarea
-          {...chatComposerProps}
-          ref={inputRef}
-          rows={1}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={onComposerKeyDown}
-          placeholder={
-            waiting
-              ? 'Дождитесь принятия запроса'
-              : incoming
-                ? 'Сначала прими запрос'
-                : 'Сообщение'
-          }
-          disabled={locked || incoming || busy}
-          maxLength={CHAT_MESSAGE_MAX}
-          aria-label="Сообщение"
-        />
-        <button
-          className="btn btn-primary"
-          type="submit"
-          disabled={locked || incoming || busy || !text.trim()}
-          // Keep focus in composer after tap (Telegram: stay ready to type)
-          onPointerDown={(e) => e.preventDefault()}
-          aria-label="Отправить"
+      {blocked ? (
+        <div className="chat-input chat-input-blocked" role="status">
+          <p className="muted">Нельзя писать, пока пользователь в блоке</p>
+        </div>
+      ) : (
+        <form
+          className="chat-input"
+          autoComplete="off"
+          onSubmit={(e) => void onSubmit(e)}
         >
-          →
-        </button>
-      </form>
+          <textarea
+            {...chatComposerProps}
+            ref={inputRef}
+            rows={1}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={onComposerKeyDown}
+            placeholder={
+              waiting
+                ? 'Дождитесь принятия запроса'
+                : incoming
+                  ? 'Сначала прими запрос'
+                  : 'Сообщение'
+            }
+            disabled={locked || incoming || busy}
+            maxLength={CHAT_MESSAGE_MAX}
+            aria-label="Сообщение"
+          />
+          <button
+            className="btn btn-primary"
+            type="submit"
+            disabled={locked || incoming || busy || !text.trim()}
+            // Keep focus in composer after tap (Telegram: stay ready to type)
+            onPointerDown={(e) => e.preventDefault()}
+            aria-label="Отправить"
+          >
+            →
+          </button>
+        </form>
+      )}
     </main>
   )
 }

@@ -180,6 +180,10 @@
   line-height: 1.45;
 }
 
+.profile-invite-hint {
+  margin: -4px 0 12px;
+}
+
 .slots {
   display: grid;
   gap: 8px;

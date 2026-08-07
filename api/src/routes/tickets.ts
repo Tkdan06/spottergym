@@ -8,6 +8,7 @@ import {
   FEEDBACK_MESSAGE_MIN,
 } from '../lib/fieldLimits.js'
 import { createNotification } from '../lib/notify.js'
+import { notifyTicketAdmins } from '../lib/ticketNotify.js'
 import { serializeTicket } from '../lib/tickets.js'
 import { loadAuthedUser, requireAuth, type AuthedEnv } from '../middleware/auth.js'
 
@@ -76,6 +77,15 @@ ticketRoutes.post('/', async (c) => {
     title: 'Обращение создано',
     body: 'Поддержка ответит в разделе «Обратная связь»',
     href: `/app/feedback/${ticket.id}`,
+  })
+
+  await notifyTicketAdmins({
+    ticketId: ticket.id,
+    actorId: me.id,
+    actorName: me.name,
+    kind: 'created',
+    category: body.data.category,
+    preview: text,
   })
 
   return c.json({ ticket: serializeTicket(ticket) }, 201)
@@ -213,6 +223,15 @@ ticketRoutes.post('/:id/reply', async (c) => {
       body: text.slice(0, 120),
       href: `/app/feedback/${ticket.id}`,
       actorId: me.id,
+    })
+  } else if (!asAdmin) {
+    await notifyTicketAdmins({
+      ticketId: ticket.id,
+      actorId: me.id,
+      actorName: me.name,
+      kind: 'reply',
+      category: ticket.category,
+      preview: text,
     })
   }
 

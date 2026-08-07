@@ -83,13 +83,39 @@
   flex-shrink: 0;
 }
 
+.request-banner.blocked-banner {
+  background: rgba(255, 120, 120, 0.08);
+  border-color: rgba(255, 120, 120, 0.28);
+}
+
+.request-banner.blocked-banner p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.chat-input-blocked {
+  display: grid;
+  place-items: center;
+  min-height: 52px;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.chat-input-blocked .muted {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
 .chat-thread {
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 6px 4px 14px;
+  /* Extra side room so bubble tails are not clipped by overflow-x */
+  padding: 6px 10px 14px;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -106,16 +132,21 @@
 /* —— Bubbles (Telegram-like tails + inline time) —— */
 .bubble {
   --bubble-radius: 16px;
+  --bubble-corner: 5px;
+  --bubble-fill: var(--bg-elevated);
   position: relative;
   max-width: min(82%, 420px);
   padding: 7px 10px 6px 11px;
   border-radius: var(--bubble-radius);
+  /* Same box model for mine/theirs so shapes match (ticks don't change the form) */
+  border: 1px solid transparent;
   animation: fade-up 0.22s ease both;
   isolation: isolate;
 }
 
 .bubble-body {
   position: relative;
+  z-index: 1;
   margin: 0;
   font-size: 0.95rem;
   line-height: 1.35;
@@ -155,19 +186,22 @@
 }
 
 .bubble.mine {
+  --bubble-fill: var(--accent);
   align-self: flex-end;
-  margin-right: 6px;
-  background: var(--accent);
+  margin-right: 7px;
+  background: var(--bubble-fill);
   color: var(--accent-ink);
-  border-bottom-right-radius: 5px;
+  border-bottom-right-radius: var(--bubble-corner);
 }
 
 .bubble.theirs {
+  --bubble-fill: #1a2220;
   align-self: flex-start;
-  margin-left: 6px;
-  background: var(--bg-card);
-  border: 1px solid var(--line);
-  border-bottom-left-radius: 5px;
+  margin-left: 7px;
+  background: var(--bubble-fill);
+  color: var(--text);
+  border-color: var(--line);
+  border-bottom-left-radius: var(--bubble-corner);
 }
 
 .bubble.theirs .bubble-meta {
@@ -180,32 +214,36 @@
   opacity: 0.62;
 }
 
-/* Tail — messenger “spoke” at the bottom corner */
+/* Tail — mirrored messenger “spoke” (fill + edge for bordered incoming) */
 .bubble.mine::after,
-.bubble.theirs::after {
+.bubble.theirs::after,
+.bubble.theirs::before {
   content: '';
   position: absolute;
-  bottom: 0;
-  width: 10px;
-  height: 14px;
+  bottom: -1px;
+  width: 11px;
+  height: 15px;
   pointer-events: none;
   z-index: 0;
 }
 
 .bubble.mine::after {
-  right: -5px;
-  background: var(--accent);
+  right: -6px;
+  bottom: 0;
+  background: var(--bubble-fill);
   clip-path: polygon(0 0, 0 100%, 100% 100%);
-  border-bottom-left-radius: 2px;
+}
+
+.bubble.theirs::before {
+  left: -7px;
+  background: var(--line);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
 }
 
 .bubble.theirs::after {
-  left: -5px;
-  background: var(--bg-card);
+  left: -6px;
+  background: var(--bubble-fill);
   clip-path: polygon(100% 0, 100% 100%, 0 100%);
-  border-bottom-right-radius: 2px;
-  /* draw border along the outer edge */
-  box-shadow: -1px 0 0 var(--line);
 }
 
 /* —— Composer —— */

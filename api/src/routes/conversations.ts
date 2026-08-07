@@ -249,10 +249,14 @@ conversationRoutes.post(
       return c.json({ error: 'Переписка ещё не открыта' }, 403)
     }
 
+    const otherId = otherUserId(conv, userId)
+    if (await areUsersBlocked(userId, otherId)) {
+      return c.json({ error: 'Нельзя писать: пользователь в блоке' }, 403)
+    }
+
     const text = sanitizeChatText(body.data.text, CHAT_MESSAGE_MAX)
     if (!text) return c.json({ error: 'Пустое сообщение' }, 400)
 
-    const otherId = otherUserId(conv, userId)
     const now = new Date()
 
     const [message] = await prisma.$transaction([
@@ -351,4 +355,35 @@ conversationRoutes.post('/:id/read', async (c) => {
   ])
 
   return c.json({ ok: true })
+})
+
+/** Pin / unpin chat for the current user only (Telegram-style) */
+conversationRoutes.post('/:id/pin', async (c) => {
+  const userId = c.get('userId')
+  const conv = await loadConvForUser(c.req.param('id'), userId)
+  if (!conv) return c.json({ error: 'Чат не найден' }, 404)
+
+  const body = z
+    .object({ pinned: z.boolean().optional() })
+    .safeParse(await c.req.json().catch(() => ({})))
+
+  const isLow = conv.userLowId === userId
+  const currentlyPinned = Boolean(isLow ? conv.pinnedLowAt : conv.pinnedHighAt)
+  const nextPinned = body.success && typeof body.data.pinned === 'boolean'
+    ? body.data.pinned
+    : !currentlyPinned
+
+  const updated = await prisma.conversation.update({
+    where: { id: conv.id },
+    data: isLow
+      ? { pinnedLowAt: nextPinned ? new Date() : null }
+      : { pinnedHighAt: nextPinned ? new Date() : null },
+  })
+
+  const other = await prisma.user.findUnique({
+    where: { id: otherUserId(updated, userId) },
+    include: userInclude,
+  })
+
+  return c.json({ conversation: serializeConversation(updated, userId, other) })
 })

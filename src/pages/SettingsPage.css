@@ -3,9 +3,79 @@
   margin: 8px 0 6px;
 }
 
-.settings-gym-list {
-  max-height: min(42vh, 420px);
-  overflow: auto;
+.settings-gyms {
+  gap: 12px;
+}
+
+.settings-gym-chips {
+  align-items: stretch;
+}
+
+.settings-gym-chip {
+  display: inline-flex;
+  align-items: stretch;
+  max-width: 100%;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(232, 240, 234, 0.04);
+  overflow: hidden;
+}
+
+.settings-gym-chip.is-home {
+  border-color: rgba(200, 245, 66, 0.45);
+  background: rgba(200, 245, 66, 0.12);
+}
+
+.settings-gym-chip-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 8px 10px 8px 12px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+}
+
+.settings-gym-home-tag {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-radius: 999px;
+  padding: 2px 7px;
+}
+
+.settings-gym-chip-remove {
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0 10px;
+  border: 0;
+  border-left: 1px solid var(--line);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.settings-gym-chip-remove:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.settings-gyms .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .settings-form {

@@ -8,7 +8,7 @@
     "address": "улица Б. Бикбая, 15",
     "membersCount": 64,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 54.7385,
     "lng": 56.0085
   },
@@ -21,7 +21,7 @@
     "address": "улица Шувалова, 6",
     "membersCount": 109,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 60.0488,
     "lng": 30.4452
   },
@@ -34,7 +34,7 @@
     "address": "проспект Кондратьевский, 64 корпус 6",
     "membersCount": 105,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.9858,
     "lng": 30.3852
   },
@@ -47,7 +47,7 @@
     "address": "улица Марата, 5/21",
     "membersCount": 108,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 59.9312,
     "lng": 30.3548
   },
@@ -60,7 +60,7 @@
     "address": "улица Спортивная, 43",
     "membersCount": 163,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 44.6085,
     "lng": 40.1085
   },
@@ -73,7 +73,7 @@
     "address": "проспект Авиаконструкторов, 54",
     "membersCount": 126,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 60.0128,
     "lng": 30.2485
   },
@@ -86,7 +86,7 @@
     "address": "Красносельское шоссе, 10",
     "membersCount": 120,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 59.8085,
     "lng": 30.0785
   },
@@ -99,7 +99,7 @@
     "address": "улица Оптиков, 4 корпус 2",
     "membersCount": 65,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 59.9888,
     "lng": 30.2285
   },
@@ -112,7 +112,7 @@
     "address": "проспект Космонавтов, 31Б",
     "membersCount": 103,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 47.2685,
     "lng": 39.7185
   },
@@ -125,7 +125,7 @@
     "address": "проспект Ибрагимова, 54",
     "membersCount": 85,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.7985,
     "lng": 49.1055
   },
@@ -138,7 +138,7 @@
     "address": "проспект Тореза, 114 корпус 2",
     "membersCount": 130,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 60.0185,
     "lng": 30.3188
   },
@@ -151,7 +151,7 @@
     "address": "улица Некрасова, 8А",
     "membersCount": 120,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.7485,
     "lng": 38.0185
   },
@@ -164,7 +164,7 @@
     "address": "улица Богдана Хмельницкого, 1/1, ТЦ «Амолл», 4 этаж",
     "membersCount": 152,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.07,
     "lng": 82.95
   },
@@ -177,7 +177,7 @@
     "address": "Багратионовский проезд, 5, ТРЦ «Филион»",
     "membersCount": 132,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.7435,
     "lng": 37.5035
   },
@@ -190,7 +190,7 @@
     "address": "ТРЦ Тандем",
     "membersCount": 135,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.7985,
     "lng": 49.1055
   },
@@ -203,7 +203,7 @@
     "address": "проспект Андропова, 22, БЦ «Нагатинский»",
     "membersCount": 83,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.6775,
     "lng": 37.6638
   },
@@ -216,7 +216,7 @@
     "address": "улица Ставропольская",
     "membersCount": 89,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 45.0425,
     "lng": 39.0085
   },
@@ -229,7 +229,7 @@
     "address": "улица Тюленина, 17/1, ТЦ «Кристалл»",
     "membersCount": 157,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 54.975,
     "lng": 82.88
   },
@@ -242,7 +242,7 @@
     "address": "улица им. Героя Бочарникова, 4 строение Б",
     "membersCount": 97,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 45.0785,
     "lng": 38.9785
   },
@@ -255,7 +255,7 @@
     "address": "улица Бородинская, 137 корпус 2",
     "membersCount": 120,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 45.0685,
     "lng": 39.0025
   },
@@ -268,7 +268,7 @@
     "address": "улица 9 января",
     "membersCount": 133,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.8485,
     "lng": 53.2185
   },
@@ -281,7 +281,7 @@
     "address": "Абакан",
     "membersCount": 157,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 53.7205,
     "lng": 91.4425
   },
@@ -294,7 +294,7 @@
     "address": "Академический район",
     "membersCount": 59,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 56.7885,
     "lng": 60.5285
   },
@@ -307,7 +307,7 @@
     "address": "Академия тенниса",
     "membersCount": 121,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 56.8385,
     "lng": 60.6185
   },
@@ -320,7 +320,7 @@
     "address": "улица Алексеева, 48а",
     "membersCount": 158,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 56.0185,
     "lng": 92.8685
   },
@@ -333,7 +333,7 @@
     "address": "проспект Ленина, 64Б",
     "membersCount": 141,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.1605,
     "lng": 61.4025
   },
@@ -346,7 +346,7 @@
     "address": "Балтийский",
     "membersCount": 155,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 56.8185,
     "lng": 60.5585
   },
@@ -359,7 +359,7 @@
     "address": "улица Профсоюзная, 31к5",
     "membersCount": 154,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.6785,
     "lng": 37.5585
   },
@@ -372,7 +372,7 @@
     "address": "улица Ясная, 2",
     "membersCount": 95,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 56.8085,
     "lng": 60.5785
   },
@@ -385,7 +385,7 @@
     "address": "ТРЦ Галактика",
     "membersCount": 121,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 54.7105,
     "lng": 20.4525
   },
@@ -398,7 +398,7 @@
     "address": "улица Горошникова, 9",
     "membersCount": 173,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 57.9105,
     "lng": 59.9685
   },
@@ -411,7 +411,7 @@
     "address": "Изумрудный бор",
     "membersCount": 167,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.8685,
     "lng": 60.5485
   },
@@ -424,7 +424,7 @@
     "address": "улица Комиссара Габишева, 36",
     "membersCount": 161,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.7885,
     "lng": 49.1225
   },
@@ -437,7 +437,7 @@
     "address": "улица Каменская, 25",
     "membersCount": 138,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.4185,
     "lng": 61.9185
   },
@@ -450,7 +450,7 @@
     "address": "Кировский район",
     "membersCount": 58,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.8485,
     "lng": 60.6485
   },
@@ -463,7 +463,7 @@
     "address": "улица Лодочная, 43",
     "membersCount": 75,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.8485,
     "lng": 37.4585
   },
@@ -476,7 +476,7 @@
     "address": "улица 50 лет Октября, 14",
     "membersCount": 144,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 57.1485,
     "lng": 65.5585
   },
@@ -489,7 +489,7 @@
     "address": "ТЦ Максидом",
     "membersCount": 127,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 56.8285,
     "lng": 60.5985
   },
@@ -502,7 +502,7 @@
     "address": "улица Медведева, 10",
     "membersCount": 86,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 56.8525,
     "lng": 53.2085
   },
@@ -515,7 +515,7 @@
     "address": "5-я просека, 95",
     "membersCount": 131,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 53.2125,
     "lng": 50.1785
   },
@@ -528,7 +528,7 @@
     "address": "улица Академика Королева, 13",
     "membersCount": 55,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.8218,
     "lng": 37.6055
   },
@@ -541,7 +541,7 @@
     "address": "улица Блюхера, 39",
     "membersCount": 67,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 56.8585,
     "lng": 60.6485
   },
@@ -554,7 +554,7 @@
     "address": "улица Сполохи, 4",
     "membersCount": 81,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 68.9585,
     "lng": 33.0825
   },
@@ -567,7 +567,7 @@
     "address": "улица Уютная",
     "membersCount": 91,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.1525,
     "lng": 61.3855
   },
@@ -580,7 +580,7 @@
     "address": "улица Мате Залки, 5",
     "membersCount": 161,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 56.0485,
     "lng": 92.9085
   },
@@ -593,7 +593,7 @@
     "address": "улица Малопрудная, 5/4",
     "membersCount": 125,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 56.8125,
     "lng": 60.5485
   },
@@ -606,7 +606,7 @@
     "address": "улица Тимофея Чаркова, 89",
     "membersCount": 147,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 57.1525,
     "lng": 65.5425
   },
@@ -619,7 +619,7 @@
     "address": "Тополиная аллея",
     "membersCount": 169,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.1425,
     "lng": 61.3685
   },
@@ -632,7 +632,7 @@
     "address": "улица Победы, 14а",
     "membersCount": 89,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 56.8885,
     "lng": 60.6125
   },
@@ -645,7 +645,7 @@
     "address": "улица Вайнера, 10",
     "membersCount": 103,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 56.8355,
     "lng": 60.5985
   },
@@ -658,7 +658,7 @@
     "address": "улица Ясная, 33/2",
     "membersCount": 66,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 56.8055,
     "lng": 60.5755
   },
@@ -671,7 +671,7 @@
     "address": "улица 8 Марта, 128а",
     "membersCount": 61,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.8085,
     "lng": 60.6085
   },
@@ -684,7 +684,7 @@
     "address": "ул. Спортивной Авиации, 3",
     "membersCount": 160,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.7885,
     "lng": 37.5288
   },
@@ -697,7 +697,7 @@
     "address": "Звенигородское шоссе, 11",
     "membersCount": 62,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.7618,
     "lng": 37.5472
   },
@@ -710,7 +710,7 @@
     "address": "Ленинградский проспект, 35, стр. 1, подъезд 1, этаж 3",
     "membersCount": 153,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.7892,
     "lng": 37.5598
   },
@@ -723,7 +723,7 @@
     "address": "55-й км МКАД, ТРК «VEGAS Кунцево»",
     "membersCount": 112,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.7248,
     "lng": 37.3905
   },
@@ -736,7 +736,7 @@
     "address": "ул. Земляной Вал, 41, стр. 1",
     "membersCount": 97,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.7576,
     "lng": 37.6608
   },
@@ -749,7 +749,7 @@
     "address": "ул. Поклонная, 9",
     "membersCount": 106,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.7338,
     "lng": 37.5195
   },
@@ -762,7 +762,7 @@
     "address": "ул. Черняховского, 19",
     "membersCount": 151,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.8042,
     "lng": 37.5375
   },
@@ -775,7 +775,7 @@
     "address": "ул. Лужники, 24, стр. 4",
     "membersCount": 141,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.7158,
     "lng": 37.5536
   },
@@ -788,7 +788,7 @@
     "address": "ул. Нижние Мнёвники, 10А",
     "membersCount": 63,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.7612,
     "lng": 37.4588
   },
@@ -801,7 +801,7 @@
     "address": "1-й Красногвардейский проезд, 22, стр. 2, башня «NEVA»",
     "membersCount": 106,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.7508,
     "lng": 37.5362
   },
@@ -814,7 +814,7 @@
     "address": "66-й км МКАД, ТРК «Вегас Крокус Сити», 2 этаж",
     "membersCount": 102,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.8235,
     "lng": 37.3902
   },
@@ -827,7 +827,7 @@
     "address": "Ленинградский проспект, 36, стр. 33",
     "membersCount": 116,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.7925,
     "lng": 37.5582
   },
@@ -840,7 +840,7 @@
     "address": "Владимирский проспект, 19, Владимирский пассаж",
     "membersCount": 86,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 59.9295,
     "lng": 30.3485
   },
@@ -853,7 +853,7 @@
     "address": "проспект Юрия Гагарина, 8, СКА Арена",
     "membersCount": 143,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 59.8675,
     "lng": 30.33
   },
@@ -866,7 +866,7 @@
     "address": "66-й км МКАД, Крокус Сити, ст. м. Мякинино",
     "membersCount": 123,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.8252,
     "lng": 37.3885
   },
@@ -879,7 +879,7 @@
     "address": "ул. Инженерная, 1, ТЦ «Марс»",
     "membersCount": 107,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.878764,
     "lng": 37.582213
   },
@@ -892,7 +892,7 @@
     "address": "Алтуфьевское шоссе, 1-й километр, вл3с1, ТРЦ «Весна»",
     "membersCount": 162,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.912741,
     "lng": 37.587954
   },
@@ -905,7 +905,7 @@
     "address": "Троицкий проспект, 17, ТРК «ЕвроПарк», этаж 4",
     "membersCount": 51,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 64.532301,
     "lng": 40.528636
   },
@@ -918,7 +918,7 @@
     "address": "ул. Воровского, 69",
     "membersCount": 132,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 44.983791,
     "lng": 41.095695
   },
@@ -931,7 +931,7 @@
     "address": "Вокзальная площадь, 13",
     "membersCount": 65,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 46.359724,
     "lng": 48.055367
   },
@@ -944,7 +944,7 @@
     "address": "Ходынский бульвар, 4, ТЦ «Авиапарк», этаж 3",
     "membersCount": 147,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.789172,
     "lng": 37.533491
   },
@@ -957,7 +957,7 @@
     "address": "ул. Летчика Бабушкина, 26, ТЦ «ОРИОН», этаж 1",
     "membersCount": 67,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.869058,
     "lng": 37.677582
   },
@@ -970,7 +970,7 @@
     "address": "шоссе Энтузиастов, 28, ТЦ «Футура», этаж 4",
     "membersCount": 110,
     "activeNow": 16,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.793551,
     "lng": 37.935199
   },
@@ -983,7 +983,7 @@
     "address": "ул. Балтийская, 116, этаж 1",
     "membersCount": 181,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 53.33874,
     "lng": 83.652761
   },
@@ -996,7 +996,7 @@
     "address": "ул. Малахова, 86В, ТЦ «Весна», этаж 2",
     "membersCount": 161,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 53.357106,
     "lng": 83.697009
   },
@@ -1009,7 +1009,7 @@
     "address": "ул. Миклухо-Маклая 36А, ТЦ «МЦ», этаж -1",
     "membersCount": 148,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.640499,
     "lng": 37.532953
   },
@@ -1022,7 +1022,7 @@
     "address": "ул. Лескова, 14, ТЦ «Будапешт», этаж -1",
     "membersCount": 77,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.8973,
     "lng": 37.6044
   },
@@ -1035,7 +1035,7 @@
     "address": "ул.Бибиревская ул., 10, корп. 2, ТЦ Лента",
     "membersCount": 171,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.881448,
     "lng": 37.60245
   },
@@ -1048,7 +1048,7 @@
     "address": "ул. Булатниковская, 9А, ТЦ «Бирюсинка», этаж 3",
     "membersCount": 57,
     "activeNow": 15,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.579635,
     "lng": 37.649089
   },
@@ -1061,7 +1061,7 @@
     "address": "ул. Элеваторная, 1Ас2, ТЦ «Среда.Царицыно», этаж 2",
     "membersCount": 253,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.602908,
     "lng": 37.651524
   },
@@ -1074,7 +1074,7 @@
     "address": "ул. Борисовские Пруды, 26 стр. 2, ТЦ «БраVo!», этаж 2",
     "membersCount": 85,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.639,
     "lng": 37.7593
   },
@@ -1087,7 +1087,7 @@
     "address": "ул. Люблинская, 153, ТЦ «Люблю Молл», этаж 4",
     "membersCount": 219,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.65871,
     "lng": 37.741699
   },
@@ -1100,7 +1100,7 @@
     "address": "Бульвар Яна Райниса, 41",
     "membersCount": 104,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.850224,
     "lng": 37.411403
   },
@@ -1113,7 +1113,7 @@
     "address": "ул. Поляны, 8, ТЦ «ВиВа», этаж 2",
     "membersCount": 233,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.5651,
     "lng": 37.5566
   },
@@ -1126,7 +1126,7 @@
     "address": "ул. 50 лет Октября, 13, ТЦ «Октябрь»",
     "membersCount": 97,
     "activeNow": 15,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.12678,
     "lng": 47.274462
   },
@@ -1139,7 +1139,7 @@
     "address": "ул. 40-летия Победы, 1, ТЦ «Ёлки», этаж 2",
     "membersCount": 98,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.191808,
     "lng": 61.281722
   },
@@ -1152,7 +1152,7 @@
     "address": "ул. Труда, 181, ТРЦ «Таганай»",
     "membersCount": 171,
     "activeNow": 15,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.168032,
     "lng": 61.377296
   },
@@ -1165,7 +1165,7 @@
     "address": "Октябрьский проспект, 25А, ТЦ «Мармелад»",
     "membersCount": 233,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.100566,
     "lng": 37.903395
   },
@@ -1178,7 +1178,7 @@
     "address": "Микрорайон Северное Чертаново, 1А, ТРЦ «Авентура», 2 этаж",
     "membersCount": 232,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.636895,
     "lng": 37.598867
   },
@@ -1191,7 +1191,7 @@
     "address": "Циолковского, д.23, МФК Долгопрудный",
     "membersCount": 49,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.937162,
     "lng": 37.512681
   },
@@ -1204,7 +1204,7 @@
     "address": "Каширское ш., 3А, ТРК «Торговый квартал», этаж 3",
     "membersCount": 92,
     "activeNow": 16,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.452226,
     "lng": 37.763402
   },
@@ -1217,7 +1217,7 @@
     "address": "Ореховый бульвар, 14 к1А",
     "membersCount": 131,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.610311,
     "lng": 37.715758
   },
@@ -1230,7 +1230,7 @@
     "address": "ул. Репина, 94, ТЦ Радуга Парк",
     "membersCount": 53,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.81593,
     "lng": 60.53712
   },
@@ -1243,7 +1243,7 @@
     "address": "Витебская, 6",
     "membersCount": 56,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 44.557364,
     "lng": 38.101764
   },
@@ -1256,7 +1256,7 @@
     "address": "ул. Академика Алиханова, 4",
     "membersCount": 233,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.929037,
     "lng": 37.545709
   },
@@ -1269,7 +1269,7 @@
     "address": "ул. Большая, 88, ТРЦ «Пихта»",
     "membersCount": 97,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 48.505408,
     "lng": 135.085499
   },
@@ -1282,7 +1282,7 @@
     "address": "ул. Партизанская, 36, ТРЦ «Карамель», этаж 5",
     "membersCount": 124,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 52.279269,
     "lng": 104.302616
   },
@@ -1295,7 +1295,7 @@
     "address": "ул. 3 Июля, 25, ТЦ «Модный Квартал», этаж 4",
     "membersCount": 179,
     "activeNow": 15,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 52.273274,
     "lng": 104.290685
   },
@@ -1308,7 +1308,7 @@
     "address": "ул. Сергеева, 3/5, ТЦ «Сильвер Молл», 4 этаж",
     "membersCount": 122,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 52.266192,
     "lng": 104.227157
   },
@@ -1321,7 +1321,7 @@
     "address": "ул. Прокатная, 2",
     "membersCount": 128,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.759652,
     "lng": 37.833545
   },
@@ -1334,7 +1334,7 @@
     "address": "ул. Новая Слобода",
     "membersCount": 41,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.97145,
     "lng": 37.920673
   },
@@ -1347,7 +1347,7 @@
     "address": "ул. Кирова, 146, ТЦ «Мой Порт», этаж 2",
     "membersCount": 193,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.863409,
     "lng": 53.21953
   },
@@ -1360,7 +1360,7 @@
     "address": "ул. Суворова, 113",
     "membersCount": 97,
     "activeNow": 17,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 54.517092,
     "lng": 36.255794
   },
@@ -1373,7 +1373,7 @@
     "address": "ул. Кантемировская, 47, ТЦ «Кантемировский», этаж 2",
     "membersCount": 45,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.637742,
     "lng": 37.656491
   },
@@ -1386,7 +1386,7 @@
     "address": "ул. Николая Ершова, 62, МФКЦ АРТ, этаж 2",
     "membersCount": 227,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.796141,
     "lng": 49.176182
   },
@@ -1399,7 +1399,7 @@
     "address": "проспект Победы, 141",
     "membersCount": 63,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.781485,
     "lng": 49.216653
   },
@@ -1412,7 +1412,7 @@
     "address": "ул. Кулахметова, 28, ТЦ «МОКИ», 3 этаж",
     "membersCount": 201,
     "activeNow": 15,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.83027,
     "lng": 49.06183
   },
@@ -1425,7 +1425,7 @@
     "address": "ул. Пушкина, 2, этаж 5",
     "membersCount": 114,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.7861,
     "lng": 49.121479
   },
@@ -1438,7 +1438,7 @@
     "address": "ул. Сибгата Хакима, 62, ЖК «Уно» 1 этаж",
     "membersCount": 117,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.815227,
     "lng": 49.144625
   },
@@ -1451,7 +1451,7 @@
     "address": "проспект Андропова, 27, РЦ «Орбита», этаж 3",
     "membersCount": 108,
     "activeNow": 14,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.6763,
     "lng": 37.6655
   },
@@ -1464,7 +1464,7 @@
     "address": "ул. Профсоюзная 126 корп. 2, ТК «Коньково», этаж 2",
     "membersCount": 253,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.631405,
     "lng": 37.51772
   },
@@ -1477,7 +1477,7 @@
     "address": "Калинина, 11",
     "membersCount": 230,
     "activeNow": 14,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.921925,
     "lng": 37.815853
   },
@@ -1490,7 +1490,7 @@
     "address": "ул. Советская, 61",
     "membersCount": 156,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 57.76282,
     "lng": 40.946289
   },
@@ -1503,7 +1503,7 @@
     "address": "улица Петра Метальникова, 42",
     "membersCount": 103,
     "activeNow": 17,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 45.097909,
     "lng": 39.000555
   },
@@ -1516,7 +1516,7 @@
     "address": "ул. Солнечная, 18/4",
     "membersCount": 100,
     "activeNow": 16,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 45.071555,
     "lng": 39.005272
   },
@@ -1529,7 +1529,7 @@
     "address": "ул. Ленина, 2, ТЦ «Красный Кит», этаж 4",
     "membersCount": 248,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.81945,
     "lng": 37.32023
   },
@@ -1542,7 +1542,7 @@
     "address": "ул. Краснопрудная, 15, ТЦ «Краснопрудный», этаж 2-3",
     "membersCount": 110,
     "activeNow": 14,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.781224,
     "lng": 37.668345
   },
@@ -1555,7 +1555,7 @@
     "address": "ул. Ленина, д. 16",
     "membersCount": 127,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.015351,
     "lng": 92.89278
   },
@@ -1568,7 +1568,7 @@
     "address": "ул. Партизана Железняка, 23, ТЦ «Кубатура»",
     "membersCount": 84,
     "activeNow": 16,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.036936,
     "lng": 92.935547
   },
@@ -1581,7 +1581,7 @@
     "address": "пр-т имени Газеты Красноярский Рабочий, 74Д, ТЦ «Саяны»",
     "membersCount": 104,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.01096,
     "lng": 92.963538
   },
@@ -1594,7 +1594,7 @@
     "address": "ул. Высотная, 2Ш",
     "membersCount": 174,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.020562,
     "lng": 92.79382
   },
@@ -1607,7 +1607,7 @@
     "address": "ул. Маршала Чуйкова, 3, ТЦ «Кузьминки», этаж 4",
     "membersCount": 159,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.703191,
     "lng": 37.765661
   },
@@ -1620,7 +1620,7 @@
     "address": "ш. Энтузиастов, 12 к.2, ТЦ «Город», 4 этаж",
     "membersCount": 159,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.747268,
     "lng": 37.707305
   },
@@ -1633,7 +1633,7 @@
     "address": "Дмитровское шоссе, 107 к.1",
     "membersCount": 232,
     "activeNow": 16,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.880361,
     "lng": 37.543459
   },
@@ -1646,7 +1646,7 @@
     "address": "ул. П.И. Смородина, 13А, ТЦ «Армада», этаж 5",
     "membersCount": 240,
     "activeNow": 14,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 52.588896,
     "lng": 39.536424
   },
@@ -1659,7 +1659,7 @@
     "address": "ул. Советская, 66",
     "membersCount": 162,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 52.605856,
     "lng": 39.577903
   },
@@ -1672,7 +1672,7 @@
     "address": "ул. Инициативная 50а, этаж 2",
     "membersCount": 241,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.6826,
     "lng": 37.91239
   },
@@ -1685,7 +1685,7 @@
     "address": "Октябрьский проспект, 112",
     "membersCount": 144,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.684637,
     "lng": 37.877813
   },
@@ -1698,7 +1698,7 @@
     "address": "ул. Грязнова, 57/1, ТРЦ «Гранд 4»",
     "membersCount": 239,
     "activeNow": 17,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 53.398928,
     "lng": 58.988339
   },
@@ -1711,7 +1711,7 @@
     "address": "Новочеркасский бульвар, 21А, РЦ «Экран», этаж -1",
     "membersCount": 180,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.647925,
     "lng": 37.727769
   },
@@ -1724,7 +1724,7 @@
     "address": "Нежинская улица, 11, ТЦ «Планета», 2 этаж",
     "membersCount": 156,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.707826,
     "lng": 37.473339
   },
@@ -1737,7 +1737,7 @@
     "address": "1-й Покровский проезд, 1, ТЦ «МЕГА Белая Дача», этаж 2",
     "membersCount": 52,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.65797,
     "lng": 37.847687
   },
@@ -1750,7 +1750,7 @@
     "address": "микрорайон ИКЕА, корпус 2",
     "membersCount": 108,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.910451,
     "lng": 37.398564
   },
@@ -1763,7 +1763,7 @@
     "address": "ул. Дубравная 51 стр. 1, ТЦ «Митино Парк», этаж 2",
     "membersCount": 222,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.84098379,
     "lng": 37.35420466
   },
@@ -1776,7 +1776,7 @@
     "address": "Каширское шоссе, 26, ТЦ «Москворечье», этаж 2",
     "membersCount": 233,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.653487,
     "lng": 37.646358
   },
@@ -1789,7 +1789,7 @@
     "address": "ул. 7-я Кожуховская, 9, ТРЦ «Мозаика», этаж 3",
     "membersCount": 52,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.710687,
     "lng": 37.6751
   },
@@ -1802,7 +1802,7 @@
     "address": "ул. Мира, 51, ТЦ «Июнь», этаж 2",
     "membersCount": 212,
     "activeNow": 16,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.9199,
     "lng": 37.7084
   },
@@ -1815,7 +1815,7 @@
     "address": "Шараповский проезд, 2, ТРК «Красный Кит», этаж 3",
     "membersCount": 71,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.9166,
     "lng": 37.7575
   },
@@ -1828,7 +1828,7 @@
     "address": "Нахимовский проспект, 31к3",
     "membersCount": 155,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.670656,
     "lng": 37.58146
   },
@@ -1841,7 +1841,7 @@
     "address": "ул. Рождественская, 11, ТЦ «Атлант», этаж 2",
     "membersCount": 69,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.70282,
     "lng": 37.914969
   },
@@ -1854,7 +1854,7 @@
     "address": "Рязанский проспект 1с1",
     "membersCount": 193,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.732109,
     "lng": 37.72891
   },
@@ -1867,7 +1867,7 @@
     "address": "ул. Сююмбике, 7, ТЦ «Рамус Молл»",
     "membersCount": 207,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.643796,
     "lng": 51.800709
   },
@@ -1880,7 +1880,7 @@
     "address": "ул. Чапаева, 27, ТРЦ «Европа-Сити»",
     "membersCount": 124,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 60.939421,
     "lng": 76.597743
   },
@@ -1893,7 +1893,7 @@
     "address": "ул. Ленина, 8, МФЦ «Green Park», этаж 4",
     "membersCount": 168,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 60.938486,
     "lng": 76.555875
   },
@@ -1906,7 +1906,7 @@
     "address": "Набережная 60-ти лет Октября, 2А, ТЦ «Богородский Мост», 2 этаж",
     "membersCount": 63,
     "activeNow": 15,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.858776,
     "lng": 38.439118
   },
@@ -1919,7 +1919,7 @@
     "address": "проспект Зелёный, 81, РЦ «Киргизия», этаж 3",
     "membersCount": 175,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.7518,
     "lng": 37.8204
   },
@@ -1932,7 +1932,7 @@
     "address": "ул. Доз, д. 10а",
     "membersCount": 43,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 53.78033,
     "lng": 87.123752
   },
@@ -1945,7 +1945,7 @@
     "address": "Большой Овчинниковский пер., 16, ТЦ «Аркадия», этаж 3",
     "membersCount": 155,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.74457,
     "lng": 37.63015
   },
@@ -1958,7 +1958,7 @@
     "address": "пр-т Дзержинского, 236",
     "membersCount": 95,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 44.672083,
     "lng": 37.779519
   },
@@ -1971,7 +1971,7 @@
     "address": "наб. имени Адмирала Серебрякова, 27А, ТЦ «Черноморский»",
     "membersCount": 224,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 44.712113,
     "lng": 37.784363
   },
@@ -1984,7 +1984,7 @@
     "address": "пр. Дзержинского/ул. Волгоградская, д.211",
     "membersCount": 119,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 44.684183,
     "lng": 37.777108
   },
@@ -1997,7 +1997,7 @@
     "address": "ул. Ипподромская, 46",
     "membersCount": 259,
     "activeNow": 17,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.058809,
     "lng": 82.938543
   },
@@ -2010,7 +2010,7 @@
     "address": "ул. Военная, 5",
     "membersCount": 120,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.029547,
     "lng": 82.936347
   },
@@ -2023,7 +2023,7 @@
     "address": "ул. Федосеева, д. 8, ТРЦ «Федосеевский»",
     "membersCount": 76,
     "activeNow": 14,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.038362,
     "lng": 82.964067
   },
@@ -2036,7 +2036,7 @@
     "address": "Площадь Карла Маркса, 2",
     "membersCount": 191,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 54.98368,
     "lng": 82.8926
   },
@@ -2049,7 +2049,7 @@
     "address": "ул. Дружбы, стр. 1А, ТЦ «Новые Химки», этаж 2",
     "membersCount": 53,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.89944,
     "lng": 37.40868
   },
@@ -2062,7 +2062,7 @@
     "address": "пр-кт Нововатутинский, 6, ТЦ «Лайнер», этаж 2",
     "membersCount": 178,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.515258,
     "lng": 37.350117
   },
@@ -2075,7 +2075,7 @@
     "address": "ул. Новый Арбат, 11с1, ТЦ «Новоарбатский», этаж -2",
     "membersCount": 75,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.752173,
     "lng": 37.59545
   },
@@ -2088,7 +2088,7 @@
     "address": "ул. Маршала Неделина, 6Б, БЦ «West East», этаж 8",
     "membersCount": 81,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.678056,
     "lng": 37.268838
   },
@@ -2101,7 +2101,7 @@
     "address": "ул. Карла Либкнехта, 3/12к1",
     "membersCount": 51,
     "activeNow": 17,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 54.985802,
     "lng": 73.376796
   },
@@ -2114,7 +2114,7 @@
     "address": "ул. 70 лет Октября, 19, ТЦ «Festival City»",
     "membersCount": 72,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 54.98118,
     "lng": 73.321257
   },
@@ -2127,7 +2127,7 @@
     "address": "ул. Герцена, 34",
     "membersCount": 50,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 54.995742,
     "lng": 73.37414
   },
@@ -2140,7 +2140,7 @@
     "address": "Шарлыкское ш., д. 1/2",
     "membersCount": 156,
     "activeNow": 16,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 51.843212,
     "lng": 55.113966
   },
@@ -2153,7 +2153,7 @@
     "address": "ул. Салмышская, д. 55/1",
     "membersCount": 207,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 51.81681,
     "lng": 55.175674
   },
@@ -2166,7 +2166,7 @@
     "address": "ул. Декабристов, 17, ТЦ «Место встречи Байконур», этаж 2",
     "membersCount": 40,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.8649,
     "lng": 37.605
   },
@@ -2179,7 +2179,7 @@
     "address": "ул. Озерная, вл. 42",
     "membersCount": 207,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.669818,
     "lng": 37.444153
   },
@@ -2192,7 +2192,7 @@
     "address": "ул. Озёрная, 33 корп. 2, ТЦ «Кувшинка», этаж 4",
     "membersCount": 105,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.67094,
     "lng": 37.447845
   },
@@ -2205,7 +2205,7 @@
     "address": "ул. Сокольнический Вал, 1Б, Ледовый дворец «Сокольники», этаж 2",
     "membersCount": 208,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.792908,
     "lng": 37.671588
   },
@@ -2218,7 +2218,7 @@
     "address": "Саляма Адиля, 4",
     "membersCount": 192,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.775029,
     "lng": 37.467739
   },
@@ -2231,7 +2231,7 @@
     "address": "ул. Ленина, 45, ТЦ «ЦУМ», этаж 4",
     "membersCount": 179,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 58.011554,
     "lng": 56.237591
   },
@@ -2244,7 +2244,7 @@
     "address": "ул. Первомайская, 93/20, ТЦ «Место встречи Первомайский», этаж 2",
     "membersCount": 244,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.794001,
     "lng": 37.80626
   },
@@ -2257,7 +2257,7 @@
     "address": "43 Армии, 22",
     "membersCount": 195,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.419034,
     "lng": 37.493207
   },
@@ -2270,7 +2270,7 @@
     "address": "Хорошёвское шоссе, 27, ТРЦ «Хорошо!», этаж 4",
     "membersCount": 259,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.777105,
     "lng": 37.523716
   },
@@ -2283,7 +2283,7 @@
     "address": "Открытое шоссе, 4 стр. 1, РЦ «Янтарь», этаж 3",
     "membersCount": 46,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.8092,
     "lng": 37.7297
   },
@@ -2296,7 +2296,7 @@
     "address": "Красноармейское шоссе, 104",
     "membersCount": 170,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.017397,
     "lng": 37.884861
   },
@@ -2309,7 +2309,7 @@
     "address": "ул. Народное Имение, 1А, ТЦ «Атриум», 3 этаж",
     "membersCount": 105,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.572523,
     "lng": 38.231786
   },
@@ -2322,7 +2322,7 @@
     "address": "Юбилейный проспект, 57, ТЦ «Новый»",
     "membersCount": 90,
     "activeNow": 14,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.753675,
     "lng": 37.88171
   },
@@ -2335,7 +2335,7 @@
     "address": "проспект Мира, 211 корп. 2, ТРК «Европолис», этаж -1",
     "membersCount": 109,
     "activeNow": 15,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.844,
     "lng": 37.6599
   },
@@ -2348,7 +2348,7 @@
     "address": "проспект Буденновский, 49/97, ТЦ «Галерея Астор», этаж 5",
     "membersCount": 86,
     "activeNow": 16,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 47.224936,
     "lng": 39.704673
   },
@@ -2361,7 +2361,7 @@
     "address": "пр-кт Космонавтов, 19А/28Ж, ТЦ «Галерея Парк», этаж 2",
     "membersCount": 174,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 47.28928,
     "lng": 39.71351
   },
@@ -2374,7 +2374,7 @@
     "address": "Киевское шоссе, 23-й километр, 8с1, ТЦ «Family Room», этаж 3",
     "membersCount": 105,
     "activeNow": 17,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.629322,
     "lng": 37.42499
   },
@@ -2387,7 +2387,7 @@
     "address": "Новосёлов, 26, ТЦ «Шоколад», этаж 3",
     "membersCount": 145,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 54.609406,
     "lng": 39.803829
   },
@@ -2400,7 +2400,7 @@
     "address": "ул. Герцена, 62, ТРЦ «Сенная Площадь», этаж 4",
     "membersCount": 231,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 58.050227,
     "lng": 38.833898
   },
@@ -2413,7 +2413,7 @@
     "address": "поселение Московский, Киевское шоссе, 23-й километр, 1, ТЦ «Саларис», этаж 2",
     "membersCount": 232,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.6237,
     "lng": 37.4219
   },
@@ -2426,7 +2426,7 @@
     "address": "ул. Аэродромная, 47А, Аврора Молл, 5 этаж",
     "membersCount": 199,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 53.191295,
     "lng": 50.188153
   },
@@ -2439,7 +2439,7 @@
     "address": "Московское шоссе, 205, ТРЦ «Эль Рио», этаж 3",
     "membersCount": 244,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 53.259013,
     "lng": 50.237125
   },
@@ -2452,7 +2452,7 @@
     "address": "ул. Красноармейская, д.131",
     "membersCount": 133,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 53.187103,
     "lng": 50.126893
   },
@@ -2465,7 +2465,7 @@
     "address": "ул. Дыбенко 30, ТЦ «Космопорт», этаж 2",
     "membersCount": 128,
     "activeNow": 14,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 53.20751,
     "lng": 50.19778
   },
@@ -2478,7 +2478,7 @@
     "address": "Гражданский проспект, 41, ТК «Академический»",
     "membersCount": 254,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 60.011401,
     "lng": 30.398266
   },
@@ -2491,7 +2491,7 @@
     "address": "Пулковское шоссе, дом 111, строение 5",
     "membersCount": 248,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.749483,
     "lng": 30.310959
   },
@@ -2504,7 +2504,7 @@
     "address": "Большая Разночинная улица, дом 16, литера А",
     "membersCount": 251,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.959639,
     "lng": 30.289345
   },
@@ -2517,7 +2517,7 @@
     "address": "Каменноостровский проспект, 37 литера А",
     "membersCount": 200,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.966254,
     "lng": 30.311685
   },
@@ -2530,7 +2530,7 @@
     "address": "Лиговский проспект, 30А, ТРЦ «Галерея», этаж 5",
     "membersCount": 123,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.927563,
     "lng": 30.360613
   },
@@ -2543,7 +2543,7 @@
     "address": "Индустриальный проспект, 24, ТЦ «Июнь», 4 этаж",
     "membersCount": 117,
     "activeNow": 15,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.946175,
     "lng": 30.473981
   },
@@ -2556,7 +2556,7 @@
     "address": "ул. Бабушкина, 40 стр.1",
     "membersCount": 227,
     "activeNow": 17,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.877696,
     "lng": 30.443258
   },
@@ -2569,7 +2569,7 @@
     "address": "ул. Коллонтай, 3Б, ТЦ «Лондон Молл»",
     "membersCount": 152,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.911914,
     "lng": 30.448198
   },
@@ -2582,7 +2582,7 @@
     "address": "ул. Романовская, 1/31, ТЦ «Небо», этаж 2",
     "membersCount": 251,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 60.069007,
     "lng": 30.435562
   },
@@ -2595,7 +2595,7 @@
     "address": "проспект Просвещения, 19, ТРК «Норд», этаж 4",
     "membersCount": 141,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 60.052681,
     "lng": 30.33184
   },
@@ -2608,7 +2608,7 @@
     "address": "Невский проспект, 48, ТД «Пассаж», этаж 3",
     "membersCount": 120,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.93527,
     "lng": 30.334447
   },
@@ -2621,7 +2621,7 @@
     "address": "проспект Славы, 50/48, ТЦ «Южный полюс», этаж 1",
     "membersCount": 252,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.863328,
     "lng": 30.404083
   },
@@ -2634,7 +2634,7 @@
     "address": "ул. Ефимова, 3С, ТЦ «Сенная»",
     "membersCount": 46,
     "activeNow": 16,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.925731,
     "lng": 30.318963
   },
@@ -2647,7 +2647,7 @@
     "address": "Коломяжский проспект, 17к2, ТРК «Сити Молл», этаж 4",
     "membersCount": 97,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 60.005621,
     "lng": 30.301435
   },
@@ -2660,7 +2660,7 @@
     "address": "Петергофское шоссе, 51, ТЦ «Жемчужная Плаза», этаж 3",
     "membersCount": 61,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.849417,
     "lng": 30.144434
   },
@@ -2673,7 +2673,7 @@
     "address": "ул. Севастопольская",
     "membersCount": 215,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 54.187359,
     "lng": 45.222835
   },
@@ -2686,7 +2686,7 @@
     "address": "ул. Богдана Хмельницкого, 28, ТЦ «Огарёв Plaza»",
     "membersCount": 171,
     "activeNow": 17,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 54.186446,
     "lng": 45.18314
   },
@@ -2699,7 +2699,7 @@
     "address": "ул. Танкистов, 1",
     "membersCount": 121,
     "activeNow": 17,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 51.547004,
     "lng": 46.01444
   },
@@ -2712,7 +2712,7 @@
     "address": "Проспект им. Петра Столыпина, 43",
     "membersCount": 114,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 51.532349,
     "lng": 46.021654
   },
@@ -2725,7 +2725,7 @@
     "address": "Набережная Серафима Саровского, 2, ТЦ «Аструм Молл», 3 этаж",
     "membersCount": 245,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.924033,
     "lng": 37.997946
   },
@@ -2738,7 +2738,7 @@
     "address": "ул. Щукинская 42, ТРК «Щука», этаж 5",
     "membersCount": 249,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.8095,
     "lng": 37.4646
   },
@@ -2751,7 +2751,7 @@
     "address": "б-р Дмитрия Донского, 1, ТЦ «Северное Сияние», этаж 3",
     "membersCount": 126,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.5749,
     "lng": 37.5801
   },
@@ -2764,7 +2764,7 @@
     "address": "ул. Шаболовка 56",
     "membersCount": 202,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.712325,
     "lng": 37.60584
   },
@@ -2777,7 +2777,7 @@
     "address": "Причальный проезд, 10 к.2, ТЦ Причальный, этаж -2",
     "membersCount": 93,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.759813,
     "lng": 37.516781
   },
@@ -2790,7 +2790,7 @@
     "address": "ул. Сходненская, 56, ТЦ «Калейдоскоп»",
     "membersCount": 249,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.85083,
     "lng": 37.443956
   },
@@ -2803,7 +2803,7 @@
     "address": "улица 25 Сентября, дом 35А",
     "membersCount": 223,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 54.768805,
     "lng": 32.080043
   },
@@ -2816,7 +2816,7 @@
     "address": "улица Новая Заря, д.7",
     "membersCount": 166,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 43.605569,
     "lng": 39.732211
   },
@@ -2829,7 +2829,7 @@
     "address": "ул. Северная, 6, 3 этаж",
     "membersCount": 91,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 43.594294,
     "lng": 39.72843
   },
@@ -2842,7 +2842,7 @@
     "address": "Сиреневый бульвар, 31, РЦ «София», этаж 3",
     "membersCount": 87,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.803732,
     "lng": 37.800554
   },
@@ -2855,7 +2855,7 @@
     "address": "ул. Авиаторов, 3Б, ТЦ «Небо», здание ОДЦ, 3 этаж",
     "membersCount": 111,
     "activeNow": 17,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.643165,
     "lng": 37.398186
   },
@@ -2868,7 +2868,7 @@
     "address": "ул. Красная, 86",
     "membersCount": 136,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.187903,
     "lng": 36.978412
   },
@@ -2881,7 +2881,7 @@
     "address": "Московский проспект, 3",
     "membersCount": 123,
     "activeNow": 15,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 0,
     "lng": 0
   },
@@ -2894,7 +2894,7 @@
     "address": "ул. Ленина, 251, Дворец Культуры и Спорта",
     "membersCount": 232,
     "activeNow": 16,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 45.03972,
     "lng": 41.958283
   },
@@ -2907,7 +2907,7 @@
     "address": "проспект Карла Маркса, 49, ТЦ «Европейский»",
     "membersCount": 252,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 45.050418,
     "lng": 41.986035
   },
@@ -2920,7 +2920,7 @@
     "address": "ул. Западный обход, 64Б, ТРЦ «Солнечный»",
     "membersCount": 43,
     "activeNow": 15,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 45.021932,
     "lng": 41.907809
   },
@@ -2933,7 +2933,7 @@
     "address": "Страстной бульвар, 10с1, ЖК «На Страстном бульваре»",
     "membersCount": 256,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.766106,
     "lng": 37.611482
   },
@@ -2946,7 +2946,7 @@
     "address": "Югорский тракт, 38, ТРЦ «Сити Молл», корпус Е, этаж 2",
     "membersCount": 144,
     "activeNow": 14,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 61.23948,
     "lng": 73.37357
   },
@@ -2959,7 +2959,7 @@
     "address": "ул. Советская, 10, ТЦ «Куклы», этаж -1",
     "membersCount": 250,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 54.195007,
     "lng": 37.611769
   },
@@ -2972,7 +2972,7 @@
     "address": "ул. Валерии Гнаровской, 12, ТРЦ «Фаворит»",
     "membersCount": 170,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 57.123404,
     "lng": 65.563257
   },
@@ -2985,7 +2985,7 @@
     "address": "ул. Чернышевского, 1Б, МФК «Резидент», этаж 1",
     "membersCount": 128,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 57.158438,
     "lng": 65.509534
   },
@@ -2998,7 +2998,7 @@
     "address": "проспект Октября, 34, ТЦ «Семья», этаж -2",
     "membersCount": 161,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 54.749803,
     "lng": 55.99914
   },
@@ -3011,7 +3011,7 @@
     "address": "ул. Маршала Жукова, 29, ТЦ «Простор»",
     "membersCount": 241,
     "activeNow": 17,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 54.771899,
     "lng": 56.058746
   },
@@ -3024,7 +3024,7 @@
     "address": "ул. Ленина, д. 39",
     "membersCount": 175,
     "activeNow": 15,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 51.830499,
     "lng": 107.583223
   },
@@ -3037,7 +3037,7 @@
     "address": "Чонгарский бульвар, 7, ТЦ «Ангара», этаж 2",
     "membersCount": 212,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.6513,
     "lng": 37.6123
   },
@@ -3050,7 +3050,7 @@
     "address": "ул. Ломоносова, 29",
     "membersCount": 224,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 58.531109,
     "lng": 31.243364
   },
@@ -3063,7 +3063,7 @@
     "address": "ул. Вешняковская, 18, ТЦ «Вешняки», этаж 6",
     "membersCount": 238,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.72397,
     "lng": 37.82517
   },
@@ -3076,7 +3076,7 @@
     "address": "ул. Берёзовая 8",
     "membersCount": 240,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.541079,
     "lng": 37.719078
   },
@@ -3089,7 +3089,7 @@
     "address": "просп. Строителей, 9Б",
     "membersCount": 244,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.138869,
     "lng": 40.365512
   },
@@ -3102,7 +3102,7 @@
     "address": "проспект Ленина, 46, ТЦ «Крейсер»",
     "membersCount": 113,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.118746,
     "lng": 40.35229
   },
@@ -3115,7 +3115,7 @@
     "address": "ул. Калинина, 8, ТРЦ «Калина Молл»",
     "membersCount": 83,
     "activeNow": 17,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 43.10304,
     "lng": 131.915432
   },
@@ -3128,7 +3128,7 @@
     "address": "ул. Тухачевского, 31",
     "membersCount": 242,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 43.15587,
     "lng": 131.932138
   },
@@ -3141,7 +3141,7 @@
     "address": "пр. Красного знамени, 110",
     "membersCount": 163,
     "activeNow": 17,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 43.122485,
     "lng": 131.923735
   },
@@ -3154,7 +3154,7 @@
     "address": "ул. Некрасовская, 49",
     "membersCount": 197,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 43.127356,
     "lng": 131.90901
   },
@@ -3167,7 +3167,7 @@
     "address": "Кронштадтский бульвар, 3А, ТЦ «Гавань», этаж 5",
     "membersCount": 220,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.840827,
     "lng": 37.485559
   },
@@ -3180,7 +3180,7 @@
     "address": "Университетский проспект, 107, ТЦ «Акварель»",
     "membersCount": 181,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 48.637315,
     "lng": 44.43532
   },
@@ -3193,7 +3193,7 @@
     "address": "пр-кт Ленина, 54Б, ТЦ «Европа Сити Молл», этаж 3",
     "membersCount": 192,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 48.72608,
     "lng": 44.540925
   },
@@ -3206,7 +3206,7 @@
     "address": "Бульвар 30-летия Победы, 21, ТРЦ «Парк Хаус»",
     "membersCount": 212,
     "activeNow": 14,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 48.74927,
     "lng": 44.495744
   },
@@ -3219,7 +3219,7 @@
     "address": "ул. Рабоче-Крестьянская, 9Б, ТЦ «Ворошиловский», этаж 3",
     "membersCount": 245,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 48.696878,
     "lng": 44.501505
   },
@@ -3232,7 +3232,7 @@
     "address": "Пошехонское шоссе, 22, ТЦ «Мармелад»",
     "membersCount": 62,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.197849,
     "lng": 39.858963
   },
@@ -3245,7 +3245,7 @@
     "address": "бульвар Профсоюзов, 1Б, ТЦ «ПланетаЛето», этаж 3",
     "membersCount": 111,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 48.776584,
     "lng": 44.773275
   },
@@ -3258,7 +3258,7 @@
     "address": "ул. Академика Семенихина, 2, БЦ «Левел Воронцовская»",
     "membersCount": 152,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.660526,
     "lng": 37.535403
   },
@@ -3271,7 +3271,7 @@
     "address": "пр-кт Революции, 38, ТЦ «ЦУМ», этаж 3",
     "membersCount": 112,
     "activeNow": 16,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 51.66783012,
     "lng": 39.20615513
   },
@@ -3284,7 +3284,7 @@
     "address": "ул. Остужева, 2Б, ТЦ «Depo», этаж 3",
     "membersCount": 185,
     "activeNow": 17,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 51.687796,
     "lng": 39.252871
   },
@@ -3297,7 +3297,7 @@
     "address": "ул. Космонавтов, д. 27Г",
     "membersCount": 136,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 51.657031,
     "lng": 39.159441
   },
@@ -3310,7 +3310,7 @@
     "address": "ул. Победы, 41, ТРЦ «Аура», этаж 3",
     "membersCount": 215,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 57.62760978,
     "lng": 39.87119561
   },
@@ -3323,7 +3323,7 @@
     "address": "ул. Труфанова, 15, ТЦ «Джаз»",
     "membersCount": 153,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 57.685371,
     "lng": 39.766307
   },
@@ -3336,7 +3336,7 @@
     "address": "пр-кт Новоясеневский, 11, ТЦ «FORT», этаж 2",
     "membersCount": 234,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.6066,
     "lng": 37.5362
   },
@@ -3349,7 +3349,7 @@
     "address": "ул. Западная, 30, ТЦ «ДаНада»",
     "membersCount": 224,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.643431,
     "lng": 47.828704
   },
@@ -3362,7 +3362,7 @@
     "address": "Площадь Юности, 1, ФК «Электрон»",
     "membersCount": 66,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.0027,
     "lng": 37.2097
   },
@@ -3375,7 +3375,7 @@
     "address": "Панфиловский пр-кт, к. 1841, этаж 2",
     "membersCount": 179,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.977732,
     "lng": 37.165989
   },
@@ -3388,7 +3388,7 @@
     "address": "ул. Авиаконструктора Миля, 3А, Фудмол «Привоз», этаж 2",
     "membersCount": 110,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.68672,
     "lng": 37.852218
   },
@@ -3401,7 +3401,7 @@
     "address": "ул. Авиаконструктора Сухого, 2, к. 1, ЖК «Лица»",
     "membersCount": 134,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.7869,
     "lng": 37.5348
   },
@@ -3414,7 +3414,7 @@
     "address": "ул. Бориса Ельцина, 6, башня «Исеть»",
     "membersCount": 164,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.8435,
     "lng": 60.5948
   },
@@ -3427,7 +3427,7 @@
     "address": "ул. Вязовая, 8",
     "membersCount": 149,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 59.9712,
     "lng": 30.2538
   },
@@ -3440,7 +3440,7 @@
     "address": "Курортный проспект, 108, ЖК «Сан-Сити»",
     "membersCount": 107,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 43.5855,
     "lng": 39.7231
   },
@@ -3453,7 +3453,7 @@
     "address": "1-й Красногвардейский проезд, 21, стр. 2, небоскрёб «ОКО», 3 этаж",
     "membersCount": 77,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.7495,
     "lng": 37.5345
   },
@@ -3466,7 +3466,7 @@
     "address": "Средний проспект В.О., 83, стр. 2",
     "membersCount": 93,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 59.9348,
     "lng": 30.2415
   },
@@ -3479,7 +3479,7 @@
     "address": "Новоясеневский проспект, 9",
     "membersCount": 69,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.6018,
     "lng": 37.5336
   },
@@ -3492,7 +3492,7 @@
     "address": "улица Богословская",
     "membersCount": 90,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 60.0285,
     "lng": 30.3485
   },
@@ -3505,7 +3505,7 @@
     "address": "проспект Большевиков",
     "membersCount": 119,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 59.9165,
     "lng": 30.4785
   },
@@ -3518,7 +3518,7 @@
     "address": "улица Чкалова / Чкаловская",
     "membersCount": 150,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.9605,
     "lng": 30.2925
   },
@@ -3531,7 +3531,7 @@
     "address": "Дальневосточный проспект",
     "membersCount": 62,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 59.9085,
     "lng": 30.4585
   },
@@ -3544,7 +3544,7 @@
     "address": "улица Главная, 60",
     "membersCount": 170,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 60.0525,
     "lng": 30.4485
   },
@@ -3557,7 +3557,7 @@
     "address": "улица Фучика",
     "membersCount": 64,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.8685,
     "lng": 30.3785
   },
@@ -3570,7 +3570,7 @@
     "address": "улица Ярослава Гашека",
     "membersCount": 159,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 59.8515,
     "lng": 30.3785
   },
@@ -3583,7 +3583,7 @@
     "address": "улица Генерала Кныша, 2А",
     "membersCount": 83,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 59.5685,
     "lng": 30.1285
   },
@@ -3596,7 +3596,7 @@
     "address": "улица Хасанская",
     "membersCount": 64,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 59.9485,
     "lng": 30.4585
   },
@@ -3609,7 +3609,7 @@
     "address": "улица Хо Ши Мина",
     "membersCount": 167,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 60.0085,
     "lng": 30.2685
   },
@@ -3622,7 +3622,7 @@
     "address": "улица Камышовая",
     "membersCount": 105,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 60.0015,
     "lng": 30.2155
   },
@@ -3635,7 +3635,7 @@
     "address": "Комендантский проспект",
     "membersCount": 158,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 60.0088,
     "lng": 30.2585
   },
@@ -3648,7 +3648,7 @@
     "address": "улица Краснопутиловская",
     "membersCount": 154,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 59.8585,
     "lng": 30.2885
   },
@@ -3661,7 +3661,7 @@
     "address": "Крестовский проспект",
     "membersCount": 108,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 59.9725,
     "lng": 30.2425
   },
@@ -3674,7 +3674,7 @@
     "address": "Европейский проспект, 21 стр.1",
     "membersCount": 161,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 59.9095,
     "lng": 30.5155
   },
@@ -3687,7 +3687,7 @@
     "address": "проспект Культуры",
     "membersCount": 133,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 60.0385,
     "lng": 30.3785
   },
@@ -3700,7 +3700,7 @@
     "address": "район метро Ладожская",
     "membersCount": 129,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 59.9325,
     "lng": 30.4385
   },
@@ -3713,7 +3713,7 @@
     "address": "Лахтинский проспект, 85",
     "membersCount": 72,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 59.9885,
     "lng": 30.1555
   },
@@ -3726,7 +3726,7 @@
     "address": "Ленинский проспект / Краснопутиловская",
     "membersCount": 87,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.8518,
     "lng": 30.2685
   },
@@ -3739,7 +3739,7 @@
     "address": "проспект Маршака",
     "membersCount": 160,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 60.0005,
     "lng": 30.4158
   },
@@ -3752,7 +3752,7 @@
     "address": "проспект Маршала Блюхера",
     "membersCount": 69,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 59.9725,
     "lng": 30.3785
   },
@@ -3765,7 +3765,7 @@
     "address": "проспект Маршала Говорова",
     "membersCount": 157,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 59.8685,
     "lng": 30.2685
   },
@@ -3778,7 +3778,7 @@
     "address": "улица Мебельная",
     "membersCount": 125,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.9985,
     "lng": 30.2485
   },
@@ -3791,7 +3791,7 @@
     "address": "улица Шувалова, 11",
     "membersCount": 90,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 60.0485,
     "lng": 30.4455
   },
@@ -3804,7 +3804,7 @@
     "address": "улица Наличная",
     "membersCount": 156,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 59.9485,
     "lng": 30.2355
   },
@@ -3817,7 +3817,7 @@
     "address": "бульвар Новаторов",
     "membersCount": 116,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 59.8505,
     "lng": 30.2555
   },
@@ -3830,7 +3830,7 @@
     "address": "п. Новогорелово, ул. Современников, 2А, ТЦ KRONUNG",
     "membersCount": 77,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 59.7885,
     "lng": 30.1455
   },
@@ -3843,7 +3843,7 @@
     "address": "ТРЦ Охта Молл",
     "membersCount": 81,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 59.9455,
     "lng": 30.4125
   },
@@ -3856,7 +3856,7 @@
     "address": "Пискарёвский проспект",
     "membersCount": 123,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 59.9785,
     "lng": 30.4085
   },
@@ -3869,7 +3869,7 @@
     "address": "Политехническая улица",
     "membersCount": 166,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 60.0055,
     "lng": 30.3725
   },
@@ -3882,7 +3882,7 @@
     "address": "Пражская улица",
     "membersCount": 64,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 59.8515,
     "lng": 30.3785
   },
@@ -3895,7 +3895,7 @@
     "address": "Пулковское шоссе",
     "membersCount": 99,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 59.8125,
     "lng": 30.3185
   },
@@ -3908,7 +3908,7 @@
     "address": "район Рыбацкое",
     "membersCount": 121,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 59.8385,
     "lng": 30.5085
   },
@@ -3921,7 +3921,7 @@
     "address": "улица Салова",
     "membersCount": 98,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 59.8885,
     "lng": 30.3685
   },
@@ -3934,7 +3934,7 @@
     "address": "улица Савушкина",
     "membersCount": 151,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.9855,
     "lng": 30.2685
   },
@@ -3947,7 +3947,7 @@
     "address": "Северный проспект",
     "membersCount": 107,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 60.0385,
     "lng": 30.3585
   },
@@ -3960,7 +3960,7 @@
     "address": "улица Шаврова",
     "membersCount": 105,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 60.0085,
     "lng": 30.2385
   },
@@ -3973,7 +3973,7 @@
     "address": "Шушары",
     "membersCount": 58,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.8085,
     "lng": 30.3785
   },
@@ -3986,7 +3986,7 @@
     "address": "Славянка",
     "membersCount": 83,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 59.7425,
     "lng": 30.4525
   },
@@ -3999,7 +3999,7 @@
     "address": "проспект Стачек",
     "membersCount": 101,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.8665,
     "lng": 30.2615
   },
@@ -4012,7 +4012,7 @@
     "address": "Светлановский проспект",
     "membersCount": 82,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 60.0125,
     "lng": 30.3285
   },
@@ -4025,7 +4025,7 @@
     "address": "Таллинское шоссе",
     "membersCount": 76,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 59.8385,
     "lng": 30.1485
   },
@@ -4038,7 +4038,7 @@
     "address": "проспект Ветеранов",
     "membersCount": 157,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 59.8425,
     "lng": 30.2155
   },
@@ -4051,7 +4051,7 @@
     "address": "Янино",
     "membersCount": 80,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 59.9485,
     "lng": 30.5755
   },
@@ -4064,7 +4064,7 @@
     "address": "улица Заречная",
     "membersCount": 137,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.9985,
     "lng": 30.2285
   },
@@ -4077,7 +4077,7 @@
     "address": "проспект Ленина, 108, ТЦ «Автозаводец», 4 этаж",
     "membersCount": 88,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 56.256,
     "lng": 43.904
   },
@@ -4090,7 +4090,7 @@
     "address": "улица Бурнаковская, 103а",
     "membersCount": 92,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 56.335,
     "lng": 43.9
   },
@@ -4103,7 +4103,7 @@
     "address": "улица Родионова, 201, корп. 1",
     "membersCount": 122,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 56.315,
     "lng": 44.045
   },
@@ -4116,7 +4116,7 @@
     "address": "проспект Кораблестроителей, 76",
     "membersCount": 70,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 56.355,
     "lng": 43.85
   },
@@ -4129,7 +4129,7 @@
     "address": "улица Бетанкура, 1, ТРЦ «Седьмое Небо»",
     "membersCount": 166,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.33,
     "lng": 43.95
   },
@@ -4142,7 +4142,7 @@
     "address": "улица Родионова, 187, ТРЦ «Фантастика», 3 этаж",
     "membersCount": 59,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 56.312,
     "lng": 44.04
   },
@@ -4155,7 +4155,7 @@
     "address": "площадь Советская, 5, ТРЦ «Жар-птица», 2 этаж",
     "membersCount": 137,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 56.3,
     "lng": 44.01
   },
@@ -4168,7 +4168,7 @@
     "address": "улица Белинского, 124, ТЦ «Счастье», 6 этаж",
     "membersCount": 137,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 56.31,
     "lng": 44.02
   },
@@ -4181,7 +4181,7 @@
     "address": "улица Белинского, 61",
     "membersCount": 130,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 56.318,
     "lng": 44.015
   },
@@ -4194,7 +4194,7 @@
     "address": "Южное шоссе, 2Г, ТЦ «Крымъ»",
     "membersCount": 122,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.24,
     "lng": 43.88
   },
@@ -4207,7 +4207,7 @@
     "address": "Трубная площадь, 2, ТЦ «Неглинная Галерея», -1 этаж",
     "membersCount": 172,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.7678,
     "lng": 37.6259
   },
@@ -4220,7 +4220,7 @@
     "address": "улица Поречная, 10, ТРК «MARi», 3 этаж",
     "membersCount": 100,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.6502,
     "lng": 37.7448
   },
@@ -4233,7 +4233,7 @@
     "address": "улица Красного Маяка, 2Б, ТРЦ Columbus, 3 этаж",
     "membersCount": 159,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.6126,
     "lng": 37.6054
   },
@@ -4246,7 +4246,7 @@
     "address": "район Академическая",
     "membersCount": 64,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 60.0125,
     "lng": 30.3955
   },
@@ -4259,7 +4259,7 @@
     "address": "Комендантский проспект",
     "membersCount": 73,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 60.0085,
     "lng": 30.2585
   },
@@ -4272,7 +4272,7 @@
     "address": "Купчино",
     "membersCount": 107,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 59.8515,
     "lng": 30.3685
   },
@@ -4285,7 +4285,7 @@
     "address": "поселение Сосенское, улица Николо-Хованская, 28, стр. 5",
     "membersCount": 84,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.5708,
     "lng": 37.4662
   },
@@ -4298,7 +4298,7 @@
     "address": "улица Юрия Гагарина, 55А",
     "membersCount": 66,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 54.695,
     "lng": 20.52
   },
@@ -4311,7 +4311,7 @@
     "address": "улица Фатыха Амирхана, 101В",
     "membersCount": 84,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.82,
     "lng": 49.15
   },
@@ -4324,7 +4324,7 @@
     "address": "улица Юлиуса Фучика, 90, ТРЦ «Франт», 3 этаж",
     "membersCount": 152,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.755,
     "lng": 49.23
   },
@@ -4337,7 +4337,7 @@
     "address": "улица Академика Глушко, 16Г",
     "membersCount": 174,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.75,
     "lng": 49.19
   },
@@ -4350,7 +4350,7 @@
     "address": "улица Гайдара, 136",
     "membersCount": 88,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 54.745,
     "lng": 20.52
   },
@@ -4363,7 +4363,7 @@
     "address": "Московский проспект, 273",
     "membersCount": 95,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 54.7,
     "lng": 20.55
   },
@@ -4376,7 +4376,7 @@
     "address": "переулок Товарный, 5",
     "membersCount": 138,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 54.69,
     "lng": 20.5
   },
@@ -4389,7 +4389,7 @@
     "address": "улица Чекистов, 81а",
     "membersCount": 56,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 54.71,
     "lng": 20.47
   },
@@ -4402,7 +4402,7 @@
     "address": "улица Ульянова, 14",
     "membersCount": 143,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 43.434,
     "lng": 39.918
   },
@@ -4415,7 +4415,7 @@
     "address": "Новомытищинский проспект, 31А",
     "membersCount": 100,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.9158,
     "lng": 37.7454
   },
@@ -4428,7 +4428,7 @@
     "address": "улица Рихарда Зорге, 68",
     "membersCount": 132,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.75,
     "lng": 49.2
   },
@@ -4441,7 +4441,7 @@
     "address": "улица 40-летия Победы",
     "membersCount": 111,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 45.0085,
     "lng": 39.0685
   },
@@ -4454,7 +4454,7 @@
     "address": "улица Шейнкмана, 21",
     "membersCount": 83,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 56.838,
     "lng": 60.5965
   },
@@ -4467,7 +4467,7 @@
     "address": "улица Рождественская, 11",
     "membersCount": 113,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.9112,
     "lng": 37.7415
   },
@@ -4480,7 +4480,7 @@
     "address": "улица Гимназическая",
     "membersCount": 116,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 45.0325,
     "lng": 38.9725
   },
@@ -4493,7 +4493,7 @@
     "address": "улица Лесной Городок, 4В",
     "membersCount": 117,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.3,
     "lng": 44.02
   },
@@ -4506,7 +4506,7 @@
     "address": "улица Малышева, 5, ТРЦ «Алатырь», 6 этаж",
     "membersCount": 131,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 56.8385,
     "lng": 60.61
   },
@@ -4519,7 +4519,7 @@
     "address": "улица Войкова, 16/23",
     "membersCount": 170,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 43.5855,
     "lng": 39.7195
   },
@@ -4532,7 +4532,7 @@
     "address": "улица им. 70-летия Октября",
     "membersCount": 173,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 45.0125,
     "lng": 39.0285
   },
@@ -4545,7 +4545,7 @@
     "address": "улица Дьяконова, 11А, 2 этаж",
     "membersCount": 169,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 56.25,
     "lng": 43.89
   },
@@ -4558,7 +4558,7 @@
     "address": "проспект Ленина, 109, БЦ «Чайка», 2 этаж",
     "membersCount": 65,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 56.255,
     "lng": 43.905
   },
@@ -4571,7 +4571,7 @@
     "address": "улица Куйбышева, 21, 2 этаж",
     "membersCount": 96,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 43.431,
     "lng": 39.914
   },
@@ -4584,7 +4584,7 @@
     "address": "улица Ватутина, 36/3",
     "membersCount": 149,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 54.985,
     "lng": 82.9
   },
@@ -4597,7 +4597,7 @@
     "address": "улица Ново-Рыбинская, 19-21, ТЦ «Квартал», 4 этаж",
     "membersCount": 83,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 59.9165,
     "lng": 30.355
   },
@@ -4610,7 +4610,7 @@
     "address": "улица Народная, 4, МФДЦ «Невский», 4 этаж",
     "membersCount": 138,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 59.878,
     "lng": 30.458
   },
@@ -4623,7 +4623,7 @@
     "address": "улица Кустодиева, 7, корп. 2, ЖК «Лондон Парк»",
     "membersCount": 167,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 60.038,
     "lng": 30.355
   },
@@ -4636,7 +4636,7 @@
     "address": "улица Савушкина, 126, ТРК «Атлантик Сити»",
     "membersCount": 172,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 59.985,
     "lng": 30.215
   },
@@ -4649,7 +4649,7 @@
     "address": "улица Солдата Корзуна, 1, корп. 2, лит. Б",
     "membersCount": 154,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.841,
     "lng": 30.218
   },
@@ -4662,7 +4662,7 @@
     "address": "проспект Народного Ополчения, 6, ТК «Путиловский»",
     "membersCount": 131,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 59.851,
     "lng": 30.269
   },
@@ -4675,7 +4675,7 @@
     "address": "улица Коллонтай, 31, корп. 1",
     "membersCount": 82,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 59.917,
     "lng": 30.482
   },
@@ -4688,7 +4688,7 @@
     "address": "улица ЗИП / Завод Измерительных Приборов",
     "membersCount": 71,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 45.0685,
     "lng": 38.9685
   },
@@ -4701,7 +4701,7 @@
     "address": "микрорайон Фестивальный",
     "membersCount": 88,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 45.0585,
     "lng": 38.9485
   },
@@ -4714,7 +4714,7 @@
     "address": "улица им. 40-летия Победы / Пашковский",
     "membersCount": 166,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 45.0285,
     "lng": 39.1085
   },
@@ -4727,7 +4727,7 @@
     "address": "улица Ташкентская, 3, корп. 3, БЦ «Фландрия Плаза»",
     "membersCount": 60,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.8755,
     "lng": 30.3755
   },
@@ -4740,7 +4740,7 @@
     "address": "улица Героев России, 2, 7 этаж",
     "membersCount": 68,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 56.843,
     "lng": 60.605
   },
@@ -4753,7 +4753,7 @@
     "address": "улица Соликамская, 16",
     "membersCount": 161,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 56.82,
     "lng": 60.645
   },
@@ -4766,7 +4766,7 @@
     "address": "улица Максима Горького, 252, Hampton by Hilton",
     "membersCount": 161,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.319,
     "lng": 44.025
   },
@@ -4779,7 +4779,7 @@
     "address": "Казанское шоссе, 11, ТРК «Индиго Life»",
     "membersCount": 104,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 56.295,
     "lng": 44.05
   },
@@ -4792,7 +4792,7 @@
     "address": "улица Коминтерна, 105А, ТРК «Золотая Миля»",
     "membersCount": 129,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 56.345,
     "lng": 43.87
   },
@@ -4805,7 +4805,7 @@
     "address": "улица Победы, 153/а, цокольный этаж",
     "membersCount": 100,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 43.9085,
     "lng": 39.333
   },
@@ -4818,7 +4818,7 @@
     "address": "Gym 80 / силовой зал",
     "membersCount": 173,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.7285,
     "lng": 37.6085
   },
@@ -4831,7 +4831,7 @@
     "address": "улица Восточно-Кругликовская",
     "membersCount": 132,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 45.0785,
     "lng": 39.0485
   },
@@ -4844,7 +4844,7 @@
     "address": "улица Гоголя, 44",
     "membersCount": 115,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.042,
     "lng": 82.925
   },
@@ -4857,7 +4857,7 @@
     "address": "улица Дуси Ковальчук, 179/4, ТЦ «Калина Центр», 4 этаж",
     "membersCount": 104,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.06,
     "lng": 82.915
   },
@@ -4870,7 +4870,7 @@
     "address": "улица Кирова, 44/1, 4 этаж",
     "membersCount": 70,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.025,
     "lng": 82.935
   },
@@ -4883,7 +4883,7 @@
     "address": "площадь Карла Маркса, 6/1, ТРЦ «KLP», 4 этаж",
     "membersCount": 117,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 54.982,
     "lng": 82.892
   },
@@ -4896,7 +4896,7 @@
     "address": "улица Героев Революции, 57",
     "membersCount": 172,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 54.96,
     "lng": 83.05
   },
@@ -4909,7 +4909,7 @@
     "address": "улица Фрунзе, 238, ТРЦ «Сибирский молл», 2 этаж",
     "membersCount": 102,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.045,
     "lng": 82.955
   },
@@ -4922,7 +4922,7 @@
     "address": "улица Вилюйская, 24, корп. 1, ТЦ «Ласточка», 2 этаж",
     "membersCount": 71,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55,
     "lng": 82.98
   },
@@ -4935,7 +4935,7 @@
     "address": "улица Ясный берег, 14Б, 2 этаж",
     "membersCount": 96,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 54.97,
     "lng": 82.85
   },
@@ -4948,7 +4948,7 @@
     "address": "улица Гоголя, 15, ТЦ «Юпитер»",
     "membersCount": 55,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.04,
     "lng": 82.92
   },
@@ -4961,7 +4961,7 @@
     "address": "улица Болотная, 2, корп. 2",
     "membersCount": 147,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 59.9855,
     "lng": 30.345
   },
@@ -4974,7 +4974,7 @@
     "address": "проезд Дежнёва, 34, стр. 2",
     "membersCount": 83,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.8855,
     "lng": 37.6302
   },
@@ -4987,7 +4987,7 @@
     "address": "улица Кастанаевская, 42, корп. 2",
     "membersCount": 129,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.7275,
     "lng": 37.4718
   },
@@ -5000,7 +5000,7 @@
     "address": "улица Уральская / ЮМР",
     "membersCount": 129,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 45.0185,
     "lng": 39.0485
   },
@@ -5013,7 +5013,7 @@
     "address": "улица Тургенева / ЧМР",
     "membersCount": 170,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 45.0485,
     "lng": 38.9585
   },
@@ -5026,7 +5026,7 @@
     "address": "улица Высоцкого, 6Б",
     "membersCount": 136,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.862,
     "lng": 60.665
   },
@@ -5039,7 +5039,7 @@
     "address": "Новомытищинский проспект, 4А, ЖК КИТ",
     "membersCount": 55,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.9124,
     "lng": 37.7326
   },
@@ -5052,7 +5052,7 @@
     "address": "улица Автозаводская, 18, ТРЦ «Ривьера», -2 этаж",
     "membersCount": 133,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.7046,
     "lng": 37.6438
   },
@@ -5065,7 +5065,7 @@
     "address": "улица Саянская, 7, 3 этаж",
     "membersCount": 99,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.75,
     "lng": 37.8255
   },
@@ -5078,7 +5078,7 @@
     "address": "улица Дмитриевского, 10, 3 этаж",
     "membersCount": 75,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.7125,
     "lng": 37.8955
   },
@@ -5091,7 +5091,7 @@
     "address": "Измайловское шоссе, 71, корпус «Дельта», 2 этаж",
     "membersCount": 86,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.7905,
     "lng": 37.7485
   },
@@ -5104,7 +5104,7 @@
     "address": "улица Российская / Энка",
     "membersCount": 96,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 45.0525,
     "lng": 39.0185
   },
@@ -5117,7 +5117,7 @@
     "address": "улица Галимджана Баруди, 8, ТЦ «Московский»",
     "membersCount": 60,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.83,
     "lng": 49.09
   },
@@ -5130,7 +5130,7 @@
     "address": "улица Минская, 9, ТК «Азино», 5 этаж",
     "membersCount": 101,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.77,
     "lng": 49.22
   },
@@ -5143,7 +5143,7 @@
     "address": "улица Голубинская, 16",
     "membersCount": 138,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.6015,
     "lng": 37.5365
   },
@@ -5156,7 +5156,7 @@
     "address": "улица Сергеева, 4",
     "membersCount": 148,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 54.715,
     "lng": 20.505
   },
@@ -5169,7 +5169,7 @@
     "address": "проспект Вернадского, 29, ТОЦ «Лето», цокольный этаж",
     "membersCount": 159,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.6797,
     "lng": 37.5028
   },
@@ -5182,7 +5182,7 @@
     "address": "набережная Обводного канала, 93А, МДЦ «Нептун»",
     "membersCount": 58,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 59.914,
     "lng": 30.321
   },
@@ -5195,7 +5195,7 @@
     "address": "улица Генерала Челнокова, 25, 3-4 этаж",
     "membersCount": 133,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 54.75,
     "lng": 20.51
   },
@@ -5208,7 +5208,7 @@
     "address": "улица Лухмановская, 6",
     "membersCount": 100,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.7055,
     "lng": 37.9085
   },
@@ -5221,7 +5221,7 @@
     "address": "улица Семашко, 6Б",
     "membersCount": 65,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.8974,
     "lng": 37.6688
   },
@@ -5234,7 +5234,7 @@
     "address": "улица Бунинская аллея, 9А",
     "membersCount": 115,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.5382,
     "lng": 37.5154
   },
@@ -5247,7 +5247,7 @@
     "address": "Олимпийский проспект, 29А, БЦ Волковский",
     "membersCount": 153,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.9132,
     "lng": 37.7389
   },
@@ -5260,7 +5260,7 @@
     "address": "улица Хабарова, 2, г. Московский",
     "membersCount": 147,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.5991,
     "lng": 37.3548
   },
@@ -5273,7 +5273,7 @@
     "address": "улица 2-я Вольская, 11А",
     "membersCount": 160,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.6824,
     "lng": 37.9285
   },
@@ -5286,7 +5286,7 @@
     "address": "улица Ленина, 102А",
     "membersCount": 127,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 43.4295,
     "lng": 39.9235
   },
@@ -5299,7 +5299,7 @@
     "address": "улица Планерная, 91, корп. 1, стр. 1",
     "membersCount": 135,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 59.999,
     "lng": 30.239
   },
@@ -5312,7 +5312,7 @@
     "address": "улица Мастеров, 35Б, спортивный манеж «Физра», 2 этаж",
     "membersCount": 170,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.86,
     "lng": 49.02
   },
@@ -5325,7 +5325,7 @@
     "address": "улица Парадная, 3, корп. 2, ЖК «Парадный квартал»",
     "membersCount": 68,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 59.944,
     "lng": 30.37
   },
@@ -5338,7 +5338,7 @@
     "address": "улица Волгоградская, 20",
     "membersCount": 76,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 56.82,
     "lng": 60.575
   },
@@ -5351,7 +5351,7 @@
     "address": "улица Московская / ФМР",
     "membersCount": 97,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 45.0685,
     "lng": 39.0285
   },
@@ -5364,7 +5364,7 @@
     "address": "улица Серафимы Дерябиной, 24",
     "membersCount": 138,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 56.808,
     "lng": 60.56
   },
@@ -5377,7 +5377,7 @@
     "address": "Дмитровское шоссе, 98, ТРЦ РТС, этажи 5–7",
     "membersCount": 125,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.88,
     "lng": 37.545
   },
@@ -5390,7 +5390,7 @@
     "address": "улица Хохрякова, 10",
     "membersCount": 168,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 56.8375,
     "lng": 60.597
   },
@@ -5403,7 +5403,7 @@
     "address": "улица Краснококшайская, 119",
     "membersCount": 96,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.83,
     "lng": 49.08
   },
@@ -5416,7 +5416,7 @@
     "address": "улица Родонитовая, 29",
     "membersCount": 61,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.7975,
     "lng": 60.631
   },
@@ -5429,7 +5429,7 @@
     "address": "улица Ивана Сусанина, 1/1",
     "membersCount": 153,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.8665,
     "lng": 37.5475
   },
@@ -5442,7 +5442,7 @@
     "address": "улица Дублёр Сибирского тракта, 2",
     "membersCount": 57,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 56.858,
     "lng": 60.67
   },
@@ -5455,7 +5455,7 @@
     "address": "Ленинградский проспект, 80, корп. 37",
     "membersCount": 145,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.8055,
     "lng": 37.5155
   },
@@ -5468,7 +5468,7 @@
     "address": "улица Титова, 35а",
     "membersCount": 64,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 56.78,
     "lng": 60.63
   },
@@ -5481,7 +5481,7 @@
     "address": "улица Викулова, 24",
     "membersCount": 138,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 56.845,
     "lng": 60.56
   },
@@ -5494,7 +5494,7 @@
     "address": "Благовещенский переулок, 1Б",
     "membersCount": 77,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.7631,
     "lng": 37.5952
   },
@@ -5507,7 +5507,7 @@
     "address": "улица Артиллерийская, 22",
     "membersCount": 55,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 54.729,
     "lng": 20.54
   },
@@ -5520,7 +5520,7 @@
     "address": "улица Баранова, 36",
     "membersCount": 103,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 54.71,
     "lng": 20.49
   },
@@ -5533,7 +5533,7 @@
     "address": "улица Менделеева, 61А",
     "membersCount": 145,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 54.7,
     "lng": 20.52
   },
@@ -5546,7 +5546,7 @@
     "address": "улица Согласия, 44А",
     "membersCount": 84,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 54.72,
     "lng": 20.53
   },
@@ -5559,7 +5559,7 @@
     "address": "улица Северная",
     "membersCount": 146,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 45.0485,
     "lng": 38.9825
   },
@@ -5572,7 +5572,7 @@
     "address": "1-я Тверская-Ямская улица, 2А",
     "membersCount": 132,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.7712,
     "lng": 37.5958
   },
@@ -5585,7 +5585,7 @@
     "address": "улица Новодмитровская, 2, корп. 7, МФК «Савеловский Сити»",
     "membersCount": 83,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.8051,
     "lng": 37.5902
   },
@@ -5598,7 +5598,7 @@
     "address": "Волковское шоссе, 23Г, ТЦ Март",
     "membersCount": 93,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.9089,
     "lng": 37.7286
   },
@@ -5611,7 +5611,7 @@
     "address": "улица Нижегородская, 29–33, БЦ «Нижегородский»",
     "membersCount": 90,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.7382,
     "lng": 37.6981
   },
@@ -5624,7 +5624,7 @@
     "address": "улица Верхоянская, 9",
     "membersCount": 145,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.8548,
     "lng": 37.6525
   },
@@ -5637,7 +5637,7 @@
     "address": "улица Дивенская, 4",
     "membersCount": 148,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.96,
     "lng": 30.315
   },
@@ -5650,7 +5650,7 @@
     "address": "улица Орловская, 1, корп. 2",
     "membersCount": 151,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 59.9485,
     "lng": 30.3705
   },
@@ -5663,7 +5663,7 @@
     "address": "улица Чебрикова, 38",
     "membersCount": 135,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 43.595,
     "lng": 39.73
   },
@@ -5676,7 +5676,7 @@
     "address": "улица Кирпичная, 24Б",
     "membersCount": 55,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 43.428,
     "lng": 39.935
   },
@@ -5689,7 +5689,7 @@
     "address": "улица Свердлова, 55, 5 этаж",
     "membersCount": 90,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 43.4365,
     "lng": 39.926
   },
@@ -5702,7 +5702,7 @@
     "address": "микрорайон Гидростроителей",
     "membersCount": 142,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 45.0885,
     "lng": 39.0085
   },
@@ -5715,7 +5715,7 @@
     "address": "улица Артиллерийская, 34",
     "membersCount": 96,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 54.7306,
     "lng": 20.5427
   },
@@ -5728,7 +5728,7 @@
     "address": "Большой Тишинский переулок, 10, стр. 1",
     "membersCount": 119,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.7674,
     "lng": 37.5751
   },
@@ -5741,7 +5741,7 @@
     "address": "улица Восстания, 100, корп. 203А",
     "membersCount": 104,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.85,
     "lng": 49.07
   },
@@ -5754,7 +5754,7 @@
     "address": "улица Челюскинцев, 21",
     "membersCount": 66,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.035,
     "lng": 82.91
   },
@@ -5767,7 +5767,7 @@
     "address": "улица Красная, ТРЦ Галерея",
     "membersCount": 130,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 45.0358,
     "lng": 38.9765
   },
@@ -5780,7 +5780,7 @@
     "address": "ТРЦ Мега Адыгея-Кубань",
     "membersCount": 167,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 45.0125,
     "lng": 38.9285
   },
@@ -5793,7 +5793,7 @@
     "address": "Лиговский проспект, 56Г",
     "membersCount": 56,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 59.924,
     "lng": 30.359
   },
@@ -5806,7 +5806,7 @@
     "address": "проспект Космонавтов, 29г",
     "membersCount": 95,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 56.888,
     "lng": 60.613
   },
@@ -5819,7 +5819,7 @@
     "address": "Ленинский проспект, 111, корп. 1",
     "membersCount": 153,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.6632,
     "lng": 37.5054
   },
@@ -5832,7 +5832,7 @@
     "address": "улица Олега Кошевого, 33",
     "membersCount": 85,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 54.72,
     "lng": 20.5
   },
@@ -5845,7 +5845,7 @@
     "address": "улица Мира, 32/2, ТЦ 4Daily, 2 этаж",
     "membersCount": 94,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.9106,
     "lng": 37.7368
   },
@@ -5858,7 +5858,7 @@
     "address": "улица Лётная, стр. 19, ЖК 9-18",
     "membersCount": 115,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.9056,
     "lng": 37.7552
   },
@@ -5871,7 +5871,7 @@
     "address": "улица Леваневского, 185Б",
     "membersCount": 134,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 45.0385,
     "lng": 38.9785
   },
@@ -5884,7 +5884,7 @@
     "address": "Кубанская набережная, 1",
     "membersCount": 161,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 45.0285,
     "lng": 38.9685
   },
@@ -5897,7 +5897,7 @@
     "address": "улица Стахановская, 3",
     "membersCount": 134,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 45.0355,
     "lng": 38.9485
   },
@@ -5910,7 +5910,7 @@
     "address": "Звёздный",
     "membersCount": 64,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 43.5855,
     "lng": 39.7235
   },
@@ -5923,7 +5923,7 @@
     "address": "улица Фатыха Амирхана, 1а",
     "membersCount": 145,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.815,
     "lng": 49.135
   },
@@ -5936,7 +5936,7 @@
     "address": "улица Чистопольская, 69",
     "membersCount": 126,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.81,
     "lng": 49.14
   },
@@ -5949,7 +5949,7 @@
     "address": "улица Мусина, 39",
     "membersCount": 59,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.82,
     "lng": 49.1
   },
@@ -5962,7 +5962,7 @@
     "address": "улица Академика Парина, 1",
     "membersCount": 130,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.74,
     "lng": 49.18
   },
@@ -5975,7 +5975,7 @@
     "address": "Алтуфьевское шоссе, д. 24, к. 1 ТЦ «Улей», 2-й этаж",
     "membersCount": 103,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.862984,
     "lng": 37.585404
   },
@@ -5988,7 +5988,7 @@
     "address": "м. Автозаводская, ТРЦ Глобал Молл, ул. Ленинская Слобода, д. 26, стр. 2",
     "membersCount": 147,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.712183,
     "lng": 37.656697
   },
@@ -6001,7 +6001,7 @@
     "address": "ул. Миклухо-Маклая, 18, к. 2 ТЦ «Беляево», 2-й этаж.",
     "membersCount": 242,
     "activeNow": 16,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.644902,
     "lng": 37.519422
   },
@@ -6014,7 +6014,7 @@
     "address": "пр-т Балаклавский, 16а",
     "membersCount": 152,
     "activeNow": 16,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.642245976534,
     "lng": 37.603548482803
   },
@@ -6027,7 +6027,7 @@
     "address": "пр-д Дежнева, 23 ТЦ «Вавилон - 92», 1 эт.",
     "membersCount": 195,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.869542789221,
     "lng": 37.637283228836
   },
@@ -6040,7 +6040,7 @@
     "address": "Москва-Сити (Башня Федерация), Пресненская наб., д. 12, -4-й этаж",
     "membersCount": 143,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.749753778757,
     "lng": 37.537392660852
   },
@@ -6053,7 +6053,7 @@
     "address": "ул. Васи Алексеева, д. 4, стр 1 ТЦ «Форум», 2-й этаж",
     "membersCount": 183,
     "activeNow": 15,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 59.880369,
     "lng": 30.264556
   },
@@ -6066,7 +6066,7 @@
     "address": "ул. Вавилова, д. 3, ТРЦ \"Гагаринский\"",
     "membersCount": 81,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.707124677602,
     "lng": 37.591268342335
   },
@@ -6079,7 +6079,7 @@
     "address": "г. Воронеж, ул. Кольцовская, 35, ТЦ «Галерея Чижова», 3 этаж",
     "membersCount": 128,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 51.666289,
     "lng": 39.191996
   },
@@ -6092,7 +6092,7 @@
     "address": "Каширское ш., д. 80, ТЦ \"Борисовский\"",
     "membersCount": 102,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.624590159818,
     "lng": 37.70892972976
   },
@@ -6105,7 +6105,7 @@
     "address": "Королев, ул. Коммунальная, д.3. ТЦ DESPORT",
     "membersCount": 70,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.916236,
     "lng": 37.849675
   },
@@ -6118,7 +6118,7 @@
     "address": "ЖК «Оранж Парк», ул. Сосновая, 5",
     "membersCount": 145,
     "activeNow": 15,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.672470494106,
     "lng": 37.857911289688
   },
@@ -6131,7 +6131,7 @@
     "address": "улица Красная / центр",
     "membersCount": 161,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 45.0355,
     "lng": 38.9755
   },
@@ -6144,7 +6144,7 @@
     "address": "м. Крылатское, Осенний б-р, 12, ТЦ Крылатский",
     "membersCount": 112,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.759224,
     "lng": 37.409223
   },
@@ -6157,7 +6157,7 @@
     "address": "Большая Черемушкинская ул., д. 1 ТРЦ «РИО» Севастопольский, 3-й этаж",
     "membersCount": 103,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.689078074328,
     "lng": 37.601752645477
   },
@@ -6170,7 +6170,7 @@
     "address": "Шереметьевская ул., 6 корпус 1, эт. -1",
     "membersCount": 186,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.795796210399,
     "lng": 37.617130271164
   },
@@ -6183,7 +6183,7 @@
     "address": "Люблинская улица, 169 к2 ТРЦ \"Мариэль\", 4 этаж",
     "membersCount": 215,
     "activeNow": 17,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.650559,
     "lng": 37.746724
   },
@@ -6196,7 +6196,7 @@
     "address": "м. Аминьевская, ТЦ ОМА, Очаковское шоссе, 3А/8, 3 этаж",
     "membersCount": 41,
     "activeNow": 17,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.695163,
     "lng": 37.463499
   },
@@ -6209,7 +6209,7 @@
     "address": "Невский пр., д.114-116, ТК \"Невский Центр\", 6 этаж",
     "membersCount": 229,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 59.931941,
     "lng": 30.359149
   },
@@ -6222,7 +6222,7 @@
     "address": "г. Реутов, Носовихинское шоссе, д. 9",
     "membersCount": 81,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.745544,
     "lng": 37.860171
   },
@@ -6235,7 +6235,7 @@
     "address": "г. Одинцово, Можайское шоссе, 32Б 2 этаж",
     "membersCount": 136,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.677037,
     "lng": 37.281926
   },
@@ -6248,7 +6248,7 @@
     "address": "г. Санкт-Петербург ул. Плесецкая, 8к2с1",
     "membersCount": 72,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 60.033423,
     "lng": 30.21364
   },
@@ -6261,7 +6261,7 @@
     "address": "Прокшино, ТЦ «Сиеста» вн.тер.г. поселение Сосенское, ул. Николо-Хованская, 7с1",
     "membersCount": 74,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.588883,
     "lng": 37.451528
   },
@@ -6274,7 +6274,7 @@
     "address": "Мичуринский пр., д. 27 ТЦ «Тиара», 3-й этаж",
     "membersCount": 255,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.697549752634,
     "lng": 37.500215038071
   },
@@ -6287,7 +6287,7 @@
     "address": "поселение Внуковское, ул. Корнея Чуковского, д. 2 ТЦ “Сказка”, 3 этаж",
     "membersCount": 54,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.63341,
     "lng": 37.336574
   },
@@ -6300,7 +6300,7 @@
     "address": "Рогожский вал, д.10",
     "membersCount": 137,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.741084,
     "lng": 37.674187
   },
@@ -6313,7 +6313,7 @@
     "address": "Рязанский проспект, 30, к. 2, 4-й этаж",
     "membersCount": 96,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.718337812305,
     "lng": 37.783883609787
   },
@@ -6326,7 +6326,7 @@
     "address": "ул. Авиационная, д. 66, этаж 2",
     "membersCount": 169,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.809843605478,
     "lng": 37.459867616693
   },
@@ -6339,7 +6339,7 @@
     "address": "Дмитровское шоссе, 85",
     "membersCount": 128,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.862722,
     "lng": 37.547836
   },
@@ -6352,7 +6352,7 @@
     "address": "Семёновская площадь, д. 1, ТЦ \"Семеновский\", 5-й этаж",
     "membersCount": 224,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.78296102459,
     "lng": 37.721347935473
   },
@@ -6365,7 +6365,7 @@
     "address": "Севастопольский пр-т, д. 28, корп 2, 2-й этаж",
     "membersCount": 62,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.664764704064,
     "lng": 37.578253970792
   },
@@ -6378,7 +6378,7 @@
     "address": "Cтрогинский бул., д. 1, ТЦ \"Дарья\", 4-й этаж.",
     "membersCount": 175,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.80589373638,
     "lng": 37.395792216949
   },
@@ -6391,7 +6391,7 @@
     "address": "Уфа, ул. Губайдуллина, д. 6 ТЦ Аркада, 2-й этаж",
     "membersCount": 115,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 54.720316,
     "lng": 56.001772
   },
@@ -6404,7 +6404,7 @@
     "address": "г. Казань, ул Петербургская, д. 1, ТЦ Кольцо 4-й этаж",
     "membersCount": 259,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.78643,
     "lng": 49.124335
   },
@@ -6417,7 +6417,7 @@
     "address": "просп. Андропова, 8, 4-й этаж ТРЦ \"Мегаполис\"",
     "membersCount": 118,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.69587,
     "lng": 37.664905
   },
@@ -6430,7 +6430,7 @@
     "address": "ТРЦ \"Фокус\", Молдавская, 16",
     "membersCount": 206,
     "activeNow": 14,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.19058,
     "lng": 61.303254
   },
@@ -6443,7 +6443,7 @@
     "address": "Средний проспект В.О., дом 36/40, лит. А ТОЦ «Остров», 3-й этаж",
     "membersCount": 97,
     "activeNow": 15,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 59.941863,
     "lng": 30.276026
   },
@@ -6456,7 +6456,7 @@
     "address": "Екатеринбург, ул. Вайнера, д. 48 ТЦ DESPORT 4-5 этаж",
     "membersCount": 131,
     "activeNow": 17,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 56.829931,
     "lng": 60.596262
   },
@@ -6469,7 +6469,7 @@
     "address": "Старопетровский пр., 1, стр. 2, ТЦ Baby Store, 1-й этаж",
     "membersCount": 122,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.823773189044,
     "lng": 37.500401095423
   },
@@ -6482,7 +6482,7 @@
     "address": "пр-т Х. Ямашева, д.97, ТК XL 3-й этаж",
     "membersCount": 157,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.825113,
     "lng": 49.152345
   },
@@ -6495,7 +6495,7 @@
     "address": "Ясногорская ул., 7А, ТЦ \"Этажи\", 3-й этаж",
     "membersCount": 130,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.608676650002,
     "lng": 37.537529415096
   },
@@ -6508,7 +6508,7 @@
     "address": "Проспект Вернадского, 86А, ТЦ Avenue Southwest, 4 этаж",
     "membersCount": 69,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.662979086166,
     "lng": 37.48085181349
   },
@@ -6521,7 +6521,7 @@
     "address": "проспект Науки, 23/2",
     "membersCount": 169,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 60.0128,
     "lng": 30.3965
   },
@@ -6534,7 +6534,7 @@
     "address": "Большой проспект В.О., 68, ТЦ Балтийский",
     "membersCount": 147,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 59.9345,
     "lng": 30.2558
   },
@@ -6547,7 +6547,7 @@
     "address": "проспект Большевиков, 7/2",
     "membersCount": 81,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 59.9168,
     "lng": 30.4785
   },
@@ -6560,7 +6560,7 @@
     "address": "Привокзальная площадь, 3А/1",
     "membersCount": 64,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 60.0505,
     "lng": 30.4422
   },
@@ -6573,7 +6573,7 @@
     "address": "Европейский проспект, 13",
     "membersCount": 63,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 59.9086,
     "lng": 30.5135
   },
@@ -6586,7 +6586,7 @@
     "address": "Транспортный переулок, 1 литера А",
     "membersCount": 144,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 59.9208,
     "lng": 30.3555
   },
@@ -6599,7 +6599,7 @@
     "address": "проспект Маршака, 10",
     "membersCount": 89,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 60.0005,
     "lng": 30.4158
   },
@@ -6612,7 +6612,7 @@
     "address": "улица Екатерининская, 18/3",
     "membersCount": 167,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 60.0512,
     "lng": 30.4428
   },
@@ -6625,7 +6625,7 @@
     "address": "проспект Наставников, 24/1",
     "membersCount": 154,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 59.9458,
     "lng": 30.4702
   },
@@ -6638,7 +6638,7 @@
     "address": "улица Красного Текстильщика, 10-12 литера C",
     "membersCount": 78,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 59.9295,
     "lng": 30.3658
   },
@@ -6651,7 +6651,7 @@
     "address": "проспект Энгельса, 120",
     "membersCount": 137,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 60.0368,
     "lng": 30.3218
   },
@@ -6664,7 +6664,7 @@
     "address": "Санкт-Петербургский проспект, 60",
     "membersCount": 140,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.8778,
     "lng": 29.9075
   },
@@ -6677,7 +6677,7 @@
     "address": "Коломяжский проспект, 15/2",
     "membersCount": 94,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 60.0026,
     "lng": 30.2975
   },
@@ -6690,7 +6690,7 @@
     "address": "проспект Просвещения, 80/1, ТК Прометей",
     "membersCount": 73,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 60.0515,
     "lng": 30.3355
   },
@@ -6703,7 +6703,7 @@
     "address": "улица Академика Павлова, 5В",
     "membersCount": 85,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 59.9728,
     "lng": 30.2685
   },
@@ -6716,7 +6716,7 @@
     "address": "проспект Энгельса, 124/1",
     "membersCount": 96,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 60.0388,
     "lng": 30.3235
   },
@@ -6729,7 +6729,7 @@
     "address": "улица Голландская, 9, мкр Янила Кантри",
     "membersCount": 78,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.9485,
     "lng": 30.5825
   },
@@ -6742,7 +6742,7 @@
     "address": "проспект Маршала Жукова, 35/1",
     "membersCount": 110,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 59.8545,
     "lng": 30.2125
   },
@@ -6755,7 +6755,7 @@
     "address": "ул. Маломосковская, вл14",
     "membersCount": 187,
     "activeNow": 15,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.771145,
     "lng": 37.643767
   },
@@ -6768,7 +6768,7 @@
     "address": "Аминьевское шоссе, 6, МФК Kvartal West, 5 этаж",
     "membersCount": 58,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.866713,
     "lng": 37.544638
   },
@@ -6781,7 +6781,7 @@
     "address": "сад ул. Вильгельма Пика, 16, МФК «Хуамин», 4 этаж",
     "membersCount": 229,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.878273,
     "lng": 37.47881
   },
@@ -6794,7 +6794,7 @@
     "address": "центр Пресненская наб., 8с1, Москва-Сити, башня «Город Столиц»",
     "membersCount": 195,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.774165,
     "lng": 37.586161
   },
@@ -6807,7 +6807,7 @@
     "address": "ул. Усачёва, 13, корп. Г",
     "membersCount": 112,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.8111,
     "lng": 37.80153
   },
@@ -6820,7 +6820,7 @@
     "address": "ул. Дыбенко, д. 7/1, стр. 1, ТЦ Discovery",
     "membersCount": 166,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.844941,
     "lng": 37.634668
   },
@@ -6833,7 +6833,7 @@
     "address": "улица Дмитрия Донского, 19",
     "membersCount": 134,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 54.72,
     "lng": 20.5
   },
@@ -6846,7 +6846,7 @@
     "address": "проспект Вернадского, 6",
     "membersCount": 42,
     "activeNow": 16,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.76158,
     "lng": 37.65821
   },
@@ -6859,7 +6859,7 @@
     "address": "Каширское шоссе, 61Г",
     "membersCount": 45,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": null,
     "lng": null
   },
@@ -6872,7 +6872,7 @@
     "address": "набережная Мартынова, 38А",
     "membersCount": 98,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.9705,
     "lng": 30.2505
   },
@@ -6885,7 +6885,7 @@
     "address": "ул. Ивана Франко, 16",
     "membersCount": 123,
     "activeNow": 15,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.72842,
     "lng": 37.43848
   },
@@ -6898,7 +6898,7 @@
     "address": "Вернадского Ленинский проспект, 109 (ТРЦ «Рио»)",
     "membersCount": 176,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.70706,
     "lng": 37.457061
   },
@@ -6911,7 +6911,7 @@
     "address": "Кубанская набережная, 39",
     "membersCount": 77,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 45.0255,
     "lng": 38.9725
   },
@@ -6924,7 +6924,7 @@
     "address": "Олимпийская набережная, 9, ЖК «Макаровский»",
     "membersCount": 164,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 56.848,
     "lng": 60.599
   },
@@ -6937,7 +6937,7 @@
     "address": "Ленинградское шоссе, 16Ас8",
     "membersCount": 111,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.75468,
     "lng": 37.60877
   },
@@ -6950,7 +6950,7 @@
     "address": "Пятницкое шоссе, 29к5",
     "membersCount": 254,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.66386,
     "lng": 37.54907
   },
@@ -6963,7 +6963,7 @@
     "address": "улица Благовещенская, стр. 13",
     "membersCount": 56,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.9048,
     "lng": 37.7585
   },
@@ -6976,7 +6976,7 @@
     "address": "улица Татищева, 18/2, ЖК «Нагорный»",
     "membersCount": 102,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 56.822,
     "lng": 60.556
   },
@@ -6989,7 +6989,7 @@
     "address": "Черемушки ул. Наметкина, 6к1",
     "membersCount": 58,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.76728,
     "lng": 37.56813
   },
@@ -7002,7 +7002,7 @@
     "address": "улица Щетинкина, 18, ЖК Montblanc",
     "membersCount": 118,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.03,
     "lng": 82.92
   },
@@ -7015,7 +7015,7 @@
     "address": "Оружейный переулок, 41",
     "membersCount": 105,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.7441767,
     "lng": 37.234174
   },
@@ -7028,7 +7028,7 @@
     "address": "1905 года ул. Климашкина, 17с2",
     "membersCount": 253,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.79843,
     "lng": 37.52076
   },
@@ -7041,7 +7041,7 @@
     "address": "1905 года ул. Климашкина, 17с2",
     "membersCount": 251,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.69707,
     "lng": 37.61798
   },
@@ -7054,7 +7054,7 @@
     "address": "улица Тимирязева, 31А",
     "membersCount": 61,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 56.305,
     "lng": 44
   },
@@ -7067,7 +7067,7 @@
     "address": "Вокзал ул. Флотская, д.7, стр.1, 4 этаж",
     "membersCount": 84,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.751041,
     "lng": 37.704862
   },
@@ -7080,7 +7080,7 @@
     "address": "проспект Академика Сахарова, 7, ЖК RED7",
     "membersCount": 252,
     "activeNow": 14,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.7695,
     "lng": 37.6485
   },
@@ -7093,7 +7093,7 @@
     "address": "1905 года ул. Сергея Макеева, 9с5",
     "membersCount": 131,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": null,
     "lng": null
   },
@@ -7106,7 +7106,7 @@
     "address": "Романов переулок, 4с2",
     "membersCount": 174,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.8044,
     "lng": 37.61841
   },
@@ -7119,7 +7119,7 @@
     "address": "бульвар ул. Рябиновая, 3с6 (ЖК «КутузовGRAD I»), Можайский район",
     "membersCount": 103,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.672823,
     "lng": 37.520662
   },
@@ -7132,7 +7132,7 @@
     "address": "Щелковское ш., д.75, ТРЦ «Щелковский» (отдельный вход на лифт до 6 этажа с Щелковского шоссе)",
     "membersCount": 127,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.726603,
     "lng": 37.571688
   },
@@ -7145,7 +7145,7 @@
     "address": "Ильича ул. Крузенштерна, д. 12, корп. 3 (строительный адрес: ул.Золоторожский Вал., д.11, корп. 16-18)",
     "membersCount": 245,
     "activeNow": 17,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.812752,
     "lng": 37.647549
   },
@@ -7158,7 +7158,7 @@
     "address": "Севастопольский проспект, 28Г.",
     "membersCount": 168,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.629739,
     "lng": 37.616414
   },
@@ -7171,7 +7171,7 @@
     "address": "Роща 12-й проезд Марьиной Рощи, вл9с2",
     "membersCount": 139,
     "activeNow": 15,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.6211864,
     "lng": 37.7137715
   },
@@ -7184,7 +7184,7 @@
     "address": "Ильича ул. Крузенштерна, д. 12, корп. 3 (строительный адрес: ул.Золоторожский Вал., д.11, корп. 16-18)",
     "membersCount": 135,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.761558,
     "lng": 37.549067
   },
@@ -7197,7 +7197,7 @@
     "address": "улица Несебрская, 1А, Grand Marina Gallery",
     "membersCount": 116,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 43.5805,
     "lng": 39.7185
   },
@@ -7210,7 +7210,7 @@
     "address": "проспект Стачек, 99, ТРК «Континент»",
     "membersCount": 82,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 59.8512,
     "lng": 30.2684
   },
@@ -7223,7 +7223,7 @@
     "address": "ул. Кулакова, 20к1",
     "membersCount": 137,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.73859127721825,
     "lng": 37.411004499999926
   },
@@ -7236,7 +7236,7 @@
     "address": "Проспект Мира, 188Бк2",
     "membersCount": 247,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": null,
     "lng": null
   },
@@ -7249,7 +7249,7 @@
     "address": "Чапаевский переулок, 3",
     "membersCount": 252,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.824751,
     "lng": 37.49752
   },
@@ -7262,7 +7262,7 @@
     "address": "Варшавское шоссе, 12А",
     "membersCount": 173,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.7058,
     "lng": 37.6255
   },
@@ -7275,7 +7275,7 @@
     "address": "ул. Большая Грузинская, 69",
     "membersCount": 224,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.80494434864393,
     "lng": 37.39068031311035
   },
@@ -7288,7 +7288,7 @@
     "address": "Ленинский проспект д.90/3",
     "membersCount": 228,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.719072,
     "lng": 37.426894
   },
@@ -7301,7 +7301,7 @@
     "address": "Варшавское шоссе, 122А",
     "membersCount": 67,
     "activeNow": 15,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.664227,
     "lng": 37.576622
   },
@@ -7314,7 +7314,7 @@
     "address": "проспект ул.Мосфильмовская, д.1 Б",
     "membersCount": 88,
     "activeNow": 14,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.66946,
     "lng": 37.54227
   },
@@ -7327,7 +7327,7 @@
     "address": "Черемушки ул. Архитектора Власова, 22",
     "membersCount": 167,
     "activeNow": 15,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.663782,
     "lng": 37.511308
   },
@@ -7340,7 +7340,7 @@
     "address": "ул. Ярцевская, вл19",
     "membersCount": 238,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.835244,
     "lng": 37.657576
   },
@@ -7353,7 +7353,7 @@
     "address": "ул. Земляной Вал, 9",
     "membersCount": 237,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.73094,
     "lng": 37.61567
   },
@@ -7366,7 +7366,7 @@
     "address": "ул. Житная, 14с2",
     "membersCount": 61,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.81084,
     "lng": 37.13832
   },
@@ -7379,7 +7379,7 @@
     "address": "Романов переулок, 4с2",
     "membersCount": 129,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.74687,
     "lng": 37.53955
   },
@@ -7392,7 +7392,7 @@
     "address": "улица Фатыха Амирхана, 1г, дворец единоборств «Ак Барс»",
     "membersCount": 123,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.815,
     "lng": 49.135
   },
@@ -7405,7 +7405,7 @@
     "address": "ул. Угличская, 13, к. 1, Лианозовский парк",
     "membersCount": 59,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.8992,
     "lng": 37.5855
   },
@@ -7418,7 +7418,7 @@
     "address": "проспект Ямашева, 115а, Ак Барс Арена",
     "membersCount": 173,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.825,
     "lng": 49.16
   },
@@ -7431,7 +7431,7 @@
     "address": "ул. Авиамоторная, 10",
     "membersCount": 165,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.7518,
     "lng": 37.7175
   },
@@ -7444,7 +7444,7 @@
     "address": "улица Бассейная, 46",
     "membersCount": 153,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 54.715,
     "lng": 20.51
   },
@@ -7457,7 +7457,7 @@
     "address": "ул. Южнобутовская, 44",
     "membersCount": 75,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.5458,
     "lng": 37.5255
   },
@@ -7470,7 +7470,7 @@
     "address": "ул. Жуковского, 14, стр. 1",
     "membersCount": 149,
     "activeNow": 8,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.7658,
     "lng": 37.6385
   },
@@ -7483,7 +7483,7 @@
     "address": "ул. Федосьино, 12",
     "membersCount": 110,
     "activeNow": 4,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.6348,
     "lng": 37.3355
   },
@@ -7496,7 +7496,7 @@
     "address": "ул. Флотская, 5В",
     "membersCount": 120,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.8518,
     "lng": 37.4765
   },
@@ -7509,7 +7509,7 @@
     "address": "ул. Усачёва, 2, стр. 3",
     "membersCount": 140,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.7278,
     "lng": 37.5725
   },
@@ -7522,7 +7522,7 @@
     "address": "проспект Юрия Гагарина, 71",
     "membersCount": 55,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 59.8425,
     "lng": 30.3485
   },
@@ -7535,7 +7535,7 @@
     "address": "Юбилейный проспект, 1А",
     "membersCount": 103,
     "activeNow": 9,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.8895,
     "lng": 37.4298
   },
@@ -7548,7 +7548,7 @@
     "address": "ул. Ткачей, 17",
     "membersCount": 98,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 56.8385,
     "lng": 60.6255
   },
@@ -7561,7 +7561,7 @@
     "address": "ул. Стасова, 182/1",
     "membersCount": 128,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 45.0445,
     "lng": 38.9765
   },
@@ -7574,7 +7574,7 @@
     "address": "Ленинградский проспект, 31А, стр. 1",
     "membersCount": 129,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.7815,
     "lng": 37.5602
   },
@@ -7587,7 +7587,7 @@
     "address": "ул. Кораблестроителей, 32/2",
     "membersCount": 145,
     "activeNow": 1,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 59.9385,
     "lng": 30.2185
   },
@@ -7600,7 +7600,7 @@
     "address": "ул. Мосфильмовская, 88, к. 2",
     "membersCount": 95,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.7125,
     "lng": 37.5058
   },
@@ -7613,7 +7613,7 @@
     "address": "1-й Нагатинский проезд, 10",
     "membersCount": 112,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.6825,
     "lng": 37.6288
   },
@@ -7626,7 +7626,7 @@
     "address": "ул. Карла Маркса, 67",
     "membersCount": 101,
     "activeNow": 2,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 51.6685,
     "lng": 39.2085
   },
@@ -7639,7 +7639,7 @@
     "address": "ул. Отрадная, 8",
     "membersCount": 117,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.8612,
     "lng": 37.6048
   },
@@ -7652,7 +7652,7 @@
     "address": "ул. Василисы Кожиной, 1",
     "membersCount": 104,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.7362,
     "lng": 37.5125
   },
@@ -7665,7 +7665,7 @@
     "address": "Алтуфьевское шоссе, 70",
     "membersCount": 110,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.8795,
     "lng": 37.5862
   },
@@ -7678,7 +7678,7 @@
     "address": "ул. Кирова, 23",
     "membersCount": 144,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.0285,
     "lng": 82.9235
   },
@@ -7691,7 +7691,7 @@
     "address": "улица Стрельбище Динамо, 10, ЖК Мытищи Парк",
     "membersCount": 158,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.9215,
     "lng": 37.7618
   },
@@ -7704,7 +7704,7 @@
     "address": "ул. Правды, 21, стр. 2",
     "membersCount": 102,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.7825,
     "lng": 37.5818
   },
@@ -7717,7 +7717,7 @@
     "address": "пл. Карла Маркса, ТЦ «Сан Сити»",
     "membersCount": 62,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 54.9825,
     "lng": 82.8925
   },
@@ -7730,7 +7730,7 @@
     "address": "Шелепихинская наб., 34, к. 2",
     "membersCount": 155,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.7572,
     "lng": 37.5128
   },
@@ -7743,7 +7743,7 @@
     "address": "бульвар Клары Лучко, 1",
     "membersCount": 135,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 45.0185,
     "lng": 38.9485
   },
@@ -7756,7 +7756,7 @@
     "address": "улица Дмитрия Павлова, 13а",
     "membersCount": 62,
     "activeNow": 10,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 56.34,
     "lng": 43.875
   },
@@ -7769,7 +7769,7 @@
     "address": "улица Сары Садыковой, 30, БЦ «Бахадир», 3 этаж",
     "membersCount": 152,
     "activeNow": 11,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.785,
     "lng": 49.12
   },
@@ -7782,7 +7782,7 @@
     "address": "ул. Маршала Рокоссовского, 62",
     "membersCount": 115,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 48.7155,
     "lng": 44.5015
   },
@@ -7795,7 +7795,7 @@
     "address": "проспект Константина Образцова, 24",
     "membersCount": 63,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 45.0585,
     "lng": 38.9785
   },
@@ -7808,7 +7808,7 @@
     "address": "ул. Газеты «Звезда», 46А",
     "membersCount": 72,
     "activeNow": 6,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 58.0105,
     "lng": 56.2502
   },
@@ -7821,7 +7821,7 @@
     "address": "б-р Братьев Весниных, 1",
     "membersCount": 163,
     "activeNow": 3,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.6985,
     "lng": 37.6452
   },
@@ -7834,7 +7834,7 @@
     "address": "Алтуфьевское шоссе, 18А",
     "membersCount": 136,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.8975,
     "lng": 37.5865
   },
@@ -7847,7 +7847,7 @@
     "address": "улица Енисейская, 35",
     "membersCount": 58,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.8695,
     "lng": 37.6615
   },
@@ -7860,7 +7860,7 @@
     "address": "улица Веневская, 6, ТРК «Витте Молл»",
     "membersCount": 102,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.5455,
     "lng": 37.5435
   },
@@ -7873,7 +7873,7 @@
     "address": "Щёлковское шоссе, 3",
     "membersCount": 121,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.8025,
     "lng": 37.7455
   },
@@ -7886,7 +7886,7 @@
     "address": "1-я улица Машиностроения, 10",
     "membersCount": 138,
     "activeNow": 13,
-    "image": "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-04.jpg",
     "lat": 55.7185,
     "lng": 37.6775
   },
@@ -7899,7 +7899,7 @@
     "address": "улица Профсоюзная, 76",
     "membersCount": 142,
     "activeNow": 5,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.6545,
     "lng": 37.5475
   },
@@ -7912,7 +7912,7 @@
     "address": "улица Орджоникидзе, 10А",
     "membersCount": 70,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-01.jpg",
     "lat": 55.7085,
     "lng": 37.5955
   },
@@ -7925,7 +7925,7 @@
     "address": "улица Широкая, 30",
     "membersCount": 141,
     "activeNow": 7,
-    "image": "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-02.jpg",
     "lat": 55.8875,
     "lng": 37.6615
   },
@@ -7938,7 +7938,7 @@
     "address": "Дербеневская набережная, 7, стр. 6",
     "membersCount": 124,
     "activeNow": 0,
-    "image": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-05.jpg",
     "lat": 55.7275,
     "lng": 37.6545
   },
@@ -7951,7 +7951,7 @@
     "address": "3-й Нижнелихоборский проезд, 1, стр. 16",
     "membersCount": 64,
     "activeNow": 12,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop",
+    "image": "/images/gyms/gym-03.jpg",
     "lat": 55.8405,
     "lng": 37.5555
   }

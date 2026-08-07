@@ -3,8 +3,10 @@ import { AppLayout } from './components/AppLayout'
 import { GuestOnly, ProtectedRoute } from './components/ProtectedRoute'
 import { AppProvider } from './context/AppContext'
 import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage'
+import { AdminGeographyPage } from './pages/AdminGeographyPage'
 import { AdminHubPage } from './pages/AdminHubPage'
 import { AdminPlayersPage } from './pages/AdminPlayersPage'
+import { AdminStoragePage } from './pages/AdminStoragePage'
 import { AdminTicketsPage } from './pages/AdminTicketsPage'
 import { AdminUsersPage } from './pages/AdminUsersPage'
 import { ChatPage } from './pages/ChatPage'
@@ -56,6 +58,8 @@ export default function App() {
               <Route path="admin" element={<AdminHubPage />} />
               <Route path="admin/players" element={<AdminPlayersPage />} />
               <Route path="admin/analytics" element={<AdminAnalyticsPage />} />
+              <Route path="admin/geography" element={<AdminGeographyPage />} />
+              <Route path="admin/storage" element={<AdminStoragePage />} />
               <Route path="admin/tickets" element={<AdminTicketsPage />} />
               <Route path="admin/users" element={<AdminUsersPage />} />
               <Route path="admin/ui" element={<UiKitPage />} />

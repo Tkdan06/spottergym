@@ -52,7 +52,11 @@ self.addEventListener('push', (event) => {
         icon: '/og-image.png',
         badge: '/og-image.png',
         data: { href: data.href || '/app/notifications', type: data.type },
-        tag: data.type ? `spotter-${data.type}` : 'spotter',
+        // Prefer unique tag (e.g. per ticket href) so alerts don't collapse into one.
+        tag:
+          data.tag ||
+          (data.href ? `spotter-${String(data.href).slice(0, 120)}` : null) ||
+          (data.type ? `spotter-${data.type}` : 'spotter'),
         renotify: true,
       }),
       setBadge(unread),

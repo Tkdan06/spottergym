@@ -117,13 +117,6 @@ export function ProfilePage() {
         onChangePhotos={(photos) => updateProfile({ photos: clampPhotos(photos) })}
       />
 
-      <section className="surface profile-block">
-        <SectionTitle>Пригласить друзей</SectionTitle>
-        <InviteFriendsButton userId={user.id} className="btn btn-primary btn-block">
-          <Share2 size={16} /> Поделиться ссылкой
-        </InviteFriendsButton>
-      </section>
-
       <section className="surface profile-block likes-block">
         <SectionTitle
           action={
@@ -140,6 +133,25 @@ export function ProfilePage() {
           maxAvatars={6}
           to="/app/likes"
         />
+      </section>
+
+      <section className="surface profile-block">
+        <SectionTitle>О себе</SectionTitle>
+        <p>{user.bio || 'Добавь описание — так проще начать разговор'}</p>
+        <div className="chip-grid" style={{ marginTop: 12 }}>
+          {experienceLabel(user.experienceLevel) ? (
+            <span className="chip level">{experienceLabel(user.experienceLevel)}</span>
+          ) : null}
+          {user.isCoach ? <span className="chip coach">Тренер</span> : null}
+          {user.sports.map((tag) => (
+            <span
+              key={tag}
+              className={`chip ${user.isCoach && user.coachSports.includes(tag) ? 'coach' : 'active'}`}
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
       </section>
 
       <section className="surface profile-block">
@@ -243,25 +255,6 @@ export function ProfilePage() {
       </section>
 
       <section className="surface profile-block">
-        <SectionTitle>О себе</SectionTitle>
-        <p>{user.bio || 'Добавь описание — так проще начать разговор'}</p>
-        <div className="chip-grid" style={{ marginTop: 12 }}>
-          {experienceLabel(user.experienceLevel) ? (
-            <span className="chip level">{experienceLabel(user.experienceLevel)}</span>
-          ) : null}
-          {user.isCoach ? <span className="chip coach">Тренер</span> : null}
-          {user.sports.map((tag) => (
-            <span
-              key={tag}
-              className={`chip ${user.isCoach && user.coachSports.includes(tag) ? 'coach' : 'active'}`}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      </section>
-
-      <section className="surface profile-block">
         <SectionTitle
           action={
             <button type="button" className="text-link muted" onClick={() => setScheduleOpen(true)}>
@@ -316,6 +309,14 @@ export function ProfilePage() {
             </Link>
           ) : null}
         </div>
+      </section>
+
+      <section className="surface profile-block profile-invite-block">
+        <SectionTitle>Пригласить друзей</SectionTitle>
+        <p className="muted profile-invite-hint">Расскажи о Spotter тем, с кем ходишь в зал</p>
+        <InviteFriendsButton userId={user.id} className="btn btn-ghost btn-block">
+          <Share2 size={16} /> Поделиться ссылкой
+        </InviteFriendsButton>
       </section>
 
       <Link to="/app/settings" className="btn btn-ghost btn-block">

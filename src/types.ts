@@ -95,6 +95,9 @@ export interface Conversation {
   updatedAt: string
   unreadCount: number
   requestStatus: 'accepted' | 'pending' | 'incoming'
+  /** Pinned for the current user only */
+  pinned?: boolean
+  pinnedAt?: string | null
 }
 
 /** Гранулярные права админа (главный админ всегда имеет все) */

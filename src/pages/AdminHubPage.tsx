@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   ArrowLeft,
-  Ban,
   BarChart3,
+  HardDrive,
+  MapPin,
   MessagesSquare,
   Palette,
   RefreshCw,
@@ -61,6 +62,7 @@ export function AdminHubPage() {
     : `Админ · ${permissionSummary(user.adminPermissions, false)}`
 
   const rr = retentionMap(analytics)
+  const blockedCount = analytics?.blockedEmails ?? blockedEmails.length
 
   return (
     <main className="page admin-page">
@@ -110,16 +112,16 @@ export function AdminHubPage() {
               <p className="dim">
                 Онбординг {analytics?.onboarded ?? '—'} · в зале {analytics?.activeNow ?? '—'}
               </p>
+              <p className="dim">
+                Фото {analytics?.totalPhotos ?? '—'} · блок {blockedCount}
+              </p>
             </article>
             <article className="admin-stat-card">
-              <span className="muted">DAU</span>
-              <strong>{analytics?.dau ?? '—'}</strong>
-              <p className="dim">Активны сегодня (МСК)</p>
-            </article>
-            <article className="admin-stat-card">
-              <span className="muted">MAU</span>
-              <strong>{analytics?.mau ?? '—'}</strong>
-              <p className="dim">Активны за 30 дней</p>
+              <span className="muted">DAU / MAU</span>
+              <strong>
+                {analytics?.dau ?? '—'} / {analytics?.mau ?? '—'}
+              </strong>
+              <p className="dim">Сегодня · 30 дней (МСК)</p>
             </article>
             <article className="admin-stat-card">
               <span className="muted">Обращения</span>
@@ -132,18 +134,24 @@ export function AdminHubPage() {
           </section>
 
           <section className="surface admin-rr-panel">
-            <SectionTitle action={<Link to="/app/admin/analytics" className="muted">Подробнее</Link>}>
-              Retention Day-N
+            <SectionTitle
+              action={
+                <Link to="/app/admin/analytics" className="muted">
+                  Подробнее
+                </Link>
+              }
+            >
+              Retention
             </SectionTitle>
             <p className="dim admin-rr-hint">
-              Среднее по когортам регистрации (МСК): доля с lastSeen в день D+N
+              Day-N по lastSeen (МСК). Полный ряд — в подробностях.
             </p>
-            <div className="admin-rr-grid">
-              {[1, 3, 7, 14, 30].map((day) => {
+            <div className="admin-rr-grid admin-rr-grid-compact">
+              {[1, 7].map((day) => {
                 const row = rr.get(day)
                 return (
                   <article key={day} className="admin-stat-card admin-rr-card">
-                    <span className="muted">RR{day}</span>
+                    <span className="muted">R{day}</span>
                     <strong>{formatRetentionRate(row?.rate ?? null)}</strong>
                     <p className="dim">
                       {row && row.cohorts > 0
@@ -154,21 +162,6 @@ export function AdminHubPage() {
                 )
               })}
             </div>
-          </section>
-
-          <section className="admin-stat-grid" aria-label="Контент">
-            <article className="admin-stat-card">
-              <span className="muted">Фото на сервере</span>
-              <strong>{analytics?.totalPhotos ?? '—'}</strong>
-              <p className="dim">
-                У {analytics?.withPhotos ?? '—'} чел. · {formatBytes(analytics?.photosBytes ?? 0)}
-              </p>
-            </article>
-            <article className="admin-stat-card">
-              <span className="muted">Блокировки</span>
-              <strong>{analytics?.blockedEmails ?? blockedEmails.length}</strong>
-              <p className="dim">Тренеров {analytics?.coaches ?? '—'}</p>
-            </article>
           </section>
         </>
       ) : (
@@ -183,13 +176,27 @@ export function AdminHubPage() {
               <Users size={20} />
               <strong>Пользователи</strong>
               <p className="muted">
-                Поиск, профиль, блок, сообщения · {analytics?.users ?? '—'} чел.
+                Поиск, профиль, блок · {analytics?.users ?? '—'} чел. · блок {blockedCount}
               </p>
             </Link>
             <Link to="/app/admin/analytics" className="admin-hub-card">
               <BarChart3 size={20} />
-              <strong>Аналитика</strong>
-              <p className="muted">Города, залы, фото, пол и возраст</p>
+              <strong>Retention</strong>
+              <p className="muted">DAU / MAU и полный ряд R1–R60</p>
+            </Link>
+            <Link to="/app/admin/geography" className="admin-hub-card">
+              <MapPin size={20} />
+              <strong>География</strong>
+              <p className="muted">
+                Города и домашние залы · {analytics?.byCity.length ?? '—'} городов
+              </p>
+            </Link>
+            <Link to="/app/admin/storage" className="admin-hub-card">
+              <HardDrive size={20} />
+              <strong>Память</strong>
+              <p className="muted">
+                Фото {analytics?.totalPhotos ?? '—'} · {formatBytes(analytics?.photosBytes ?? 0)}
+              </p>
             </Link>
           </>
         ) : null}
@@ -203,18 +210,15 @@ export function AdminHubPage() {
             </p>
           </Link>
         ) : null}
-        {canManageAdmins ? (
+        {canManageAdmins || canBlockUsers ? (
           <Link to="/app/admin/users" className="admin-hub-card">
             <Shield size={20} />
-            <strong>Админы и права</strong>
-            <p className="muted">Назначать админов, полные или ограниченные права</p>
-          </Link>
-        ) : null}
-        {canBlockUsers ? (
-          <Link to="/app/admin/users#block" className="admin-hub-card">
-            <Ban size={20} />
-            <strong>Блокировки</strong>
-            <p className="muted">Заблокировано email: {analytics?.blockedEmails ?? blockedEmails.length}</p>
+            <strong>{canManageAdmins ? 'Админы и права' : 'Блокировки'}</strong>
+            <p className="muted">
+              {canManageAdmins
+                ? `Права админов · блок email · ${blockedCount}`
+                : `Заблокировано email: ${blockedCount}`}
+            </p>
           </Link>
         ) : null}
         <Link to="/app/admin/ui" className="admin-hub-card">

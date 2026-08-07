@@ -3,19 +3,13 @@ import { ArrowLeft, RefreshCw } from 'lucide-react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { SectionTitle } from '../components/SectionTitle'
 import { useApp } from '../context/useApp'
-import {
-  formatRetentionRate,
-  retentionMap,
-  type AdminAnalytics,
-} from '../lib/adminAnalytics'
+import type { AdminAnalytics } from '../lib/adminAnalytics'
 import { formatAdminDate } from '../lib/adminStats'
 import { apiAdminFetchAnalytics } from '../lib/apiClient'
 import './FeedbackPage.css'
 import './AdminPlayersPage.css'
 
-const RR_DAYS = [1, 3, 7, 14, 30, 60] as const
-
-export function AdminAnalyticsPage() {
+export function AdminGeographyPage() {
   const navigate = useNavigate()
   const { user, canViewUsers } = useApp()
   const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null)
@@ -28,7 +22,7 @@ export function AdminAnalyticsPage() {
     try {
       setAnalytics(await apiAdminFetchAnalytics())
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось загрузить retention')
+      setError(err instanceof Error ? err.message : 'Не удалось загрузить географию')
     } finally {
       setLoading(false)
     }
@@ -41,8 +35,6 @@ export function AdminAnalyticsPage() {
   if (!user?.isAdmin) return <Navigate to="/app/profile" replace />
   if (!canViewUsers) return <Navigate to="/app/admin" replace />
 
-  const rr = retentionMap(analytics)
-
   return (
     <main className="page admin-page admin-players-page">
       <button type="button" className="back-link" onClick={() => navigate('/app/admin')}>
@@ -51,9 +43,9 @@ export function AdminAnalyticsPage() {
 
       <header className="admin-players-head">
         <div>
-          <h1>Retention</h1>
+          <h1>География</h1>
           <p className="muted">
-            Активность и Day-N · МСК
+            Города и домашние залы
             {analytics ? ` · обновлено ${formatAdminDate(analytics.generatedAt)}` : ''}
             {loading ? ' · обновляем…' : ''}
           </p>
@@ -72,44 +64,43 @@ export function AdminAnalyticsPage() {
 
       {error ? <p className="admin-inline-error">{error}</p> : null}
 
-      <section className="admin-stat-grid" aria-label="Активность">
+      <section className="admin-stat-grid" aria-label="Сводка">
         <article className="admin-stat-card">
-          <span className="muted">DAU / MAU</span>
-          <strong>
-            {analytics?.dau ?? '—'} / {analytics?.mau ?? '—'}
-          </strong>
-          <p className="dim">Сегодня · 30 дней</p>
+          <span className="muted">Городов</span>
+          <strong>{analytics?.byCity.length ?? '—'}</strong>
+          <p className="dim">С указанным городом в профиле</p>
         </article>
         <article className="admin-stat-card">
-          <span className="muted">Пользователи</span>
-          <strong>{analytics?.users ?? '—'}</strong>
-          <p className="dim">
-            Онбординг {analytics?.onboarded ?? '—'} · в зале {analytics?.activeNow ?? '—'}
-          </p>
+          <span className="muted">Залов</span>
+          <strong>{analytics?.byGym.length ?? '—'}</strong>
+          <p className="dim">С выбранным домашним залом</p>
         </article>
       </section>
 
-      <section className="surface admin-rr-panel">
-        <SectionTitle>Retention Day-N</SectionTitle>
-        <p className="dim admin-rr-hint">
-          Доля когорты регистрации с lastSeen в день D+N. Среднее по завершённым когортам (окно 28
-          дней, МСК).
-        </p>
-        <div className="admin-rr-grid admin-rr-grid-full">
-          {RR_DAYS.map((day) => {
-            const row = rr.get(day)
-            return (
-              <article key={day} className="admin-stat-card admin-rr-card">
-                <span className="muted">R{day}</span>
-                <strong>{formatRetentionRate(row?.rate ?? null)}</strong>
-                <p className="dim">
-                  {row && row.cohorts > 0
-                    ? `${row.cohorts} когорт · ${row.retained}/${row.cohortUsers}`
-                    : 'мало данных'}
-                </p>
-              </article>
-            )
-          })}
+      <section className="admin-breakdown">
+        <div className="surface admin-breakdown-card">
+          <SectionTitle>Города</SectionTitle>
+          <ul>
+            {(analytics?.byCity || []).slice(0, 40).map((c) => (
+              <li key={c.city}>
+                <span>{c.city}</span>
+                <strong>{c.count}</strong>
+              </li>
+            ))}
+            {!analytics?.byCity.length ? <li className="muted">Пока нет данных</li> : null}
+          </ul>
+        </div>
+        <div className="surface admin-breakdown-card">
+          <SectionTitle>Залы (домашние)</SectionTitle>
+          <ul>
+            {(analytics?.byGym || []).slice(0, 40).map((g) => (
+              <li key={g.gymId}>
+                <span>{g.label}</span>
+                <strong>{g.count}</strong>
+              </li>
+            ))}
+            {!analytics?.byGym.length ? <li className="muted">Пока нет данных</li> : null}
+          </ul>
         </div>
       </section>
     </main>

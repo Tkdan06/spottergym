@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { ArrowLeft, Check, Clock3, MapPin, Star } from 'lucide-react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { InviteFriendsButton } from '../components/InviteFriendsButton'
 import { SmartImage } from '../components/SmartImage'
 import { SoftLoader } from '../components/SoftLoader'
@@ -21,6 +21,8 @@ import './GymDetailPage.css'
 export function GymDetailPage() {
   const { gymId = '' } = useParams()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const fromSettings = searchParams.get('from') === 'settings'
   const { user, joinGym, leaveGym, setHomeGym, likes, blockedUserIds, apiOnline } = useApp()
   const gym = getGym(gymId)
   const isMine = isMemberOfGym(user, gymId)
@@ -40,6 +42,10 @@ export function GymDetailPage() {
   const activeCount = people.filter((p) => p.isActive).length
 
   const goBack = () => {
+    if (fromSettings) {
+      navigate('/app/discover?from=settings')
+      return
+    }
     if (window.history.length > 1) navigate(-1)
     else navigate('/app')
   }
@@ -148,6 +154,15 @@ export function GymDetailPage() {
           </button>
         ) : (
           <>
+            {fromSettings ? (
+              <button
+                type="button"
+                className="btn btn-primary btn-block"
+                onClick={() => navigate('/app/settings')}
+              >
+                Готово · к настройкам
+              </button>
+            ) : null}
             {!isHome ? (
               <button
                 type="button"
