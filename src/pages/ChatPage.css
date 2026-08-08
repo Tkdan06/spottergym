@@ -129,21 +129,41 @@
   flex-shrink: 0;
 }
 
-/* —— Bubbles (A · Telegram soft curve tails + inline time) —— */
+/* —— Bubbles (soft SVG tongue + inline time) —— */
 .bubble {
   --bubble-radius: 16px;
-  --bubble-corner: 4px;
-  --bubble-fill: var(--bg-elevated);
-  /* Soft “tongue” masks — Telegram-style curve, mirrored L/R */
-  --tail-mine: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 20'%3E%3Cpath fill='%23000' d='M0 0v20h1c2.8 0 5-2.4 6.8-6.2C9.8 9.2 11 4.6 11 0H0z'/%3E%3C/svg%3E");
-  --tail-theirs: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 20'%3E%3Cpath fill='%23000' d='M11 0v20h-1c-2.8 0-5-2.4-6.8-6.2C1.2 9.2 0 4.6 0 0h11z'/%3E%3C/svg%3E");
+  --bubble-corner: 3px;
+  --bubble-fill: #1a2220;
   position: relative;
   max-width: min(82%, 420px);
   padding: 7px 10px 6px 11px;
   border-radius: var(--bubble-radius);
   border: 0;
+  background: var(--bubble-fill);
   animation: fade-up 0.22s ease both;
   overflow: visible;
+}
+
+.bubble-tail {
+  position: absolute;
+  bottom: 0;
+  width: 11px;
+  height: 15px;
+  pointer-events: none;
+  z-index: 0;
+  overflow: visible;
+}
+
+.bubble-tail path {
+  fill: var(--bubble-fill);
+}
+
+.bubble.theirs .bubble-tail {
+  left: -10px;
+}
+
+.bubble.mine .bubble-tail {
+  right: -10px;
 }
 
 .bubble-body {
@@ -190,8 +210,7 @@
 .bubble.mine {
   --bubble-fill: var(--accent);
   align-self: flex-end;
-  margin-right: 8px;
-  background: var(--bubble-fill);
+  margin-right: 9px;
   color: var(--accent-ink);
   border-bottom-right-radius: var(--bubble-corner);
 }
@@ -199,8 +218,7 @@
 .bubble.theirs {
   --bubble-fill: #1a2220;
   align-self: flex-start;
-  margin-left: 8px;
-  background: var(--bubble-fill);
+  margin-left: 9px;
   color: var(--text);
   border-bottom-left-radius: var(--bubble-corner);
 }
@@ -213,35 +231,6 @@
 .bubble.mine .bubble-meta {
   color: var(--accent-ink);
   opacity: 0.62;
-}
-
-/* Soft curved tail (Telegram tongue) via SVG mask */
-.bubble.mine::after,
-.bubble.theirs::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  width: 10px;
-  height: 18px;
-  background: var(--bubble-fill);
-  pointer-events: none;
-  z-index: 0;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-}
-
-.bubble.mine::after {
-  right: -9px;
-  -webkit-mask-image: var(--tail-mine);
-  mask-image: var(--tail-mine);
-}
-
-.bubble.theirs::after {
-  left: -9px;
-  -webkit-mask-image: var(--tail-theirs);
-  mask-image: var(--tail-theirs);
 }
 
 /* —— Composer —— */

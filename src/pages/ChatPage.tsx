@@ -355,6 +355,16 @@ export function ChatPage() {
           const time = formatMsgTime(msg.createdAt)
           return (
             <div key={msg.id} className={`bubble ${mine ? 'mine' : 'theirs'}`}>
+              {/* Real SVG tongue — CSS mask paths were flipping / slicing wrong on iOS */}
+              <svg className="bubble-tail" viewBox="0 0 11 15" aria-hidden>
+                <path
+                  d={
+                    mine
+                      ? 'M0 0c3.8 3.2 7.8 8.2 11 15H0V0z'
+                      : 'M11 0C7.2 3.2 3.2 8.2 0 15h11V0z'
+                  }
+                />
+              </svg>
               <div className="bubble-body">
                 {msg.text}
                 {/* Spacer reserves last-line room so absolute meta never overlaps text */}
