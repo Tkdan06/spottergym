@@ -22,7 +22,9 @@ export function GymDetailPage() {
   const { gymId = '' } = useParams()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const fromSettings = searchParams.get('from') === 'settings'
+  const from = searchParams.get('from')
+  const fromSettings = from === 'settings'
+  const fromHome = from === 'home'
   const { user, joinGym, leaveGym, setHomeGym, likes, blockedUserIds, apiOnline } = useApp()
   const gym = getGym(gymId)
   const isMine = isMemberOfGym(user, gymId)
@@ -44,6 +46,10 @@ export function GymDetailPage() {
   const goBack = () => {
     if (fromSettings) {
       navigate('/app/discover?from=settings')
+      return
+    }
+    if (fromHome) {
+      navigate('/app/discover?from=home')
       return
     }
     if (window.history.length > 1) navigate(-1)
@@ -161,6 +167,15 @@ export function GymDetailPage() {
                 onClick={() => navigate('/app/settings')}
               >
                 Готово · к настройкам
+              </button>
+            ) : null}
+            {fromHome ? (
+              <button
+                type="button"
+                className="btn btn-primary btn-block"
+                onClick={() => navigate('/app')}
+              >
+                Готово · на главную
               </button>
             ) : null}
             {!isHome ? (

@@ -1,0 +1,486 @@
+.lp {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 100dvh;
+  min-height: 100svh;
+  overflow-x: clip;
+  padding-top: 0;
+  padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  background: var(--bg);
+}
+
+.lp-hero {
+  position: relative;
+  z-index: 1;
+  padding: calc(28px + env(safe-area-inset-top, 0px)) 0 28px;
+  margin: 0 -4px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.lp-hero-bg {
+  position: absolute;
+  inset: -4px -20px 18%;
+  z-index: -1;
+  background-color: #0b0f0e;
+  background-image:
+    linear-gradient(180deg, rgba(11, 15, 14, 0.42) 0%, rgba(11, 15, 14, 0.9) 58%, var(--bg) 100%),
+    url('/images/welcome-gym.jpg');
+  background-position: center top;
+  background-size: cover;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.lp-kicker {
+  margin: 0 0 10px;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lp-brand {
+  display: block;
+  margin: 0 0 16px;
+  font-size: clamp(2.4rem, 12vw, 4.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+
+.lp-headline {
+  margin: 0 0 12px;
+  max-width: 22ch;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 5.2vw, 1.85rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.lp-lead {
+  margin: 0 0 22px;
+  max-width: 36ch;
+  color: var(--text);
+  font-size: clamp(0.95rem, 3.5vw, 1.05rem);
+  line-height: 1.45;
+}
+
+.lp-actions {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.lp-actions .btn {
+  width: 100%;
+  min-height: 50px;
+  font-weight: 750;
+}
+
+.lp-actions .btn-primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+}
+
+.lp-actions .btn-primary:hover,
+.lp-actions .btn-primary:focus-visible {
+  color: var(--accent-ink);
+  filter: brightness(1.04);
+}
+
+.lp-status-demo {
+  display: grid;
+  gap: 10px;
+  margin-top: 28px;
+  max-width: 360px;
+}
+
+.lp-demo-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: rgba(20, 27, 24, 0.92);
+  backdrop-filter: blur(8px);
+}
+
+.lp-demo-card-coach {
+  border-color: rgba(200, 245, 66, 0.22);
+}
+
+.lp-demo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.lp-demo-avatar {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  object-fit: cover;
+  background: var(--bg-soft);
+}
+
+.lp-demo-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.lp-demo-copy strong {
+  font-size: 0.98rem;
+}
+
+.lp-demo-copy .muted {
+  font-size: 0.82rem;
+}
+
+.lp-demo-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lp-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid var(--line);
+}
+
+.lp-pill-on {
+  color: var(--online, #57f287);
+  border-color: rgba(87, 242, 135, 0.35);
+  background: rgba(87, 242, 135, 0.08);
+}
+
+.lp-pill-open {
+  color: var(--accent);
+  border-color: rgba(200, 245, 66, 0.35);
+  background: var(--accent-soft);
+}
+
+.lp-pill-coach {
+  color: var(--accent-ink);
+  border-color: transparent;
+  background: var(--accent);
+}
+
+.lp-section {
+  padding: 28px 0 8px;
+}
+
+.lp-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: var(--text-section-size);
+  font-weight: var(--text-section-weight);
+  line-height: var(--text-section-line);
+  letter-spacing: -0.02em;
+}
+
+.lp-section-lead {
+  margin: 0 0 16px;
+  max-width: 40ch;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.lp-stack,
+.lp-steps,
+.lp-status-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lp-block {
+  padding: 14px 14px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+}
+
+.lp-block h3 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.lp-block p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.lp-step {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.lp-step-num {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.lp-scenarios {
+  margin: 0 -4px;
+  padding-left: 4px;
+  padding-right: 4px;
+  overflow: hidden;
+}
+
+.lp-carousel {
+  display: flex;
+  gap: 12px;
+  margin: 0 -4px;
+  padding: 4px 4px 8px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.lp-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.lp-slide {
+  flex: 0 0 min(82vw, 320px);
+  scroll-snap-align: center;
+  display: grid;
+  grid-template-rows: 180px auto;
+  border-radius: calc(var(--radius) + 4px);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+  transition: border-color 0.2s ease, transform 0.25s ease;
+}
+
+.lp-slide.is-active {
+  border-color: rgba(200, 245, 66, 0.35);
+  transform: translateY(-2px);
+}
+
+.lp-slide-media {
+  background-color: var(--bg-soft);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.lp-slide-body {
+  display: grid;
+  gap: 6px;
+  padding: 14px 14px 16px;
+  min-height: 118px;
+}
+
+.lp-slide-body h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.lp-slide-body p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.lp-carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.lp-carousel-dots button {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  cursor: pointer;
+}
+
+.lp-carousel-dots button.on {
+  width: 22px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.lp-mid-cta {
+  padding: 28px 0 8px;
+}
+
+.lp-mid-cta .lp-actions {
+  margin-top: 4px;
+}
+
+.lp-offer-item h3 {
+  color: var(--accent);
+}
+
+.lp-coaches-visual {
+  width: calc(100% + 8px);
+  height: 200px;
+  margin: 0 -4px 16px;
+  border-radius: calc(var(--radius) + 4px);
+  background-color: var(--bg-soft);
+  background-position: center 25%;
+  background-size: cover;
+  border: 1px solid var(--line);
+}
+
+.lp-check-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lp-check-list li {
+  position: relative;
+  padding: 10px 12px 10px 36px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.lp-check-list li::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translateY(-50%);
+}
+
+.lp-coach-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.lp-mini-list {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lp-mini-list li {
+  position: relative;
+  padding-left: 16px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.lp-mini-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.lp-final {
+  padding: 32px 0 8px;
+}
+
+.lp-final .lp-actions {
+  margin-top: 18px;
+}
+
+.lp-footer {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.lp-footer p {
+  margin: 0 0 6px;
+}
+
+.lp-footer a {
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (min-width: 720px) {
+  .lp {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .lp-hero {
+    padding-top: calc(40px + env(safe-area-inset-top, 0px));
+  }
+
+  .lp-slide {
+    flex-basis: 340px;
+  }
+
+  .lp-slide-media {
+    height: 200px;
+  }
+
+  .lp-status-list {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .lp-coach-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .lp-coaches-visual {
+    height: 200px;
+  }
+}

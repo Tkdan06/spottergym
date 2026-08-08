@@ -29,6 +29,7 @@ import { SettingsPage } from './pages/SettingsPage'
 import { TermsPage } from './pages/TermsPage'
 import { UiKitPage } from './pages/UiKitPage'
 import { UserProfilePage } from './pages/UserProfilePage'
+import { LandingPage } from './pages/LandingPage'
 import { WelcomePage } from './pages/WelcomePage'
 
 export default function App() {
@@ -42,6 +43,9 @@ export default function App() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           </Route>
+
+          {/* Ad landing — public even if logged in (preview + cold traffic) */}
+          <Route path="/lp" element={<LandingPage />} />
 
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />

@@ -25,7 +25,9 @@ export function DiscoverPage() {
   const { user, apiOnline } = useApp()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const fromSettings = searchParams.get('from') === 'settings'
+  const from = searchParams.get('from')
+  const fromSettings = from === 'settings'
+  const fromHome = from === 'home'
   const [city, setCity] = useState(user?.city || 'Москва')
   const [network, setNetwork] = useState<(typeof NETWORKS)[number]>('Все сети')
   const [query, setQuery] = useState('')
@@ -33,8 +35,11 @@ export function DiscoverPage() {
   const [elsewhereRemote, setElsewhereRemote] = useState<Gym[] | null>(null)
 
   const demoStats = isDemoAccount(user?.email)
-  const gymLink = (gymId: string) =>
-    fromSettings ? `/app/gym/${gymId}?from=settings` : `/app/gym/${gymId}`
+  const gymLink = (gymId: string) => {
+    if (fromSettings) return `/app/gym/${gymId}?from=settings`
+    if (fromHome) return `/app/gym/${gymId}?from=home`
+    return `/app/gym/${gymId}`
+  }
 
   useEffect(() => {
     if (!apiOnline || demoStats) {
@@ -138,21 +143,28 @@ export function DiscoverPage() {
 
   return (
     <main className="page discover-page">
-      {fromSettings ? (
+      {fromSettings || fromHome ? (
         <button
           type="button"
           className="back-link"
-          onClick={() => navigate('/app/settings')}
+          onClick={() => navigate(fromHome ? '/app' : '/app/settings')}
         >
-          <ArrowLeft size={18} /> Настройки
+          <ArrowLeft size={18} /> {fromHome ? 'Мой зал' : 'Настройки'}
         </button>
       ) : null}
       <header className="page-header discover-header">
         <div className="page-header-text">
-          <h1 className="page-title">{fromSettings ? 'Каталог залов' : 'Залы'}</h1>
+          <h1 className="page-title">
+            {fromSettings || fromHome ? 'Каталог залов' : 'Залы'}
+          </h1>
           {fromSettings ? (
             <p className="muted discover-settings-lead">
               Выбери город и клуб — добавишь в «Мои залы», потом вернёшься в настройки.
+            </p>
+          ) : null}
+          {fromHome ? (
+            <p className="muted discover-settings-lead">
+              Выбери клуб — откроется страница зала, там можно сделать его своим.
             </p>
           ) : null}
         </div>

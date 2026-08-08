@@ -268,13 +268,18 @@ export function SettingsPage() {
             </>
           ) : (
             <p className="muted">
-              Зал ещё не выбран. Открой каталог — там город и клубы. Нет в каталоге? Напиши в
-              обратную связь.
+              Зал ещё не выбран. Открой каталог — там город и клубы. Нет в каталоге? Запроси
+              добавление зала.
             </p>
           )}
           <Link to="/app/discover?from=settings" className="btn btn-soft btn-block">
             <Plus size={18} aria-hidden /> Добавить зал в каталоге
           </Link>
+          {!selectedGyms.length ? (
+            <Link to="/app/feedback?topic=gym" className="btn btn-ghost btn-block">
+              Запросить добавление зала
+            </Link>
+          ) : null}
         </section>
 
         <div>

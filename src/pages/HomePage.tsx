@@ -103,14 +103,14 @@ export function HomePage() {
           </div>
           <h2>Добавь свой клуб</h2>
           <p className="muted">
-            Выбери зал в настройках — здесь появятся люди рядом. Если клуба нет в каталоге,
-            напиши в обратную связь — добавим.
+            Выбери зал в каталоге — здесь появятся люди рядом. Если клуба нет в списке, запроси
+            добавление — добавим.
           </p>
-          <Link to="/app/settings" className="btn btn-primary btn-block">
-            Выбрать зал в настройках
+          <Link to="/app/discover?from=home" className="btn btn-primary btn-block">
+            Выбрать зал
           </Link>
           <Link to="/app/feedback?topic=gym" className="btn btn-soft btn-block">
-            Сообщить о своём зале
+            Запросить добавление зала
           </Link>
         </section>
       ) : (
