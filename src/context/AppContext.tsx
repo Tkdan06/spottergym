@@ -224,8 +224,8 @@ export interface AppContextValue {
   lookupUsername: (username: string) => Promise<UserProfile>
   /** Partial @ник / имя — серверный поиск */
   searchUsers: (query: string) => Promise<UserProfile[]>
-  /** Профиль по id с сервера (кэширует) */
-  fetchUserById: (userId: string) => Promise<UserProfile>
+  /** Профиль по id с сервера (кэширует). bypassCache — всегда дернуть API. */
+  fetchUserById: (userId: string, opts?: { bypassCache?: boolean }) => Promise<UserProfile>
   rememberUser: (person: UserProfile) => void
   sendMessage: (conversationId: string, text: string) => void | Promise<void>
   startConversation: (userId: string, text: string) => string | Promise<string>
@@ -743,13 +743,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   )
 
   const rememberUserRef = useRef<(person: UserProfile) => void>(() => undefined)
+  const rememberUsersRef = useRef<(people: UserProfile[]) => void>(() => undefined)
+  const knownUsersRef = useRef<UserProfile[]>([])
+  useEffect(() => {
+    knownUsersRef.current = knownUsers
+  }, [knownUsers])
 
   const refreshChats = useCallback(async () => {
     if (!apiOnlineRef.current || !getStoredToken()) return
     const list = await apiFetchConversations()
-    for (const row of list) {
-      if (row.other) rememberUserRef.current(row.other)
-    }
+    rememberUsersRef.current(list.map((row) => row.other).filter(Boolean) as UserProfile[])
     const next = list
       .map(({ other: _o, ...c }) => c)
       .sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt))
@@ -758,22 +761,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (email) saveAccountConversations(email, next)
   }, [])
 
-  /** Light poll: chats + notifications so nav/bell badges stay in sync outside Messages page */
+  /** Light poll: chats + notifications + likes so badges and likes stay fresh while the app is open */
   const refreshInbox = useCallback(async () => {
     if (!apiOnlineRef.current || !getStoredToken()) return
     try {
-      const [notifs, list] = await Promise.all([apiFetchNotifications(), apiFetchConversations()])
+      const [notifs, list, likesPayload] = await Promise.all([
+        apiFetchNotifications(),
+        apiFetchConversations(),
+        apiFetchLikes(),
+      ])
       const email = userEmailRef.current
       setNotifications(notifs)
       if (email) saveNotificationsForUser(email, notifs)
+      const contacts: UserProfile[] = []
       for (const row of list) {
-        if (row.other) rememberUserRef.current(row.other)
+        if (row.other) contacts.push(row.other)
       }
+      for (const actor of likesPayload.actors) contacts.push(actor)
+      rememberUsersRef.current(contacts)
       const next = list
         .map(({ other: _o, ...c }) => c)
         .sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt))
       setConversations(next)
       if (email) saveAccountConversations(email, next)
+      const likesMap = normalizeLikesMap(likesPayload.likes)
+      setLikes(likesMap)
+      if (email) saveAccountLikes(email, likesMap)
     } catch {
       /* keep cache */
     }
@@ -816,7 +829,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const likesMap = normalizeLikesMap(likesPayload.likes)
       setLikes(likesMap)
       if (email) saveAccountLikes(email, likesMap)
-      for (const actor of likesPayload.actors) rememberUserRef.current?.(actor)
+      rememberUsersRef.current(likesPayload.actors)
       setNotifications(notifs)
       if (email) saveNotificationsForUser(email, notifs)
       setNotificationPrefs(prefs)
@@ -886,7 +899,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     void hydrateSocialFromApi()
   }, [apiOnline, user?.id, hydrateSocialFromApi])
 
-  // Keep chat + notification badges fresh while the app is open (not only on Messages page)
+  // Keep chats, likes, and notification badges fresh while the app is open
   useEffect(() => {
     if (!apiOnline || !user || !getStoredToken()) return
 
@@ -894,15 +907,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const tick = () => {
       if (cancelled || document.visibilityState === 'hidden') return
       void refreshInbox()
+      void ensureWebPushSubscription()
     }
 
-    const id = window.setInterval(tick, 8000)
+    const id = window.setInterval(tick, 5000)
     const onVis = () => {
       if (document.visibilityState === 'visible') tick()
     }
     document.addEventListener('visibilitychange', onVis)
-    // First tick shortly after mount so badges catch up without waiting a full interval
-    const warm = window.setTimeout(tick, 1200)
+    // First tick shortly after mount so badges/likes catch up without waiting a full interval
+    const warm = window.setTimeout(tick, 800)
 
     return () => {
       cancelled = true
@@ -1471,22 +1485,44 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [applyServerUser],
   )
 
-  const rememberUser = useCallback((person: UserProfile) => {
+  const rememberUsers = useCallback((people: UserProfile[]) => {
+    const incoming = people.filter((p) => p?.id)
+    if (!incoming.length) return
     setKnownUsers((prev) => {
-      const i = prev.findIndex((u) => u.id === person.id)
-      const next =
-        i >= 0
-          ? prev.map((u, idx) => (idx === i ? { ...u, ...person } : u))
-          : [...prev, person]
+      let changed = false
+      const map = new Map(prev.map((u) => [u.id, u]))
+      for (const person of incoming) {
+        const existing = map.get(person.id)
+        if (!existing) {
+          map.set(person.id, person)
+          changed = true
+          continue
+        }
+        const merged = { ...existing, ...person }
+        if (JSON.stringify(existing) !== JSON.stringify(merged)) {
+          map.set(person.id, merged)
+          changed = true
+        }
+      }
+      if (!changed) return prev
+      const next = [...map.values()]
       const email = userEmailRef.current
       if (email) saveAccountContacts(email, next)
       return next
     })
   }, [])
 
+  const rememberUser = useCallback(
+    (person: UserProfile) => {
+      rememberUsers([person])
+    },
+    [rememberUsers],
+  )
+
   useEffect(() => {
     rememberUserRef.current = rememberUser
-  }, [rememberUser])
+    rememberUsersRef.current = rememberUsers
+  }, [rememberUser, rememberUsers])
 
   const toggleLike = useCallback(
     (userId: string) => {
@@ -1497,7 +1533,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             const map = normalizeLikesMap(next)
             setLikes(map)
             persistLikesMap(map)
-            for (const actor of actors) rememberUser(actor)
+            rememberUsers(actors)
           })
           .catch(() => {
             setLikes((prev) => {
@@ -1514,7 +1550,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return next
       })
     },
-    [user, persistLikesMap, rememberUser],
+    [user, persistLikesMap, rememberUsers],
   )
 
   const getLikesFor = useCallback(
@@ -1600,11 +1636,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   )
 
   const fetchUserById = useCallback(
-    async (userId: string) => {
+    async (userId: string, opts?: { bypassCache?: boolean }) => {
       if (!userId) throw new Error('Пользователь не найден')
       if (user && user.id === userId) return user as UserProfile
-      const cached = knownUsers.find((u) => u.id === userId)
-      if (cached) return cached
+      if (!opts?.bypassCache) {
+        const cached = knownUsersRef.current.find((u) => u.id === userId)
+        if (cached) return cached
+      }
       if (user && isDemoAccount(user.email)) {
         const seed = USERS.find((u) => u.id === userId)
         if (seed) {
@@ -1615,13 +1653,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const online = apiOnlineRef.current || (await apiHealth())
       setApiOnline(online)
       if (!online || !getStoredToken()) {
+        const cached = knownUsersRef.current.find((u) => u.id === userId)
+        if (cached) return cached
         throw new Error('Пользователь не найден')
       }
       const found = await apiFetchUser(userId)
       rememberUser(found)
       return found
     },
-    [user, knownUsers, rememberUser],
+    [user, rememberUser],
   )
 
   const sendMessage = useCallback(

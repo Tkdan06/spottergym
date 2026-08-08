@@ -2,6 +2,17 @@
   max-width: 100%;
   overflow-x: clip;
   box-sizing: border-box;
+  /* Tap/long-press on a chat must not paint a page-wide text selection */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.messages-page input,
+.messages-page textarea {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
 }
 
 .messages-page .messages-top {
@@ -179,6 +190,8 @@
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  touch-action: manipulation;
 }
 
 .conversation-row.is-unread {

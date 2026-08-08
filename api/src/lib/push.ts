@@ -66,7 +66,10 @@ export async function sendPushToUser(
   if (!ensureVapid()) return 0
 
   const subs = await prisma.pushSubscription.findMany({ where: { userId } })
-  if (!subs.length) return 0
+  if (!subs.length) {
+    console.warn('[push] no subscriptions for user', userId, 'type', payload.type)
+    return 0
+  }
 
   const unreadCount = await countUnreadBadge(userId)
   const data = JSON.stringify({
@@ -76,6 +79,10 @@ export async function sendPushToUser(
     type: payload.type || 'system',
     unreadCount,
   })
+
+  // High urgency for chat/likes so locked-screen devices deliver sooner when possible.
+  const urgency =
+    payload.type === 'chat_message' || payload.type === 'like' ? 'high' : 'normal'
 
   let sent = 0
   await Promise.all(
@@ -87,18 +94,22 @@ export async function sendPushToUser(
             keys: { p256dh: sub.p256dh, auth: sub.auth },
           },
           data,
-          { TTL: 60 * 60 * 12, urgency: 'normal' },
+          { TTL: 60 * 60 * 12, urgency },
         )
         sent += 1
       } catch (err: unknown) {
         const status = (err as { statusCode?: number })?.statusCode
         if (status === 404 || status === 410) {
           await prisma.pushSubscription.deleteMany({ where: { id: sub.id } })
+          console.warn('[push] dropped stale subscription', sub.id)
         } else {
           console.warn('[push] send failed', status || err)
         }
       }
     }),
   )
+  if (!sent && subs.length) {
+    console.warn('[push] 0 delivered for user', userId, 'type', payload.type)
+  }
   return sent
 }

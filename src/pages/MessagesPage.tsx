@@ -58,12 +58,18 @@ function ConversationRow({
     }
   }
 
+  const clearSelection = () => {
+    const sel = window.getSelection?.()
+    if (sel && sel.rangeCount > 0) sel.removeAllRanges()
+  }
+
   const startLong = () => {
     clearLong()
     longFired.current = false
     longTimer.current = window.setTimeout(() => {
       longFired.current = true
       longTimer.current = null
+      clearSelection()
       if (navigator.vibrate) navigator.vibrate(12)
       onLongPress(conversation)
     }, LONG_PRESS_MS)
@@ -73,6 +79,7 @@ function ConversationRow({
     <Link
       to={`/app/messages/${conversation.id}`}
       className={`conversation-row${hasUnread ? ' is-unread' : ''}${pinned ? ' is-pinned' : ''}`}
+      draggable={false}
       aria-label={
         [
           pinned ? 'Закреплён' : '',
@@ -82,15 +89,21 @@ function ConversationRow({
           .filter(Boolean)
           .join(', ')
       }
-      onPointerDown={startLong}
+      onPointerDown={() => {
+        clearSelection()
+        startLong()
+      }}
       onPointerUp={clearLong}
       onPointerCancel={clearLong}
       onPointerLeave={clearLong}
+      onDragStart={(e) => e.preventDefault()}
       onContextMenu={(e) => {
         e.preventDefault()
+        clearSelection()
         onLongPress(conversation)
       }}
       onClick={(e) => {
+        clearSelection()
         if (longFired.current) {
           e.preventDefault()
           longFired.current = false

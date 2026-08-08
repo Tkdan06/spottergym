@@ -55,22 +55,23 @@ export async function issuePasswordResetForUser(user: {
     '— Spotter',
   ].join('\n')
 
+  // Colors match src/styles/global.css UI kit tokens (inline — email clients ignore CSS vars).
   const html = `
 <!DOCTYPE html>
 <html lang="ru">
-<body style="margin:0;padding:0;background:#0f1115;color:#f2f2f2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;">
+<body style="margin:0;padding:0;background:#0b0f0e;color:#eef5ef;font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;background:#0b0f0e;">
     <tr>
       <td align="center">
-        <table role="presentation" width="100%" style="max-width:480px;background:#1a1d24;border-radius:16px;padding:28px 24px;">
-          <tr><td style="font-size:22px;font-weight:800;letter-spacing:0.04em;">SPOT<span style="color:#6ee7a8;">TER</span></td></tr>
-          <tr><td style="padding-top:18px;font-size:16px;line-height:1.45;">${escapeHtml(name)}, мы получили запрос на восстановление пароля.</td></tr>
+        <table role="presentation" width="100%" style="max-width:480px;background:#141b18;border:1px solid rgba(232,240,234,0.1);border-radius:16px;padding:28px 24px;">
+          <tr><td style="font-family:Syne,'Manrope',sans-serif;font-size:22px;font-weight:800;letter-spacing:0.04em;color:#eef5ef;">SPOT<span style="color:#c8f542;">TER</span></td></tr>
+          <tr><td style="padding-top:18px;font-size:16px;line-height:1.45;color:#eef5ef;">${escapeHtml(name)}, мы получили запрос на восстановление пароля.</td></tr>
           <tr><td style="padding-top:22px;" align="center">
-            <a href="${escapeAttr(resetUrl)}" style="display:inline-block;background:#6ee7a8;color:#0f1115;text-decoration:none;font-weight:800;padding:14px 22px;border-radius:12px;">Сбросить пароль</a>
+            <a href="${escapeAttr(resetUrl)}" style="display:inline-block;background:#c8f542;color:#13200a;text-decoration:none;font-weight:800;padding:14px 22px;border-radius:12px;">Сбросить пароль</a>
           </td></tr>
-          <tr><td style="padding-top:18px;font-size:13px;line-height:1.45;color:#a8b0bd;">Ссылка действует 60 минут и только один раз. Если кнопка не открывается, скопируй адрес:</td></tr>
-          <tr><td style="padding-top:8px;font-size:12px;line-height:1.4;word-break:break-all;color:#7d8794;">${escapeHtml(resetUrl)}</td></tr>
-          <tr><td style="padding-top:20px;font-size:12px;color:#7d8794;">Если это были не ты — просто проигнорируй письмо.</td></tr>
+          <tr><td style="padding-top:18px;font-size:13px;line-height:1.45;color:#94a39a;">Ссылка действует 60 минут и только один раз. Если кнопка не открывается, скопируй адрес:</td></tr>
+          <tr><td style="padding-top:8px;font-size:12px;line-height:1.4;word-break:break-all;color:#6b7a71;">${escapeHtml(resetUrl)}</td></tr>
+          <tr><td style="padding-top:20px;font-size:12px;color:#6b7a71;">Если это были не ты — просто проигнорируй письмо.</td></tr>
         </table>
       </td>
     </tr>

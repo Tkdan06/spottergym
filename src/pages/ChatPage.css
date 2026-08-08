@@ -114,8 +114,8 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  /* Extra side room so bubble tails are not clipped by overflow-x */
-  padding: 6px 10px 14px;
+  /* Side room for Telegram curve tails (overflow-x clips otherwise) */
+  padding: 6px 14px 14px;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -129,19 +129,21 @@
   flex-shrink: 0;
 }
 
-/* —— Bubbles (Telegram-like tails + inline time) —— */
+/* —— Bubbles (A · Telegram soft curve tails + inline time) —— */
 .bubble {
   --bubble-radius: 16px;
-  --bubble-corner: 5px;
+  --bubble-corner: 4px;
   --bubble-fill: var(--bg-elevated);
+  /* Soft “tongue” masks — Telegram-style curve, mirrored L/R */
+  --tail-mine: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 20'%3E%3Cpath fill='%23000' d='M0 0v20h1c2.8 0 5-2.4 6.8-6.2C9.8 9.2 11 4.6 11 0H0z'/%3E%3C/svg%3E");
+  --tail-theirs: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 11 20'%3E%3Cpath fill='%23000' d='M11 0v20h-1c-2.8 0-5-2.4-6.8-6.2C1.2 9.2 0 4.6 0 0h11z'/%3E%3C/svg%3E");
   position: relative;
   max-width: min(82%, 420px);
   padding: 7px 10px 6px 11px;
   border-radius: var(--bubble-radius);
-  /* Same box model for mine/theirs so shapes match (ticks don't change the form) */
-  border: 1px solid transparent;
+  border: 0;
   animation: fade-up 0.22s ease both;
-  isolation: isolate;
+  overflow: visible;
 }
 
 .bubble-body {
@@ -188,7 +190,7 @@
 .bubble.mine {
   --bubble-fill: var(--accent);
   align-self: flex-end;
-  margin-right: 7px;
+  margin-right: 8px;
   background: var(--bubble-fill);
   color: var(--accent-ink);
   border-bottom-right-radius: var(--bubble-corner);
@@ -197,10 +199,9 @@
 .bubble.theirs {
   --bubble-fill: #1a2220;
   align-self: flex-start;
-  margin-left: 7px;
+  margin-left: 8px;
   background: var(--bubble-fill);
   color: var(--text);
-  border-color: var(--line);
   border-bottom-left-radius: var(--bubble-corner);
 }
 
@@ -214,36 +215,33 @@
   opacity: 0.62;
 }
 
-/* Tail — mirrored messenger “spoke” (fill + edge for bordered incoming) */
+/* Soft curved tail (Telegram tongue) via SVG mask */
 .bubble.mine::after,
-.bubble.theirs::after,
-.bubble.theirs::before {
+.bubble.theirs::after {
   content: '';
   position: absolute;
   bottom: -1px;
-  width: 11px;
-  height: 15px;
+  width: 10px;
+  height: 18px;
+  background: var(--bubble-fill);
   pointer-events: none;
   z-index: 0;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
 }
 
 .bubble.mine::after {
-  right: -6px;
-  bottom: 0;
-  background: var(--bubble-fill);
-  clip-path: polygon(0 0, 0 100%, 100% 100%);
-}
-
-.bubble.theirs::before {
-  left: -7px;
-  background: var(--line);
-  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  right: -9px;
+  -webkit-mask-image: var(--tail-mine);
+  mask-image: var(--tail-mine);
 }
 
 .bubble.theirs::after {
-  left: -6px;
-  background: var(--bubble-fill);
-  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  left: -9px;
+  -webkit-mask-image: var(--tail-theirs);
+  mask-image: var(--tail-theirs);
 }
 
 /* —— Composer —— */

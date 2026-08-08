@@ -1,6 +1,6 @@
-import { type FormEvent, useEffect, useMemo, useState } from 'react'
+import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, Clock3, Heart, MessageCircle } from 'lucide-react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { LikesRow } from '../components/LikesRow'
 import { PhotoGalleryModal } from '../components/PhotoGalleryModal'
 import { ProfilePhotoCarousel } from '../components/ProfilePhotoCarousel'
@@ -22,8 +22,13 @@ import './ProfileViews.css'
 
 const DEFAULT_GREETING = 'Привет! Увидел тебя в Spotter.'
 
+function isProfileLike(value: unknown): value is UserProfile {
+  return Boolean(value && typeof value === 'object' && typeof (value as UserProfile).id === 'string')
+}
+
 export function UserProfilePage() {
   const { userId = '' } = useParams()
+  const location = useLocation()
   const {
     user,
     directory,
@@ -32,48 +37,71 @@ export function UserProfilePage() {
     toggleLike,
     getLikesFor,
     fetchUserById,
+    rememberUser,
     apiOnline,
   } = useApp()
   const navigate = useNavigate()
   const [remote, setRemote] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(false)
   const [loadError, setLoadError] = useState('')
+  const fetchUserByIdRef = useRef(fetchUserById)
+  fetchUserByIdRef.current = fetchUserById
+
+  const statePerson = isProfileLike(
+    (location.state as { person?: unknown } | null)?.person,
+  )
+    ? ((location.state as { person: UserProfile }).person)
+    : null
 
   const localPerson =
     (user && user.id === userId ? user : null) ||
+    (statePerson && statePerson.id === userId ? statePerson : null) ||
     directory.find((u) => u.id === userId) ||
     (isDemoAccount(user?.email) ? getUser(userId) : undefined) ||
     null
 
   const person = remote || localPerson
-  const hasLocal = Boolean(localPerson)
+
+  useEffect(() => {
+    if (statePerson && statePerson.id === userId) {
+      rememberUser(statePerson)
+    }
+  }, [userId, statePerson, rememberUser])
 
   useEffect(() => {
     setRemote(null)
     setLoadError('')
-    if (!userId || hasLocal) return
+    if (!userId) return
+
     if (!apiOnline) {
-      setLoadError('Пользователь не найден')
+      if (!localPerson) setLoadError('Пользователь не найден')
       return
     }
+
     let cancelled = false
-    setLoading(true)
-    void fetchUserById(userId)
+    // Keep showing cached/state person while refreshing — avoid empty flash
+    if (!localPerson) setLoading(true)
+
+    void fetchUserByIdRef
+      .current(userId, { bypassCache: true })
       .then((found) => {
         if (!cancelled) setRemote(found)
       })
       .catch((err) => {
-        if (!cancelled) {
+        if (!cancelled && !localPerson) {
           setLoadError(err instanceof Error ? err.message : 'Пользователь не найден')
         }
       })
       .finally(() => {
         if (!cancelled) setLoading(false)
       })
+
     return () => {
       cancelled = true
     }
-  }, [userId, hasLocal, apiOnline, fetchUserById])
+    // localPerson intentionally omitted: only re-fetch when route/api changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stable fetch via ref; localPerson is stale-while-revalidate seed
+  }, [userId, apiOnline])
 
   const gyms = person ? getUserGyms(person) : []
   const [message, setMessage] = useState('')
@@ -135,7 +163,10 @@ export function UserProfilePage() {
   const isAnon = person.privacy === 'anonymous'
   const isSelf = Boolean(user && person.id === user.id)
   const photo = profileImage(person)
-  const galleryPhotos = isAnon ? [] : person.photos
+  const galleryPhotos = isAnon ? [] : Array.isArray(person.photos) ? person.photos : []
+  const sports = Array.isArray(person.sports) ? person.sports : []
+  const coachSports = Array.isArray(person.coachSports) ? person.coachSports : []
+  const visitSlots = Array.isArray(person.visitSlots) ? person.visitSlots : []
   const onBreak = isOnBreak(person.breakUntil)
   const breakText = breakLabel(person.breakUntil)
 
@@ -193,8 +224,8 @@ export function UserProfilePage() {
           ) : null}
           <p className="muted">
             {!isAnon && person.isCoach
-              ? person.coachSports.length
-                ? `Тренер · ${person.coachSports.join(', ')}`
+              ? coachSports.length
+                ? `Тренер · ${coachSports.join(', ')}`
                 : 'Тренер'
               : intentLabel(person.intent)}
           </p>
@@ -256,17 +287,17 @@ export function UserProfilePage() {
         <LikesRow count={likesInfo.count} likers={likesInfo.likers} maxAvatars={6} />
       </section>
 
-      {!isAnon && person.bio ? (
-        <section className="surface profile-block">
-          <SectionTitle>О себе</SectionTitle>
-          <p>{person.bio}</p>
-        </section>
-      ) : (
+      {isAnon ? (
         <section className="surface profile-block">
           <SectionTitle>Анонимный профиль</SectionTitle>
           <p className="muted">Имя и фото скрыты. Можно написать запрос — человек сам решит, открыться ли.</p>
         </section>
-      )}
+      ) : person.bio ? (
+        <section className="surface profile-block">
+          <SectionTitle>О себе</SectionTitle>
+          <p>{person.bio}</p>
+        </section>
+      ) : null}
 
       <section className="surface profile-block">
         <SectionTitle>
@@ -281,10 +312,10 @@ export function UserProfilePage() {
                 <span className="chip level">{experienceLabel(person.experienceLevel)}</span>
               ) : null}
               {person.isCoach ? <span className="chip coach">Тренер</span> : null}
-              {person.sports.map((tag) => (
+              {sports.map((tag) => (
                 <span
                   key={tag}
-                  className={`chip ${person.isCoach && person.coachSports.includes(tag) ? 'coach' : 'active'}`}
+                  className={`chip ${person.isCoach && coachSports.includes(tag) ? 'coach' : 'active'}`}
                 >
                   {tag}
                 </span>
@@ -303,8 +334,8 @@ export function UserProfilePage() {
           </SectionTitle>
           {onBreak ? <p className="break-note">{breakText}</p> : null}
           <div className="slots">
-            {person.visitSlots.length ? (
-              person.visitSlots.map((slot) => (
+            {visitSlots.length ? (
+              visitSlots.map((slot) => (
                 <div key={`${slot.day}-${slot.from}`} className="slot">
                   <strong>{slot.day}</strong>
                   <span>

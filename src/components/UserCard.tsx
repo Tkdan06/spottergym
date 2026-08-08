@@ -37,6 +37,7 @@ export function UserCard({ user, compact, rank, priority = false }: Props) {
   return (
     <Link
       to={profileTo}
+      state={isMe ? undefined : { person: user }}
       className={`user-card ${compact ? 'compact' : ''} ${isMe ? 'is-me' : ''} ${isCoach ? 'is-coach' : ''}`}
       aria-label={isMe ? `${name} — это ты` : name}
     >
