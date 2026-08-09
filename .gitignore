@@ -16,6 +16,9 @@ dist-ssr
 !.env.example
 !.env.prod.example
 
+# User-uploaded media (local / server disk store)
+api/data/media/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

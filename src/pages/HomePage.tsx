@@ -34,7 +34,8 @@ function shortGymName(name: string) {
 }
 
 export function HomePage() {
-  const { user, likes, setHomeGym, unreadNotifications, blockedUserIds, apiOnline } = useApp()
+  const { user, likes, likeCounts, setHomeGym, unreadNotifications, blockedUserIds, apiOnline } =
+    useApp()
   const [filter, setFilter] = useState<IntentFilter>('all')
   const [genderFilter, setGenderFilter] = useState<GenderFilter>('all')
   const [ageFilter, setAgeFilter] = useState<AgeFilter>('all')
@@ -63,8 +64,8 @@ export function HomePage() {
     if (genderFilter !== 'all') list = list.filter((p) => p.gender === genderFilter)
     if (ageFilter !== 'all') list = list.filter((p) => matchesAge(p.age, ageFilter))
     if (levelFilter !== 'all') list = list.filter((p) => p.experienceLevel === levelFilter)
-    return sortByLikes(list, likes)
-  }, [floorPeople, filter, genderFilter, ageFilter, levelFilter, likes])
+    return sortByLikes(list, likes, likeCounts)
+  }, [floorPeople, filter, genderFilter, ageFilter, levelFilter, likes, likeCounts])
 
   const youHere = Boolean(
     user && hasGym && checkedInId === gym!.id && user.isActive,
@@ -195,7 +196,7 @@ export function HomePage() {
                   <UserCard
                     key={person.id}
                     user={person}
-                    rank={getHallRank(person.id, people, likes)}
+                    rank={getHallRank(person.id, people, likes, likeCounts)}
                     priority={index < 4}
                   />
                 ))

@@ -77,6 +77,7 @@ export async function softDeleteUser(
         isMasterAdmin: false,
         adminPermissions: Prisma.DbNull,
         privacy: 'open',
+        tokenVersion: { increment: 1 },
         lastSeenAt: new Date(),
       },
     })

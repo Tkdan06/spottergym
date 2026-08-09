@@ -28,7 +28,8 @@ import {
   resolveExpiresAt,
 } from '../lib/checkInExpiry.js'
 import { notifyGymMembers } from '../lib/gymNotify.js'
-import { isAllowedAvatarDataUrl, isAllowedPhotoDataUrl } from '../lib/photos.js'
+import { persistAvatar, persistPhotoList } from '../lib/mediaStore.js'
+import { isAllowedAvatarRef, isAllowedPhotoRef } from '../lib/photos.js'
 import { serializeUser } from '../lib/serialize.js'
 import { isValidUsername, normalizeUsername } from '../lib/username.js'
 import { ensureWelcomeInstallNotification } from '../lib/welcomeInstall.js'
@@ -37,6 +38,7 @@ import {
   requireAuth,
   type AuthedEnv,
 } from '../middleware/auth.js'
+import { rateLimit } from '../middleware/rateLimit.js'
 
 const tagList = z.array(z.string().trim().min(1).max(TAG_ITEM_MAX)).max(TAGS_MAX)
 
@@ -76,7 +78,10 @@ meRoutes.get('/', async (c) => {
   return c.json({ user: serializeUser(user) })
 })
 
-meRoutes.patch('/', async (c) => {
+meRoutes.patch(
+  '/',
+  rateLimit({ windowMs: 60_000, max: 30, route: 'me-patch' }),
+  async (c) => {
   const body = patchSchema.safeParse(await c.req.json().catch(() => null))
   if (!body.success) {
     return c.json({ error: 'Некорректные данные профиля' }, 400)
@@ -85,13 +90,23 @@ meRoutes.patch('/', async (c) => {
   const data = { ...body.data }
 
   if (data.photos) {
-    if (!data.photos.every((p) => isAllowedPhotoDataUrl(p))) {
-      return c.json({ error: 'Фото: только JPEG, PNG или WebP (data URL)' }, 400)
+    if (!data.photos.every((p) => isAllowedPhotoRef(p))) {
+      return c.json({ error: 'Фото: JPEG, PNG, WebP или сохранённый файл' }, 400)
+    }
+    try {
+      data.photos = await persistPhotoList(userId, data.photos)
+    } catch {
+      return c.json({ error: 'Не удалось сохранить фото' }, 400)
     }
   }
   if (data.avatar !== undefined && data.avatar !== '') {
-    if (!isAllowedAvatarDataUrl(data.avatar)) {
-      return c.json({ error: 'Аватар: только JPEG, PNG или WebP (data URL)' }, 400)
+    if (!isAllowedAvatarRef(data.avatar)) {
+      return c.json({ error: 'Аватар: JPEG, PNG, WebP или сохранённый файл' }, 400)
+    }
+    try {
+      data.avatar = await persistAvatar(userId, data.avatar)
+    } catch {
+      return c.json({ error: 'Не удалось сохранить аватар' }, 400)
     }
   }
 
@@ -196,9 +211,13 @@ meRoutes.patch('/', async (c) => {
   }
 
   return c.json({ user: serializeUser(user) })
-})
+  },
+)
 
-meRoutes.post('/check-in', async (c) => {
+meRoutes.post(
+  '/check-in',
+  rateLimit({ windowMs: 60_000, max: 12, route: 'me-check-in' }),
+  async (c) => {
   const body = z
     .object({ gymId: z.string().min(1).max(GYM_ID_MAX) })
     .safeParse(await c.req.json().catch(() => null))
@@ -255,9 +274,13 @@ meRoutes.post('/check-in', async (c) => {
     }
   }
   return c.json({ user: user ? serializeUser(user) : null })
-})
+  },
+)
 
-meRoutes.post('/check-out', async (c) => {
+meRoutes.post(
+  '/check-out',
+  rateLimit({ windowMs: 60_000, max: 20, route: 'me-check-out' }),
+  async (c) => {
   const userId = c.get('userId')
   await prisma.checkIn.updateMany({
     where: { userId, checkedOutAt: null },
@@ -269,10 +292,14 @@ meRoutes.post('/check-out', async (c) => {
   })
   const user = await loadAuthedUser(userId)
   return c.json({ user: user ? serializeUser(user) : null })
-})
+  },
+)
 
 /** Still at the gym — push expiry +1h (max 2 extends). */
-meRoutes.post('/check-in/extend', async (c) => {
+meRoutes.post(
+  '/check-in/extend',
+  rateLimit({ windowMs: 60_000, max: 20, route: 'me-check-extend' }),
+  async (c) => {
   const userId = c.get('userId')
   await expireStaleCheckIns()
   const open = await prisma.checkIn.findFirst({
@@ -310,7 +337,8 @@ meRoutes.post('/check-in/extend', async (c) => {
 
   const user = await loadAuthedUser(userId)
   return c.json({ user: user ? serializeUser(user) : null })
-})
+  },
+)
 
 meRoutes.post('/gyms/:gymId', async (c) => {
   const userId = c.get('userId')

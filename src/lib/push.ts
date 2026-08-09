@@ -84,12 +84,9 @@ async function fetchVapidPublicKey() {
 }
 
 async function postSubscription(path: '/push/subscribe' | '/push/unsubscribe', body: PushSubscribePayload | { endpoint: string }) {
-  const token = getStoredToken()
-  const headers = new Headers({ 'Content-Type': 'application/json' })
-  if (token) headers.set('X-Spotter-Token', token)
   const res = await fetch(`${getApiBase()}${path}`, {
     method: 'POST',
-    headers,
+    headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
     body: JSON.stringify(body),
   })

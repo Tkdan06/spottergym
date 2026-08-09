@@ -22,6 +22,10 @@ if (isProd && (WEAK_JWT_SECRETS.has(jwtSecret) || jwtSecret.length < 32)) {
   )
 }
 
+if (isProd && !String(process.env.MASTER_ADMIN_EMAIL || '').trim()) {
+  throw new Error('MASTER_ADMIN_EMAIL must be set in production')
+}
+
 export const env = {
   isProd,
   databaseUrl: required(
@@ -35,8 +39,10 @@ export const env = {
     .map((s) => s.trim())
     .filter(Boolean),
   allowLanCors: !isProd && process.env.ALLOW_LAN_CORS !== 'false',
-  /** Единственный мастер-админ */
-  masterAdminEmail: String(process.env.MASTER_ADMIN_EMAIL || 'tkdan@ya.ru')
+  /** Единственный мастер-админ (email only on server — never ship to the client) */
+  masterAdminEmail: String(
+    process.env.MASTER_ADMIN_EMAIL || (isProd ? '' : 'admin@localhost'),
+  )
     .trim()
     .toLowerCase(),
   /** Доп. админы отключены по умолчанию — оставляем пустым */
@@ -46,7 +52,7 @@ export const env = {
     .filter(Boolean),
   vapidPublicKey: String(process.env.VAPID_PUBLIC_KEY || '').trim(),
   vapidPrivateKey: String(process.env.VAPID_PRIVATE_KEY || '').trim(),
-  vapidSubject: String(process.env.VAPID_SUBJECT || 'mailto:tkdan@ya.ru').trim(),
+  vapidSubject: String(process.env.VAPID_SUBJECT || 'mailto:noreply@spottergym.ru').trim(),
   /** Sendsay account login (for API URL path) */
   sendsayLogin: String(process.env.SENDSAY_LOGIN || '').trim(),
   sendsayApiKey: String(process.env.SENDSAY_APIKEY || '').trim(),

@@ -31,8 +31,20 @@ export const requireAuth = createMiddleware<AuthedEnv>(async (c, next) => {
   if (!session) {
     return c.json({ error: 'Сессия недействительна' }, 401)
   }
-  c.set('userId', session.sub)
-  c.set('userEmail', session.email)
+
+  const row = await prisma.user.findUnique({
+    where: { id: session.sub },
+    select: { id: true, email: true, deletedAt: true, tokenVersion: true },
+  })
+  if (!row || row.deletedAt) {
+    return c.json({ error: 'Сессия недействительна' }, 401)
+  }
+  if (row.tokenVersion !== session.tv) {
+    return c.json({ error: 'Сессия устарела — войди снова' }, 401)
+  }
+
+  c.set('userId', row.id)
+  c.set('userEmail', row.email)
   await next()
 })
 
@@ -53,4 +65,12 @@ export async function authedUserJson(userId: string) {
   const user = await loadAuthedUser(userId)
   if (!user) return null
   return serializeUser(user)
+}
+
+/** Invalidate all existing JWTs for this user. */
+export async function bumpTokenVersion(userId: string) {
+  await prisma.user.update({
+    where: { id: userId },
+    data: { tokenVersion: { increment: 1 } },
+  })
 }

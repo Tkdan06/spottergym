@@ -1,3 +1,8 @@
+/* Kill .page top padding — it left a blank strip above the hero */
+.page.lp {
+  padding-top: 0;
+}
+
 .lp {
   display: flex;
   flex-direction: column;
@@ -14,14 +19,14 @@
   position: relative;
   z-index: 1;
   padding: calc(28px + env(safe-area-inset-top, 0px)) 0 28px;
-  margin: 0 -4px;
-  padding-left: 4px;
-  padding-right: 4px;
+  margin: 0 -16px;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
 .lp-hero-bg {
   position: absolute;
-  inset: -4px -20px 18%;
+  inset: 0 0 18%;
   z-index: -1;
   background-color: #0b0f0e;
   background-image:
@@ -452,6 +457,19 @@
   color: var(--text-muted);
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+@media (min-width: 900px) {
+  .page.lp {
+    padding-top: 0;
+  }
+
+  .lp-hero {
+    margin-left: -36px;
+    margin-right: -36px;
+    padding-left: 36px;
+    padding-right: 36px;
+  }
 }
 
 @media (min-width: 720px) {

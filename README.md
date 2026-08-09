@@ -22,7 +22,7 @@ cd api && npm install && npm run db:setup && npm run dev
 
 В другом терминале: `npm run dev` (Vite проксирует `/api` → `:3001`).
 
-Главный админ: зарегистрируй аккаунт с email из `MASTER_ADMIN_EMAIL` (по умолчанию **tkdan@ya.ru**). В production без API вход закрыт (fail closed). В dev без Docker — fallback на `localStorage`.
+Главный админ: зарегистрируй аккаунт с email из серверного `MASTER_ADMIN_EMAIL` (не публикуется во фронтенде). В production без API вход закрыт (fail closed). В dev без Docker — fallback на `localStorage`.
 
 Подробнее: [api/README.md](api/README.md) · друзья на VPS: [DEPLOY.md](DEPLOY.md).
 

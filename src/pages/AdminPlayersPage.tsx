@@ -2,7 +2,6 @@ import { type FormEvent, useMemo, useState } from 'react'
 import { ArrowLeft, Ban, MessageSquare, RefreshCw, ShieldAlert, Trash2 } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/useApp'
-import { isMasterAdminEmail } from '../lib/adminConfig'
 import { formatAdminDate, formatBytes } from '../lib/adminStats'
 import { experienceLabel, getGym, intentLabel } from '../data/mock'
 import { ADMIN_MESSAGE_MAX } from '../lib/fieldLimits'
@@ -96,7 +95,7 @@ export function AdminPlayersPage() {
     setNotice('')
     void (async () => {
       try {
-        if (isMasterAdminEmail(entry.email)) throw new Error('Нельзя блокировать главного админа')
+        if (entry.isMasterAdmin) throw new Error('Нельзя блокировать главного админа')
         const blocked = blockedEmails.includes(entry.email.toLowerCase())
         if (blocked) {
           await adminUnblockEmail(entry.email)
@@ -341,7 +340,7 @@ export function AdminPlayersPage() {
                     type="button"
                     className="admin-action-icon"
                     onClick={() => onBlockToggle(selected)}
-                    disabled={busy || isMasterAdminEmail(selected.email)}
+                    disabled={busy || selected.isMasterAdmin}
                     title={
                       blockedEmails.includes(selected.email.toLowerCase())
                         ? 'Разблокировать'
@@ -356,7 +355,7 @@ export function AdminPlayersPage() {
                     <Ban size={18} />
                   </button>
                 ) : null}
-                {canRemoveUsers && !selected.isDemoSeed && !isMasterAdminEmail(selected.email) ? (
+                {canRemoveUsers && !selected.isDemoSeed && !selected.isMasterAdmin ? (
                   <button
                     type="button"
                     className="admin-action-icon danger"

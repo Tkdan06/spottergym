@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowRight, Dumbbell, Shield } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { LANDING } from '../content/landing'
+import {
+  attachLandingScrollTracking,
+  trackLanding,
+} from '../lib/landingTrack'
 import { captureMarketingParams, marketingRegisterSearch } from '../lib/utm'
 import './LandingPage.css'
 
@@ -9,20 +13,34 @@ function registerPath() {
   return `/register${marketingRegisterSearch({ from: 'lp' })}`
 }
 
+function loginPath() {
+  return `/login${marketingRegisterSearch({ from: 'lp' })}`
+}
+
 function CtaPair({
   primaryLabel,
   secondaryLabel = LANDING.hero.ctaSecondary,
+  placement,
 }: {
   primaryLabel: string
   secondaryLabel?: string
+  placement: 'hero' | 'mid' | 'final'
 }) {
   return (
     <div className="lp-actions">
-      <Link to={registerPath()} className="btn btn-primary btn-block">
+      <Link
+        to={registerPath()}
+        className="btn btn-primary btn-block"
+        onClick={() => trackLanding('cta_register', { placement })}
+      >
         {primaryLabel}
         <ArrowRight size={18} aria-hidden />
       </Link>
-      <Link to="/login" className="btn btn-ghost btn-block">
+      <Link
+        to={loginPath()}
+        className="btn btn-ghost btn-block"
+        onClick={() => trackLanding('cta_login', { placement })}
+      >
         {secondaryLabel}
       </Link>
     </div>
@@ -129,6 +147,8 @@ export function LandingPage() {
   useEffect(() => {
     captureMarketingParams(search)
     captureMarketingParams('from=lp')
+    trackLanding('view', { path: '/lp' })
+    return attachLandingScrollTracking()
   }, [search])
 
   useEffect(() => {
@@ -159,7 +179,7 @@ export function LandingPage() {
           </h1>
           <p className="lp-headline">{LANDING.hero.headline}</p>
           <p className="lp-lead">{LANDING.hero.lead}</p>
-          <CtaPair primaryLabel={LANDING.hero.ctaPrimary} />
+          <CtaPair primaryLabel={LANDING.hero.ctaPrimary} placement="hero" />
 
           <div className="lp-status-demo" aria-label="Примеры карточек в Spotter">
             <div className="lp-demo-card">
@@ -276,6 +296,7 @@ export function LandingPage() {
           <CtaPair
             primaryLabel={LANDING.midCta.ctaPrimary}
             secondaryLabel={LANDING.midCta.ctaSecondary}
+            placement="mid"
           />
         </section>
 
@@ -329,6 +350,7 @@ export function LandingPage() {
           <CtaPair
             primaryLabel={LANDING.finalCta.ctaPrimary}
             secondaryLabel={LANDING.finalCta.ctaSecondary}
+            placement="final"
           />
         </section>
 

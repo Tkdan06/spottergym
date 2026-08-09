@@ -2,7 +2,6 @@ import { type FormEvent, useMemo, useState } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/useApp'
-import { MASTER_ADMIN_EMAIL } from '../lib/adminConfig'
 import { searchFieldProps } from '../lib/inputAttrs'
 import {
   ADMIN_PERMISSION_KEYS,
@@ -117,7 +116,7 @@ export function AdminUsersPage() {
       </button>
       <h1>Админы и права</h1>
       <p className="muted">
-        Главный: {MASTER_ADMIN_EMAIL}. Можно выдать ограниченные права (только тикеты) или полные
+        Главный админ отмечен в списке. Можно выдать ограниченные права (только тикеты) или полные
         (блок, удаление, назначение других админов).
       </p>
 

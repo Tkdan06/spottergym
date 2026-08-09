@@ -15,34 +15,60 @@ const userInclude = {
   checkIns: { where: { checkedOutAt: null }, take: 1 },
 } as const
 
-/** LikesMap: targetUserId → likerIds[] */
-async function buildLikesMap() {
-  const rows = await prisma.like.findMany({
-    select: { fromUserId: true, toUserId: true },
-  })
-  const map: Record<string, string[]> = {}
-  for (const row of rows) {
-    if (!map[row.toUserId]) map[row.toUserId] = []
-    map[row.toUserId].push(row.fromUserId)
-  }
-  return map
-}
+/**
+ * Privacy-scoped likes for the viewer:
+ * - full liker ids only for likes *received* by the viewer
+ * - for outgoing targets: only the viewer's id (so likedByMe works)
+ * - counts for everyone (hall ranking) without exposing other people's liker graphs
+ */
+async function buildViewerLikesPayload(viewerId: string) {
+  const [incoming, outgoing, countRows] = await Promise.all([
+    prisma.like.findMany({
+      where: { toUserId: viewerId },
+      select: { fromUserId: true },
+    }),
+    prisma.like.findMany({
+      where: { fromUserId: viewerId },
+      select: { toUserId: true },
+    }),
+    prisma.like.groupBy({
+      by: ['toUserId'],
+      _count: { _all: true },
+    }),
+  ])
 
-/** Public profiles for likers so every viewer resolves the same avatars. */
-async function loadLikerActors(likes: Record<string, string[]>) {
-  const likerIds = [...new Set(Object.values(likes).flat())]
-  if (!likerIds.length) return []
-  const users = await prisma.user.findMany({
-    where: { id: { in: likerIds } },
-    include: userInclude,
-  })
-  return users.map(serializePublicUser)
+  const likes: Record<string, string[]> = {}
+  likes[viewerId] = incoming.map((r) => r.fromUserId)
+
+  const outgoingIds = outgoing.map((r) => r.toUserId)
+  for (const targetId of outgoingIds) {
+    const arr = likes[targetId] ? [...likes[targetId]] : []
+    if (!arr.includes(viewerId)) arr.push(viewerId)
+    likes[targetId] = arr
+  }
+
+  const counts: Record<string, number> = {}
+  for (const row of countRows) {
+    counts[row.toUserId] = row._count._all
+  }
+  if (counts[viewerId] == null) counts[viewerId] = incoming.length
+
+  const actorIds = [...new Set([...likes[viewerId], ...outgoingIds])]
+  const actors = actorIds.length
+    ? (
+        await prisma.user.findMany({
+          where: { id: { in: actorIds }, deletedAt: null },
+          include: userInclude,
+        })
+      ).map(serializePublicUser)
+    : []
+
+  return { likes, counts, actors }
 }
 
 likesRoutes.get('/', async (c) => {
-  const likes = await buildLikesMap()
-  const actors = await loadLikerActors(likes)
-  return c.json({ likes, actors })
+  const payload = await buildViewerLikesPayload(c.get('userId'))
+  return c.json(payload)
 })
 
 likesRoutes.post('/:userId/toggle', async (c) => {
@@ -56,9 +82,9 @@ likesRoutes.post('/:userId/toggle', async (c) => {
 
   const target = await prisma.user.findUnique({
     where: { id: toUserId.data },
-    select: { id: true, name: true },
+    select: { id: true, name: true, deletedAt: true },
   })
-  if (!target) return c.json({ error: 'Пользователь не найден' }, 404)
+  if (!target || target.deletedAt) return c.json({ error: 'Пользователь не найден' }, 404)
   if (await areUsersBlocked(fromUserId, toUserId.data)) {
     return c.json({ error: 'Пользователь недоступен' }, 403)
   }
@@ -92,7 +118,6 @@ likesRoutes.post('/:userId/toggle', async (c) => {
     })
   }
 
-  const likes = await buildLikesMap()
-  const actors = await loadLikerActors(likes)
-  return c.json({ liked, likes, actors })
+  const payload = await buildViewerLikesPayload(fromUserId)
+  return c.json({ liked, ...payload })
 })

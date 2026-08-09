@@ -7,6 +7,7 @@ import {
   type AdminPermissions,
 } from '../lib/admin.js'
 import { buildAdminAnalytics, estimatePhotosBytes } from '../lib/adminAnalytics.js'
+import { buildLandingAnalytics } from '../lib/landingAnalytics.js'
 import { buildPasswordResetAnalytics } from '../lib/passwordResetAnalytics.js'
 import { isMasterAdminEmail, normalizeEmail } from '../env.js'
 import { serializeUser } from '../lib/serialize.js'
@@ -51,6 +52,13 @@ adminRoutes.get('/password-resets', async (c) => {
   return c.json(data)
 })
 
+adminRoutes.get('/landing', async (c) => {
+  const gate = await requirePerm(c.get('userId'), 'viewUsers')
+  if (!gate.ok) return c.json({ error: gate.error }, gate.status)
+  const data = await buildLandingAnalytics()
+  return c.json(data)
+})
+
 adminRoutes.get('/users', async (c) => {
   const gate = await requirePerm(c.get('userId'), 'viewUsers')
   if (!gate.ok) return c.json({ error: gate.error }, gate.status)
@@ -78,14 +86,18 @@ adminRoutes.get('/users', async (c) => {
     take: 300,
   })
 
+  const viewerIsMaster = gate.flags.isMasterAdmin
   return c.json({
     users: users.map((u) => {
       const full = serializeUser(u)
       const photos = u.photos || []
       // Slim payload: no photo blobs in admin directory
       const { photos: _photos, avatar: _avatar, ...rest } = full
+      const hideMasterEmail = !viewerIsMaster && isMasterAdminEmail(u.email)
       return {
         ...rest,
+        // Master email stays server-side for non-master admins
+        email: hideMasterEmail ? 'скрыто' : rest.email,
         photos: [] as string[],
         avatar: '',
         photosCount: photos.length,

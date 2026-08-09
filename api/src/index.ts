@@ -8,7 +8,9 @@ import { HTTP_BODY_MAX_BYTES } from './lib/fieldLimits.js'
 import { isPushConfigured } from './lib/push.js'
 import { startWorkoutReminderLoop } from './lib/workoutReminders.js'
 import { adminRoutes } from './routes/admin.js'
+import { analyticsRoutes } from './routes/analytics.js'
 import { authRoutes } from './routes/auth.js'
+import { mediaRoutes } from './routes/media.js'
 import { blockRoutes } from './routes/blocks.js'
 import { conversationRoutes } from './routes/conversations.js'
 import { gymRoutes } from './routes/gyms.js'
@@ -56,6 +58,8 @@ app.use(
 
 app.get('/health', (c) => c.json({ ok: true, service: 'spotter-api' }))
 
+app.route('/analytics', analyticsRoutes)
+app.route('/media', mediaRoutes)
 app.route('/auth', authRoutes)
 app.route('/me', meRoutes)
 app.route('/users', userRoutes)

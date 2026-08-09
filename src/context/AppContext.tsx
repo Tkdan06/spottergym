@@ -107,11 +107,7 @@ import {
   ADMIN_PRESETS,
   normalizeAdminPermissions,
 } from '../lib/adminPermissions'
-import {
-  isMasterAdminEmail,
-  MASTER_ADMIN_NAME,
-  normalizeEmail,
-} from '../lib/adminConfig'
+import { normalizeEmail } from '../lib/adminConfig'
 import { localGenderAvatar, withSyncedAvatar } from '../lib/avatar'
 import {
   BIO_MAX,
@@ -147,6 +143,10 @@ import {
 import {
   getLikeCount,
   hasLiked,
+  normalizeLikeCounts,
+  seedLikeCounts,
+  toggleLikeCount,
+  type LikeCounts,
   normalizeLikesMap,
   resolveLikers,
   resolveOutgoingLikes,
@@ -194,6 +194,7 @@ export interface AppContextValue {
   conversations: Conversation[]
   messages: Message[]
   likes: LikesMap
+  likeCounts: LikeCounts
   notifications: AppNotification[]
   notificationPrefs: NotificationPrefs
   unreadNotifications: number
@@ -382,12 +383,10 @@ function normalizeGender(value: unknown): Gender {
 }
 
 function createDefaultUser(name: string, email: string, gender: Gender = 'male'): AppUser {
-  const flags = adminFlagsForEmail(email)
-  const displayName = flags.isMasterAdmin ? MASTER_ADMIN_NAME : name
   return withAdminFlags({
     id: 'me',
-    username: generateLocalUsername(displayName),
-    name: displayName,
+    username: generateLocalUsername(name),
+    name,
     email: normalizeEmail(email),
     age: 25,
     gender: normalizeGender(gender),
@@ -416,10 +415,10 @@ function createDefaultUser(name: string, email: string, gender: Gender = 'male')
     lastSeenAt: new Date().toISOString(),
     registeredAt: new Date().toISOString(),
     onboardingDone: false,
-    isAdmin: flags.isAdmin,
-    isMasterAdmin: flags.isMasterAdmin,
-    canGrantAdmin: flags.canGrantAdmin,
-    adminPermissions: flags.adminPermissions,
+    isAdmin: false,
+    isMasterAdmin: false,
+    canGrantAdmin: false,
+    adminPermissions: undefined,
   })
 }
 
@@ -546,6 +545,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const current = loadUser()
     return current ? loadAccountBags(current.email).likes : {}
   })
+  const [likeCounts, setLikeCounts] = useState<LikeCounts>(() => {
+    const current = loadUser()
+    if (!current) return {}
+    const bags = loadAccountBags(current.email)
+    return seedLikeCounts(bags.likes)
+  })
   const [notifications, setNotifications] = useState<AppNotification[]>(() => {
     const current = loadUser()
     return current ? loadNotificationsForUser(current.email, false) : []
@@ -586,11 +591,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setApiOnline(online)
       apiOnlineRef.current = online
 
-      // Не стираем сессию при кратком сбое health (Safari / сеть) — только при 401 ниже
-      if (!online || !getStoredToken()) return
+      // Cookie session — always try /auth/me when API is up (no JWT in localStorage).
+      if (!online) return
       try {
         const me = await apiMe()
         if (cancelled || bootEpoch !== sessionEpochRef.current) return
+        setStoredToken('1')
         const normalized = withAdminFlags(
           normalizeGymFields(me as AppUser) as AppUser,
         )
@@ -605,8 +611,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           setStoredToken(null)
           setUser(null)
           localStorage.removeItem(STORAGE_USER)
-        } else if (!import.meta.env.PROD) {
-          setStoredToken(null)
         }
       }
     })()
@@ -637,6 +641,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setConversations(bags.conversations)
     setMessages(bags.messages)
     setLikes(bags.likes)
+    setLikeCounts(seedLikeCounts(bags.likes))
     setKnownUsers(contacts)
     saveAccountContacts(email, contacts)
     // seed уведомлений только для демо и только при первом создании ключа
@@ -735,6 +740,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setConversations([])
       setMessages([])
       setLikes({})
+      setLikeCounts({})
       setNotifications([])
       setNotificationPrefs({ ...DEFAULT_NOTIF_PREFS })
       localStorage.removeItem(STORAGE_USER)
@@ -785,7 +791,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setConversations(next)
       if (email) saveAccountConversations(email, next)
       const likesMap = normalizeLikesMap(likesPayload.likes)
+      const counts = normalizeLikeCounts(likesPayload.counts)
       setLikes(likesMap)
+      setLikeCounts(counts)
       if (email) saveAccountLikes(email, likesMap)
     } catch {
       /* keep cache */
@@ -827,7 +835,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ])
       const email = userEmailRef.current
       const likesMap = normalizeLikesMap(likesPayload.likes)
+      const counts = normalizeLikeCounts(likesPayload.counts)
       setLikes(likesMap)
+      setLikeCounts(counts)
       if (email) saveAccountLikes(email, likesMap)
       rememberUsersRef.current(likesPayload.actors)
       setNotifications(notifs)
@@ -1529,37 +1539,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!user || user.id === userId) return
       if (apiOnlineRef.current && getStoredToken()) {
         void apiToggleLike(userId)
-          .then(({ likes: next, actors }) => {
+          .then(({ likes: next, counts, actors }) => {
             const map = normalizeLikesMap(next)
             setLikes(map)
+            setLikeCounts(normalizeLikeCounts(counts))
             persistLikesMap(map)
             rememberUsers(actors)
           })
           .catch(() => {
+            const liked = !hasLiked(likes, userId, user.id)
             setLikes((prev) => {
               const next = toggleLikeInMap(prev, userId, user.id)
               persistLikesMap(next)
               return next
             })
+            setLikeCounts((prev) => toggleLikeCount(prev, userId, liked))
           })
         return
       }
+      const liked = !hasLiked(likes, userId, user.id)
       setLikes((prev) => {
         const next = toggleLikeInMap(prev, userId, user.id)
         persistLikesMap(next)
         return next
       })
+      setLikeCounts((prev) => toggleLikeCount(prev, userId, liked))
     },
-    [user, persistLikesMap, rememberUsers],
+    [user, likes, persistLikesMap, rememberUsers],
   )
 
   const getLikesFor = useCallback(
     (userId: string) => ({
-      count: getLikeCount(likes, userId),
+      count: getLikeCount(likes, userId, likeCounts),
       likedByMe: user ? hasLiked(likes, userId, user.id) : false,
       likers: resolveLikers(likes, userId, user, knownUsers),
     }),
-    [likes, user, knownUsers],
+    [likes, likeCounts, user, knownUsers],
   )
 
   const getMyLikedUsers = useCallback(
@@ -2014,7 +2029,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!hasAdminPermission(user, 'messageUsers')) {
         throw new Error('Нет права писать пользователям')
       }
-      if (isMasterAdminEmail(target.email) && !isMasterAdminEmail(user!.email)) {
+      if (target.isMasterAdmin && !user!.isMasterAdmin) {
         throw new Error('Нельзя писать главному админу от имени другого админа')
       }
       if (isEmailBlocked(target.email)) {
@@ -2187,7 +2202,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const adminBlockEmail = useCallback(
     async (email: string) => {
       if (!canBlockUsers) throw new Error('Нет права блокировать')
-      if (isMasterAdminEmail(email)) throw new Error('Нельзя блокировать главного админа')
+      const target = adminDirectory.find(
+        (p) => normalizeEmail(p.email) === normalizeEmail(email),
+      )
+      if (target?.isMasterAdmin) throw new Error('Нельзя блокировать главного админа')
       if (apiOnlineRef.current && getStoredToken()) {
         const emails = await apiAdminBlockEmail(email)
         saveBlockedEmails(emails)
@@ -2196,7 +2214,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       setBlockedEmails(blockEmail(email))
     },
-    [canBlockUsers],
+    [canBlockUsers, adminDirectory],
   )
 
   const adminUnblockEmail = useCallback(
@@ -2216,14 +2234,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const adminRemoveUser = useCallback(
     async (email: string, alsoBlock = false) => {
       if (!canRemoveUsers) throw new Error('Нет права удалять пользователей')
-      if (isMasterAdminEmail(email)) throw new Error('Нельзя удалить главного админа')
+      const listed =
+        adminDirectory.find((p) => normalizeEmail(p.email) === normalizeEmail(email)) ||
+        loadDirectory().find((p) => normalizeEmail(p.email) === normalizeEmail(email))
+      if (listed?.isMasterAdmin) throw new Error('Нельзя удалить главного админа')
       if (user && normalizeEmail(user.email) === normalizeEmail(email)) {
         throw new Error('Нельзя удалить свой аккаунт')
       }
       if (apiOnlineRef.current && getStoredToken()) {
-        const target =
-          adminDirectory.find((p) => normalizeEmail(p.email) === normalizeEmail(email)) ||
-          loadDirectory().find((p) => normalizeEmail(p.email) === normalizeEmail(email))
+        const target = listed
         if (!target?.id) throw new Error('Пользователь не найден на сервере')
         await apiAdminDeleteUser(target.id, { alsoBlock })
         if (alsoBlock) {
@@ -2378,6 +2397,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       conversations,
       messages,
       likes,
+      likeCounts,
       notifications,
       notificationPrefs,
       unreadNotifications,
@@ -2445,6 +2465,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       conversations,
       messages,
       likes,
+      likeCounts,
       notifications,
       notificationPrefs,
       unreadNotifications,

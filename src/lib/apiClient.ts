@@ -11,9 +11,12 @@ import type {
   UserProfile,
 } from '../types'
 import type { AdminAnalytics } from './adminAnalytics'
-import type { LikesMap } from './likes'
+import type { LikeCounts, LikesMap } from './likes'
 
+/** Legacy JWT key — cleared; session is httpOnly cookie only. */
 const TOKEN_KEY = 'spotter.api.token'
+/** Non-secret marker that a cookie session may exist (gates polls; not auth). */
+const SESSION_FLAG = 'spotter.api.session'
 
 export function getApiBase() {
   const fromEnv = String(import.meta.env.VITE_API_URL || '').trim().replace(/\/$/, '')
@@ -26,9 +29,15 @@ export function isApiConfigured() {
   return true
 }
 
+/** Truthy when we expect a cookie session (never stores the JWT). */
 export function getStoredToken() {
   try {
-    return localStorage.getItem(TOKEN_KEY) || ''
+    localStorage.removeItem(TOKEN_KEY)
+  } catch {
+    /* ignore */
+  }
+  try {
+    return localStorage.getItem(SESSION_FLAG) || ''
   } catch {
     return ''
   }
@@ -36,8 +45,9 @@ export function getStoredToken() {
 
 export function setStoredToken(token: string | null) {
   try {
-    if (token) localStorage.setItem(TOKEN_KEY, token)
-    else localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(TOKEN_KEY)
+    if (token) localStorage.setItem(SESSION_FLAG, '1')
+    else localStorage.removeItem(SESSION_FLAG)
   } catch {
     /* ignore */
   }
@@ -59,9 +69,6 @@ async function request<T>(
   if (options.json !== undefined) {
     headers.set('Content-Type', 'application/json')
   }
-  // Use a custom header so nginx Basic Auth can keep Authorization: Basic
-  const token = getStoredToken()
-  if (token) headers.set('X-Spotter-Token', token)
 
   const res = await fetch(`${getApiBase()}${path}`, {
     ...options,
@@ -109,20 +116,20 @@ export async function apiRegister(input: {
   gender: Gender
   inviteFrom?: string
 }) {
-  const data = await request<{ user: AppUser; token: string }>('/auth/register', {
+  const data = await request<{ user: AppUser }>('/auth/register', {
     method: 'POST',
     json: input,
   })
-  if (data.token) setStoredToken(data.token)
+  setStoredToken('1')
   return data.user
 }
 
 export async function apiLogin(email: string, password: string) {
-  const data = await request<{ user: AppUser; token: string }>('/auth/login', {
+  const data = await request<{ user: AppUser }>('/auth/login', {
     method: 'POST',
     json: { email, password },
   })
-  if (data.token) setStoredToken(data.token)
+  setStoredToken('1')
   return data.user
 }
 
@@ -323,6 +330,54 @@ export async function apiAdminFetchPasswordResets() {
   return request<PasswordResetAnalytics>('/admin/password-resets')
 }
 
+export type LandingFunnelWindow = {
+  views: number
+  uniqueVisitors: number
+  scroll50: number
+  scroll50Unique: number
+  scroll90: number
+  scroll90Unique: number
+  ctaRegister: number
+  ctaRegisterUnique: number
+  ctaLogin: number
+  ctaByPlacement: Record<string, number>
+  registerView: number
+  registerViewUnique: number
+  registerSuccess: number
+  registerSuccessUnique: number
+  viewToCtaPct: number | null
+  ctaToRegisterPct: number | null
+  viewToRegisterPct: number | null
+}
+
+export type LandingAnalytics = {
+  generatedAt: string
+  last24h: LandingFunnelWindow
+  last7d: LandingFunnelWindow
+  last30d: LandingFunnelWindow
+  campaigns7d: {
+    campaign: string
+    views: number
+    ctaRegister: number
+    registerSuccess: number
+  }[]
+  recent: {
+    id: string
+    name: string
+    placement: string
+    utmSource: string
+    utmCampaign: string
+    utmContent: string
+    fromParam: string
+    visitorId: string
+    createdAt: string
+  }[]
+}
+
+export async function apiAdminFetchLanding() {
+  return request<LandingAnalytics>('/admin/landing')
+}
+
 export async function apiAdminFetchBlockedEmails() {
   const data = await request<{ emails: string[] }>('/admin/blocked-emails')
   return data.emails
@@ -375,21 +430,27 @@ export async function apiPatchTicketStatus(
 }
 
 export async function apiFetchLikes() {
-  const data = await request<{ likes: LikesMap; actors?: UserProfile[] }>('/likes')
+  const data = await request<{ likes: LikesMap; counts?: LikeCounts; actors?: UserProfile[] }>(
+    '/likes',
+  )
   return {
     likes: data.likes,
+    counts: data.counts || {},
     actors: Array.isArray(data.actors) ? data.actors : [],
   }
 }
 
 export async function apiToggleLike(userId: string) {
-  const data = await request<{ liked: boolean; likes: LikesMap; actors?: UserProfile[] }>(
-    `/likes/${encodeURIComponent(userId)}/toggle`,
-    { method: 'POST' },
-  )
+  const data = await request<{
+    liked: boolean
+    likes: LikesMap
+    counts?: LikeCounts
+    actors?: UserProfile[]
+  }>(`/likes/${encodeURIComponent(userId)}/toggle`, { method: 'POST' })
   return {
     liked: data.liked,
     likes: data.likes,
+    counts: data.counts || {},
     actors: Array.isArray(data.actors) ? data.actors : [],
   }
 }

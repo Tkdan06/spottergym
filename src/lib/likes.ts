@@ -3,6 +3,8 @@ import type { AppUser, UserProfile } from '../types'
 import { isDemoAccount } from './demoAccount'
 
 export type LikesMap = Record<string, string[]>
+/** Total like counts per user (for hall ranking without exposing full liker graphs). */
+export type LikeCounts = Record<string, number>
 
 /** Стартовые лайки для демо-рейтинга в зале */
 export const SEED_LIKES: LikesMap = {
@@ -12,6 +14,14 @@ export const SEED_LIKES: LikesMap = {
   'u-danya': ['u-ivan'],
   'u-katya': ['u-masha'],
   'u-anon': ['u-lera'],
+}
+
+export function seedLikeCounts(likes: LikesMap = SEED_LIKES): LikeCounts {
+  const counts: LikeCounts = {}
+  for (const [userId, likers] of Object.entries(likes)) {
+    counts[userId] = likers.length
+  }
+  return counts
 }
 
 export function normalizeLikesMap(
@@ -29,7 +39,19 @@ export function normalizeLikesMap(
   return next
 }
 
-export function getLikeCount(likes: LikesMap, userId: string) {
+export function normalizeLikeCounts(raw: LikeCounts | null | undefined): LikeCounts {
+  if (!raw || typeof raw !== 'object') return {}
+  const next: LikeCounts = {}
+  for (const [userId, n] of Object.entries(raw)) {
+    if (typeof n === 'number' && Number.isFinite(n) && n >= 0) {
+      next[userId] = Math.floor(n)
+    }
+  }
+  return next
+}
+
+export function getLikeCount(likes: LikesMap, userId: string, counts?: LikeCounts) {
+  if (counts && counts[userId] != null) return counts[userId]
   return likes[userId]?.length ?? 0
 }
 
@@ -43,6 +65,12 @@ export function toggleLikeInMap(likes: LikesMap, targetId: string, likerId: stri
   const liked = current.includes(likerId)
   const nextLikers = liked ? current.filter((id) => id !== likerId) : [...current, likerId]
   return { ...likes, [targetId]: nextLikers }
+}
+
+export function toggleLikeCount(counts: LikeCounts, targetId: string, liked: boolean): LikeCounts {
+  const prev = counts[targetId] ?? 0
+  const next = liked ? prev + 1 : Math.max(0, prev - 1)
+  return { ...counts, [targetId]: next }
 }
 
 function resolveUserById(
@@ -110,10 +138,14 @@ function lastSeenMs(user: HallSortable) {
  * 3) при равных лайках — кто сейчас в зале
  * 4) затем кто был в зале позже (lastSeenAt)
  */
-export function sortByLikes<T extends HallSortable>(list: T[], likes: LikesMap) {
+export function sortByLikes<T extends HallSortable>(
+  list: T[],
+  likes: LikesMap,
+  counts?: LikeCounts,
+) {
   return [...list].sort((a, b) => {
-    const likesA = getLikeCount(likes, a.id)
-    const likesB = getLikeCount(likes, b.id)
+    const likesA = getLikeCount(likes, a.id, counts)
+    const likesB = getLikeCount(likes, b.id, counts)
     if (likesB !== likesA) return likesB - likesA
 
     const activeDiff = Number(Boolean(b.isActive)) - Number(Boolean(a.isActive))
@@ -124,11 +156,16 @@ export function sortByLikes<T extends HallSortable>(list: T[], likes: LikesMap) 
 }
 
 /** Место в рейтинге только у тех, у кого есть лайки */
-export function getHallRank(userId: string, sorted: HallSortable[], likes: LikesMap) {
-  if (getLikeCount(likes, userId) <= 0) return undefined
+export function getHallRank(
+  userId: string,
+  sorted: HallSortable[],
+  likes: LikesMap,
+  counts?: LikeCounts,
+) {
+  if (getLikeCount(likes, userId, counts) <= 0) return undefined
   let rank = 0
   for (const person of sorted) {
-    if (getLikeCount(likes, person.id) <= 0) break
+    if (getLikeCount(likes, person.id, counts) <= 0) break
     rank += 1
     if (person.id === userId) return rank
   }

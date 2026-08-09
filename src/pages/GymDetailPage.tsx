@@ -25,7 +25,8 @@ export function GymDetailPage() {
   const from = searchParams.get('from')
   const fromSettings = from === 'settings'
   const fromHome = from === 'home'
-  const { user, joinGym, leaveGym, setHomeGym, likes, blockedUserIds, apiOnline } = useApp()
+  const { user, joinGym, leaveGym, setHomeGym, likes, likeCounts, blockedUserIds, apiOnline } =
+    useApp()
   const gym = getGym(gymId)
   const isMine = isMemberOfGym(user, gymId)
   const isHome = user?.homeGymId === gymId
@@ -39,7 +40,10 @@ export function GymDetailPage() {
     blockedUserIds,
   })
 
-  const people = useMemo(() => sortByLikes(floorPeople, likes), [floorPeople, likes])
+  const people = useMemo(
+    () => sortByLikes(floorPeople, likes, likeCounts),
+    [floorPeople, likes, likeCounts],
+  )
 
   const activeCount = people.filter((p) => p.isActive).length
 
@@ -224,7 +228,7 @@ export function GymDetailPage() {
               <UserCard
                 key={person.id}
                 user={person}
-                rank={getHallRank(person.id, people, likes)}
+                rank={getHallRank(person.id, people, likes, likeCounts)}
                 priority={index < 4}
               />
             ))

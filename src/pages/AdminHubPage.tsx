@@ -5,6 +5,7 @@ import {
   HardDrive,
   KeyRound,
   MapPin,
+  Megaphone,
   MessagesSquare,
   Palette,
   RefreshCw,
@@ -221,6 +222,11 @@ export function AdminHubPage() {
               <p className="muted">
                 7д {analytics?.passwordResets?.last7d ?? '—'} запросов · спам и забывчивость
               </p>
+            </Link>
+            <Link to="/app/admin/landing" className="admin-hub-card">
+              <Megaphone size={20} />
+              <strong>Лендинг /lp</strong>
+              <p className="muted">Визиты, скролл, CTA и регистрации с рекламы</p>
             </Link>
           </>
         ) : null}

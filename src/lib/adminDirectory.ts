@@ -1,8 +1,6 @@
 import type { AdminDirectoryUser, AdminPermissions, AppUser, Gender } from '../types'
 import {
-  isMasterAdminEmail,
   isSeedAdminEmail,
-  MASTER_ADMIN_EMAIL,
   MASTER_ADMIN_NAME,
   normalizeEmail,
   SEED_ADMIN_EMAILS,
@@ -84,21 +82,8 @@ export function unblockEmail(email: string) {
 }
 
 function seedDirectory(): AdminDirectoryUser[] {
-  // Сиды людей в зале (Иван, Маша…) не кладём в админку — только у demo@demo.ru
-  return [
-    {
-      id: 'master-bogdan',
-      name: MASTER_ADMIN_NAME,
-      email: MASTER_ADMIN_EMAIL,
-      isAdmin: true,
-      isMasterAdmin: true,
-      canGrantAdmin: true,
-      adminPermissions: { ...FULL_PERMISSIONS },
-      isDemoSeed: false,
-      registeredAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 90).toISOString(),
-    },
-    ...seedAdminEntries(),
-  ]
+  // Master identity comes from API isMasterAdmin — never hardcode email in the client.
+  return [...seedAdminEntries()]
 }
 
 function ensureSeedAdmins(dir: AdminDirectoryUser[]): AdminDirectoryUser[] {
@@ -129,25 +114,12 @@ export function loadDirectory(): AdminDirectoryUser[] {
     saveJson(STORAGE_ADMIN_DIR, seeded)
     return seeded
   }
-  let dir = raw
-  if (!raw.some((u) => isMasterAdminEmail(u.email))) {
-    dir = [
-      {
-        id: 'master-bogdan',
-        name: MASTER_ADMIN_NAME,
-        email: MASTER_ADMIN_EMAIL,
-        isAdmin: true,
-        isMasterAdmin: true,
-        canGrantAdmin: true,
-        isDemoSeed: false,
-      },
-      ...raw,
-    ]
-    saveJson(STORAGE_ADMIN_DIR, dir)
-  }
+  // Drop legacy client-seeded master row (hardcoded email was shipped in old builds).
+  let dir = raw.filter((u) => u.id !== 'master-bogdan')
+  if (dir.length !== raw.length) saveJson(STORAGE_ADMIN_DIR, dir)
   dir = dir.map((u) =>
     withNormalizedPermissions(
-      isMasterAdminEmail(u.email)
+      u.isMasterAdmin
         ? {
             ...u,
             isAdmin: true,
@@ -202,9 +174,9 @@ export type DirectoryUpsertInput = {
 export function upsertDirectoryUser(input: DirectoryUpsertInput) {
   const email = normalizeEmail(input.email)
   const dir = loadDirectory()
-  const master = isMasterAdminEmail(email)
-  const seedAdmin = isSeedAdminEmail(email)
   const idx = dir.findIndex((u) => normalizeEmail(u.email) === email || u.id === input.id)
+  const master = Boolean(input.isMasterAdmin || (idx >= 0 && dir[idx].isMasterAdmin))
+  const seedAdmin = isSeedAdminEmail(email)
 
   const isAdmin = master || seedAdmin ? true : Boolean(input.isAdmin)
   const adminPermissions = normalizeAdminPermissions(
@@ -393,32 +365,33 @@ export function setCanGrantAdmin(targetId: string, canGrant: boolean, actorIsMas
   return dir[idx]
 }
 
-export function adminFlagsForEmail(email: string) {
-  // Единственный админ — MASTER_ADMIN_EMAIL. Локальная директория не выдаёт админку сама.
-  const master = isMasterAdminEmail(email)
-  const isAdmin = master
-  const isMasterAdmin = master
-  const adminPermissions = normalizeAdminPermissions(
-    master ? FULL_PERMISSIONS : undefined,
-    {
-      isAdmin,
-      isMasterAdmin,
-      canGrantAdmin: master,
-    },
-  )
+export function adminFlagsForEmail(_email: string) {
+  // Admin flags come from the API (isMasterAdmin / isAdmin). No email allowlist in the client.
+  const adminPermissions = normalizeAdminPermissions(undefined, {
+    isAdmin: false,
+    isMasterAdmin: false,
+    canGrantAdmin: false,
+  })
   return {
-    isAdmin,
-    isMasterAdmin,
-    canGrantAdmin: adminPermissions.manageAdmins,
+    isAdmin: false,
+    isMasterAdmin: false,
+    canGrantAdmin: false,
     adminPermissions,
   }
+}
+
+function isMasterInDirectory(email: string) {
+  const key = normalizeEmail(email)
+  return loadDirectory().some(
+    (u) => u.isMasterAdmin && normalizeEmail(u.email) === key,
+  )
 }
 
 /** Удалить аккаунт пользователя с этого устройства + запись в директории */
 export function removeUserAccount(email: string, options?: { alsoBlock?: boolean }) {
   const key = normalizeEmail(email)
   if (!key) throw new Error('Пустой email')
-  if (isMasterAdminEmail(key)) throw new Error('Нельзя удалить главного админа')
+  if (isMasterInDirectory(key)) throw new Error('Нельзя удалить главного админа')
 
   const prefixes = [
     `spotter.account:${key}`,

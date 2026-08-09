@@ -17,7 +17,7 @@ JWT уходит заголовком `X-Spotter-Token`.
 |--------|--------|------|
 | `POSTGRES_PASSWORD` | `.env.prod` | Длинный случайный |
 | `JWT_SECRET` | `.env.prod` | ≥ 32 символов |
-| `MASTER_ADMIN_EMAIL` | `.env.prod` | `tkdan@ya.ru` |
+| `MASTER_ADMIN_EMAIL` | `.env.prod` | Только на сервере, не в клиенте |
 
 Сайт **без** nginx Basic Auth и без soft site-lock. Пользователи регистрируются сами.
 
@@ -60,7 +60,7 @@ DNS A/AAAA → IP VPS. Если раньше был GitHub Pages — отклю�
 ## 5. Admin
 
 1. Открой `https://spottergym.ru`
-2. Зарегистрируйся на `MASTER_ADMIN_EMAIL` (`tkdan@ya.ru`) с сильным паролем (≥ 8)
+2. Зарегистрируйся на email из `MASTER_ADMIN_EMAIL` (из `.env.prod`) с сильным паролем (≥ 8)
 3. Этот аккаунт — главный админ
 
 ## 6. Updates

@@ -74,7 +74,7 @@ authRoutes.post(
     }
 
     // Обычная регистрация никогда не выдаёт админку.
-    // Единственный админ — MASTER_ADMIN_EMAIL (tkdan@ya.ru): флаги выставляет resolveAdminFlags.
+    // Master email (server env only) gets flags via resolveAdminFlags / isMasterAdminEmail.
     const master = isMasterAdminEmail(email)
     const passwordHash = await hashPassword(body.data.password)
     const displayName = master ? 'Bogdan' : body.data.name
@@ -113,9 +113,14 @@ authRoutes.post(
       }
     }
 
-    const token = await signSession({ sub: user.id, email: user.email })
+    const token = await signSession({
+      sub: user.id,
+      email: user.email,
+      tv: user.tokenVersion,
+    })
     setSessionCookie(c, token)
-    return c.json({ user: serializeUser(user), token }, 201)
+    // Cookie is the session; token omitted from body (XSS-safe). Kept empty for old clients.
+    return c.json({ user: serializeUser(user) }, 201)
   },
 )
 
@@ -176,9 +181,13 @@ authRoutes.post(
       })
     }
 
-    const token = await signSession({ sub: user.id, email: user.email })
+    const token = await signSession({
+      sub: user.id,
+      email: user.email,
+      tv: user.tokenVersion,
+    })
     setSessionCookie(c, token)
-    return c.json({ user: serializeUser(user), token })
+    return c.json({ user: serializeUser(user) })
   },
 )
 
@@ -225,10 +234,17 @@ authRoutes.post(
     }
 
     const passwordHash = await hashPassword(newPassword)
-    await prisma.user.update({
+    const updated = await prisma.user.update({
       where: { id: user.id },
-      data: { passwordHash },
+      data: { passwordHash, tokenVersion: { increment: 1 } },
+      select: { id: true, email: true, tokenVersion: true },
     })
+    const token = await signSession({
+      sub: updated.id,
+      email: updated.email,
+      tv: updated.tokenVersion,
+    })
+    setSessionCookie(c, token)
 
     return c.json({ ok: true })
   },
@@ -324,7 +340,7 @@ authRoutes.post(
     await prisma.$transaction([
       prisma.user.update({
         where: { id: consumed.userId },
-        data: { passwordHash },
+        data: { passwordHash, tokenVersion: { increment: 1 } },
       }),
       prisma.passwordResetToken.update({
         where: { id: consumed.tokenId },
@@ -335,6 +351,7 @@ authRoutes.post(
         data: { usedAt: new Date() },
       }),
     ])
+    // Intentionally do not set a new session cookie — user must log in again.
 
     if (user?.email) {
       await logPasswordResetEvent({

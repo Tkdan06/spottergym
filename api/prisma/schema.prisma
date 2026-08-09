@@ -94,6 +94,8 @@ model User {
   lastSeenAt       DateTime        @default(now())
   /** Soft-delete: аккаунт анонимизирован, чаты сохраняются */
   deletedAt        DateTime?
+  /** Bump to invalidate all JWTs (password change / reset / soft-delete) */
+  tokenVersion     Int             @default(0)
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 
@@ -150,6 +152,32 @@ model PasswordResetEvent {
   @@index([email])
   @@index([status])
   @@index([userId])
+}
+
+/** Anonymous funnel events from /lp ads landing (+ register from lp) */
+model LandingEvent {
+  id          String   @id @default(cuid())
+  name        String
+  visitorId   String
+  sessionId   String   @default("")
+  placement   String   @default("")
+  path        String   @default("/lp")
+  utmSource   String   @default("")
+  utmMedium   String   @default("")
+  utmCampaign String   @default("")
+  utmContent  String   @default("")
+  utmTerm     String   @default("")
+  fromParam   String   @default("")
+  userAgent   String   @default("")
+  ip          String   @default("")
+  userId      String?
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([name, createdAt])
+  @@index([visitorId, name, createdAt])
+  @@index([utmCampaign, createdAt])
+  @@index([sessionId, name])
 }
 
 /** Web Push endpoints for installed PWA (home screen) */
