@@ -100,6 +100,7 @@ import {
   unblockEmail,
 } from '../lib/adminDirectory'
 import {
+  EMPTY_PERMISSIONS,
   FULL_PERMISSIONS,
   hasAdminPermission,
   SUPPORT_PERMISSIONS,
@@ -418,7 +419,7 @@ function createDefaultUser(name: string, email: string, gender: Gender = 'male')
     isAdmin: false,
     isMasterAdmin: false,
     canGrantAdmin: false,
-    adminPermissions: undefined,
+    adminPermissions: { ...EMPTY_PERMISSIONS },
   })
 }
 
