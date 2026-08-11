@@ -30,6 +30,7 @@ import { SettingsPage } from './pages/SettingsPage'
 import { TermsPage } from './pages/TermsPage'
 import { UiKitPage } from './pages/UiKitPage'
 import { UserProfilePage } from './pages/UserProfilePage'
+import { LandingCoachesPage } from './pages/LandingCoachesPage'
 import { LandingPage } from './pages/LandingPage'
 import { WelcomePage } from './pages/WelcomePage'
 
@@ -45,8 +46,9 @@ export default function App() {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           </Route>
 
-          {/* Ad landing — public even if logged in (preview + cold traffic) */}
+          {/* Ad landings — public even if logged in (preview + cold traffic) */}
           <Route path="/lp" element={<LandingPage />} />
+          <Route path="/lp-coaches" element={<LandingCoachesPage />} />
 
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />

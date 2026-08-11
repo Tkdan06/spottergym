@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowRight, Dumbbell, Shield } from 'lucide-react'
+import { ArrowRight, Heart, MessageCircle } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
-import { LANDING } from '../content/landing'
+import { LANDING, type LandingDemoProfile } from '../content/landing'
 import {
   attachLandingScrollTracking,
   trackLanding,
@@ -27,7 +27,7 @@ function CtaPair({
   placement: 'hero' | 'mid' | 'final'
 }) {
   return (
-    <div className="lp-actions">
+    <div className={`lp-actions${placement === 'hero' ? ' lp-actions-hero' : ''}`}>
       <Link
         to={registerPath()}
         className="btn btn-primary btn-block"
@@ -38,12 +38,70 @@ function CtaPair({
       </Link>
       <Link
         to={loginPath()}
-        className="btn btn-ghost btn-block"
+        className="lp-login-quiet"
         onClick={() => trackLanding('cta_login', { placement })}
       >
         {secondaryLabel}
       </Link>
     </div>
+  )
+}
+
+function DemoProfileCard({ profile }: { profile: LandingDemoProfile }) {
+  return (
+    <Link
+      to={registerPath()}
+      className={`lp-demo-card${profile.isCoach ? ' lp-demo-card-coach' : ''}`}
+      onClick={() =>
+        trackLanding('cta_register', { placement: `demo_profile:${profile.id}` })
+      }
+      aria-label={`${profile.name}, ${profile.age}. ${profile.gym}`}
+    >
+      <div className="lp-demo-aside">
+        <div className="lp-demo-media">
+          <img src={profile.photo} alt="" width={88} height={88} />
+        </div>
+        <span className={`lp-demo-presence ${profile.inGym ? 'on' : 'off'}`}>
+          <i aria-hidden />
+          {profile.inGym ? 'В зале' : 'Не в зале'}
+        </span>
+      </div>
+      <div className="lp-demo-body">
+        <h3>
+          {profile.name}
+          <span className="lp-demo-age">, {profile.age}</span>
+        </h3>
+        <p className="lp-demo-gym">{profile.gym}</p>
+        <p className="muted lp-demo-line">{profile.line}</p>
+        <div className="lp-demo-pills">
+          {profile.isCoach ? <span className="lp-pill lp-pill-coach">Тренер</span> : null}
+          {profile.open ? (
+            <span className="lp-pill lp-pill-open">Открыт к общению</span>
+          ) : null}
+        </div>
+        <div className="lp-demo-meta">
+          <div className="lp-demo-likes" aria-label={`${profile.likeCount} лайков`}>
+            <div className="lp-demo-likers" aria-hidden>
+              {profile.likerPhotos.map((src) => (
+                <img key={src} src={src} alt="" className="lp-demo-liker" width={22} height={22} />
+              ))}
+              {profile.likeCount > profile.likerPhotos.length ? (
+                <span className="lp-demo-likes-extra">
+                  +{profile.likeCount - profile.likerPhotos.length}
+                </span>
+              ) : null}
+            </div>
+            <span className="lp-demo-likes-count">
+              <Heart size={12} fill="currentColor" aria-hidden />
+              {profile.likeCount}
+            </span>
+          </div>
+          <span className="lp-demo-msg" aria-hidden>
+            <MessageCircle size={16} />
+          </span>
+        </div>
+      </div>
+    </Link>
   )
 }
 
@@ -181,72 +239,27 @@ export function LandingPage() {
           <p className="lp-lead">{LANDING.hero.lead}</p>
           <CtaPair primaryLabel={LANDING.hero.ctaPrimary} placement="hero" />
 
-          <div className="lp-status-demo" aria-label="Примеры карточек в Spotter">
-            <div className="lp-demo-card">
-              <div className="lp-demo-row">
-                <img
-                  className="lp-demo-avatar"
-                  src="/images/avatar-male.svg"
-                  alt=""
-                  width={48}
-                  height={48}
-                />
-                <div className="lp-demo-copy">
-                  <strong>Алекс, 27</strong>
-                  <span className="muted">Твой клуб · жим / функционалка</span>
-                </div>
-              </div>
-              <div className="lp-demo-pills">
-                <span className="lp-pill lp-pill-on">В зале</span>
-                <span className="lp-pill lp-pill-open">Открыт к общению</span>
-              </div>
-            </div>
-            <div className="lp-demo-card lp-demo-card-coach">
-              <div className="lp-demo-row">
-                <img
-                  className="lp-demo-avatar"
-                  src="/images/avatar-female.svg"
-                  alt=""
-                  width={48}
-                  height={48}
-                />
-                <div className="lp-demo-copy">
-                  <strong>Катя, 31</strong>
-                  <span className="muted">Твой клуб · силовой · стретчинг</span>
-                </div>
-              </div>
-              <div className="lp-demo-pills">
-                <span className="lp-pill lp-pill-coach">Тренер</span>
-                <span className="lp-pill lp-pill-open">Открыт к общению</span>
-              </div>
-            </div>
+          <div className="lp-status-demo" aria-label="Примеры профилей в Spotter">
+            <p className="lp-demo-caption muted">{LANDING.hero.demoCaption}</p>
+            {LANDING.demoProfiles.map((profile) => (
+              <DemoProfileCard key={profile.id} profile={profile} />
+            ))}
           </div>
         </header>
 
-        <section className="lp-section" aria-labelledby="lp-pains">
-          <h2 id="lp-pains" className="lp-section-title">
-            {LANDING.pains.title}
+        <section className="lp-section" aria-labelledby="lp-pain-offer">
+          <h2 id="lp-pain-offer" className="lp-section-title">
+            {LANDING.painOffer.title}
           </h2>
+          <p className="lp-section-lead muted">{LANDING.painOffer.lead}</p>
           <div className="lp-stack">
-            {LANDING.pains.items.map((item) => (
-              <article key={item.title} className="lp-block">
-                <h3>{item.title}</h3>
-                <p className="muted">{item.body}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="lp-section" aria-labelledby="lp-offer">
-          <h2 id="lp-offer" className="lp-section-title">
-            {LANDING.offer.title}
-          </h2>
-          <p className="lp-section-lead muted">{LANDING.offer.lead}</p>
-          <div className="lp-stack">
-            {LANDING.offer.items.map((item) => (
-              <article key={item.title} className="lp-block lp-offer-item">
-                <h3>{item.title}</h3>
-                <p className="muted">{item.body}</p>
+            {LANDING.painOffer.items.map((item) => (
+              <article key={item.pain} className="lp-block lp-pain-offer">
+                <p className="lp-pain">{item.pain}</p>
+                <p className="lp-fix">
+                  <span className="lp-fix-label">В Spotter</span>
+                  {item.fix}
+                </p>
               </article>
             ))}
           </div>
@@ -271,76 +284,7 @@ export function LandingPage() {
           </ol>
         </section>
 
-        <section className="lp-section" aria-labelledby="lp-statuses">
-          <h2 id="lp-statuses" className="lp-section-title">
-            {LANDING.statuses.title}
-          </h2>
-          <p className="lp-section-lead muted">{LANDING.statuses.lead}</p>
-          <ul className="lp-status-list">
-            {LANDING.statuses.items.map((item) => (
-              <li key={item.label} className="lp-block">
-                <strong>{item.label}</strong>
-                <p className="muted">{item.hint}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-
         <ScenarioCarousel />
-
-        <section className="lp-mid-cta" aria-labelledby="lp-mid">
-          <h2 id="lp-mid" className="lp-section-title">
-            {LANDING.midCta.title}
-          </h2>
-          <p className="lp-section-lead muted">{LANDING.midCta.lead}</p>
-          <CtaPair
-            primaryLabel={LANDING.midCta.ctaPrimary}
-            secondaryLabel={LANDING.midCta.ctaSecondary}
-            placement="mid"
-          />
-        </section>
-
-        <section className="lp-section lp-coaches" aria-labelledby="lp-coaches">
-          <div
-            className="lp-coaches-visual"
-            style={{ backgroundImage: `url(${LANDING.coaches.image})` }}
-            role="img"
-            aria-label="Тренер работает с клиентом в зале"
-          />
-          <h2 id="lp-coaches" className="lp-section-title">
-            <Dumbbell size={20} aria-hidden /> {LANDING.coaches.title}
-          </h2>
-          <p className="lp-section-lead muted">{LANDING.coaches.lead}</p>
-          <div className="lp-coach-grid">
-            <article className="lp-block">
-              <h3>{LANDING.coaches.forCoaches.title}</h3>
-              <ul className="lp-mini-list">
-                {LANDING.coaches.forCoaches.items.map((line) => (
-                  <li key={line}>{line}</li>
-                ))}
-              </ul>
-            </article>
-            <article className="lp-block">
-              <h3>{LANDING.coaches.forClients.title}</h3>
-              <ul className="lp-mini-list">
-                {LANDING.coaches.forClients.items.map((line) => (
-                  <li key={line}>{line}</li>
-                ))}
-              </ul>
-            </article>
-          </div>
-        </section>
-
-        <section className="lp-section" aria-labelledby="lp-safety">
-          <h2 id="lp-safety" className="lp-section-title">
-            <Shield size={20} aria-hidden /> {LANDING.safety.title}
-          </h2>
-          <ul className="lp-check-list">
-            {LANDING.safety.items.map((line) => (
-              <li key={line}>{line}</li>
-            ))}
-          </ul>
-        </section>
 
         <section className="lp-final" aria-labelledby="lp-final">
           <h2 id="lp-final" className="lp-section-title">

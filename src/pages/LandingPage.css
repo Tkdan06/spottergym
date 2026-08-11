@@ -30,7 +30,7 @@
   z-index: -1;
   background-color: #0b0f0e;
   background-image:
-    linear-gradient(180deg, rgba(11, 15, 14, 0.42) 0%, rgba(11, 15, 14, 0.9) 58%, var(--bg) 100%),
+    linear-gradient(180deg, rgba(11, 15, 14, 0.62) 0%, rgba(11, 15, 14, 0.92) 58%, var(--bg) 100%),
     url('/images/welcome-gym.jpg');
   background-position: center top;
   background-size: cover;
@@ -47,30 +47,40 @@
   text-transform: uppercase;
 }
 
+/* Hierarchy: brand (Syne) > headline (Unbounded) > lead (Manrope) */
 .lp-brand {
   display: block;
-  margin: 0 0 16px;
-  font-size: clamp(2.4rem, 12vw, 4.5rem);
-  line-height: 0.92;
-  letter-spacing: -0.045em;
+  margin: 0 0 10px;
+  font-family: var(--font-brand);
+  font-size: clamp(2.6rem, 13vw, 4rem);
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  color: #fff;
+}
+
+.lp-brand span {
+  color: var(--accent);
 }
 
 .lp-headline {
   margin: 0 0 12px;
-  max-width: 22ch;
+  max-width: 24ch;
   font-family: var(--font-display);
-  font-size: clamp(1.35rem, 5.2vw, 1.85rem);
-  font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
+  font-size: clamp(1.2rem, 4.4vw, 1.55rem);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: #fff;
 }
 
 .lp-lead {
   margin: 0 0 22px;
   max-width: 36ch;
-  color: var(--text);
+  font-family: var(--font-body);
+  color: rgba(255, 255, 255, 0.92);
   font-size: clamp(0.95rem, 3.5vw, 1.05rem);
   line-height: 1.45;
+  font-weight: 500;
 }
 
 .lp-actions {
@@ -78,6 +88,10 @@
   gap: 10px;
   width: 100%;
   max-width: 360px;
+}
+
+.lp-actions-hero {
+  gap: 12px;
 }
 
 .lp-actions .btn {
@@ -98,54 +112,159 @@
   filter: brightness(1.04);
 }
 
+.lp-login-quiet {
+  justify-self: center;
+  margin-top: 2px;
+  padding: 4px 8px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(148, 163, 154, 0.45);
+}
+
+.lp-login-quiet:hover,
+.lp-login-quiet:focus-visible {
+  color: var(--text);
+  text-decoration-color: rgba(238, 245, 239, 0.55);
+}
+
+.lp-hero .lp-login-quiet {
+  color: rgba(255, 255, 255, 0.72);
+  text-decoration-color: rgba(255, 255, 255, 0.35);
+}
+
+.lp-hero .lp-login-quiet:hover,
+.lp-hero .lp-login-quiet:focus-visible {
+  color: #fff;
+  text-decoration-color: rgba(255, 255, 255, 0.7);
+}
+
 .lp-status-demo {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   margin-top: 28px;
-  max-width: 360px;
+  max-width: 400px;
+}
+
+.lp-demo-caption {
+  margin: 0;
+  font-size: 0.85rem;
 }
 
 .lp-demo-card {
   display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: start;
   gap: 12px;
-  padding: 14px;
+  padding: 12px;
   border-radius: var(--radius);
   border: 1px solid var(--line);
-  background: rgba(20, 27, 24, 0.92);
+  background: rgba(20, 27, 24, 0.94);
   backdrop-filter: blur(8px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.lp-demo-card:hover {
+  border-color: rgba(200, 245, 66, 0.35);
+  transform: translateY(-1px);
 }
 
 .lp-demo-card-coach {
-  border-color: rgba(200, 245, 66, 0.22);
+  border-color: rgba(200, 245, 66, 0.32);
 }
 
-.lp-demo-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
+.lp-demo-card:hover .lp-demo-media {
+  border-color: rgba(200, 245, 66, 0.35);
 }
 
-.lp-demo-avatar {
-  width: 48px;
-  height: 48px;
-  flex-shrink: 0;
-  border-radius: 14px;
-  object-fit: cover;
-  background: var(--bg-soft);
-}
-
-.lp-demo-copy {
+.lp-demo-aside {
   display: grid;
-  gap: 2px;
+  gap: 7px;
+  align-content: start;
   min-width: 0;
 }
 
-.lp-demo-copy strong {
-  font-size: 0.98rem;
+.lp-demo-media {
+  border-radius: 14px;
+  overflow: hidden;
+  aspect-ratio: 1;
+  background: var(--bg-soft);
+  border: 1px solid transparent;
+  transition: border-color 0.2s ease;
 }
 
-.lp-demo-copy .muted {
+.lp-demo-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+  display: block;
+}
+
+.lp-demo-presence {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.lp-demo-presence i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.lp-demo-presence.on {
+  color: var(--online, #57f287);
+  border-color: rgba(87, 242, 135, 0.35);
+}
+
+.lp-demo-presence.off {
+  color: var(--muted);
+}
+
+.lp-demo-body {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  align-content: start;
+}
+
+.lp-demo-body h3 {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.lp-demo-age {
+  font-weight: 650;
+  color: var(--muted);
+}
+
+.lp-demo-gym {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.lp-demo-line {
+  margin: 0;
   font-size: 0.82rem;
 }
 
@@ -153,6 +272,80 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-top: 4px;
+}
+
+.lp-demo-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+  min-width: 0;
+}
+
+.lp-demo-likes {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.lp-demo-msg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.lp-demo-likers {
+  display: inline-flex;
+  align-items: center;
+}
+
+.lp-demo-liker {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 20%;
+  border: 1.5px solid rgba(20, 27, 24, 0.95);
+  background: var(--bg-soft);
+  margin-left: -6px;
+}
+
+.lp-demo-liker:first-child {
+  margin-left: 0;
+}
+
+.lp-demo-likes-extra {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  margin-left: -6px;
+  padding: 0 5px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(20, 27, 24, 0.95);
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.68rem;
+  font-weight: 750;
+  color: var(--muted);
+}
+
+.lp-demo-likes-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #ff7a9a;
+  font-size: 0.82rem;
+  font-weight: 750;
 }
 
 .lp-pill {
@@ -255,6 +448,53 @@
   font-size: 0.95rem;
 }
 
+.lp-pain-offer {
+  display: grid;
+  gap: 10px;
+}
+
+.lp-pain {
+  color: var(--text);
+  font-weight: 650;
+}
+
+.lp-fix {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(200, 245, 66, 0.08);
+  border: 1px solid rgba(200, 245, 66, 0.18);
+  color: var(--text);
+}
+
+.lp-fix-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.lp-step-statuses {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lp-step-statuses li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+.lp-step-statuses .muted {
+  font-size: 0.82rem;
+}
+
 .lp-scenarios {
   margin: 0 -4px;
   padding-left: 4px;
@@ -351,8 +591,45 @@
   padding: 28px 0 8px;
 }
 
+.lp-mid-cta-early {
+  padding-top: 20px;
+  margin-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .lp-mid-cta .lp-actions {
   margin-top: 4px;
+}
+
+.lp-objections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  max-width: 400px;
+}
+
+.lp-objections li {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(200, 245, 66, 0.22);
+  background: rgba(200, 245, 66, 0.08);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.lp-cold-start {
+  margin: 14px 0 0;
+  max-width: 36ch;
+  font-size: 0.88rem;
+  line-height: 1.4;
 }
 
 .lp-offer-item h3 {
@@ -362,7 +639,7 @@
 .lp-coaches-visual {
   width: calc(100% + 8px);
   height: 200px;
-  margin: 0 -4px 16px;
+  margin: 4px -4px 16px;
   border-radius: calc(var(--radius) + 4px);
   background-color: var(--bg-soft);
   background-position: center 25%;
