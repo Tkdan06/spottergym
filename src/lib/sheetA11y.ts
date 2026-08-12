@@ -13,6 +13,8 @@ export function useSheetA11y(
   useEffect(() => {
     if (!open) return
 
+    let cancelled = false
+    let focusTimer = 0
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     const restoreFocus = document.activeElement as HTMLElement | null
@@ -24,16 +26,9 @@ export function useSheetA11y(
       inertNodes.push(el)
     }
 
-    const panel = panelRef.current
-    const sheetRoot =
-      panel?.closest(
-        '.schedule-sheet, .checkin-sheet, .chat-pin-sheet, .safety-sheet, .floor-sheet, .city-sheet, .photo-modal, [data-sheet-root]',
-      ) || panel
+    const applyInertTree = (sheetRoot: Element) => {
+      markInert(document.querySelector('.bottom-nav'))
 
-    markInert(document.querySelector('.bottom-nav'))
-
-    const appMain = document.querySelector('.app-main')
-    if (sheetRoot && appMain?.contains(sheetRoot)) {
       let current: Element | null = sheetRoot
       while (current && current !== document.body) {
         const parent: Element | null = current.parentElement
@@ -42,22 +37,11 @@ export function useSheetA11y(
         for (const sibling of siblings) {
           if (sibling !== current) markInert(sibling)
         }
-        if (parent === appMain || parent.classList.contains('app-shell')) break
+        // Stop at app shell when present; otherwise walk to body (onboarding has no .app-main)
+        if (parent.classList.contains('app-shell') || parent.classList.contains('app-main')) break
         current = parent
       }
-    } else {
-      // Portaled outside the shell
-      markInert(document.querySelector('.app-shell'))
     }
-
-    const focusTimer = window.setTimeout(() => {
-      const target =
-        initialFocusRef?.current ||
-        panelRef.current?.querySelector<HTMLElement>(
-          'button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
-        )
-      target?.focus()
-    }, 0)
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -88,7 +72,32 @@ export function useSheetA11y(
     }
 
     window.addEventListener('keydown', onKey)
+
+    // Panel ref is set after paint — retry once so we never inert the wrong tree
+    const arm = () => {
+      if (cancelled) return
+      const panel = panelRef.current
+      if (!panel) {
+        focusTimer = window.setTimeout(arm, 0)
+        return
+      }
+      const sheetRoot =
+        panel.closest(
+          '.schedule-sheet, .checkin-sheet, .chat-pin-sheet, .safety-sheet, .floor-sheet, .city-sheet, .photo-modal, [data-sheet-root]',
+        ) || panel
+      applyInertTree(sheetRoot)
+
+      const target =
+        initialFocusRef?.current ||
+        panel.querySelector<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        )
+      target?.focus()
+    }
+    arm()
+
     return () => {
+      cancelled = true
       window.clearTimeout(focusTimer)
       document.body.style.overflow = prevOverflow
       for (const node of inertNodes) node.removeAttribute('inert')

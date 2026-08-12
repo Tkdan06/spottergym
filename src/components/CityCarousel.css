@@ -205,6 +205,10 @@
   position: relative;
   z-index: 1;
   width: min(100%, 560px);
+  /* Definite height (not only max-height) so the list row can scroll.
+     Without this + body overflow:hidden from useSheetA11y, the sheet
+     grows to all cities, covers the backdrop, and freezes the page. */
+  height: min(calc(var(--city-sheet-vh, 100dvh) - 8px), 720px);
   max-height: min(calc(var(--city-sheet-vh, 100dvh) - 8px), 720px);
   margin: 0 auto;
   padding: 14px 16px calc(14px + var(--safe-bottom));
@@ -217,6 +221,7 @@
   gap: 12px;
   animation: fade-up 0.25s ease both;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .city-sheet-chrome {
@@ -304,6 +309,7 @@
   .city-sheet-panel {
     border-radius: 24px;
     border-bottom: 1px solid var(--line);
+    height: min(calc(var(--city-sheet-vh, 100dvh) - 48px), 680px);
     max-height: min(calc(var(--city-sheet-vh, 100dvh) - 48px), 680px);
   }
 }
