@@ -242,7 +242,6 @@ export function LandingPage() {
           <CtaPair primaryLabel={LANDING.hero.ctaPrimary} placement="hero" />
 
           <div className="lp-status-demo" aria-label="Примеры профилей в Spotter">
-            <p className="lp-demo-caption muted">{LANDING.hero.demoCaption}</p>
             {LANDING.demoProfiles.map((profile) => (
               <DemoProfileCard key={profile.id} profile={profile} />
             ))}
