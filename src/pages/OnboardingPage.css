@@ -8,9 +8,8 @@
   max-height: 100dvh;
   overflow: hidden;
   box-sizing: border-box;
-  padding-bottom: 0;
-  /* 24px — 8pt grid (Material): чуть больше воздуха над логотипом, чем базовые 16px */
-  padding-top: calc(24px + var(--standalone-top));
+  /* Full padding reset — avoid stacking .page / .page.no-nav / safe-area twice */
+  padding: calc(16px + var(--standalone-top)) 16px 0;
 }
 
 .onboarding-top {

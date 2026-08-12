@@ -105,6 +105,15 @@ export function OnboardingPage() {
 
   const demoStats = isDemoAccount(user?.email)
 
+  // Keep first paint at the top — focus/keyboard from city sheet must not leave the page scrolled
+  useEffect(() => {
+    window.scrollTo(0, 0)
+    document.documentElement.scrollTop = 0
+    document.body.scrollTop = 0
+    const body = document.querySelector('.onboarding-body')
+    if (body instanceof HTMLElement) body.scrollTop = 0
+  }, [step])
+
   useEffect(() => {
     if (!user || user.onboardingDone) return
     saveOnboardingDraft({

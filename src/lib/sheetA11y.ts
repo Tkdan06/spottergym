@@ -1,5 +1,10 @@
 import { type RefObject, useEffect } from 'react'
 
+type SheetA11yOptions = {
+  /** When false, only focus the panel container (no control autofocus / no keyboard). Default true. */
+  autoFocus?: boolean
+}
+
 /**
  * Focus trap + inert background for modal sheets (matches Messages pin sheet).
  * `panelRef` must point at the dialog panel that contains focusable controls.
@@ -9,7 +14,10 @@ export function useSheetA11y(
   onClose: () => void,
   panelRef: RefObject<HTMLElement | null>,
   initialFocusRef?: RefObject<HTMLElement | null>,
+  options?: SheetA11yOptions,
 ) {
+  const autoFocus = options?.autoFocus !== false
+
   useEffect(() => {
     if (!open) return
 
@@ -26,6 +34,10 @@ export function useSheetA11y(
       inertNodes.push(el)
     }
 
+    const focusEl = (el: HTMLElement) => {
+      el.focus({ preventScroll: true })
+    }
+
     const applyInertTree = (sheetRoot: Element) => {
       markInert(document.querySelector('.bottom-nav'))
 
@@ -37,7 +49,6 @@ export function useSheetA11y(
         for (const sibling of siblings) {
           if (sibling !== current) markInert(sibling)
         }
-        // Stop at app shell / page root (onboarding has no .app-main)
         if (
           parent.classList.contains('app-shell') ||
           parent.classList.contains('app-main') ||
@@ -59,7 +70,7 @@ export function useSheetA11y(
       if (!root) return
       const focusables = Array.from(
         root.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          'button:not([disabled]), [href], input:not([disabled]):not([readonly]), textarea:not([disabled]):not([readonly]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
         ),
       ).filter((el) => el.tabIndex !== -1 && !el.hasAttribute('disabled'))
       if (!focusables.length) return
@@ -69,17 +80,16 @@ export function useSheetA11y(
       if (e.shiftKey) {
         if (active === first || !root.contains(active)) {
           e.preventDefault()
-          last.focus()
+          focusEl(last)
         }
       } else if (active === last || !root.contains(active)) {
         e.preventDefault()
-        first.focus()
+        focusEl(first)
       }
     }
 
     window.addEventListener('keydown', onKey)
 
-    // Panel ref is set after paint — retry once so we never inert the wrong tree
     const arm = () => {
       if (cancelled) return
       const panel = panelRef.current
@@ -93,18 +103,31 @@ export function useSheetA11y(
         ) || panel
       applyInertTree(sheetRoot)
 
-      const target =
-        initialFocusRef?.current ||
-        panel.querySelector<HTMLElement>(
-          // Prefer buttons/links — never autofocus inputs (opens mobile keyboard)
-          'button:not([disabled]), [href], [data-sheet-initial-focus]',
-        )
-      // Explicitly avoid focusing text fields even if passed by mistake as query result
-      if (target && target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
-        target.focus()
+      panel.setAttribute('tabindex', '-1')
+
+      if (!autoFocus) {
+        // Keep focus in the dialog without focusing inputs/buttons that scroll or open the keyboard
+        focusEl(panel)
+        return
+      }
+
+      const target = initialFocusRef?.current
+      if (
+        target &&
+        target.tagName !== 'INPUT' &&
+        target.tagName !== 'TEXTAREA'
+      ) {
+        focusEl(target)
+        return
+      }
+
+      const fallback = panel.querySelector<HTMLElement>(
+        'button:not([disabled]), [href], [data-sheet-initial-focus]',
+      )
+      if (fallback && fallback.tagName !== 'INPUT' && fallback.tagName !== 'TEXTAREA') {
+        focusEl(fallback)
       } else {
-        panel.setAttribute('tabindex', '-1')
-        panel.focus()
+        focusEl(panel)
       }
     }
     arm()
@@ -115,7 +138,13 @@ export function useSheetA11y(
       document.body.style.overflow = prevOverflow
       for (const node of inertNodes) node.removeAttribute('inert')
       window.removeEventListener('keydown', onKey)
-      restoreFocus?.focus?.()
+      if (restoreFocus && typeof restoreFocus.focus === 'function') {
+        try {
+          restoreFocus.focus({ preventScroll: true })
+        } catch {
+          /* ignore */
+        }
+      }
     }
-  }, [open, onClose, panelRef, initialFocusRef])
+  }, [open, onClose, panelRef, initialFocusRef, autoFocus])
 }

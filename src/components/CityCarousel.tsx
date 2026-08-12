@@ -36,12 +36,19 @@ export function CityCarousel({
 }: Props) {
   const [query, setQuery] = useState('')
   const [allOpen, setAllOpen] = useState(false)
+  /** Search stays inert until the user taps it — avoids iOS autofocus + keyboard */
+  const [searchActive, setSearchActive] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
-  const closeRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
 
-  // Focus close control — never the search field (keyboard jump on open)
-  useSheetA11y(allOpen, () => setAllOpen(false), panelRef, closeRef)
+  useSheetA11y(allOpen, () => setAllOpen(false), panelRef, undefined, { autoFocus: false })
+
+  useEffect(() => {
+    if (!allOpen) {
+      setSearchActive(false)
+      setQuery('')
+    }
+  }, [allOpen])
 
   const selected = CITIES_META.find((c) => c.name === value)
 
@@ -65,7 +72,7 @@ export function CityCarousel({
     return citiesByGymCount.filter((c) => c.name.toLowerCase().includes(q))
   }, [citiesByGymCount, query])
 
-  /** Поднимаем шторку над клавиатурой; прячем нижнее «Дальше», чтобы не перекрывало список */
+  /** Viewport height for the sheet only — ignore keyboard inset until search is active */
   useEffect(() => {
     const root = document.documentElement
     if (!allOpen) {
@@ -84,7 +91,8 @@ export function CityCarousel({
       }
       const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop)
       root.style.setProperty('--city-sheet-vh', `${vv.height}px`)
-      root.style.setProperty('--city-sheet-kb', `${kb}px`)
+      // Only shrink for keyboard when the user opened search
+      root.style.setProperty('--city-sheet-kb', `${searchActive && kb > 40 ? kb : 0}px`)
     }
     sync()
     const vv = window.visualViewport
@@ -99,15 +107,22 @@ export function CityCarousel({
       root.style.removeProperty('--city-sheet-kb')
       root.style.removeProperty('--city-sheet-vh')
     }
-  }, [allOpen])
+  }, [allOpen, searchActive])
 
   const pick = (city: string) => {
     onChange(city)
     setAllOpen(false)
     setQuery('')
+    setSearchActive(false)
   }
 
   const openAll = () => setAllOpen(true)
+
+  const activateSearch = () => {
+    if (searchActive) return
+    setSearchActive(true)
+    window.setTimeout(() => searchRef.current?.focus({ preventScroll: true }), 0)
+  }
 
   return (
     <section
@@ -132,7 +147,6 @@ export function CityCarousel({
         </button>
       ) : null}
 
-      {/* Быстрые города — всегда в разметке под селектором (и в full, и в compact) */}
       <div className="city-strip" role="listbox" aria-label="Города по числу клубов">
         {previewCities.map((city) => (
           <button
@@ -172,7 +186,6 @@ export function CityCarousel({
                   <h3>Выбери город</h3>
                 </div>
                 <button
-                  ref={closeRef}
                   type="button"
                   className="icon-btn"
                   aria-label="Закрыть список"
@@ -182,13 +195,21 @@ export function CityCarousel({
                 </button>
               </div>
 
-              <label className="city-search">
+              <label className="city-search" onPointerDown={activateSearch}>
                 <Search size={16} />
                 <input
                   {...searchFieldProps}
                   ref={searchRef}
                   value={query}
+                  readOnly={!searchActive}
+                  inputMode={searchActive ? 'search' : 'none'}
+                  tabIndex={searchActive ? 0 : -1}
                   onChange={(e) => setQuery(e.target.value)}
+                  onFocus={() => {
+                    if (!searchActive) {
+                      searchRef.current?.blur()
+                    }
+                  }}
                   placeholder="Найти город"
                   aria-label="Поиск города"
                 />
