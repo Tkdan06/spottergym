@@ -5,17 +5,8 @@
   gap: 10px;
 }
 
-.gym-hours-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--accent);
-}
-
-.gym-hours-head h2 {
+.gym-hours-title {
   margin: 0;
-  font-size: 1rem;
-  color: var(--text);
 }
 
 .gym-hours-list {
@@ -40,7 +31,7 @@
 
 .gym-hours-list strong {
   font-weight: 750;
-  color: var(--online);
+  color: var(--text);
   white-space: nowrap;
 }
 
@@ -61,7 +52,26 @@
   font-size: 0.8rem;
   line-height: 1.25;
   text-align: center;
-  white-space: nowrap;
+}
+
+.gym-action-error {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.35;
+  text-align: center;
+  color: var(--danger);
+}
+
+.gym-people-refresh-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.gym-people-refresh-error p {
+  margin: 0;
 }
 
 .gym-people {
@@ -78,7 +88,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  height: 148px;
+  min-height: 148px;
   border-radius: var(--radius-lg);
   background: var(--bg-soft);
   overflow: hidden;
@@ -113,7 +123,7 @@
   width: 100%;
   display: grid;
   gap: 5px;
-  padding: 0 14px;
+  padding: 14px;
 }
 
 .gym-hero-top {
@@ -144,55 +154,7 @@
   flex-shrink: 0;
   align-items: center;
   gap: 6px;
-  height: 28px;
-}
-
-.gym-hero-badge {
-  box-sizing: border-box;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  width: auto;
-  height: 28px;
   min-height: 28px;
-  max-height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  border: 1px solid transparent;
-  font-size: 0.72rem;
-  font-weight: 700;
-  line-height: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.gym-hero-badge .online-dot {
-  width: 6px;
-  height: 6px;
-  margin: 0;
-  flex-shrink: 0;
-  animation: none;
-}
-
-.gym-hero-badge--mine {
-  background: var(--accent-soft);
-  border-color: rgba(200, 245, 66, 0.4);
-  color: var(--accent);
-}
-
-.gym-hero-badge--online {
-  background: rgba(12, 28, 18, 0.78);
-  border-color: rgba(87, 242, 135, 0.35);
-  color: var(--online);
-}
-
-.gym-hero-badge--off {
-  background: rgba(14, 18, 16, 0.78);
-  border-color: rgba(232, 240, 234, 0.16);
-  color: var(--text-muted);
 }
 
 .gym-hero-title {

@@ -1,7 +1,9 @@
-import { useMemo } from 'react'
-import { ArrowLeft, Check, Clock3, MapPin, Star } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { ArrowLeft, Check, MapPin, Star } from 'lucide-react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { GymMineBadge, GymPresenceBadge } from '../components/GymBadges'
 import { InviteFriendsButton } from '../components/InviteFriendsButton'
+import { SectionTitle } from '../components/SectionTitle'
 import { SmartImage } from '../components/SmartImage'
 import { SoftLoader } from '../components/SoftLoader'
 import { UserCard } from '../components/UserCard'
@@ -12,10 +14,13 @@ import {
   gymTitleLines,
   shortGymName,
 } from '../data/mock'
+import { ApiError, apiFetchGym } from '../lib/apiClient'
 import { getGymHours } from '../lib/gymHours'
 import { useGymPeople } from '../hooks/useGymPeople'
 import { getHallRank, sortByLikes } from '../lib/likes'
+import { formatMembersInSpotter } from '../lib/presenceCopy'
 import { isMemberOfGym } from '../lib/userGyms'
+import type { Gym } from '../types'
 import './GymDetailPage.css'
 
 export function GymDetailPage() {
@@ -27,12 +32,80 @@ export function GymDetailPage() {
   const fromHome = from === 'home'
   const { user, joinGym, leaveGym, setHomeGym, likes, likeCounts, blockedUserIds, apiOnline } =
     useApp()
-  const gym = getGym(gymId)
+
+  const [gym, setGym] = useState<Gym | undefined>(() => (gymId ? getGym(gymId) : undefined))
+  const [gymLoading, setGymLoading] = useState(false)
+  const [gymMissing, setGymMissing] = useState(false)
+  const [actionError, setActionError] = useState('')
+  const [actionBusy, setActionBusy] = useState(false)
+
+  useEffect(() => {
+    if (!gymId) {
+      setGym(undefined)
+      setGymMissing(true)
+      setGymLoading(false)
+      return
+    }
+
+    const local = getGym(gymId)
+    if (local) {
+      setGym(local)
+      setGymMissing(false)
+    }
+
+    if (!apiOnline) {
+      setGymLoading(false)
+      setGymMissing(!local)
+      return
+    }
+
+    let cancelled = false
+    if (!local) setGymLoading(true)
+
+    void apiFetchGym(gymId)
+      .then((remote) => {
+        if (cancelled) return
+        setGym(remote)
+        setGymMissing(false)
+      })
+      .catch(() => {
+        if (cancelled) return
+        if (!local) {
+          setGym(undefined)
+          setGymMissing(true)
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setGymLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [gymId, apiOnline])
+
+  useEffect(() => {
+    if (!gym) return
+    const short = shortGymName(gym.name, gym.network) || gym.name
+    const prev = document.title
+    document.title = `${short} · SPOTTER`
+    return () => {
+      document.title = prev
+    }
+  }, [gym])
+
   const isMine = isMemberOfGym(user, gymId)
   const isHome = user?.homeGymId === gymId
   const hours = gym ? getGymHours(gym) : null
 
-  const { people: floorPeople, loading: peopleLoading, showLoader } = useGymPeople({
+  const {
+    people: floorPeople,
+    loading: peopleLoading,
+    showLoader,
+    fromApi,
+    error: peopleError,
+    retry: retryPeople,
+  } = useGymPeople({
     gymId,
     user,
     apiOnline,
@@ -45,7 +118,13 @@ export function GymDetailPage() {
     [floorPeople, likes, likeCounts],
   )
 
-  const activeCount = people.filter((p) => p.isActive).length
+  const activeFromPeople = people.filter((p) => p.isActive).length
+  /** Server activeNow until members resolve; then live count from the list */
+  const activeCount = fromApi
+    ? activeFromPeople
+    : typeof gym?.activeNow === 'number'
+      ? gym.activeNow
+      : activeFromPeople
 
   const goBack = () => {
     if (fromSettings) {
@@ -60,7 +139,36 @@ export function GymDetailPage() {
     else navigate('/app')
   }
 
-  if (!gym) {
+  const runMembership = async (action: () => void | Promise<void>, failLabel: string) => {
+    setActionError('')
+    setActionBusy(true)
+    try {
+      await action()
+    } catch (err) {
+      const message =
+        err instanceof ApiError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : failLabel
+      setActionError(message || failLabel)
+    } finally {
+      setActionBusy(false)
+    }
+  }
+
+  if (gymLoading && !gym) {
+    return (
+      <main className="page gym-detail">
+        <button type="button" className="back-link" onClick={goBack}>
+          <ArrowLeft size={18} /> Назад
+        </button>
+        <SoftLoader label="Загружаем зал…" />
+      </main>
+    )
+  }
+
+  if (!gym || gymMissing) {
     return (
       <main className="page">
         <p>Зал не найден</p>
@@ -70,6 +178,12 @@ export function GymDetailPage() {
       </main>
     )
   }
+
+  const showPeopleError = Boolean(peopleError && !showLoader && !peopleLoading)
+  /** First load failed — don't pretend the club is empty */
+  const showPeopleErrorBlock = showPeopleError && !fromApi
+  const showEmptyInvite =
+    !showLoader && !peopleLoading && !peopleError && people.length === 0
 
   return (
     <main className="page gym-detail">
@@ -90,13 +204,8 @@ export function GymDetailPage() {
           <div className="gym-hero-top">
             <p className="gym-hero-network">{gym.network}</p>
             <div className="gym-hero-badges">
-              {isMine ? <span className="gym-hero-badge gym-hero-badge--mine">Твой</span> : null}
-              <span
-                className={`gym-hero-badge ${activeCount > 0 ? 'gym-hero-badge--online' : 'gym-hero-badge--off'}`}
-              >
-                {activeCount > 0 ? <span className="online-dot" /> : null}
-                {activeCount > 0 ? `${activeCount} в зале` : 'Пусто'}
-              </span>
+              {isMine ? <GymMineBadge surface="hero" /> : null}
+              <GymPresenceBadge activeNow={activeCount} surface="hero" />
             </div>
           </div>
           <h1 className="gym-hero-title" aria-label={gym.name}>
@@ -121,10 +230,7 @@ export function GymDetailPage() {
 
       {hours ? (
         <section className="gym-hours surface">
-          <div className="gym-hours-head">
-            <Clock3 size={18} />
-            <h2>Часы работы</h2>
-          </div>
+          <SectionTitle className="gym-hours-title">Часы работы</SectionTitle>
           <ul className="gym-hours-list">
             {hours.weekdays === hours.weekend ? (
               <li>
@@ -145,19 +251,31 @@ export function GymDetailPage() {
             )}
           </ul>
           <p className="dim gym-hours-note">
-            Типичный график сети
+            Типичный график сети — не онлайн-статус клуба.
             <br />
-            Перед визитом сверь на сайте сети
+            Перед визитом сверь на сайте сети.
           </p>
         </section>
       ) : null}
 
       <section className="gym-actions">
+        {actionError ? (
+          <p className="gym-action-error" role="alert">
+            {actionError}
+          </p>
+        ) : null}
         {!isMine ? (
           <button
             type="button"
             className="btn btn-primary btn-block"
-            onClick={() => joinGym(gymId, !user?.homeGymId)}
+            disabled={actionBusy}
+            aria-busy={actionBusy}
+            onClick={() =>
+              void runMembership(
+                () => joinGym(gymId, !user?.homeGymId),
+                'Не удалось добавить зал',
+              )
+            }
           >
             <Check size={18} />
             Сделать своим залом
@@ -186,7 +304,11 @@ export function GymDetailPage() {
               <button
                 type="button"
                 className="btn btn-soft btn-block"
-                onClick={() => setHomeGym(gymId)}
+                disabled={actionBusy}
+                aria-busy={actionBusy}
+                onClick={() =>
+                  void runMembership(() => setHomeGym(gymId), 'Не удалось сменить домашний зал')
+                }
               >
                 <Star size={18} />
                 Открывать на главной
@@ -195,8 +317,11 @@ export function GymDetailPage() {
             <button
               type="button"
               className="btn btn-ghost btn-block"
-              onClick={() => leaveGym(gymId)}
-              disabled={(user?.gymIds.length ?? 0) <= 1}
+              onClick={() =>
+                void runMembership(() => leaveGym(gymId), 'Не удалось убрать зал')
+              }
+              disabled={actionBusy || (user?.gymIds.length ?? 0) <= 1}
+              aria-busy={actionBusy}
             >
               Убрать из своих
             </button>
@@ -208,31 +333,56 @@ export function GymDetailPage() {
       </section>
 
       <section className="gym-people">
-        <div className="section-title">
-          <h2>Люди в этом зале</h2>
-          <span className="muted">
-            {peopleLoading && !showLoader
-              ? '…'
-              : showLoader
-                ? 'загрузка'
-                : people.length
-                  ? `${people.length} в клубе`
-                  : 'Пока никого'}
-          </span>
-        </div>
+        <SectionTitle
+          action={
+            <span className="muted">
+              {showPeopleErrorBlock
+                ? 'ошибка'
+                : peopleLoading && !showLoader
+                  ? '…'
+                  : showLoader
+                    ? 'загрузка'
+                    : people.length
+                      ? formatMembersInSpotter(people.length)
+                      : 'Пока никого'}
+            </span>
+          }
+        >
+          Люди в этом зале
+        </SectionTitle>
         <div className="card-list">
           {showLoader ? (
             <SoftLoader label="Загружаем людей в зале…" />
+          ) : showPeopleErrorBlock ? (
+            <div className="empty-copy-actions">
+              <div className="empty-copy" role="alert">
+                <p className="empty-copy-title">Не удалось загрузить людей</p>
+                <p className="empty-copy-lead">{peopleError}</p>
+              </div>
+              <button type="button" className="btn btn-soft btn-block" onClick={retryPeople}>
+                Повторить
+              </button>
+            </div>
           ) : peopleLoading ? null : people.length ? (
-            people.map((person, index) => (
-              <UserCard
-                key={person.id}
-                user={person}
-                rank={getHallRank(person.id, people, likes, likeCounts)}
-                priority={index < 4}
-              />
-            ))
-          ) : (
+            <>
+              {showPeopleError ? (
+                <div className="gym-people-refresh-error" role="status">
+                  <p className="dim">{peopleError}</p>
+                  <button type="button" className="btn btn-ghost" onClick={retryPeople}>
+                    Обновить
+                  </button>
+                </div>
+              ) : null}
+              {people.map((person, index) => (
+                <UserCard
+                  key={person.id}
+                  user={person}
+                  rank={getHallRank(person.id, people, likes, likeCounts)}
+                  priority={index < 4}
+                />
+              ))}
+            </>
+          ) : showEmptyInvite ? (
             <div className="empty-copy-actions">
               <div className="empty-copy" role="status">
                 <p className="empty-copy-title">Пока никого в Spotter</p>
@@ -248,7 +398,7 @@ export function GymDetailPage() {
                 </InviteFriendsButton>
               ) : null}
             </div>
-          )}
+          ) : null}
         </div>
         {!isMine ? (
           <p className="muted gym-hint">Добавь зал в свои — и эти люди появятся у тебя в зале</p>

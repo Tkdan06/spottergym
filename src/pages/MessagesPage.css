@@ -30,12 +30,20 @@
   font-size: 0.75rem;
   font-weight: 650;
   color: var(--text-muted);
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
   min-width: 0;
-  max-width: 55%;
+  max-width: min(62%, 16rem);
   text-align: right;
+}
+
+.messages-load-more {
+  margin-top: 8px;
 }
 
 .messages-presence-label.on {
@@ -270,10 +278,15 @@
   font-size: 0.75rem;
   font-weight: 650;
   color: var(--accent);
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
   max-width: 100%;
+  min-width: 0;
 }
 
 .conversation-preview-row {

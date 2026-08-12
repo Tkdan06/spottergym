@@ -86,7 +86,8 @@
   color: var(--online, #57f287);
 }
 
-.profile-hero-meta h1 {
+.profile-hero-meta h1,
+.profile-hero-meta .profile-hero-name {
   margin: 10px 0 6px;
   max-width: 100%;
   font-size: 1.75rem;
@@ -97,6 +98,17 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
+}
+
+.profile-copy-flash {
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+}
+
+.profile-coach-hint {
+  display: inline-block;
+  margin: -4px 0 8px;
+  font-size: 0.85rem;
 }
 
 .profile-username {

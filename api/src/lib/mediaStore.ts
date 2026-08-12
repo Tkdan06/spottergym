@@ -39,13 +39,21 @@ export async function storePhotoDataUrl(userId: string, dataUrl: string): Promis
   return `/api/media/${safeUser}/${name}`
 }
 
-/** Convert profile photo list: keep media paths, persist new data URLs. */
+function mediaOwnerPrefix(userId: string) {
+  const safeUser = userId.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64) || 'user'
+  return `/api/media/${safeUser}/`
+}
+
+/** Convert profile photo list: keep own media paths, persist new data URLs. */
 export async function persistPhotoList(userId: string, photos: string[]): Promise<string[]> {
+  const prefix = mediaOwnerPrefix(userId)
   const out: string[] = []
   for (const p of photos) {
     const value = String(p || '').trim()
     if (!value) continue
     if (isMediaPath(value)) {
+      // Reject cross-user media URL reuse
+      if (!value.startsWith(prefix)) throw new Error('bad_photo_owner')
       out.push(value)
       continue
     }
@@ -56,6 +64,17 @@ export async function persistPhotoList(userId: string, photos: string[]): Promis
     throw new Error('bad_photo')
   }
   return out
+}
+
+/** Delete media paths that dropped out of the new list (same owner only). */
+export async function deleteRemovedMedia(userId: string, prev: string[], next: string[]) {
+  const prefix = mediaOwnerPrefix(userId)
+  const kept = new Set(next.filter((p) => isMediaPath(p)))
+  for (const old of prev) {
+    if (!isMediaPath(old) || !old.startsWith(prefix)) continue
+    if (kept.has(old)) continue
+    await tryDeleteMediaPath(old)
+  }
 }
 
 export async function persistAvatar(userId: string, avatar: string): Promise<string> {

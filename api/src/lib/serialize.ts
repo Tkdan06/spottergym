@@ -161,20 +161,38 @@ export function serializePublicUser(user: UserWithRels) {
   }
 
   if (full.privacy === 'anonymous') {
+    // Presence only — no gym graph / city / intent / lastSeen leakage
     return {
       ...base,
       username: '',
       name: 'Аноним',
       age: 0,
+      gender: full.gender,
       bio: '',
       photos: [] as string[],
       avatar: '',
+      gymIds: [] as string[],
+      homeGymId: '',
+      city: '',
+      intent: 'both' as const,
+      experienceLevel: 'confident' as const,
       interests: [] as string[],
       sports: [] as string[],
       isCoach: false,
       coachSports: [] as string[],
       visitSlots: [] as unknown[],
-      lookingToMeet: false,
+      // Keep real flag so @ник → «Написать» works when the user is open to chat
+      lookingToMeet: full.lookingToMeet,
+      checkedInAt: '',
+      checkedInExpiresAt: '',
+      checkInExtendCount: 0,
+      checkInCanExtend: false,
+      lastSeenAt: '',
+      // Keep gym-scoped presence (people route rewrites isActive for the viewed club)
+      isActive: full.isActive,
+      checkedInGymId: full.checkedInGymId,
+      breakUntil: full.breakUntil,
+      privacy: 'anonymous' as const,
     }
   }
 

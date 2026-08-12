@@ -7,7 +7,8 @@ export const USERNAME_MIN = 3
 export const USERNAME_MAX = 20
 
 /** Tinder-style about-me */
-export const BIO_MIN = 5
+/** Aligned with API: bio may be empty; onboarding no longer hard-requires length */
+export const BIO_MIN = 0
 export const BIO_MAX = 500
 
 export const EMAIL_MAX = 254

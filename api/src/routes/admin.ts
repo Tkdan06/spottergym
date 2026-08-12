@@ -6,7 +6,12 @@ import {
   resolveAdminFlags,
   type AdminPermissions,
 } from '../lib/admin.js'
-import { buildAdminAnalytics, estimatePhotosBytes } from '../lib/adminAnalytics.js'
+import {
+  buildAdminAnalytics,
+  estimatePhotosBytes,
+  moscowDayKey,
+  moscowDayStartUtc,
+} from '../lib/adminAnalytics.js'
 import { buildLandingAnalytics } from '../lib/landingAnalytics.js'
 import { buildPasswordResetAnalytics } from '../lib/passwordResetAnalytics.js'
 import { isMasterAdminEmail, normalizeEmail } from '../env.js'
@@ -64,9 +69,40 @@ adminRoutes.get('/users', async (c) => {
   if (!gate.ok) return c.json({ error: gate.error }, gate.status)
 
   const q = (c.req.query('q') || '').trim().toLowerCase().slice(0, 80)
+  const activity = (c.req.query('activity') || '').trim()
+  const todayStart = moscowDayStartUtc(moscowDayKey(new Date()))
+
+  let checkedInTodayByUser = new Map<
+    string,
+    { checkedInAt: Date; gymId: string }
+  >()
+
+  if (activity === 'checkedInToday') {
+    const rows = await prisma.checkIn.findMany({
+      where: { checkedInAt: { gte: todayStart } },
+      select: { userId: true, checkedInAt: true, gymId: true },
+      orderBy: { checkedInAt: 'desc' },
+    })
+    for (const row of rows) {
+      if (!checkedInTodayByUser.has(row.userId)) {
+        checkedInTodayByUser.set(row.userId, {
+          checkedInAt: row.checkedInAt,
+          gymId: row.gymId,
+        })
+      }
+    }
+  }
+
+  const activityUserIds =
+    activity === 'checkedInToday' ? [...checkedInTodayByUser.keys()] : null
+
   const users = await prisma.user.findMany({
     where: {
       deletedAt: null,
+      ...(activity === 'seenToday' ? { lastSeenAt: { gte: todayStart } } : {}),
+      ...(activityUserIds
+        ? { id: { in: activityUserIds.length ? activityUserIds : ['__none__'] } }
+        : {}),
       ...(q
         ? {
             OR: [
@@ -82,9 +118,39 @@ adminRoutes.get('/users', async (c) => {
       gyms: true,
       checkIns: { where: { checkedOutAt: null }, take: 1 },
     },
-    orderBy: { registeredAt: 'desc' },
+    orderBy:
+      activity === 'seenToday'
+        ? { lastSeenAt: 'desc' }
+        : activity === 'checkedInToday'
+          ? { lastSeenAt: 'desc' }
+          : { registeredAt: 'desc' },
     take: 300,
   })
+
+  if (activity !== 'checkedInToday' && users.length) {
+    const todayRows = await prisma.checkIn.findMany({
+      where: { userId: { in: users.map((u) => u.id) }, checkedInAt: { gte: todayStart } },
+      select: { userId: true, checkedInAt: true, gymId: true },
+      orderBy: { checkedInAt: 'desc' },
+    })
+    checkedInTodayByUser = new Map()
+    for (const row of todayRows) {
+      if (!checkedInTodayByUser.has(row.userId)) {
+        checkedInTodayByUser.set(row.userId, {
+          checkedInAt: row.checkedInAt,
+          gymId: row.gymId,
+        })
+      }
+    }
+  }
+
+  if (activity === 'checkedInToday') {
+    users.sort((a, b) => {
+      const at = checkedInTodayByUser.get(a.id)?.checkedInAt.getTime() || 0
+      const bt = checkedInTodayByUser.get(b.id)?.checkedInAt.getTime() || 0
+      return bt - at
+    })
+  }
 
   const viewerIsMaster = gate.flags.isMasterAdmin
   return c.json({
@@ -94,6 +160,7 @@ adminRoutes.get('/users', async (c) => {
       // Slim payload: no photo blobs in admin directory
       const { photos: _photos, avatar: _avatar, ...rest } = full
       const hideMasterEmail = !viewerIsMaster && isMasterAdminEmail(u.email)
+      const todayCheckIn = checkedInTodayByUser.get(u.id)
       return {
         ...rest,
         // Master email stays server-side for non-master admins
@@ -102,6 +169,8 @@ adminRoutes.get('/users', async (c) => {
         avatar: '',
         photosCount: photos.length,
         photosBytes: estimatePhotosBytes(photos),
+        checkedInTodayAt: todayCheckIn?.checkedInAt.toISOString() || '',
+        checkedInTodayGymId: todayCheckIn?.gymId || '',
       }
     }),
   })

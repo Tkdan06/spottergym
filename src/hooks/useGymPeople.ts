@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { peopleForGymPage, peopleInGym } from '../data/mock'
-import { apiFetchGymPeople } from '../lib/apiClient'
+import { ApiError, apiFetchGymPeople } from '../lib/apiClient'
 import { isDemoAccount } from '../lib/demoAccount'
 import { isPresentInGym } from '../lib/presence'
 import type { AppUser, UserProfile } from '../types'
@@ -15,6 +15,8 @@ type Options = {
 }
 
 const LOADER_DELAY_MS = 1000
+/** Quiet refresh while the floor/detail stays open */
+const POLL_MS = 45_000
 
 function withSelfOnFloor(list: UserProfile[], user: AppUser, gymId: string) {
   if (!user.gymIds.includes(gymId)) return list
@@ -31,54 +33,107 @@ function withSelfOnFloor(list: UserProfile[], user: AppUser, gymId: string) {
  * Demo / offline — local mock helpers (dev only for offline).
  *
  * Check-in / check-out does NOT refetch: own status is merged from `user` locally
- * so the floor list does not blink. Full reload runs on gym / account change.
+ * so the floor list does not blink. Background poll refreshes others’ presence.
  */
 export function useGymPeople({ gymId, user, apiOnline, mode, blockedUserIds }: Options) {
   const [remote, setRemote] = useState<UserProfile[] | null>(null)
   const [loading, setLoading] = useState(false)
   const [showLoader, setShowLoader] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [retryTick, setRetryTick] = useState(0)
   /** Last successful fetch key — avoid wiping list on presence-only updates */
   const loadedKeyRef = useRef<string | null>(null)
+  const lastGoodKeyRef = useRef<string | null>(null)
+  const fetchKeyRef = useRef('')
+  const inFlightRef = useRef(false)
 
   const demo = Boolean(user && isDemoAccount(user.email))
   const useApi = Boolean(gymId && user && apiOnline && !demo)
   const gymIdsKey = user?.gymIds?.join(',') ?? ''
   const fetchKey = useApi && user ? `${user.id}:${gymId}:${gymIdsKey}` : ''
+  fetchKeyRef.current = fetchKey
+
+  const load = useCallback(
+    async (opts: { quiet?: boolean; force?: boolean }) => {
+      const key = fetchKeyRef.current
+      if (!useApi || !gymId || !key) return
+      if (!opts.force && loadedKeyRef.current === key && !opts.quiet) return
+      if (inFlightRef.current) return
+
+      const keepPrevious = lastGoodKeyRef.current === key
+      const quiet = Boolean(opts.quiet && keepPrevious)
+
+      inFlightRef.current = true
+      if (!quiet) {
+        if (!keepPrevious) setRemote(null)
+        setLoading(true)
+        setError(null)
+      }
+
+      try {
+        const people = await apiFetchGymPeople(gymId)
+        if (fetchKeyRef.current !== key) return
+        setRemote(people)
+        loadedKeyRef.current = key
+        lastGoodKeyRef.current = key
+        setError(null)
+      } catch (err) {
+        if (fetchKeyRef.current !== key) return
+        const message =
+          err instanceof ApiError
+            ? err.message
+            : err instanceof Error
+              ? err.message
+              : 'Не удалось загрузить людей'
+        if (!quiet) {
+          setError(message)
+          if (!keepPrevious) setRemote(null)
+        }
+      } finally {
+        inFlightRef.current = false
+        if (!quiet) setLoading(false)
+      }
+    },
+    [useApi, gymId],
+  )
+
+  const retry = useCallback(() => {
+    loadedKeyRef.current = null
+    setRetryTick((n) => n + 1)
+  }, [])
 
   useEffect(() => {
     if (!useApi || !gymId || !fetchKey) {
       setRemote(null)
       setLoading(false)
+      setError(null)
       loadedKeyRef.current = null
+      lastGoodKeyRef.current = null
       return
     }
 
-    // Same hall already loaded — skip. Check-in only updates `user` in useMemo.
-    if (loadedKeyRef.current === fetchKey) return
+    void load({ force: true })
+  }, [useApi, gymId, fetchKey, retryTick, load])
 
-    let cancelled = false
-    // Invalidate cache while in flight so A→B→A still refetches A
-    loadedKeyRef.current = null
-    setRemote(null)
-    setLoading(true)
+  // Background presence refresh while tab is visible
+  useEffect(() => {
+    if (!useApi || !gymId || !fetchKey) return
 
-    void apiFetchGymPeople(gymId)
-      .then((people) => {
-        if (cancelled) return
-        setRemote(people)
-        loadedKeyRef.current = fetchKey
-      })
-      .catch(() => {
-        if (!cancelled) setRemote([])
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-
-    return () => {
-      cancelled = true
+    const tick = () => {
+      if (document.visibilityState === 'hidden') return
+      void load({ quiet: true, force: true })
     }
-  }, [useApi, gymId, fetchKey])
+
+    const id = window.setInterval(tick, POLL_MS)
+    const onVis = () => {
+      if (document.visibilityState === 'visible') tick()
+    }
+    document.addEventListener('visibilitychange', onVis)
+    return () => {
+      window.clearInterval(id)
+      document.removeEventListener('visibilitychange', onVis)
+    }
+  }, [useApi, gymId, fetchKey, load])
 
   // Лоадер только если ответ дольше 1 с — быстрые ответы без мигания
   useEffect(() => {
@@ -96,7 +151,7 @@ export function useGymPeople({ gymId, user, apiOnline, mode, blockedUserIds }: O
     let list: UserProfile[]
     if (useApi) {
       if (remote === null) {
-        // Ждём API — не подмешиваем демо-мок чужого зала
+        // Ждём API или ошибка без кэша — только себя, без демо-мока чужого зала
         list = user.gymIds.includes(gymId)
           ? [{ ...user, isActive: isPresentInGym(user, gymId) }]
           : []
@@ -107,10 +162,17 @@ export function useGymPeople({ gymId, user, apiOnline, mode, blockedUserIds }: O
         })
         list = withSelfOnFloor(list, user, gymId)
       }
-    } else if (mode === 'gymPage') {
-      list = peopleForGymPage(gymId, user, { includeSeedPeople: demo })
+    } else if (demo) {
+      // Seed faces only for the demo account — never for real users offline
+      list =
+        mode === 'gymPage'
+          ? peopleForGymPage(gymId, user, { includeSeedPeople: true })
+          : peopleInGym(gymId, user, { includeSeedPeople: true })
     } else {
-      list = peopleInGym(gymId, user, { includeSeedPeople: demo })
+      // API offline / not ready: self only, no mock strangers
+      list = user.gymIds.includes(gymId)
+        ? [{ ...user, isActive: isPresentInGym(user, gymId) }]
+        : []
     }
 
     if (blockedUserIds.length) {
@@ -125,5 +187,8 @@ export function useGymPeople({ gymId, user, apiOnline, mode, blockedUserIds }: O
     /** true только после 1 с ожидания ответа API */
     showLoader,
     fromApi: Boolean(useApi && remote !== null),
+    /** Set when people fetch failed (may still show last good list) */
+    error,
+    retry,
   }
 }

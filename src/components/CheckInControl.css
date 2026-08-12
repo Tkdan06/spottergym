@@ -40,6 +40,11 @@
   margin: 0;
 }
 
+.checkin-error {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
 .checkin-expire-banner {
   display: grid;
   gap: 8px;

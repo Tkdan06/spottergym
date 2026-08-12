@@ -36,13 +36,15 @@ function CtaPair({
         {primaryLabel}
         <ArrowRight size={18} aria-hidden />
       </Link>
-      <Link
-        to={loginPath()}
-        className="lp-login-quiet"
-        onClick={() => trackLanding('cta_login', { placement })}
-      >
-        {secondaryLabel}
-      </Link>
+      {placement === 'final' ? (
+        <Link
+          to={loginPath()}
+          className="lp-login-quiet"
+          onClick={() => trackLanding('cta_login', { placement })}
+        >
+          {secondaryLabel}
+        </Link>
+      ) : null}
     </div>
   )
 }
@@ -251,7 +253,6 @@ export function LandingPage() {
           <h2 id="lp-pain-offer" className="lp-section-title">
             {LANDING.painOffer.title}
           </h2>
-          <p className="lp-section-lead muted">{LANDING.painOffer.lead}</p>
           <div className="lp-stack">
             {LANDING.painOffer.items.map((item) => (
               <article key={item.pain} className="lp-block lp-pain-offer">

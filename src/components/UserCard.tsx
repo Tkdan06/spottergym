@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Heart } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/useApp'
 import { displayName, experienceLabel, intentLabel } from '../data/mock'
 import { profileImage, profileImageFallback } from '../lib/avatar'
@@ -14,11 +16,21 @@ interface Props {
   rank?: number
   /** Первые карточки в списке — без lazy */
   priority?: boolean
+  /** Лайк прямо с карточки (не для своего профиля) */
+  enableLike?: boolean
 }
 
-export function UserCard({ user, compact, rank, priority = false }: Props) {
-  const { user: me, getLikesFor } = useApp()
-  const { count, likers } = getLikesFor(user.id)
+export function UserCard({
+  user,
+  compact,
+  rank,
+  priority = false,
+  enableLike = true,
+}: Props) {
+  const navigate = useNavigate()
+  const { user: me, getLikesFor, toggleLike } = useApp()
+  const { count, likers, likedByMe } = getLikesFor(user.id)
+  const [likeError, setLikeError] = useState('')
   const isMe = Boolean(me && user.id === me.id)
   const name = displayName(user)
   const photo = profileImage(user)
@@ -34,12 +46,23 @@ export function UserCard({ user, compact, rank, priority = false }: Props) {
 
   const profileTo = isMe ? '/app/profile' : `/app/user/${user.id}`
 
+  const goProfile = () => {
+    navigate(profileTo, { state: isMe ? undefined : { person: user } })
+  }
+
   return (
-    <Link
-      to={profileTo}
-      state={isMe ? undefined : { person: user }}
+    <article
       className={`user-card ${compact ? 'compact' : ''} ${isMe ? 'is-me' : ''} ${isCoach ? 'is-coach' : ''}`}
+      role="link"
+      tabIndex={0}
       aria-label={isMe ? `${name} — это ты` : name}
+      onClick={goProfile}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          goProfile()
+        }
+      }}
     >
       {isMe ? <span className="me-tab">Ты</span> : null}
 
@@ -107,8 +130,33 @@ export function UserCard({ user, compact, rank, priority = false }: Props) {
           )}
           {user.lookingToMeet ? <span className="chip small">Открыт к общению</span> : null}
         </div>
-        <LikesRow count={count} likers={likers} compact maxAvatars={3} />
+        <div className="user-card-likes">
+          <LikesRow count={count} likers={likers} compact maxAvatars={3} />
+          {enableLike && !isMe && me ? (
+            <button
+              type="button"
+              className={`user-card-like-btn ${likedByMe ? 'liked' : ''}`}
+              aria-pressed={likedByMe}
+              aria-label={likedByMe ? 'Убрать лайк' : 'Лайк'}
+              title={likeError || undefined}
+              onClick={(e) => {
+                e.stopPropagation()
+                setLikeError('')
+                void Promise.resolve(toggleLike(user.id)).catch((err: unknown) => {
+                  setLikeError(err instanceof Error ? err.message : 'Не удалось поставить лайк')
+                })
+              }}
+            >
+              <Heart size={16} fill={likedByMe ? 'currentColor' : 'none'} aria-hidden />
+            </button>
+          ) : null}
+        </div>
+        {likeError ? (
+          <p className="feedback-error user-card-like-error" role="alert">
+            {likeError}
+          </p>
+        ) : null}
       </div>
-    </Link>
+    </article>
   )
 }

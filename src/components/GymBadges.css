@@ -1,0 +1,94 @@
+/* Shared presence / mine badges — GymCard + gym detail hero */
+
+.gym-presence-badge {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 0.64rem;
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.gym-presence-badge .online-dot {
+  width: 6px;
+  height: 6px;
+  margin: 0;
+  flex-shrink: 0;
+  animation: none;
+}
+
+.gym-presence-badge--online {
+  border-color: rgba(87, 242, 135, 0.35);
+  background: rgba(12, 28, 18, 0.78);
+  color: var(--online);
+}
+
+.gym-presence-badge--off {
+  border-color: rgba(232, 240, 234, 0.16);
+  background: rgba(14, 18, 16, 0.78);
+  color: var(--text-muted);
+}
+
+.gym-presence-badge--hero {
+  height: 28px;
+  min-height: 28px;
+  max-height: 28px;
+  padding: 0 10px;
+  font-size: 0.72rem;
+  line-height: 1;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.gym-presence-badge--card {
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  transform: translateX(-50%);
+  z-index: 1;
+  min-width: 72px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.gym-mine-badge {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(200, 245, 66, 0.4);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.gym-mine-badge--hero {
+  height: 28px;
+  min-height: 28px;
+  max-height: 28px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.gym-mine-badge--chip {
+  height: auto;
+  min-height: 0;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  border-color: var(--line);
+  background: var(--bg-soft);
+  color: var(--text);
+  backdrop-filter: none;
+}

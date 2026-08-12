@@ -189,6 +189,9 @@ export interface AdminDirectoryUser {
   photosBytes?: number
   registeredAt?: string
   lastSeenAt?: string
+  /** First check-in of today (MSK), if any */
+  checkedInTodayAt?: string
+  checkedInTodayGymId?: string
   /** Сид из mock — не «живой» зарегистрированный пользователь */
   isDemoSeed?: boolean
 }

@@ -5,6 +5,7 @@ import { prisma } from '../db.js'
 import {
   AVATAR_MAX_CHARS,
   BIO_MAX,
+  BIO_MIN,
   BREAK_UNTIL_MAX,
   CITY_MAX,
   GYM_IDS_MAX,
@@ -28,9 +29,14 @@ import {
   resolveExpiresAt,
 } from '../lib/checkInExpiry.js'
 import { notifyGymMembers } from '../lib/gymNotify.js'
-import { persistAvatar, persistPhotoList } from '../lib/mediaStore.js'
+import {
+  deleteRemovedMedia,
+  persistAvatar,
+  persistPhotoList,
+} from '../lib/mediaStore.js'
 import { isAllowedAvatarRef, isAllowedPhotoRef } from '../lib/photos.js'
 import { serializeUser } from '../lib/serialize.js'
+import { SoftDeleteError, softDeleteUser } from '../lib/softDeleteUser.js'
 import { isValidUsername, normalizeUsername } from '../lib/username.js'
 import { ensureWelcomeInstallNotification } from '../lib/welcomeInstall.js'
 import {
@@ -42,31 +48,61 @@ import { rateLimit } from '../middleware/rateLimit.js'
 
 const tagList = z.array(z.string().trim().min(1).max(TAG_ITEM_MAX)).max(TAGS_MAX)
 
+const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'] as const
+const TIME_RE = /^([01]?\d|2[0-3]):[0-5]\d$/
+
+function normalizeTime(value: string) {
+  const m = TIME_RE.exec(value.trim())
+  if (!m) return null
+  const [h, min] = value.trim().split(':')
+  return `${h.padStart(2, '0')}:${min}`
+}
+
+const visitSlotSchema = z
+  .object({
+    day: z.enum(WEEKDAYS),
+    from: z.string().trim(),
+    to: z.string().trim(),
+  })
+  .transform((slot, ctx) => {
+    const from = normalizeTime(slot.from)
+    const to = normalizeTime(slot.to)
+    if (!from || !to) {
+      ctx.addIssue({ code: 'custom', message: 'bad_time' })
+      return z.NEVER
+    }
+    return { day: slot.day, from, to }
+  })
+
 const patchSchema = z
   .object({
     name: z.string().trim().min(NAME_MIN).max(NAME_MAX).optional(),
     username: z.string().trim().min(USERNAME_MIN).max(USERNAME_MAX).optional(),
     age: z.number().int().min(18).max(80).optional(),
     gender: z.enum(['female', 'male']).optional(),
-    bio: z.string().max(BIO_MAX).optional(),
+    bio: z.string().min(BIO_MIN).max(BIO_MAX).optional(),
     photos: z.array(z.string().max(PHOTO_DATA_URL_MAX_CHARS)).max(PHOTO_MAX_COUNT).optional(),
     avatar: z.string().max(AVATAR_MAX_CHARS).optional(),
     city: z.string().max(CITY_MAX).optional(),
     homeGymId: z.string().max(GYM_ID_MAX).nullable().optional(),
-    gymIds: z.array(z.string().max(GYM_ID_MAX)).max(GYM_IDS_MAX).optional(),
+    gymIds: z.array(z.string().max(GYM_ID_MAX)).min(1).max(GYM_IDS_MAX).optional(),
     intent: z.enum(['dating', 'buddy', 'both']).optional(),
     experienceLevel: z.enum(['newbie', 'confident', 'experienced', 'pro']).optional(),
     interests: tagList.optional(),
     sports: tagList.optional(),
     isCoach: z.boolean().optional(),
     coachSports: tagList.optional(),
-    visitSlots: z.array(z.unknown()).max(VISIT_SLOTS_MAX).optional(),
+    visitSlots: z.array(visitSlotSchema).max(VISIT_SLOTS_MAX).optional(),
     breakUntil: z.string().max(BREAK_UNTIL_MAX).nullable().optional(),
     privacy: z.enum(['open', 'anonymous']).optional(),
     lookingToMeet: z.boolean().optional(),
     onboardingDone: z.boolean().optional(),
   })
   .strict()
+
+function publicActorName(user: { name: string; privacy: string }) {
+  return user.privacy === 'anonymous' ? 'Аноним' : user.name
+}
 
 export const meRoutes = new Hono<AuthedEnv>()
 
@@ -77,6 +113,21 @@ meRoutes.get('/', async (c) => {
   if (!user) return c.json({ error: 'Аккаунт не найден' }, 404)
   return c.json({ user: serializeUser(user) })
 })
+
+/** Throttled presence bump — counts as app activity without check-in. */
+meRoutes.post(
+  '/heartbeat',
+  rateLimit({ windowMs: 60_000, max: 8, route: 'me-heartbeat' }),
+  async (c) => {
+    const userId = c.get('userId')
+    const now = new Date()
+    await prisma.user.update({
+      where: { id: userId },
+      data: { lastSeenAt: now },
+    })
+    return c.json({ ok: true, lastSeenAt: now.toISOString() })
+  },
+)
 
 meRoutes.patch(
   '/',
@@ -94,7 +145,15 @@ meRoutes.patch(
       return c.json({ error: 'Фото: JPEG, PNG, WebP или сохранённый файл' }, 400)
     }
     try {
+      const prevRow = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { photos: true },
+      })
+      const prevPhotos = Array.isArray(prevRow?.photos)
+        ? (prevRow.photos as string[])
+        : []
       data.photos = await persistPhotoList(userId, data.photos)
+      await deleteRemovedMedia(userId, prevPhotos, data.photos)
     } catch {
       return c.json({ error: 'Не удалось сохранить фото' }, 400)
     }
@@ -139,6 +198,9 @@ meRoutes.patch(
     })
     const okIds = new Set(existing.map((g) => g.id))
     const gymIds = unique.filter((id) => okIds.has(id))
+    if (gymIds.length < 1) {
+      return c.json({ error: 'Нужен хотя бы один зал' }, 400)
+    }
 
     await prisma.$transaction([
       prisma.userGym.deleteMany({
@@ -156,7 +218,7 @@ meRoutes.patch(
     const homeGymId =
       data.homeGymId && gymIds.includes(data.homeGymId)
         ? data.homeGymId
-        : gymIds[0] || null
+        : gymIds[0]
 
     await prisma.user.update({
       where: { id: userId },
@@ -170,6 +232,15 @@ meRoutes.patch(
     visitSlots: visitSlotsRaw,
     ...rest
   } = data
+
+  // Setting an active break clears any open check-in (XOR presence)
+  if (rest.breakUntil) {
+    const now = new Date()
+    await prisma.checkIn.updateMany({
+      where: { userId, checkedOutAt: null },
+      data: { checkedOutAt: now },
+    })
+  }
 
   const finishingOnboarding = data.onboardingDone === true
   const wasOnboarded = finishingOnboarding
@@ -256,12 +327,13 @@ meRoutes.post(
   if (user) {
     const gym = await prisma.gym.findUnique({ where: { id: body.data.gymId } })
     const gymLabel = gym?.name || 'зале'
+    const who = publicActorName(user)
     await notifyGymMembers({
       actorId: userId,
       gymId: body.data.gymId,
       type: 'checkin',
       title: 'Кто-то в зале',
-      body: `${user.name} отметился в ${gymLabel}`,
+      body: `${who} отметился в ${gymLabel}`,
     })
     if (user.isCoach) {
       await notifyGymMembers({
@@ -269,7 +341,7 @@ meRoutes.post(
         gymId: body.data.gymId,
         type: 'coach',
         title: 'Тренер в зале',
-        body: `${user.name} сейчас в ${gymLabel}`,
+        body: `${who} сейчас в ${gymLabel}`,
       })
     }
   }
@@ -340,7 +412,10 @@ meRoutes.post(
   },
 )
 
-meRoutes.post('/gyms/:gymId', async (c) => {
+meRoutes.post(
+  '/gyms/:gymId',
+  rateLimit({ windowMs: 60_000, max: 30, route: 'me-gym-join' }),
+  async (c) => {
   const userId = c.get('userId')
   const gymId = c.req.param('gymId')
   const gym = await prisma.gym.findUnique({ where: { id: gymId } })
@@ -367,22 +442,36 @@ meRoutes.post('/gyms/:gymId', async (c) => {
   })
 
   if (!existing && user) {
+    const who = publicActorName(user)
     await notifyGymMembers({
       actorId: userId,
       gymId,
       type: 'gym_new_member',
       title: 'Новый человек в зале',
-      body: `${user.name} присоединился к ${gym.name}`,
+      body: `${who} присоединился к ${gym.name}`,
     })
   }
 
   const next = await loadAuthedUser(userId)
   return c.json({ user: next ? serializeUser(next) : null })
-})
+  },
+)
 
-meRoutes.delete('/gyms/:gymId', async (c) => {
+meRoutes.delete(
+  '/gyms/:gymId',
+  rateLimit({ windowMs: 60_000, max: 30, route: 'me-gym-leave' }),
+  async (c) => {
   const userId = c.get('userId')
   const gymId = c.req.param('gymId')
+
+  const membershipCount = await prisma.userGym.count({ where: { userId } })
+  const isMember = await prisma.userGym.findUnique({
+    where: { userId_gymId: { userId, gymId } },
+  })
+  if (isMember && membershipCount <= 1) {
+    return c.json({ error: 'Нельзя убрать последний зал. Сначала добавь другой.' }, 400)
+  }
+
   await prisma.userGym.deleteMany({ where: { userId, gymId } })
   await prisma.checkIn.updateMany({
     where: { userId, gymId, checkedOutAt: null },
@@ -403,4 +492,28 @@ meRoutes.delete('/gyms/:gymId', async (c) => {
 
   const next = await loadAuthedUser(userId)
   return c.json({ user: next ? serializeUser(next) : null })
-})
+  },
+)
+
+meRoutes.post(
+  '/delete-account',
+  rateLimit({ windowMs: 60 * 60_000, max: 3, route: 'me-delete-account' }),
+  async (c) => {
+    const body = z
+      .object({ confirm: z.literal('DELETE') })
+      .safeParse(await c.req.json().catch(() => null))
+    if (!body.success) {
+      return c.json({ error: 'Подтверди удаление: confirm = DELETE' }, 400)
+    }
+    const userId = c.get('userId')
+    try {
+      await softDeleteUser(userId, { actorId: userId, allowSelf: true })
+      return c.json({ ok: true })
+    } catch (err) {
+      if (err instanceof SoftDeleteError) {
+        return c.json({ error: err.message }, err.status)
+      }
+      throw err
+    }
+  },
+)

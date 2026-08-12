@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { Prisma } from '@prisma/client'
 import { prisma } from '../db.js'
 import { isMasterAdminEmail, normalizeEmail } from '../env.js'
+import { deleteRemovedMedia, tryDeleteMediaPath } from './mediaStore.js'
 import { hashPassword } from './password.js'
 
 export class SoftDeleteError extends Error {
@@ -18,7 +19,7 @@ export class SoftDeleteError extends Error {
  */
 export async function softDeleteUser(
   userId: string,
-  options: { actorId: string; alsoBlockEmail?: boolean },
+  options: { actorId: string; alsoBlockEmail?: boolean; allowSelf?: boolean },
 ) {
   const target = await prisma.user.findUnique({ where: { id: userId } })
   if (!target) throw new SoftDeleteError('Пользователь не найден', 404)
@@ -26,7 +27,7 @@ export async function softDeleteUser(
   if (isMasterAdminEmail(target.email)) {
     throw new SoftDeleteError('Нельзя удалить главного админа', 400)
   }
-  if (target.id === options.actorId) {
+  if (target.id === options.actorId && !options.allowSelf) {
     throw new SoftDeleteError('Нельзя удалить себя', 400)
   }
 
@@ -34,6 +35,9 @@ export async function softDeleteUser(
   const deadHash = await hashPassword(`${randomUUID()}${randomUUID()}`)
   const tombstoneEmail = `deleted+${userId}@spotter.invalid`
   const tombstoneUsername = `deleted_${userId.replace(/[^a-z0-9]/gi, '').slice(0, 16)}`
+
+  const prevPhotos = Array.isArray(target.photos) ? (target.photos as string[]) : []
+  const prevAvatar = typeof target.avatar === 'string' ? target.avatar : ''
 
   await prisma.$transaction(async (tx) => {
     await tx.userGym.deleteMany({ where: { userId } })
@@ -97,6 +101,10 @@ export async function softDeleteUser(
       })
     }
   })
+
+  // After DB tombstone — drop media files so old URLs 404
+  await deleteRemovedMedia(userId, prevPhotos, []).catch(() => undefined)
+  if (prevAvatar) await tryDeleteMediaPath(prevAvatar).catch(() => undefined)
 
   return { ok: true as const, email: originalEmail }
 }

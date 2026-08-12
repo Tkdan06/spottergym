@@ -11,6 +11,7 @@ import { createNotification } from '../lib/notify.js'
 import { notifyTicketAdmins } from '../lib/ticketNotify.js'
 import { serializeTicket } from '../lib/tickets.js'
 import { loadAuthedUser, requireAuth, type AuthedEnv } from '../middleware/auth.js'
+import { rateLimit } from '../middleware/rateLimit.js'
 
 export const ticketRoutes = new Hono<AuthedEnv>()
 
@@ -38,7 +39,10 @@ ticketRoutes.get('/', async (c) => {
   return c.json({ tickets: tickets.map(serializeTicket) })
 })
 
-ticketRoutes.post('/', async (c) => {
+ticketRoutes.post(
+  '/',
+  rateLimit({ windowMs: 60_000, max: 5, route: 'tickets-create' }),
+  async (c) => {
   const body = z
     .object({
       category: categorySchema,
@@ -89,10 +93,14 @@ ticketRoutes.post('/', async (c) => {
   })
 
   return c.json({ ticket: serializeTicket(ticket) }, 201)
-})
+  },
+)
 
 /** Админ пишет пользователю — создаёт тикет от поддержки */
-ticketRoutes.post('/outbound', async (c) => {
+ticketRoutes.post(
+  '/outbound',
+  rateLimit({ windowMs: 60_000, max: 20, route: 'tickets-outbound' }),
+  async (c) => {
   const body = z
     .object({
       userId: z.string().min(1).max(64),
@@ -141,7 +149,8 @@ ticketRoutes.post('/outbound', async (c) => {
   })
 
   return c.json({ ticket: serializeTicket(ticket) }, 201)
-})
+  },
+)
 
 ticketRoutes.get('/:id', async (c) => {
   const id = c.req.param('id')
@@ -160,7 +169,10 @@ ticketRoutes.get('/:id', async (c) => {
   return c.json({ ticket: serializeTicket(ticket) })
 })
 
-ticketRoutes.post('/:id/reply', async (c) => {
+ticketRoutes.post(
+  '/:id/reply',
+  rateLimit({ windowMs: 60_000, max: 20, route: 'tickets-reply' }),
+  async (c) => {
   const id = c.req.param('id')
   const body = z
     .object({
@@ -236,7 +248,8 @@ ticketRoutes.post('/:id/reply', async (c) => {
   }
 
   return c.json({ ticket: serializeTicket(updated) })
-})
+  },
+)
 
 ticketRoutes.patch('/:id/status', async (c) => {
   const id = c.req.param('id')

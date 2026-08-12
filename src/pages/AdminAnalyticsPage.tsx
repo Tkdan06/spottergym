@@ -78,13 +78,14 @@ export function AdminAnalyticsPage() {
           <strong>
             {analytics?.dau ?? '—'} / {analytics?.mau ?? '—'}
           </strong>
-          <p className="dim">Сегодня · 30 дней</p>
+          <p className="dim">Заходили сегодня · 30 дней</p>
         </article>
         <article className="admin-stat-card">
-          <span className="muted">Пользователи</span>
-          <strong>{analytics?.users ?? '—'}</strong>
+          <span className="muted">В зале сегодня</span>
+          <strong>{analytics?.checkedInToday ?? '—'}</strong>
           <p className="dim">
-            Онбординг {analytics?.onboarded ?? '—'} · в зале {analytics?.activeNow ?? '—'}
+            Чекин · сейчас {analytics?.activeNow ?? '—'} · онбординг{' '}
+            {analytics?.onboarded ?? '—'}
           </p>
         </article>
       </section>

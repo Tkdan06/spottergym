@@ -1,6 +1,6 @@
-import { type FormEvent, useMemo, useState } from 'react'
+import { type FormEvent, useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, Ban, MessageSquare, RefreshCw, ShieldAlert, Trash2 } from 'lucide-react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { useApp } from '../context/useApp'
 import { formatAdminDate, formatBytes } from '../lib/adminStats'
 import { experienceLabel, getGym, intentLabel } from '../data/mock'
@@ -9,6 +9,40 @@ import { messageFieldProps, searchFieldProps } from '../lib/inputAttrs'
 import type { AdminDirectoryUser } from '../types'
 import './FeedbackPage.css'
 import './AdminPlayersPage.css'
+
+type PlayerFilter =
+  | 'real'
+  | 'all'
+  | 'active'
+  | 'blocked'
+  | 'demo'
+  | 'seenToday'
+  | 'checkedInToday'
+
+const FILTERS: { id: PlayerFilter; label: string }[] = [
+  { id: 'real', label: 'Пользователи' },
+  { id: 'seenToday', label: 'Заходили сегодня' },
+  { id: 'checkedInToday', label: 'В зале сегодня' },
+  { id: 'active', label: 'Сейчас в зале' },
+  { id: 'blocked', label: 'Блок' },
+  { id: 'demo', label: 'Сиды' },
+  { id: 'all', label: 'Все' },
+]
+
+function parseFilter(raw: string | null): PlayerFilter {
+  if (
+    raw === 'seenToday' ||
+    raw === 'checkedInToday' ||
+    raw === 'active' ||
+    raw === 'blocked' ||
+    raw === 'demo' ||
+    raw === 'all' ||
+    raw === 'real'
+  ) {
+    return raw
+  }
+  return 'real'
+}
 
 function gymLabel(gymId?: string) {
   if (!gymId) return '—'
@@ -19,6 +53,7 @@ function gymLabel(gymId?: string) {
 
 export function AdminPlayersPage() {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const {
     user,
     blockedEmails,
@@ -35,15 +70,63 @@ export function AdminPlayersPage() {
   } = useApp()
 
   const [query, setQuery] = useState('')
-  const [filter, setFilter] = useState<'real' | 'all' | 'active' | 'blocked' | 'demo'>('real')
+  const filter = parseFilter(searchParams.get('filter'))
+  const [activityList, setActivityList] = useState<AdminDirectoryUser[] | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [message, setMessage] = useState('')
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 
+  const setFilter = (next: PlayerFilter) => {
+    const sp = new URLSearchParams(searchParams)
+    if (next === 'real') sp.delete('filter')
+    else sp.set('filter', next)
+    setSearchParams(sp, { replace: true })
+  }
+
+  useEffect(() => {
+    if (filter !== 'seenToday' && filter !== 'checkedInToday') {
+      setActivityList(null)
+      return
+    }
+    let cancelled = false
+    setBusy(true)
+    setError('')
+    void refreshAdminDirectory({ activity: filter })
+      .then((rows) => {
+        if (!cancelled) setActivityList(rows)
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Ошибка загрузки')
+          setActivityList([])
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setBusy(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [filter, refreshAdminDirectory])
+
   const players = useMemo(() => {
-    return [...adminDirectory].sort((a, b) => {
+    const source =
+      filter === 'seenToday' || filter === 'checkedInToday'
+        ? activityList || []
+        : adminDirectory
+    return [...source].sort((a, b) => {
+      if (filter === 'seenToday') {
+        const at = a.lastSeenAt ? +new Date(a.lastSeenAt) : 0
+        const bt = b.lastSeenAt ? +new Date(b.lastSeenAt) : 0
+        return bt - at || a.name.localeCompare(b.name, 'ru')
+      }
+      if (filter === 'checkedInToday') {
+        const at = a.checkedInTodayAt ? +new Date(a.checkedInTodayAt) : 0
+        const bt = b.checkedInTodayAt ? +new Date(b.checkedInTodayAt) : 0
+        return bt - at || a.name.localeCompare(b.name, 'ru')
+      }
       const ar = a.isDemoSeed ? 1 : 0
       const br = b.isDemoSeed ? 1 : 0
       if (ar !== br) return ar - br
@@ -51,7 +134,7 @@ export function AdminPlayersPage() {
       const bt = b.registeredAt ? +new Date(b.registeredAt) : 0
       return bt - at || a.name.localeCompare(b.name, 'ru')
     })
-  }, [adminDirectory])
+  }, [adminDirectory, activityList, filter])
 
   const list = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -84,8 +167,15 @@ export function AdminPlayersPage() {
   const refresh = () => {
     setBusy(true)
     setError('')
-    void Promise.resolve(refreshAdminDirectory())
-      .then(() => setNotice('Список обновлён с сервера'))
+    const opts =
+      filter === 'seenToday' || filter === 'checkedInToday'
+        ? { activity: filter as 'seenToday' | 'checkedInToday' }
+        : undefined
+    void Promise.resolve(refreshAdminDirectory(opts))
+      .then((rows) => {
+        if (opts) setActivityList(rows)
+        setNotice('Список обновлён с сервера')
+      })
       .catch((err) => setError(err instanceof Error ? err.message : 'Ошибка обновления'))
       .finally(() => setBusy(false))
   }
@@ -132,16 +222,16 @@ export function AdminPlayersPage() {
       `Удалить аккаунт ${entry.email}?\n\nПрофиль исчезнет из зала и поиска. Переписки с ним сохранятся у собеседников как «Удалённый пользователь».`,
     )
     if (!ok) return
-    const alsoBlock = window.confirm('Также заблокировать этот email (не сможет зарегистрироваться снова)?')
+    const alsoBlock = window.confirm(
+      'Также заблокировать этот email (не сможет зарегистрироваться снова)?',
+    )
     setBusy(true)
     void (async () => {
       try {
         await adminRemoveUser(entry.email, alsoBlock)
         setSelectedId(null)
         setNotice(
-          alsoBlock
-            ? `${entry.email} удалён и заблокирован`
-            : `${entry.email} удалён`,
+          alsoBlock ? `${entry.email} удалён и заблокирован` : `${entry.email} удалён`,
         )
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Не удалось удалить')
@@ -150,6 +240,13 @@ export function AdminPlayersPage() {
       }
     })()
   }
+
+  const subtitle =
+    filter === 'seenToday'
+      ? 'Заходили в приложение сегодня (МСК) · lastSeen'
+      : filter === 'checkedInToday'
+        ? 'Нажали «Я в зале» сегодня (МСК)'
+        : `Реестр с сервера · ${adminDirectory.filter((p) => !p.isDemoSeed).length} аккаунтов`
 
   return (
     <main className="page admin-page admin-players-page">
@@ -160,9 +257,7 @@ export function AdminPlayersPage() {
       <header className="admin-players-head">
         <div>
           <h1>Пользователи</h1>
-          <p className="muted">
-            Реестр с сервера · {players.filter((p) => !p.isDemoSeed).length} аккаунтов
-          </p>
+          <p className="muted">{subtitle}</p>
         </div>
         <button
           type="button"
@@ -177,7 +272,7 @@ export function AdminPlayersPage() {
       </header>
 
       <p className="dim">
-        Города, залы и DAU/MAU — в{' '}
+        DAU считает любой вход в аккаунт. Чекин «в зале» — отдельно. Города — в{' '}
         <Link to="/app/admin/analytics" className="text-link">
           Аналитике
         </Link>
@@ -193,15 +288,7 @@ export function AdminPlayersPage() {
           onChange={(e) => setQuery(e.target.value)}
         />
         <div className="admin-filter-bar" role="tablist" aria-label="Фильтр пользователей">
-          {(
-            [
-              ['real', 'Пользователи'],
-              ['active', 'В зале'],
-              ['blocked', 'Блок'],
-              ['demo', 'Сиды'],
-              ['all', 'Все'],
-            ] as const
-          ).map(([id, label]) => (
+          {FILTERS.map(({ id, label }) => (
             <button
               key={id}
               type="button"
@@ -216,7 +303,12 @@ export function AdminPlayersPage() {
         </div>
       </div>
 
-      <p className="muted admin-players-count">Найдено: {list.length}</p>
+      <p className="muted admin-players-count">
+        Найдено: {list.length}
+        {busy && (filter === 'seenToday' || filter === 'checkedInToday')
+          ? ' · загружаем…'
+          : ''}
+      </p>
 
       <div className="admin-players-layout">
         <div className="admin-players-list">
@@ -243,7 +335,21 @@ export function AdminPlayersPage() {
                   <span>{entry.city || 'город —'}</span>
                   <span>{gymLabel(entry.homeGymId || entry.gymIds?.[0])}</span>
                 </div>
-                <p className="dim">Рег. {formatAdminDate(entry.registeredAt)}</p>
+                {filter === 'seenToday' ? (
+                  <p className="dim">Визит {formatAdminDate(entry.lastSeenAt)}</p>
+                ) : filter === 'checkedInToday' ? (
+                  <p className="dim">
+                    Чекин {formatAdminDate(entry.checkedInTodayAt)} ·{' '}
+                    {gymLabel(entry.checkedInTodayGymId)}
+                  </p>
+                ) : (
+                  <p className="dim">
+                    Рег. {formatAdminDate(entry.registeredAt)}
+                    {entry.lastSeenAt
+                      ? ` · визит ${formatAdminDate(entry.lastSeenAt)}`
+                      : ''}
+                  </p>
+                )}
               </button>
             )
           })}
@@ -263,6 +369,14 @@ export function AdminPlayersPage() {
                 <div>
                   <dt>Последний визит</dt>
                   <dd>{formatAdminDate(selected.lastSeenAt)}</dd>
+                </div>
+                <div>
+                  <dt>Чекин сегодня</dt>
+                  <dd>
+                    {selected.checkedInTodayAt
+                      ? `${formatAdminDate(selected.checkedInTodayAt)} · ${gymLabel(selected.checkedInTodayGymId)}`
+                      : 'нет'}
+                  </dd>
                 </div>
                 <div>
                   <dt>Возраст / пол</dt>
@@ -394,7 +508,11 @@ export function AdminPlayersPage() {
                     required
                     maxLength={ADMIN_MESSAGE_MAX}
                   />
-                  <button type="submit" className="btn btn-primary" disabled={message.trim().length < 2}>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={message.trim().length < 2}
+                  >
                     Отправить
                   </button>
                 </form>

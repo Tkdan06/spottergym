@@ -705,6 +705,17 @@ a.btn-danger {
   color: var(--text-muted);
 }
 
+.demo-local-banner {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: rgba(255, 196, 80, 0.1);
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
 .empty-copy-actions {
   display: grid;
   gap: 14px;

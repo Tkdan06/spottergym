@@ -1,7 +1,8 @@
-import { useEffect, useId, useMemo, useState } from 'react'
+import { useId, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { SlidersHorizontal, X } from 'lucide-react'
 import { EXPERIENCE_LEVELS } from '../data/mock'
+import { useSheetA11y } from '../lib/sheetA11y'
 import type { ExperienceLevel, Gender } from '../types'
 import './FloorFilters.css'
 
@@ -72,6 +73,9 @@ export function FloorFilters({
 }: Props) {
   const titleId = useId()
   const [open, setOpen] = useState(false)
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  useSheetA11y(open, () => setOpen(false), panelRef)
 
   const extraCount =
     Number(gender !== 'all') + Number(age !== 'all') + Number(level !== 'all')
@@ -101,20 +105,6 @@ export function FloorFilters({
     }
     return tags
   }, [gender, age, level, onGenderChange, onAgeChange, onLevelChange])
-
-  useEffect(() => {
-    if (!open) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => {
-      document.body.style.overflow = prev
-      window.removeEventListener('keydown', onKey)
-    }
-  }, [open])
 
   const resetExtras = () => {
     onGenderChange('all')
@@ -181,6 +171,7 @@ export function FloorFilters({
                 onClick={() => setOpen(false)}
               />
               <div
+                ref={panelRef}
                 className="floor-sheet-panel"
                 role="dialog"
                 aria-modal="true"

@@ -55,6 +55,7 @@ export function AdminUsersPage() {
   }, [adminDirectory, search])
 
   if (!user?.isAdmin) return <Navigate to="/app/profile" replace />
+  if (!canManageAdmins && !canBlockUsers) return <Navigate to="/app/admin" replace />
 
   const onBlock = (e: FormEvent) => {
     e.preventDefault()

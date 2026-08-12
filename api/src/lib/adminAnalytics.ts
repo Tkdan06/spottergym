@@ -28,6 +28,8 @@ export type AdminAnalytics = {
   totalPhotos: number
   photosBytes: number
   activeNow: number
+  /** Distinct users with a check-in started today (MSK) */
+  checkedInToday: number
   dau: number
   mau: number
   retention: AdminRetentionPoint[]
@@ -119,6 +121,7 @@ export async function buildAdminAnalytics(): Promise<AdminAnalytics> {
     activityRows,
     photoRows,
     activeNow,
+    checkedInTodayRows,
     cityGroups,
     gymGroups,
     genderGroups,
@@ -143,6 +146,11 @@ export async function buildAdminAnalytics(): Promise<AdminAnalytics> {
       select: { photos: true },
     }),
     prisma.checkIn.count({ where: { checkedOutAt: null } }),
+    prisma.checkIn.findMany({
+      where: { checkedInAt: { gte: todayStart } },
+      select: { userId: true },
+      distinct: ['userId'],
+    }),
     prisma.user.groupBy({
       by: ['city'],
       _count: { _all: true },
@@ -255,6 +263,7 @@ export async function buildAdminAnalytics(): Promise<AdminAnalytics> {
     totalPhotos,
     photosBytes,
     activeNow,
+    checkedInToday: checkedInTodayRows.length,
     dau,
     mau,
     retention,

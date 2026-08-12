@@ -60,6 +60,7 @@ export function NotificationsPage() {
   }
   const [pushBusy, setPushBusy] = useState(false)
   const [pushError, setPushError] = useState('')
+  const [prefsError, setPrefsError] = useState('')
   const [pushState, setPushState] = useState({
     supported: pushSupported(),
     standalone: isStandalonePwa(),
@@ -67,6 +68,13 @@ export function NotificationsPage() {
     subscribed: false,
     configured: false,
   })
+
+  const patchPrefs = (patch: Partial<typeof notificationPrefs>) => {
+    setPrefsError('')
+    void Promise.resolve(updateNotificationPrefs(patch)).catch((err: unknown) => {
+      setPrefsError(err instanceof Error ? err.message : 'Не удалось сохранить настройки')
+    })
+  }
 
   const refreshPushState = async () => {
     const next = await getPushSubscriptionState()
@@ -136,7 +144,9 @@ export function NotificationsPage() {
             <button
               type="button"
               className="notifications-mark-all"
-              onClick={markAllNotificationsRead}
+              onClick={() => {
+                void Promise.resolve(markAllNotificationsRead()).catch(() => undefined)
+              }}
             >
               Прочитать все
             </button>
@@ -163,10 +173,16 @@ export function NotificationsPage() {
 
       {tab === 'settings' ? (
         <section className="stack">
+          {prefsError ? (
+            <p className="feedback-error" role="alert">
+              {prefsError}
+            </p>
+          ) : null}
+
           <button
             type="button"
             className="toggle-row"
-            onClick={() => updateNotificationPrefs({ enabled: !notificationPrefs.enabled })}
+            onClick={() => patchPrefs({ enabled: !notificationPrefs.enabled })}
           >
             <div className="row">
               <span className="notif-setting-icon" aria-hidden>
@@ -199,11 +215,21 @@ export function NotificationsPage() {
               <span className={`toggle ${pushActive ? 'on' : ''}`} />
             </button>
 
-            <Link to="/app/install" className="push-guide-link">
-              {!pushState.standalone
-                ? 'Хочешь пуши? Поставь ярлык на экран'
-                : 'Как поставить ярлык на экран'}
-            </Link>
+            {!pushState.standalone && pushState.supported ? (
+              <div className="empty-copy-actions push-install-cta">
+                <p className="muted">
+                  Пуши на телефон работают из установленного приложения (ярлык на экран Домой), не
+                  из обычной вкладки Safari/Chrome.
+                </p>
+                <Link to="/app/install" className="btn btn-soft btn-block">
+                  Как поставить на экран
+                </Link>
+              </div>
+            ) : (
+              <Link to="/app/install" className="push-guide-link">
+                Как поставить ярлык на экран
+              </Link>
+            )}
             {pushError ? <p className="push-error">{pushError}</p> : null}
           </div>
 
@@ -214,9 +240,7 @@ export function NotificationsPage() {
                 type="button"
                 className="toggle-row"
                 disabled={!notificationPrefs.enabled}
-                onClick={() =>
-                  updateNotificationPrefs({ [item.key]: !notificationPrefs[item.key] })
-                }
+                onClick={() => patchPrefs({ [item.key]: !notificationPrefs[item.key] })}
               >
                 <div>
                   <strong>{item.title}</strong>
@@ -239,9 +263,26 @@ export function NotificationsPage() {
       ) : (
         <section className="card-list">
           {!notificationPrefs.enabled ? (
-            <div className="empty-copy" role="status">
-              <p className="empty-copy-title">Уведомления выключены</p>
-              <p className="empty-copy-lead">Включи их во вкладке «Настройки»</p>
+            <div className="empty-copy-actions">
+              <div className="empty-copy" role="status">
+                <p className="empty-copy-title">Уведомления выключены</p>
+                <p className="empty-copy-lead">Включи их здесь — или настрой типы во вкладке «Настройки»</p>
+              </div>
+              {prefsError ? (
+                <p className="feedback-error" role="alert">
+                  {prefsError}
+                </p>
+              ) : null}
+              <button
+                type="button"
+                className="btn btn-primary btn-block"
+                onClick={() => patchPrefs({ enabled: true })}
+              >
+                Включить уведомления
+              </button>
+              <button type="button" className="btn btn-soft btn-block" onClick={() => setTab('settings')}>
+                Открыть настройки
+              </button>
             </div>
           ) : visible.length ? (
             visible.map((item) => {
@@ -253,7 +294,9 @@ export function NotificationsPage() {
                   className={`notification-card ${item.read ? 'is-read' : 'is-unread'}${
                     installWelcome ? ' is-welcome-install' : ''
                   }`}
-                  onClick={() => markNotificationRead(item.id)}
+                  onClick={() => {
+                    void Promise.resolve(markNotificationRead(item.id)).catch(() => undefined)
+                  }}
                 >
                   <div className="notification-card-top">
                     <span className="chip small level">

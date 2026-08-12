@@ -167,12 +167,25 @@ export async function apiMe() {
   return data.user
 }
 
+/** Bumps lastSeenAt so DAU counts any authenticated session, not only check-in. */
+export async function apiHeartbeat() {
+  return request<{ ok: true; lastSeenAt: string }>('/me/heartbeat', { method: 'POST' })
+}
+
 export async function apiPatchMe(patch: Partial<AppUser>) {
   const data = await request<{ user: AppUser }>('/me', {
     method: 'PATCH',
     json: patch,
   })
   return data.user
+}
+
+/** Soft-delete own account. Requires body confirm: "DELETE". */
+export async function apiDeleteAccount() {
+  return request<{ ok: true }>('/me/delete-account', {
+    method: 'POST',
+    json: { confirm: 'DELETE' },
+  })
 }
 
 export async function apiCheckIn(gymId: string) {
@@ -283,11 +296,21 @@ export async function apiUnblockUser(userId: string) {
 export type AdminUserRow = AppUser & {
   photosCount?: number
   photosBytes?: number
+  checkedInTodayAt?: string
+  checkedInTodayGymId?: string
 }
 
-export async function apiAdminFetchUsers(q?: string) {
-  const sp = q?.trim() ? `?q=${encodeURIComponent(q.trim())}` : ''
-  const data = await request<{ users: AdminUserRow[] }>(`/admin/users${sp}`)
+export async function apiAdminFetchUsers(opts?: {
+  q?: string
+  activity?: 'seenToday' | 'checkedInToday'
+}) {
+  const sp = new URLSearchParams()
+  if (opts?.q?.trim()) sp.set('q', opts.q.trim())
+  if (opts?.activity) sp.set('activity', opts.activity)
+  const qs = sp.toString()
+  const data = await request<{ users: AdminUserRow[] }>(
+    `/admin/users${qs ? `?${qs}` : ''}`,
+  )
   return data.users
 }
 
@@ -516,9 +539,18 @@ export async function apiAdminOutboundTicket(userId: string, message: string) {
 
 export type ApiConversation = Conversation & { other?: UserProfile }
 
-export async function apiFetchConversations() {
-  const data = await request<{ conversations: ApiConversation[] }>('/conversations')
-  return data.conversations
+export async function apiFetchConversations(opts?: { before?: string; limit?: number }) {
+  const sp = new URLSearchParams()
+  if (opts?.before) sp.set('before', opts.before)
+  if (opts?.limit) sp.set('limit', String(opts.limit))
+  const qs = sp.toString()
+  const data = await request<{ conversations: ApiConversation[]; hasMore?: boolean }>(
+    `/conversations${qs ? `?${qs}` : ''}`,
+  )
+  return {
+    conversations: data.conversations,
+    hasMore: Boolean(data.hasMore),
+  }
 }
 
 export async function apiStartConversation(userId: string, message?: string) {
@@ -529,12 +561,26 @@ export async function apiStartConversation(userId: string, message?: string) {
   return data.conversation
 }
 
-export async function apiFetchMessages(conversationId: string) {
+export async function apiFetchMessages(
+  conversationId: string,
+  opts?: { before?: string; limit?: number },
+) {
+  const sp = new URLSearchParams()
+  if (opts?.before) sp.set('before', opts.before)
+  if (opts?.limit) sp.set('limit', String(opts.limit))
+  const qs = sp.toString()
   const data = await request<{
     conversation: ApiConversation
     messages: Message[]
-  }>(`/conversations/${encodeURIComponent(conversationId)}/messages`)
-  return data
+    hasMore?: boolean
+  }>(
+    `/conversations/${encodeURIComponent(conversationId)}/messages${qs ? `?${qs}` : ''}`,
+  )
+  return {
+    conversation: data.conversation,
+    messages: data.messages,
+    hasMore: Boolean(data.hasMore),
+  }
 }
 
 export async function apiSendMessage(conversationId: string, text: string) {

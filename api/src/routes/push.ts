@@ -4,6 +4,7 @@ import { prisma } from '../db.js'
 import { getVapidPublicKey, isPushConfigured } from '../lib/push.js'
 import { isAllowedPushEndpoint } from '../lib/pushEndpoint.js'
 import { requireAuth, type AuthedEnv } from '../middleware/auth.js'
+import { rateLimit } from '../middleware/rateLimit.js'
 
 export const pushRoutes = new Hono<AuthedEnv>()
 
@@ -25,7 +26,10 @@ const subSchema = z.object({
   }),
 })
 
-pushRoutes.post('/subscribe', async (c) => {
+pushRoutes.post(
+  '/subscribe',
+  rateLimit({ windowMs: 60_000, max: 20, route: 'push-subscribe' }),
+  async (c) => {
   if (!isPushConfigured()) {
     return c.json({ error: 'Push не настроен на сервере' }, 503)
   }
@@ -61,9 +65,13 @@ pushRoutes.post('/subscribe', async (c) => {
   })
 
   return c.json({ ok: true })
-})
+  },
+)
 
-pushRoutes.post('/unsubscribe', async (c) => {
+pushRoutes.post(
+  '/unsubscribe',
+  rateLimit({ windowMs: 60_000, max: 20, route: 'push-unsubscribe' }),
+  async (c) => {
   const body = z
     .object({ endpoint: z.string().url().max(2000) })
     .safeParse(await c.req.json().catch(() => null))
@@ -74,4 +82,5 @@ pushRoutes.post('/unsubscribe', async (c) => {
     where: { userId, endpoint: body.data.endpoint },
   })
   return c.json({ ok: true })
-})
+  },
+)

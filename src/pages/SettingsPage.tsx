@@ -1,8 +1,7 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, Plus, Share2, X } from 'lucide-react'
+import { ArrowLeft, Plus, X } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { ChangePasswordForm } from '../components/ChangePasswordForm'
-import { InviteFriendsButton } from '../components/InviteFriendsButton'
 import { SectionTitle } from '../components/SectionTitle'
 import { useApp } from '../context/useApp'
 import {
@@ -10,9 +9,11 @@ import {
   EXPERIENCE_LEVELS,
   INTERESTS,
   SPORTS,
+  displayName,
   getGym,
   getUser,
 } from '../data/mock'
+import { apiDeleteAccount } from '../lib/apiClient'
 import { isDemoAccount } from '../lib/demoAccount'
 import { BIO_MAX, NAME_MAX, NAME_MIN, USERNAME_MAX, USERNAME_MIN } from '../lib/fieldLimits'
 import {
@@ -22,8 +23,8 @@ import {
 } from '../lib/inputAttrs'
 import { isValidUsername, normalizeUsername } from '../lib/username'
 import { activeBreakUntil, todayISO } from '../lib/schedule'
-import type { ExperienceLevel, Gender, Intent, VisitSlot } from '../types'
-import { ScheduleEditor, sortVisitSlots } from '../components/ScheduleEditor'
+import type { ExperienceLevel, Gender, Intent } from '../types'
+import './FeedbackPage.css'
 import './SettingsPage.css'
 
 const GENDERS: { value: Gender; label: string }[] = [
@@ -32,11 +33,22 @@ const GENDERS: { value: Gender; label: string }[] = [
 ]
 
 export function SettingsPage() {
-  const { user, updateProfile, logout, blockedUserIds, unblockUser } = useApp()
+  const {
+    user,
+    updateProfile,
+    logout,
+    blockedUserIds,
+    unblockUser,
+    directory,
+    fetchUserById,
+  } = useApp()
   const navigate = useNavigate()
   const [name, setName] = useState(user?.name || '')
   const [username, setUsername] = useState(user?.username || '')
   const [usernameError, setUsernameError] = useState('')
+  const [ageError, setAgeError] = useState('')
+  const [saveError, setSaveError] = useState('')
+  const [saving, setSaving] = useState(false)
   const [age, setAge] = useState<number | ''>(user?.age || 25)
   const [gender, setGender] = useState<Gender>(
     user?.gender === 'female' || user?.gender === 'male' ? user.gender : 'male',
@@ -53,13 +65,14 @@ export function SettingsPage() {
   const [isCoach, setIsCoach] = useState(user?.isCoach ?? false)
   const [coachSports, setCoachSports] = useState<string[]>(user?.coachSports || [])
   const [interests, setInterests] = useState<string[]>(user?.interests || [])
-  const [visitSlots, setVisitSlots] = useState<VisitSlot[]>(() =>
-    sortVisitSlots(user?.visitSlots || []),
-  )
 
   const initialBreak = activeBreakUntil(user?.breakUntil)
   const [breakOn, setBreakOn] = useState(Boolean(initialBreak))
   const [breakUntil, setBreakUntil] = useState(initialBreak || '')
+  const [blockedPeople, setBlockedPeople] = useState<{ id: string; name: string }[]>([])
+  const [deleteStep, setDeleteStep] = useState<'idle' | 'confirm'>('idle')
+  const [deleteBusy, setDeleteBusy] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
 
   // Sync after catalog join/leave (settings remount or live user update)
   useEffect(() => {
@@ -69,17 +82,34 @@ export function SettingsPage() {
     setCity(user.city || 'Москва')
   }, [user?.gymIds?.join(','), user?.homeGymId, user?.city])
 
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      const rows = await Promise.all(
+        blockedUserIds.map(async (id) => {
+          const fromDir = directory.find((u) => u.id === id)
+          if (fromDir) return { id, name: displayName(fromDir) }
+          const demo = getUser(id)
+          if (demo && isDemoAccount(user?.email)) return { id, name: displayName(demo) }
+          try {
+            const person = await fetchUserById(id)
+            return { id, name: displayName(person) }
+          } catch {
+            return { id, name: 'Пользователь' }
+          }
+        }),
+      )
+      if (!cancelled) setBlockedPeople(rows)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [blockedUserIds, directory, fetchUserById, user?.email])
+
   const selectedGyms = useMemo(
     () => gymIds.map((id) => getGym(id)).filter(Boolean),
     [gymIds],
   )
-
-  const blockedPeople = useMemo(() => {
-    if (!isDemoAccount(user?.email)) return []
-    return blockedUserIds
-      .map((id) => getUser(id))
-      .filter((p): p is NonNullable<typeof p> => Boolean(p))
-  }, [blockedUserIds, user?.email])
 
   if (!user) return <Navigate to="/login" replace />
 
@@ -89,18 +119,28 @@ export function SettingsPage() {
 
   const toggleGym = (id: string) => {
     setGymIds((prev) => {
+      if (prev.includes(id) && prev.length <= 1) {
+        setSaveError('Нельзя убрать последний зал. Сначала добавь другой.')
+        return prev
+      }
       const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
       if (!next.includes(homeGymId)) {
         setHomeGymId(next[0] || '')
       }
+      setSaveError('')
       return next
     })
   }
 
   const onSave = (e: FormEvent) => {
     e.preventDefault()
+    if (saving) return
     const parsedAge = typeof age === 'number' ? age : Number(age)
-    if (!Number.isFinite(parsedAge) || parsedAge < 18 || parsedAge > 80) return
+    if (!Number.isFinite(parsedAge) || parsedAge < 18 || parsedAge > 80) {
+      setAgeError('Укажи возраст от 18 до 80')
+      return
+    }
+    setAgeError('')
 
     const nextUsername = normalizeUsername(username)
     if (!isValidUsername(nextUsername)) {
@@ -109,38 +149,42 @@ export function SettingsPage() {
     }
     setUsernameError('')
 
+    if (gymIds.length < 1) {
+      setSaveError('Нужен хотя бы один зал')
+      return
+    }
+
     const nextBreak =
       breakOn && breakUntil && breakUntil >= todayISO() ? breakUntil : null
 
-    updateProfile({
-      name: name.trim(),
-      username: nextUsername,
-      age: parsedAge,
-      gender,
-      bio: bio.trim(),
-      intent,
-      experienceLevel,
-      gymIds,
-      homeGymId: gymIds.includes(homeGymId) ? homeGymId : gymIds[0] || '',
-      sports,
-      isCoach,
-      coachSports: isCoach ? coachSports : [],
-      interests,
-      city,
-      visitSlots: sortVisitSlots(visitSlots),
-      breakUntil: nextBreak,
-      ...(nextBreak && user.isActive
-        ? {
-            isActive: false,
-            checkedInGymId: '',
-            checkedInAt: '',
-            checkedInExpiresAt: '',
-            checkInExtendCount: 0,
-            checkInCanExtend: false,
-          }
-        : {}),
-    })
-    navigate('/app/profile')
+    setSaving(true)
+    setSaveError('')
+    void Promise.resolve(
+      updateProfile({
+        name: name.trim(),
+        username: nextUsername,
+        age: parsedAge,
+        gender,
+        bio: bio.trim(),
+        intent,
+        experienceLevel,
+        gymIds,
+        homeGymId: gymIds.includes(homeGymId) ? homeGymId : gymIds[0] || '',
+        sports,
+        isCoach,
+        coachSports: isCoach ? coachSports : [],
+        interests,
+        city,
+        breakUntil: nextBreak,
+      }),
+    )
+      .then(() => {
+        navigate('/app/profile')
+      })
+      .catch((err: unknown) => {
+        setSaveError(err instanceof Error ? err.message : 'Не удалось сохранить')
+      })
+      .finally(() => setSaving(false))
   }
 
   return (
@@ -150,6 +194,13 @@ export function SettingsPage() {
       </button>
       <h1>Настройки</h1>
       <p className="muted">Редактируй профиль и список своих залов.</p>
+
+      {isDemoAccount(user.email) ? (
+        <p className="demo-local-banner" role="status">
+          Демо-аккаунт: изменения и люди в зале локальные. Для проверки продакшена используй
+          обычный аккаунт.
+        </p>
+      ) : null}
 
       <form className="settings-form" onSubmit={onSave}>
         <div className="field">
@@ -193,9 +244,15 @@ export function SettingsPage() {
             onChange={(e) => {
               const next = e.target.value
               setAge(next === '' ? '' : Number(next))
+              setAgeError('')
             }}
             required
           />
+          {ageError ? (
+            <p className="feedback-error" role="alert">
+              {ageError}
+            </p>
+          ) : null}
         </div>
         <div className="field">
           <p className="field-label">Пол</p>
@@ -348,6 +405,8 @@ export function SettingsPage() {
         <button
           type="button"
           className="toggle-row"
+          role="switch"
+          aria-checked={isCoach}
           onClick={() => {
             setIsCoach((v) => {
               if (v) setCoachSports([])
@@ -402,15 +461,19 @@ export function SettingsPage() {
         <section className="settings-panel">
           <div className="settings-panel-head">
             <h2>Расписание</h2>
-            <p className="muted">Для каждого дня — своё время</p>
+            <p className="muted">Дни и время редактируются в профиле</p>
           </div>
-          <ScheduleEditor value={visitSlots} onChange={setVisitSlots} idPrefix="settings" />
+          <Link to="/app/profile" className="btn btn-soft btn-block">
+            Открыть расписание в профиле
+          </Link>
         </section>
 
         <section className="settings-panel">
           <button
             type="button"
             className="toggle-row settings-break-toggle"
+            role="switch"
+            aria-checked={breakOn}
             onClick={() => {
               setBreakOn((v) => {
                 if (v) {
@@ -454,17 +517,17 @@ export function SettingsPage() {
           ) : null}
         </section>
 
-        <button type="submit" className="btn btn-primary btn-block">
-          Сохранить
+        {saveError ? (
+          <p className="feedback-error" role="alert">
+            {saveError}
+          </p>
+        ) : null}
+        <button type="submit" className="btn btn-primary btn-block" disabled={saving}>
+          {saving ? 'Сохраняем…' : 'Сохранить'}
         </button>
       </form>
 
       <div className="settings-links">
-        {user ? (
-          <InviteFriendsButton userId={user.id} className="btn btn-ghost btn-block">
-            <Share2 size={16} /> Пригласить друзей
-          </InviteFriendsButton>
-        ) : null}
         <Link to="/app/feedback" className="btn btn-ghost btn-block">
           Обратная связь
         </Link>
@@ -513,6 +576,61 @@ export function SettingsPage() {
       >
         Выйти
       </button>
+
+      <section className="settings-panel settings-delete">
+        <div className="settings-panel-head">
+          <h2>Удалить аккаунт</h2>
+          <p className="muted">Переписка останется как «Удалённый пользователь». Это необратимо.</p>
+        </div>
+        {deleteStep === 'idle' ? (
+          <button
+            type="button"
+            className="btn btn-ghost btn-block"
+            onClick={() => {
+              setDeleteError('')
+              setDeleteStep('confirm')
+            }}
+          >
+            Удалить аккаунт…
+          </button>
+        ) : (
+          <div className="empty-copy-actions">
+            {deleteError ? (
+              <p className="feedback-error" role="alert">
+                {deleteError}
+              </p>
+            ) : null}
+            <button
+              type="button"
+              className="btn btn-danger btn-block"
+              disabled={deleteBusy}
+              onClick={() => {
+                setDeleteBusy(true)
+                setDeleteError('')
+                void apiDeleteAccount()
+                  .then(async () => {
+                    await logout()
+                    navigate('/', { replace: true })
+                  })
+                  .catch((err: unknown) => {
+                    setDeleteError(err instanceof Error ? err.message : 'Не удалось удалить')
+                  })
+                  .finally(() => setDeleteBusy(false))
+              }}
+            >
+              {deleteBusy ? 'Удаляем…' : 'Удалить навсегда'}
+            </button>
+            <button
+              type="button"
+              className="btn btn-soft btn-block"
+              disabled={deleteBusy}
+              onClick={() => setDeleteStep('idle')}
+            >
+              Отмена
+            </button>
+          </div>
+        )}
+      </section>
     </main>
   )
 }

@@ -1,10 +1,12 @@
 import { Hono } from 'hono'
+import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 import { prisma } from '../db.js'
 import { areUsersBlocked } from '../lib/blocks.js'
 import { createNotification } from '../lib/notify.js'
 import { serializePublicUser } from '../lib/serialize.js'
 import { requireAuth, type AuthedEnv } from '../middleware/auth.js'
+import { rateLimit } from '../middleware/rateLimit.js'
 
 export const likesRoutes = new Hono<AuthedEnv>()
 
@@ -71,53 +73,72 @@ likesRoutes.get('/', async (c) => {
   return c.json(payload)
 })
 
-likesRoutes.post('/:userId/toggle', async (c) => {
-  const toUserId = z.string().min(1).max(64).safeParse(c.req.param('userId'))
-  if (!toUserId.success) return c.json({ error: 'Некорректный id' }, 400)
+likesRoutes.post(
+  '/:userId/toggle',
+  rateLimit({ windowMs: 60_000, max: 60, route: 'likes-toggle' }),
+  async (c) => {
+    const toUserId = z.string().min(1).max(64).safeParse(c.req.param('userId'))
+    if (!toUserId.success) return c.json({ error: 'Некорректный id' }, 400)
 
-  const fromUserId = c.get('userId')
-  if (fromUserId === toUserId.data) {
-    return c.json({ error: 'Нельзя лайкнуть себя' }, 400)
-  }
+    const fromUserId = c.get('userId')
+    if (fromUserId === toUserId.data) {
+      return c.json({ error: 'Нельзя лайкнуть себя' }, 400)
+    }
 
-  const target = await prisma.user.findUnique({
-    where: { id: toUserId.data },
-    select: { id: true, name: true, deletedAt: true },
-  })
-  if (!target || target.deletedAt) return c.json({ error: 'Пользователь не найден' }, 404)
-  if (await areUsersBlocked(fromUserId, toUserId.data)) {
-    return c.json({ error: 'Пользователь недоступен' }, 403)
-  }
-
-  const existing = await prisma.like.findUnique({
-    where: {
-      fromUserId_toUserId: { fromUserId, toUserId: toUserId.data },
-    },
-  })
-
-  let liked: boolean
-  if (existing) {
-    await prisma.like.delete({ where: { id: existing.id } })
-    liked = false
-  } else {
-    await prisma.like.create({
-      data: { fromUserId, toUserId: toUserId.data },
+    const target = await prisma.user.findUnique({
+      where: { id: toUserId.data },
+      select: { id: true, name: true, deletedAt: true },
     })
-    liked = true
-    const me = await prisma.user.findUnique({
-      where: { id: fromUserId },
-      select: { name: true },
-    })
-    await createNotification({
-      userId: toUserId.data,
-      type: 'like',
-      title: 'Новый лайк',
-      body: `${me?.name || 'Кто-то'} отметил твою карточку`,
-      href: '/app/likes',
-      actorId: fromUserId,
-    })
-  }
+    if (!target || target.deletedAt) return c.json({ error: 'Пользователь не найден' }, 404)
+    if (await areUsersBlocked(fromUserId, toUserId.data)) {
+      return c.json({ error: 'Пользователь недоступен' }, 403)
+    }
 
-  const payload = await buildViewerLikesPayload(fromUserId)
-  return c.json({ liked, ...payload })
-})
+    // Idempotent toggle via transaction: delete if exists, else create (catch unique race)
+    let liked: boolean
+    const existing = await prisma.like.findUnique({
+      where: {
+        fromUserId_toUserId: { fromUserId, toUserId: toUserId.data },
+      },
+    })
+
+    if (existing) {
+      await prisma.like.delete({ where: { id: existing.id } }).catch(() => undefined)
+      liked = false
+    } else {
+      try {
+        await prisma.like.create({
+          data: { fromUserId, toUserId: toUserId.data },
+        })
+        liked = true
+      } catch (err) {
+        if (
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === 'P2002'
+        ) {
+          // Parallel double-create — treat as liked
+          liked = true
+        } else {
+          throw err
+        }
+      }
+      if (liked) {
+        const me = await prisma.user.findUnique({
+          where: { id: fromUserId },
+          select: { name: true },
+        })
+        await createNotification({
+          userId: toUserId.data,
+          type: 'like',
+          title: 'Новый лайк',
+          body: `${me?.name || 'Кто-то'} отметил твою карточку`,
+          href: '/app/likes',
+          actorId: fromUserId,
+        }).catch(() => undefined)
+      }
+    }
+
+    const payload = await buildViewerLikesPayload(fromUserId)
+    return c.json({ liked, ...payload })
+  },
+)

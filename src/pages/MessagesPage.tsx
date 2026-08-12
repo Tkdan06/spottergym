@@ -1,16 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
-import { Heart, Pin, PinOff, Search, UserRound } from 'lucide-react'
+import { Heart, MessageCircle, Pin, PinOff, Search, UserRound } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { PresenceBadge } from '../components/PresenceBadge'
 import { SmartImage } from '../components/SmartImage'
 import { useApp, useOtherParticipant } from '../context/useApp'
 import { displayName, formatGymLabel, getContactGym, getGym } from '../data/mock'
 import { profileImage, profileImageFallback } from '../lib/avatar'
+import { otherParticipantId } from '../lib/conversations'
 import { formatDialogTime } from '../lib/formatDialogTime'
 import { searchFieldProps } from '../lib/inputAttrs'
 import { getCheckedInGymId } from '../lib/presence'
 import { formatUsername } from '../lib/username'
 import type { Conversation, UserProfile } from '../types'
+import './FeedbackPage.css'
 import './MessagesPage.css'
 
 const LONG_PRESS_MS = 480
@@ -165,9 +167,41 @@ function FindResultCard({
   person: UserProfile
   onOpen: () => void
 }) {
-  const { user, toggleLike, getLikesFor } = useApp()
+  const { user, toggleLike, getLikesFor, conversations, startConversation } = useApp()
+  const navigate = useNavigate()
   const likesInfo = getLikesFor(person.id)
   const isSelf = Boolean(user && person.id === user.id)
+  const existing = conversations.find(
+    (c) => otherParticipantId(c, user?.id) === person.id,
+  )
+  const canWrite = Boolean(existing || person.lookingToMeet)
+  const [writeBusy, setWriteBusy] = useState(false)
+  const [writeError, setWriteError] = useState('')
+
+  const onWrite = () => {
+    if (existing) {
+      navigate(`/app/messages/${existing.id}`, { state: { from: '/app/messages' } })
+      return
+    }
+    setWriteBusy(true)
+    setWriteError('')
+    void Promise.resolve(startConversation(person.id, ''))
+      .then((id) => {
+        navigate(`/app/messages/${id}`, { state: { from: '/app/messages' } })
+      })
+      .catch((err: unknown) => {
+        const cid =
+          err && typeof err === 'object' && 'conversationId' in err
+            ? (err as { conversationId?: string }).conversationId
+            : undefined
+        if (typeof cid === 'string' && cid) {
+          navigate(`/app/messages/${cid}`, { state: { from: '/app/messages' } })
+          return
+        }
+        setWriteError(err instanceof Error ? err.message : 'Не удалось открыть чат')
+      })
+      .finally(() => setWriteBusy(false))
+  }
 
   return (
     <div className="find-user-card">
@@ -190,14 +224,29 @@ function FindResultCard({
           {person.username ? (
             <p className="dim">{formatUsername(person.username)}</p>
           ) : null}
+          {writeError ? <p className="feedback-error find-user-error">{writeError}</p> : null}
         </div>
       </button>
       <div className="find-user-card-actions">
+        {!isSelf && canWrite ? (
+          <button
+            type="button"
+            className="find-user-open"
+            disabled={writeBusy}
+            onClick={() => void onWrite()}
+            aria-label={existing ? 'Открыть чат' : 'Написать'}
+            title={existing ? 'Открыть чат' : 'Написать'}
+          >
+            <MessageCircle size={16} aria-hidden />
+          </button>
+        ) : null}
         {!isSelf ? (
           <button
             type="button"
             className={`find-user-like ${likesInfo.likedByMe ? 'on' : ''}`}
-            onClick={() => void toggleLike(person.id)}
+            onClick={() => {
+              void Promise.resolve(toggleLike(person.id)).catch(() => undefined)
+            }}
             aria-label={likesInfo.likedByMe ? 'Убрать лайк' : 'Лайкнуть'}
             title={likesInfo.likedByMe ? 'В лайках' : 'Лайкнуть'}
           >
@@ -233,27 +282,79 @@ export function MessagesPage() {
   const [results, setResults] = useState<UserProfile[]>([])
   const [sheetConv, setSheetConv] = useState<Conversation | null>(null)
   const [pinBusy, setPinBusy] = useState(false)
+  const [hasMoreChats, setHasMoreChats] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const pinActionRef = useRef<HTMLButtonElement>(null)
+  const pinPanelRef = useRef<HTMLDivElement>(null)
+  const restoreFocusRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     if (!apiOnline) return
-    void refreshChats().catch(() => undefined)
-    const id = window.setInterval(() => {
-      void refreshChats().catch(() => undefined)
-    }, 5000)
-    return () => window.clearInterval(id)
+    void refreshChats()
+      .then((res) => setHasMoreChats(Boolean(res.hasMore)))
+      .catch(() => undefined)
   }, [apiOnline, refreshChats])
 
   useEffect(() => {
     if (!sheetConv) return
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
+    restoreFocusRef.current = document.activeElement as HTMLElement | null
+
+    const nav = document.querySelector('.bottom-nav')
+    const page = document.querySelector('.messages-page')
+    const inertNodes: Element[] = []
+    if (nav) {
+      nav.setAttribute('inert', '')
+      inertNodes.push(nav)
+    }
+    if (page) {
+      for (const child of Array.from(page.children)) {
+        if (!child.classList.contains('chat-pin-sheet')) {
+          child.setAttribute('inert', '')
+          inertNodes.push(child)
+        }
+      }
+    }
+
+    const focusFirst = () => {
+      pinActionRef.current?.focus()
+    }
+    const focusTimer = window.setTimeout(focusFirst, 0)
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSheetConv(null)
+      if (e.key === 'Escape') {
+        setSheetConv(null)
+        return
+      }
+      if (e.key !== 'Tab') return
+      const panel = pinPanelRef.current
+      if (!panel) return
+      const focusables = Array.from(
+        panel.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input, textarea'),
+      ).filter((el) => !el.hasAttribute('disabled') && el.tabIndex !== -1)
+      if (!focusables.length) return
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      const active = document.activeElement as HTMLElement | null
+      if (e.shiftKey) {
+        if (active === first || !panel.contains(active)) {
+          e.preventDefault()
+          last.focus()
+        }
+      } else if (active === last || !panel.contains(active)) {
+        e.preventDefault()
+        first.focus()
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => {
+      window.clearTimeout(focusTimer)
       document.body.style.overflow = prev
+      for (const node of inertNodes) node.removeAttribute('inert')
       window.removeEventListener('keydown', onKey)
+      restoreFocusRef.current?.focus?.()
     }
   }, [sheetConv])
 
@@ -311,6 +412,20 @@ export function MessagesPage() {
     }
   }
 
+  const loadMoreChats = async () => {
+    if (loadingMore || !hasMoreChats || !sorted.length) return
+    setLoadingMore(true)
+    try {
+      const oldest = sorted[sorted.length - 1]?.updatedAt
+      const res = await refreshChats({ before: oldest, append: true })
+      setHasMoreChats(Boolean(res.hasMore))
+    } catch {
+      /* keep list */
+    } finally {
+      setLoadingMore(false)
+    }
+  }
+
   return (
     <main className="page messages-page">
       <header className="page-header messages-top">
@@ -333,6 +448,7 @@ export function MessagesPage() {
           <Search size={16} aria-hidden />
           <input
             {...searchFieldProps}
+            ref={searchInputRef}
             value={query}
             onChange={(e) => {
               setQuery(e.target.value)
@@ -361,13 +477,37 @@ export function MessagesPage() {
 
       <div className="card-list">
         {sorted.length ? (
-          sorted.map((c) => (
-            <ConversationRow key={c.id} conversation={c} onLongPress={setSheetConv} />
-          ))
+          <>
+            {sorted.map((c) => (
+              <ConversationRow key={c.id} conversation={c} onLongPress={setSheetConv} />
+            ))}
+            {hasMoreChats ? (
+              <button
+                type="button"
+                className="btn btn-ghost btn-block messages-load-more"
+                disabled={loadingMore}
+                onClick={() => void loadMoreChats()}
+              >
+                {loadingMore ? 'Загружаем…' : 'Ещё чаты'}
+              </button>
+            ) : null}
+          </>
         ) : (
-          <div className="empty-copy" role="status">
-            <p className="empty-copy-title">Пока нет диалогов</p>
-            <p className="empty-copy-lead">Найди человека по @нику или в своём зале</p>
+          <div className="empty-copy-actions">
+            <div className="empty-copy" role="status">
+              <p className="empty-copy-title">Пока нет диалогов</p>
+              <p className="empty-copy-lead">Найди человека по @нику или в своём зале</p>
+            </div>
+            <Link to="/app" className="btn btn-primary btn-block">
+              В свой зал
+            </Link>
+            <button
+              type="button"
+              className="btn btn-soft btn-block"
+              onClick={() => searchInputRef.current?.focus()}
+            >
+              Найти по @нику
+            </button>
           </div>
         )}
       </div>
@@ -380,11 +520,12 @@ export function MessagesPage() {
             aria-label="Закрыть"
             onClick={() => setSheetConv(null)}
           />
-          <div className="chat-pin-sheet-panel">
+          <div className="chat-pin-sheet-panel" ref={pinPanelRef}>
             <div className="chat-pin-sheet-grab" aria-hidden />
             <p className="muted chat-pin-sheet-hint">Удерживай чат, чтобы закрепить сверху</p>
             <button
               type="button"
+              ref={pinActionRef}
               className="btn btn-primary btn-block"
               disabled={pinBusy}
               onClick={() => void onTogglePin()}

@@ -8,6 +8,7 @@
   border-radius: var(--radius);
   background: var(--bg-card);
   border: 1px solid var(--line);
+  cursor: pointer;
   transition: border-color 0.2s ease, transform 0.2s ease;
   animation: fade-up 0.4s ease both;
   /* no content-visibility: me-tab sits at top:-9px and would be paint-clipped */
@@ -208,6 +209,53 @@
 
 /* LikesRow.css owns card likes alignment; keep pin-to-bottom here only if needed */
 .user-card-body .likes-row {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.user-card-likes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   margin-top: auto;
   padding-top: 4px;
+  min-width: 0;
+}
+
+.user-card-likes .likes-row {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-card-like-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--bg-soft);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.user-card-like-btn:hover {
+  border-color: rgba(200, 245, 66, 0.35);
+  color: var(--accent);
+}
+
+.user-card-like-btn.liked {
+  border-color: rgba(255, 90, 120, 0.4);
+  background: rgba(255, 90, 120, 0.12);
+  color: #ff7a93;
+}
+
+.user-card-like-error {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
 }

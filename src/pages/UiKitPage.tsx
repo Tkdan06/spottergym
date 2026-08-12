@@ -24,10 +24,12 @@ const COLOR_TOKENS = [
  */
 export function UiKitPage() {
   const navigate = useNavigate()
-  const { user } = useApp()
+  const { user, canViewUsers, canManageAdmins } = useApp()
   const [toggleOn, setToggleOn] = useState(true)
 
   if (!user?.isAdmin) return <Navigate to="/app/profile" replace />
+  // UI kit — internal design reference; only for staff with broader access
+  if (!canViewUsers && !canManageAdmins) return <Navigate to="/app/admin" replace />
 
   return (
     <main className="page ui-kit-page">

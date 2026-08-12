@@ -5,6 +5,7 @@ import { prisma } from '../db.js'
 import { areUsersBlocked, listHiddenUserIds } from '../lib/blocks.js'
 import { serializePublicUser } from '../lib/serialize.js'
 import { loadAuthedUser, requireAuth, type AuthedEnv } from '../middleware/auth.js'
+import { rateLimit } from '../middleware/rateLimit.js'
 import { normalizeUsername } from '../lib/username.js'
 
 export const userRoutes = new Hono<AuthedEnv>()
@@ -17,7 +18,10 @@ const userInclude = {
 } as const
 
 /** Partial @username / name search */
-userRoutes.get('/search', async (c) => {
+userRoutes.get(
+  '/search',
+  rateLimit({ windowMs: 60_000, max: 60, route: 'users-search' }),
+  async (c) => {
   const raw = (c.req.query('q') || '').trim()
   const q = normalizeUsername(raw) || raw.toLowerCase()
   if (q.length < 2) {
@@ -29,6 +33,7 @@ userRoutes.get('/search', async (c) => {
   const nick = q.replace(/[^a-z0-9_]/g, '')
   const nameQ = raw.replace(/^@+/, '').trim()
 
+  // Name match only for open profiles — anonymous stay findable by @username (product choice)
   const found = await prisma.user.findMany({
     where: {
       deletedAt: null,
@@ -37,7 +42,12 @@ userRoutes.get('/search', async (c) => {
         ...(nick.length >= 2
           ? [{ username: { contains: nick, mode: 'insensitive' as const } }]
           : []),
-        { name: { contains: nameQ, mode: 'insensitive' } },
+        {
+          AND: [
+            { privacy: 'open' },
+            { name: { contains: nameQ, mode: 'insensitive' } },
+          ],
+        },
         { username: { contains: q, mode: 'insensitive' } },
       ],
     },

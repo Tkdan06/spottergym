@@ -19,6 +19,7 @@ import { getHallRank, sortByLikes } from '../lib/likes'
 import { useCheckInElapsed } from '../hooks/useCheckInElapsed'
 import { useGymPeople } from '../hooks/useGymPeople'
 import { getCheckInStartedAt, getCheckedInGymId } from '../lib/presence'
+import { formatActiveNowLabel } from '../lib/presenceCopy'
 import './HomePage.css'
 
 function shortGymName(name: string) {
@@ -47,13 +48,21 @@ export function HomePage() {
   const checkedInId = user ? getCheckedInGymId(user) : ''
   const hasGym = Boolean(gym)
 
-  const { people: floorPeople, loading: peopleLoading, showLoader } = useGymPeople({
+  const {
+    people: floorPeople,
+    loading: peopleLoading,
+    showLoader,
+    fromApi: peopleFromApi,
+    error: peopleError,
+    retry: retryPeople,
+  } = useGymPeople({
     gymId: floorGymId,
     user,
     apiOnline,
     mode: 'floor',
     blockedUserIds,
   })
+  const peopleLoadFailed = Boolean(peopleError && !peopleLoading && !showLoader && !peopleFromApi)
 
   const people = useMemo(() => {
     let list = floorPeople
@@ -120,14 +129,14 @@ export function HomePage() {
             <div className="home-gym-block-head">
               <div className="home-gym-network-row">
                 <p className="home-gym-network">{gym!.network}</p>
-                <Link to={`/app/gym/${gym!.id}`} className="home-gym-link">
+                <Link to={`/app/gym/${gym!.id}?from=home`} className="home-gym-link">
                   О зале <ChevronRight size={15} />
                 </Link>
               </div>
               <h2 className="home-gym-title">{gymLabel}</h2>
               <p className="home-status">
                 <span className="home-status-live">
-                  {activeNow > 0 ? `${activeNow} сейчас в зале` : 'Пока никого в зале'}
+                  {activeNow > 0 ? formatActiveNowLabel(activeNow) : 'Пока никого в зале'}
                 </span>
                 {youHere ? (
                   <span className="home-status-you">
@@ -155,7 +164,9 @@ export function HomePage() {
                         role="option"
                         aria-selected={active}
                         className={`floor-gym-chip ${active ? 'active' : ''} ${here ? 'here' : ''}`}
-                        onClick={() => setHomeGym(g.id)}
+                        onClick={() => {
+                          void Promise.resolve(setHomeGym(g.id)).catch(() => undefined)
+                        }}
                       >
                         <span className="floor-gym-chip-name">{shortGymName(g.name) || g.name}</span>
                         {here ? (
@@ -191,6 +202,16 @@ export function HomePage() {
             <div className="card-list">
               {showLoader ? (
                 <SoftLoader label="Загружаем людей в зале…" />
+              ) : peopleLoadFailed ? (
+                <div className="empty-copy-actions">
+                  <div className="empty-copy" role="alert">
+                    <p className="empty-copy-title">Не удалось загрузить людей</p>
+                    <p className="empty-copy-lead">{peopleError}</p>
+                  </div>
+                  <button type="button" className="btn btn-soft btn-block" onClick={retryPeople}>
+                    Повторить
+                  </button>
+                </div>
               ) : peopleLoading ? null : people.length ? (
                 people.map((person, index) => (
                   <UserCard

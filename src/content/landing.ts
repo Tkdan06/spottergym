@@ -24,10 +24,10 @@ export const LANDING = {
   hero: {
     kicker: 'Знакомства · партнёры',
     headline: 'Увидел в зале — написал в Spotter',
-    lead: 'Люди твоего клуба. Видно, кто в зале и кто открыт к общению.',
+    lead: 'Люди твоего клуба. Когда кто-то отмечается — видно, кто в зале и кто открыт к общению.',
     ctaPrimary: 'Найти людей в своём клубе',
     ctaSecondary: 'Войти',
-    demoCaption: 'Люди в клубе',
+    demoCaption: 'Пример карточек — в реальном клубе сначала бывают пусто, пока кто-то не отметится',
   },
 
   demoProfiles: [
@@ -40,8 +40,8 @@ export const LANDING = {
       line: 'Знакомства · силовые',
       inGym: true,
       open: true,
-      likeCount: 12,
-      likerPhotos: ['/images/lp/demo/liker-1.png', '/images/lp/demo/liker-2.png'],
+      likeCount: 3,
+      likerPhotos: ['/images/lp/demo/liker-1.png'],
     },
     {
       id: 'demo-ivan',
@@ -50,10 +50,10 @@ export const LANDING = {
       photo: '/images/lp/demo/ivan.png',
       gym: 'DDX · Ленинградский',
       line: 'Партнёр по залу · жим',
-      inGym: true,
+      inGym: false,
       open: true,
-      likeCount: 8,
-      likerPhotos: ['/images/lp/demo/liker-3.png', '/images/lp/demo/liker-4.png'],
+      likeCount: 2,
+      likerPhotos: ['/images/lp/demo/liker-3.png'],
     },
     {
       id: 'demo-katya',
@@ -64,15 +64,14 @@ export const LANDING = {
       line: 'Знакомства · функционалка',
       inGym: false,
       open: true,
-      likeCount: 24,
-      likerPhotos: ['/images/lp/demo/liker-2.png', '/images/lp/demo/liker-3.png'],
+      likeCount: 4,
+      likerPhotos: ['/images/lp/demo/liker-2.png'],
     },
   ] satisfies LandingDemoProfile[],
 
   /** Pain → how Spotter helps (one screen) */
   painOffer: {
     title: 'Знакомо?',
-    lead: 'Сервис для тех, кто ходит в зал: партнёр, друг и новые знакомства в твоём клубе.',
     items: [
       {
         pain: 'Нравится человек в зале — хочется подойти, но не получается: неловко.',
@@ -222,8 +221,8 @@ export const LANDING_COACHES = {
       inGym: true,
       open: true,
       isCoach: true,
-      likeCount: 24,
-      likerPhotos: ['/images/lp/demo/liker-1.png', '/images/lp/demo/liker-3.png'],
+      likeCount: 4,
+      likerPhotos: ['/images/lp/demo/liker-1.png'],
     },
     {
       id: 'demo-coach-client',
@@ -232,10 +231,10 @@ export const LANDING_COACHES = {
       photo: '/images/lp/demo/ivan.png',
       gym: 'Spirit Fitness · Крылатское',
       line: 'Ищет тренера · силовые',
-      inGym: true,
+      inGym: false,
       open: true,
-      likeCount: 6,
-      likerPhotos: ['/images/lp/demo/liker-2.png', '/images/lp/demo/liker-4.png'],
+      likeCount: 2,
+      likerPhotos: ['/images/lp/demo/liker-2.png'],
     },
   ] satisfies LandingDemoProfile[],
 

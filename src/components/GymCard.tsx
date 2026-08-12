@@ -1,7 +1,9 @@
 import { MapPin, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { formatGymAddress } from '../data/mock'
+import { formatMembersInSpotter } from '../lib/presenceCopy'
 import type { Gym } from '../types'
+import { GymMineBadge, GymPresenceBadge } from './GymBadges'
 import { SmartImage } from './SmartImage'
 import './GymCard.css'
 
@@ -38,26 +40,21 @@ export function GymCard({
     <>
       <div className="gym-card-media">
         <SmartImage src={gym.image} alt={gym.name} size="card" priority={priority} />
-        <span className={`gym-card-presence ${activeNow > 0 ? 'is-online' : 'is-empty'}`}>
-          {activeNow > 0 ? <span className="online-dot" /> : null}
-          <span className="gym-card-presence-label">
-            {activeNow > 0 ? `${activeNow} сейчас` : 'Пусто'}
-          </span>
-        </span>
+        <GymPresenceBadge activeNow={activeNow} surface="card" />
       </div>
       <div className="gym-card-body">
         <div className="row" style={{ gap: 6, flexWrap: 'wrap' }}>
           <span className="chip small active network-tag">{gym.network}</span>
-          {mine || selected ? <span className="chip small">Твой</span> : null}
+          {mine || selected ? <GymMineBadge surface="chip" /> : null}
         </div>
         <h3>{gym.name}</h3>
         <p className="muted row">
-          <MapPin size={14} />
+          <MapPin size={14} aria-hidden />
           {formatGymAddress(gym)}
         </p>
         <p className="dim row">
-          <Users size={14} />
-          {membersCount > 0 ? `${membersCount} в Spotter` : 'Пока никого в Spotter'}
+          <Users size={14} aria-hidden />
+          {formatMembersInSpotter(membersCount)}
         </p>
       </div>
     </>

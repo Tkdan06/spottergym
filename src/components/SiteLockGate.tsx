@@ -4,6 +4,7 @@ import {
   fetchSiteLockRemote,
   isSiteLockUnlocked,
   setSiteLockUnlocked,
+  siteLockCredentials,
   siteLockEnvForceOff,
   siteLockEnvForceOn,
 } from '../config/siteLock'
@@ -39,6 +40,14 @@ export function SiteLockGate({ children }: { children: ReactNode }) {
       setHint(remote.hint || 'Закрытый тест Spotter')
 
       if (!enabled) {
+        setPhase('open')
+        return
+      }
+
+      // Lock on without env credentials would brick the site forever — fail open
+      const creds = siteLockCredentials()
+      if (!creds.user || !creds.password) {
+        console.warn('[site-lock] enabled but VITE_SITE_LOCK_USER/PASSWORD missing — leaving open')
         setPhase('open')
         return
       }

@@ -18,6 +18,8 @@ export type AdminAnalytics = {
   totalPhotos: number
   photosBytes: number
   activeNow: number
+  /** Distinct users who checked in today (MSK) */
+  checkedInToday?: number
   dau: number
   mau: number
   retention: AdminRetentionPoint[]

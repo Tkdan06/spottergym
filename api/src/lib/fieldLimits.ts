@@ -4,6 +4,7 @@ export const NAME_MIN = 2
 export const NAME_MAX = 30
 export const USERNAME_MIN = 3
 export const USERNAME_MAX = 20
+export const BIO_MIN = 0
 export const BIO_MAX = 500
 export const EMAIL_MAX = 254
 export const PASSWORD_MIN = 8

@@ -5,11 +5,16 @@ export function pairUserIds(a: string, b: string): [string, string] {
   return a < b ? [a, b] : [b, a]
 }
 
-/** Strip control chars; keep normal newlines out (single-line chat). */
+/**
+ * Strip control chars; keep limited newlines (Shift+Enter in composer).
+ * Collapse horizontal whitespace; max two consecutive line breaks.
+ */
 export function sanitizeChatText(raw: string, max: number) {
   const cleaned = raw
     .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
-    .replace(/\s+/g, ' ')
+    .replace(/\r\n/g, '\n')
+    .replace(/[^\S\n]+/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
     .trim()
   if (cleaned.length > max) return cleaned.slice(0, max)
   return cleaned

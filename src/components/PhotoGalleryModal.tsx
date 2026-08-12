@@ -24,6 +24,7 @@ import {
   removePhotoAt,
   setMainPhoto,
 } from '../lib/photos'
+import { useSheetA11y } from '../lib/sheetA11y'
 import { SmartImage } from './SmartImage'
 import './PhotoGalleryModal.css'
 
@@ -54,6 +55,8 @@ export function PhotoGalleryModal({
 }: Props) {
   const titleId = useId()
   const fileRef = useRef<HTMLInputElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
   const touchX = useRef<number | null>(null)
   const [index, setIndex] = useState(0)
   const [busy, setBusy] = useState(false)
@@ -75,15 +78,6 @@ export function PhotoGalleryModal({
     setFlash('')
   }, [open, initialIndex, count])
 
-  useEffect(() => {
-    if (!open) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = prev
-    }
-  }, [open])
-
   const go = useCallback(
     (dir: -1 | 1) => {
       if (count <= 1) return
@@ -94,16 +88,17 @@ export function PhotoGalleryModal({
     [count],
   )
 
+  useSheetA11y(open, onClose, panelRef, closeRef)
+
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
       if (e.key === 'ArrowLeft') go(-1)
       if (e.key === 'ArrowRight') go(1)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [open, onClose, go])
+  }, [open, go])
 
   if (!open) return null
 
@@ -181,6 +176,7 @@ export function PhotoGalleryModal({
         onClick={onClose}
       />
       <div
+        ref={panelRef}
         className="photo-modal-panel"
         role="dialog"
         aria-modal="true"
@@ -191,7 +187,13 @@ export function PhotoGalleryModal({
             <p className="photo-modal-kicker">{canEdit ? 'Мои фото' : 'Фото'}</p>
             <h2 id={titleId}>{name}</h2>
           </div>
-          <button type="button" className="photo-modal-icon" onClick={onClose} aria-label="Закрыть">
+          <button
+            type="button"
+            ref={closeRef}
+            className="photo-modal-icon"
+            onClick={onClose}
+            aria-label="Закрыть"
+          >
             <X size={20} />
           </button>
         </header>

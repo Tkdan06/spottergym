@@ -5,8 +5,14 @@ import { expandGymQueryVariants, gymMatchesQuery } from '../lib/gymSearch.js'
 import { listHiddenUserIds } from '../lib/blocks.js'
 import { serializeGym, serializePublicUser } from '../lib/serialize.js'
 import { requireAuth, type AuthedEnv } from '../middleware/auth.js'
+import { rateLimit } from '../middleware/rateLimit.js'
 
 export const gymRoutes = new Hono<AuthedEnv>()
+
+gymRoutes.use(
+  '*',
+  rateLimit({ windowMs: 60_000, max: 120, route: 'gyms' }),
+)
 
 gymRoutes.get('/', async (c) => {
   const city = c.req.query('city')?.trim().slice(0, 80)

@@ -2,6 +2,7 @@ import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronDown, Search, X } from 'lucide-react'
 import { CITIES_META, type CityMeta } from '../data/mock'
 import { searchFieldProps } from '../lib/inputAttrs'
+import { useSheetA11y } from '../lib/sheetA11y'
 import './CityCarousel.css'
 
 const PREVIEW_LIMIT = 12
@@ -36,6 +37,9 @@ export function CityCarousel({
   const [query, setQuery] = useState('')
   const [allOpen, setAllOpen] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  useSheetA11y(allOpen, () => setAllOpen(false), panelRef, searchRef)
 
   const selected = CITIES_META.find((c) => c.name === value)
 
@@ -58,15 +62,6 @@ export function CityCarousel({
     if (!q) return citiesByGymCount
     return citiesByGymCount.filter((c) => c.name.toLowerCase().includes(q))
   }, [citiesByGymCount, query])
-
-  useEffect(() => {
-    if (!allOpen) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setAllOpen(false)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [allOpen])
 
   /** Поднимаем шторку над клавиатурой; прячем нижнее «Дальше», чтобы не перекрывало список */
   useEffect(() => {
@@ -94,12 +89,10 @@ export function CityCarousel({
     vv?.addEventListener('resize', sync)
     vv?.addEventListener('scroll', sync)
     window.addEventListener('resize', sync)
-    const t = window.setTimeout(() => searchRef.current?.focus(), 80)
     return () => {
       vv?.removeEventListener('resize', sync)
       vv?.removeEventListener('scroll', sync)
       window.removeEventListener('resize', sync)
-      window.clearTimeout(t)
       root.removeAttribute('data-city-sheet')
       root.style.removeProperty('--city-sheet-kb')
       root.style.removeProperty('--city-sheet-vh')
@@ -169,7 +162,7 @@ export function CityCarousel({
             aria-label="Закрыть"
             onClick={() => setAllOpen(false)}
           />
-          <div className="city-sheet-panel">
+          <div className="city-sheet-panel" ref={panelRef}>
             <div className="city-sheet-chrome">
               <div className="city-sheet-top">
                 <div>

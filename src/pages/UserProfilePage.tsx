@@ -18,6 +18,7 @@ import { getCheckedInGymId } from '../lib/presence'
 import { breakLabel, isOnBreak } from '../lib/schedule'
 import { formatUsername } from '../lib/username'
 import type { UserProfile } from '../types'
+import './FeedbackPage.css'
 import './ProfileViews.css'
 
 const DEFAULT_GREETING = 'Привет! Увидел тебя в Spotter.'
@@ -44,6 +45,7 @@ export function UserProfilePage() {
   const [remote, setRemote] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(false)
   const [loadError, setLoadError] = useState('')
+  const [likeError, setLikeError] = useState('')
   const fetchUserByIdRef = useRef(fetchUserById)
   fetchUserByIdRef.current = fetchUserById
 
@@ -105,6 +107,8 @@ export function UserProfilePage() {
 
   const gyms = person ? getUserGyms(person) : []
   const [message, setMessage] = useState('')
+  const [sendBusy, setSendBusy] = useState(false)
+  const [sendError, setSendError] = useState('')
   const [openComposer, setOpenComposer] = useState(false)
   const [galleryOpen, setGalleryOpen] = useState(false)
   const [galleryIndex, setGalleryIndex] = useState(0)
@@ -172,9 +176,26 @@ export function UserProfilePage() {
 
   const onSend = async (e: FormEvent) => {
     e.preventDefault()
+    if (sendBusy) return
     const text = message.trim() || DEFAULT_GREETING
-    const id = await startConversation(person.id, text)
-    navigate(`/app/messages/${id}`, { state: { from: `/app/user/${person.id}` } })
+    setSendBusy(true)
+    setSendError('')
+    try {
+      const id = await startConversation(person.id, text)
+      navigate(`/app/messages/${id}`, { state: { from: `/app/user/${person.id}` } })
+    } catch (err) {
+      const cid =
+        err && typeof err === 'object' && 'conversationId' in err
+          ? (err as { conversationId?: string }).conversationId
+          : undefined
+      if (typeof cid === 'string' && cid) {
+        navigate(`/app/messages/${cid}`, { state: { from: `/app/user/${person.id}` } })
+        return
+      }
+      setSendError(err instanceof Error ? err.message : 'Не удалось начать чат')
+    } finally {
+      setSendBusy(false)
+    }
   }
 
   const openExistingChat = () => {
@@ -273,7 +294,12 @@ export function UserProfilePage() {
               <button
                 type="button"
                 className={`like-btn ${likesInfo.likedByMe ? 'liked' : ''}`}
-                onClick={() => toggleLike(person.id)}
+                onClick={() => {
+                  setLikeError('')
+                  void Promise.resolve(toggleLike(person.id)).catch((err: unknown) => {
+                    setLikeError(err instanceof Error ? err.message : 'Не удалось поставить лайк')
+                  })
+                }}
                 aria-pressed={likesInfo.likedByMe}
               >
                 <Heart size={18} fill={likesInfo.likedByMe ? 'currentColor' : 'none'} />
@@ -284,13 +310,21 @@ export function UserProfilePage() {
         >
           Лайки в зале
         </SectionTitle>
+        {likeError ? (
+          <p className="feedback-error" role="alert">
+            {likeError}
+          </p>
+        ) : null}
         <LikesRow count={likesInfo.count} likers={likesInfo.likers} maxAvatars={6} />
       </section>
 
       {isAnon ? (
         <section className="surface profile-block">
           <SectionTitle>Анонимный профиль</SectionTitle>
-          <p className="muted">Имя и фото скрыты. Можно написать запрос — человек сам решит, открыться ли.</p>
+          <p className="muted">
+            Имя и фото скрыты. Если человек открыт к общению — можно написать запрос; он сам решит,
+            открыться ли.
+          </p>
         </section>
       ) : person.bio ? (
         <section className="surface profile-block">
@@ -368,13 +402,14 @@ export function UserProfilePage() {
               {person.lookingToMeet ? 'Написать' : 'Сейчас не открыт к общению'}
             </button>
           ) : (
-            <form className="composer" onSubmit={onSend}>
+            <form className="composer" onSubmit={(e) => void onSend(e)}>
               <textarea
                 {...messageFieldProps}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder={DEFAULT_GREETING}
                 autoFocus
+                disabled={sendBusy}
                 maxLength={GREETING_MESSAGE_MAX}
               />
               <p className="composer-hint muted">
@@ -382,8 +417,17 @@ export function UserProfilePage() {
                   ? 'Уйдёт твой текст'
                   : 'Поле пустое — уйдёт приветствие из подсказки. Начни печатать — напишешь своё, стирать ничего не нужно.'}
               </p>
-              <button type="submit" className="btn btn-primary btn-block">
-                {message.trim() ? 'Отправить запрос' : 'Отправить приветствие'}
+              {sendError ? (
+                <p className="feedback-error" role="alert">
+                  {sendError}
+                </p>
+              ) : null}
+              <button type="submit" className="btn btn-primary btn-block" disabled={sendBusy}>
+                {sendBusy
+                  ? 'Отправляем…'
+                  : message.trim()
+                    ? 'Отправить запрос'
+                    : 'Отправить приветствие'}
               </button>
             </form>
           )}

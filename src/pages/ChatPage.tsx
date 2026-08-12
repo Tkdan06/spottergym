@@ -12,14 +12,18 @@ import { ArrowLeft } from 'lucide-react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { MessageTicks } from '../components/MessageTicks'
 import { PresenceBadge } from '../components/PresenceBadge'
+import { SafetyActions } from '../components/SafetyActions'
 import { SmartImage } from '../components/SmartImage'
+import { SoftLoader } from '../components/SoftLoader'
 import { useApp } from '../context/useApp'
 import { displayName, formatGymLabel, getContactGym, getUser } from '../data/mock'
 import { profileImage, profileImageFallback } from '../lib/avatar'
 import { otherParticipantId } from '../lib/conversations'
 import { CHAT_MESSAGE_MAX } from '../lib/fieldLimits'
 import { chatComposerProps } from '../lib/inputAttrs'
+import { shortGymName } from '../data/mock'
 import './ChatPage.css'
+import './FeedbackPage.css'
 
 function formatMsgTime(iso: string) {
   return new Date(iso).toLocaleTimeString('ru-RU', {
@@ -53,11 +57,15 @@ export function ChatPage() {
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [hydrate, setHydrate] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
+  const [hasMore, setHasMore] = useState(false)
+  const [loadingOlder, setLoadingOlder] = useState(false)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const threadRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const touchStartY = useRef<number | null>(null)
   const tapStart = useRef<{ x: number; y: number } | null>(null)
+
   const conversation = conversations.find((c) => c.id === conversationId)
   const otherId = conversation ? otherParticipantId(conversation, user?.id) : ''
   const other =
@@ -80,17 +88,39 @@ export function ChatPage() {
   }
 
   useEffect(() => {
-    if (!conversationId || !apiOnline) return
-    void refreshThread(conversationId).catch(() => undefined)
-    void markRead(conversationId)
+    if (!conversationId) return
+    let cancelled = false
+    const known = conversations.some((c) => c.id === conversationId)
+    if (!apiOnline) {
+      setHydrate(known ? 'ready' : 'error')
+      return
+    }
+    setHydrate((prev) => (known && prev !== 'idle' ? prev : known ? 'ready' : 'loading'))
+    void refreshThread(conversationId)
+      .then((res) => {
+        if (cancelled) return
+        setHasMore(Boolean(res?.hasMore))
+        setHydrate('ready')
+        void markRead(conversationId)
+      })
+      .catch(() => {
+        if (cancelled) return
+        setHydrate(known ? 'ready' : 'error')
+      })
+    return () => {
+      cancelled = true
+    }
   }, [conversationId, apiOnline, refreshThread, markRead])
 
-  /** Poll like a messenger while the thread is open */
+  /** Poll while the thread is open (inbox poll lives in AppContext) */
   useEffect(() => {
     if (!conversationId || !apiOnline) return
     const id = window.setInterval(() => {
-      void refreshThread(conversationId).catch(() => undefined)
-    }, 3000)
+      if (document.visibilityState === 'hidden') return
+      void refreshThread(conversationId)
+        .then((res) => setHasMore(Boolean(res?.hasMore)))
+        .catch(() => undefined)
+    }, 4000)
     return () => window.clearInterval(id)
   }, [conversationId, apiOnline, refreshThread])
 
@@ -102,7 +132,6 @@ export function ChatPage() {
     const sync = () => {
       const keyboard = Math.max(0, window.innerHeight - vv.height - vv.offsetTop)
       root.style.setProperty('--chat-keyboard', `${keyboard}px`)
-      // Keep latest messages visible above the keyboard
       if (keyboard > 40) {
         bottomRef.current?.scrollIntoView({ block: 'end' })
       }
@@ -126,11 +155,87 @@ export function ChatPage() {
     resizeComposer()
   }, [text])
 
+  useEffect(() => {
+    if (!other || other.isDeleted) return
+    const short = shortGymName(other.name) || other.name
+    const prev = document.title
+    document.title = `${short} · чат · SPOTTER`
+    return () => {
+      document.title = prev
+    }
+  }, [other])
+
+  const loadOlder = async () => {
+    if (!conversationId || loadingOlder || !hasMore || !thread.length) return
+    setLoadingOlder(true)
+    const oldest = thread[0]?.createdAt
+    const el = threadRef.current
+    const prevHeight = el?.scrollHeight ?? 0
+    try {
+      const res = await refreshThread(conversationId, { before: oldest })
+      setHasMore(Boolean(res?.hasMore))
+      requestAnimationFrame(() => {
+        if (el) el.scrollTop = el.scrollHeight - prevHeight
+      })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось загрузить историю')
+    } finally {
+      setLoadingOlder(false)
+    }
+  }
+
+  if (hydrate === 'loading' && !conversation) {
+    return (
+      <main className="page chat-page">
+        <SoftLoader label="Открываем чат…" />
+      </main>
+    )
+  }
+
+  if ((!conversation || !other || !user) && hydrate === 'error') {
+    return (
+      <main className="page chat-page">
+        <div className="empty-copy-actions chat-empty-state">
+          <div className="empty-copy" role="alert">
+            <p className="empty-copy-title">Не удалось открыть чат</p>
+            <p className="empty-copy-lead">Проверь сеть и попробуй ещё раз</p>
+          </div>
+          <button
+            type="button"
+            className="btn btn-soft btn-block"
+            onClick={() => {
+              setHydrate('loading')
+              void refreshThread(conversationId)
+                .then((res) => {
+                  setHasMore(Boolean(res?.hasMore))
+                  setHydrate('ready')
+                  void markRead(conversationId)
+                })
+                .catch(() => setHydrate('error'))
+            }}
+          >
+            Повторить
+          </button>
+          <Link to="/app/messages" className="btn btn-ghost btn-block">
+            К списку чатов
+          </Link>
+        </div>
+      </main>
+    )
+  }
+
   if (!conversation || !other || !user) {
     return (
-      <main className="page">
-        <p>Чат не найден</p>
-        <Link to="/app/messages">К списку</Link>
+      <main className="page chat-page">
+        <div className="empty-copy-actions chat-empty-state">
+          <div className="empty-copy" role="status">
+            <p className="empty-copy-title">Чат не найден</p>
+            <p className="empty-copy-lead">Возможно, диалог удалили или ссылка устарела</p>
+          </div>
+          <Link to="/app/messages" className="btn btn-primary btn-block">
+            К списку чатов
+          </Link>
+        </div>
       </main>
     )
   }
@@ -163,7 +268,6 @@ export function ChatPage() {
     setBusy(true)
     setError('')
     setText('')
-    // Telegram: after send keyboard stays open for the next message
     inputRef.current?.focus({ preventScroll: true })
     try {
       await sendMessage(conversation.id, trimmed)
@@ -178,7 +282,6 @@ export function ChatPage() {
 
   const onComposerKeyDown = (e: ReactKeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key !== 'Enter' || e.shiftKey) return
-    // Mobile/desktop: Enter sends; Shift+Enter = newline
     e.preventDefault()
     void onSubmit(e)
   }
@@ -216,7 +319,6 @@ export function ChatPage() {
     if (touchStartY.current == null) return
     if (document.activeElement !== inputRef.current) return
     const y = e.touches[0]?.clientY ?? touchStartY.current
-    // Swipe down on thread → hide keyboard (Telegram-like)
     if (y - touchStartY.current > 24) {
       dismissKeyboard()
       touchStartY.current = null
@@ -236,7 +338,6 @@ export function ChatPage() {
     const dx = Math.abs(e.clientX - tapStart.current.x)
     const dy = Math.abs(e.clientY - tapStart.current.y)
     tapStart.current = null
-    // Tap (not scroll) on thread → hide keyboard; send keeps focus for multi-send
     if (dx < 12 && dy < 12 && document.activeElement === inputRef.current) {
       dismissKeyboard()
     }
@@ -244,6 +345,7 @@ export function ChatPage() {
 
   return (
     <main className="chat-page">
+      <h1 className="sr-only">Чат с {name}</h1>
       <header className="chat-header">
         <button
           type="button"
@@ -297,6 +399,7 @@ export function ChatPage() {
             </div>
           </Link>
         )}
+        {!deleted ? <SafetyActions person={other} /> : null}
       </header>
 
       {waiting ? (
@@ -334,7 +437,7 @@ export function ChatPage() {
       ) : null}
 
       {error ? (
-        <p className="feedback-error" style={{ margin: '0 0 8px' }}>
+        <p className="feedback-error chat-send-error" role="alert">
           {error}
         </p>
       ) : null}
@@ -350,6 +453,16 @@ export function ChatPage() {
           tapStart.current = null
         }}
       >
+        {hasMore ? (
+          <button
+            type="button"
+            className="btn btn-ghost chat-load-older"
+            disabled={loadingOlder}
+            onClick={() => void loadOlder()}
+          >
+            {loadingOlder ? 'Загружаем…' : 'Ещё выше'}
+          </button>
+        ) : null}
         {thread.map((msg) => {
           const mine = msg.senderId === user.id || msg.senderId === 'me'
           const time = formatMsgTime(msg.createdAt)
@@ -357,7 +470,6 @@ export function ChatPage() {
             <div key={msg.id} className={`bubble ${mine ? 'mine' : 'theirs'}`}>
               <div className="bubble-body">
                 {msg.text}
-                {/* Spacer reserves last-line room so absolute meta never overlaps text */}
                 <span
                   className="bubble-meta-spacer"
                   aria-hidden
@@ -406,7 +518,6 @@ export function ChatPage() {
             className="btn btn-primary"
             type="submit"
             disabled={locked || incoming || busy || !text.trim()}
-            // Keep focus in composer after tap (Telegram: stay ready to type)
             onPointerDown={(e) => e.preventDefault()}
             aria-label="Отправить"
           >

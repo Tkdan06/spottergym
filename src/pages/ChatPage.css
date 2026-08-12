@@ -31,7 +31,24 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  flex: 1;
   min-width: 0;
+}
+
+.chat-empty-state {
+  padding: 16px;
+  margin-top: 24px;
+}
+
+.chat-send-error {
+  margin: 0 0 8px;
+  flex-shrink: 0;
+}
+
+.chat-load-older {
+  align-self: center;
+  margin: 4px 0 10px;
+  flex-shrink: 0;
 }
 
 .chat-user-avatar {

@@ -11,6 +11,7 @@ import {
 } from '../lib/feedback'
 import { FEEDBACK_MESSAGE_MAX } from '../lib/fieldLimits'
 import { messageFieldProps } from '../lib/inputAttrs'
+import { useKeyboardInset } from '../lib/useKeyboardInset'
 import type { FeedbackCategoryId } from '../types'
 import './FeedbackPage.css'
 
@@ -40,6 +41,8 @@ export function FeedbackPage() {
   const [reply, setReply] = useState('')
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+
+  useKeyboardInset('--form-keyboard')
 
   useEffect(() => {
     if (ticketId || searchParams.get('topic') !== 'gym') return

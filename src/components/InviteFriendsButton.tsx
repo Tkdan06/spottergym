@@ -1,5 +1,6 @@
-import { type ReactNode } from 'react'
-import { buildInvitePayload, canUseNativeShare, shareInvite } from '../lib/inviteShare'
+import { type ReactNode, useEffect, useState } from 'react'
+import { buildInvitePayload, shareOrCopyInvite } from '../lib/inviteShare'
+import './InviteFriendsButton.css'
 
 interface InviteButtonProps {
   userId: string
@@ -9,8 +10,8 @@ interface InviteButtonProps {
 }
 
 /**
- * Opens only the phone OS share sheet.
- * Works in a secure context (HTTPS or localhost). On plain HTTP LAN it may be unavailable.
+ * Opens the OS share sheet when available; otherwise copies the invite link.
+ * Always gives feedback — never a silent no-op.
  */
 export function InviteFriendsButton({
   userId,
@@ -18,15 +19,34 @@ export function InviteFriendsButton({
   className = 'btn btn-primary btn-block',
   children = 'Пригласить друзей',
 }: InviteButtonProps) {
+  const [status, setStatus] = useState('')
+
+  useEffect(() => {
+    if (!status) return
+    const id = window.setTimeout(() => setStatus(''), 2500)
+    return () => window.clearTimeout(id)
+  }, [status])
+
   const onClick = () => {
     const payload = buildInvitePayload({ userId, gymName })
-    if (!canUseNativeShare()) return
-    void shareInvite(payload)
+    void shareOrCopyInvite(payload).then((result) => {
+      if (result === 'shared') setStatus('Отправлено')
+      else if (result === 'copied') setStatus('Ссылка скопирована')
+      else if (result === 'failed') setStatus('Не удалось поделиться')
+      // cancelled — no toast
+    })
   }
 
   return (
-    <button type="button" className={className} onClick={onClick}>
-      {children}
-    </button>
+    <div className="invite-friends-wrap">
+      <button type="button" className={className} onClick={onClick}>
+        {children}
+      </button>
+      {status ? (
+        <p className="invite-friends-status" role="status" aria-live="polite">
+          {status}
+        </p>
+      ) : null}
+    </div>
   )
 }

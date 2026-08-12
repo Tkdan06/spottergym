@@ -48,6 +48,7 @@ import {
   apiFetchNotifications,
   apiFetchTickets,
   apiFetchUser,
+  apiHeartbeat,
   apiHealth,
   apiJoinGym,
   apiLeaveGym,
@@ -208,17 +209,17 @@ export interface AppContextValue {
   completeOnboarding: (
     data: Partial<AppUser>,
   ) => void | Promise<{ ok: true } | { ok: false; error: string }>
-  updateProfile: (data: Partial<AppUser>) => void
+  updateProfile: (data: Partial<AppUser>) => void | Promise<void>
   /** Быстрый check-in/out; при нескольких залах лучше checkIn + picker */
-  toggleActive: (gymId?: string) => void
-  checkIn: (gymId: string) => void
-  checkOut: () => void
+  toggleActive: (gymId?: string) => void | Promise<void>
+  checkIn: (gymId: string) => void | Promise<void>
+  checkOut: () => void | Promise<void>
   /** Продлить присутствие на +1 час (макс. 2 раза) */
   extendCheckIn: () => void | Promise<void>
-  joinGym: (gymId: string, makeHome?: boolean) => void
-  leaveGym: (gymId: string) => void
-  setHomeGym: (gymId: string) => void
-  toggleLike: (userId: string) => void
+  joinGym: (gymId: string, makeHome?: boolean) => void | Promise<void>
+  leaveGym: (gymId: string) => void | Promise<void>
+  setHomeGym: (gymId: string) => void | Promise<void>
+  toggleLike: (userId: string) => void | Promise<void>
   getLikesFor: (userId: string) => { count: number; likedByMe: boolean; likers: UserProfile[] }
   /** Пользователи, которых лайкнул текущий аккаунт (любые залы) */
   getMyLikedUsers: () => UserProfile[]
@@ -236,11 +237,14 @@ export interface AppContextValue {
   /** Закрепить / открепить чат (только для текущего пользователя) */
   togglePinConversation: (conversationId: string, pinned?: boolean) => void | Promise<void>
   /** Подтянуть список чатов / тред с сервера */
-  refreshChats: () => Promise<void>
-  refreshThread: (conversationId: string) => Promise<void>
-  updateNotificationPrefs: (patch: Partial<NotificationPrefs>) => void
-  markNotificationRead: (id: string) => void
-  markAllNotificationsRead: () => void
+  refreshChats: (opts?: { before?: string; append?: boolean }) => Promise<{ hasMore: boolean }>
+  refreshThread: (
+    conversationId: string,
+    opts?: { before?: string },
+  ) => Promise<{ hasMore: boolean }>
+  updateNotificationPrefs: (patch: Partial<NotificationPrefs>) => void | Promise<void>
+  markNotificationRead: (id: string) => void | Promise<void>
+  markAllNotificationsRead: () => void | Promise<void>
   /** Обратная связь / админка */
   tickets: FeedbackTicket[]
   adminDirectory: AdminDirectoryUser[]
@@ -282,7 +286,10 @@ export interface AppContextValue {
   /** Админ пишет пользователю (тикет + уведомление в его ленту) */
   adminMessageUser: (target: AdminDirectoryUser, message: string) => Promise<FeedbackTicket>
   /** Перечитать директорию и аккаунты localStorage / API */
-  refreshAdminDirectory: () => void | Promise<void>
+  refreshAdminDirectory: (opts?: {
+    q?: string
+    activity?: 'seenToday' | 'checkedInToday'
+  }) => Promise<AdminDirectoryUser[]>
   /** Пользователи, которых скрыл текущий аккаунт */
   blockedUserIds: string[]
   isBlocked: (userId: string) => boolean
@@ -342,7 +349,12 @@ function withAdminFlags(user: AppUser): AppUser {
 }
 
 function toAdminDirectoryUser(
-  u: AppUser & { photosCount?: number; photosBytes?: number },
+  u: AppUser & {
+    photosCount?: number
+    photosBytes?: number
+    checkedInTodayAt?: string
+    checkedInTodayGymId?: string
+  },
 ): AdminDirectoryUser {
   const photosCount =
     typeof u.photosCount === 'number'
@@ -375,6 +387,8 @@ function toAdminDirectoryUser(
     photosBytes,
     registeredAt: u.registeredAt,
     lastSeenAt: u.lastSeenAt,
+    checkedInTodayAt: u.checkedInTodayAt || undefined,
+    checkedInTodayGymId: u.checkedInTodayGymId || undefined,
     isDemoSeed: false,
   }
 }
@@ -568,6 +582,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   )
 
   const userEmailRef = useRef(user?.email || '')
+  const userRef = useRef(user)
   const apiOnlineRef = useRef(false)
   const notificationPrefsRef = useRef(notificationPrefs)
   /** Инкремент при login/logout — отсекает устаревшие apiLogout/apiMe */
@@ -575,6 +590,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     userEmailRef.current = user?.email || ''
   }, [user?.email])
+  useEffect(() => {
+    userRef.current = user
+  }, [user])
   useEffect(() => {
     apiOnlineRef.current = apiOnline
   }, [apiOnline])
@@ -756,27 +774,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
     knownUsersRef.current = knownUsers
   }, [knownUsers])
 
-  const refreshChats = useCallback(async () => {
-    if (!apiOnlineRef.current || !getStoredToken()) return
-    const list = await apiFetchConversations()
+  const refreshChats = useCallback(async (opts?: { before?: string; append?: boolean }) => {
+    if (!apiOnlineRef.current || !getStoredToken()) return { hasMore: false }
+    const { conversations: list, hasMore } = await apiFetchConversations({
+      before: opts?.before,
+      limit: 50,
+    })
     rememberUsersRef.current(list.map((row) => row.other).filter(Boolean) as UserProfile[])
-    const next = list
-      .map(({ other: _o, ...c }) => c)
-      .sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt))
-    setConversations(next)
-    const email = userEmailRef.current
-    if (email) saveAccountConversations(email, next)
+    const mapped = list.map(({ other: _o, ...c }) => c)
+    setConversations((prev) => {
+      let next: Conversation[]
+      if (opts?.append) {
+        const seen = new Set(prev.map((c) => c.id))
+        const extra = mapped.filter((c) => !seen.has(c.id))
+        next = [...prev, ...extra].sort(
+          (a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt),
+        )
+      } else {
+        next = mapped.sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt))
+      }
+      const email = userEmailRef.current
+      if (email) saveAccountConversations(email, next)
+      return next
+    })
+    return { hasMore }
   }, [])
 
   /** Light poll: chats + notifications + likes so badges and likes stay fresh while the app is open */
   const refreshInbox = useCallback(async () => {
     if (!apiOnlineRef.current || !getStoredToken()) return
     try {
-      const [notifs, list, likesPayload] = await Promise.all([
+      const [notifs, listPayload, likesPayload] = await Promise.all([
         apiFetchNotifications(),
-        apiFetchConversations(),
+        apiFetchConversations({ limit: 50 }),
         apiFetchLikes(),
       ])
+      const list = listPayload.conversations
       const email = userEmailRef.current
       setNotifications(notifs)
       if (email) saveNotificationsForUser(email, notifs)
@@ -786,11 +819,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       for (const actor of likesPayload.actors) contacts.push(actor)
       rememberUsersRef.current(contacts)
-      const next = list
-        .map(({ other: _o, ...c }) => c)
-        .sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt))
-      setConversations(next)
-      if (email) saveAccountConversations(email, next)
+      const fresh = list.map(({ other: _o, ...c }) => c)
+      setConversations((prev) => {
+        // Keep chats loaded via "ещё" pagination; poll only refreshes the head page
+        const freshIds = new Set(fresh.map((c) => c.id))
+        const extras = prev.filter((c) => !freshIds.has(c.id))
+        const next = [...fresh, ...extras].sort(
+          (a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt),
+        )
+        if (email) saveAccountConversations(email, next)
+        return next
+      })
       const likesMap = normalizeLikesMap(likesPayload.likes)
       const counts = normalizeLikeCounts(likesPayload.counts)
       setLikes(likesMap)
@@ -801,28 +840,61 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const refreshThread = useCallback(async (conversationId: string) => {
-    if (!apiOnlineRef.current || !getStoredToken() || !conversationId) return
-    const { conversation, messages: thread } = await apiFetchMessages(conversationId)
-    if (conversation.other) rememberUserRef.current(conversation.other)
-    const { other: _o, ...conv } = conversation
-    setConversations((prev) => {
-      const rest = prev.filter((c) => c.id !== conv.id)
-      const next = [conv, ...rest].sort(
-        (a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt),
-      )
-      const email = userEmailRef.current
-      if (email) saveAccountConversations(email, next)
-      return next
-    })
-    setMessages((prev) => {
-      const others = prev.filter((m) => m.conversationId !== conversationId)
-      const next = [...others, ...thread]
-      const email = userEmailRef.current
-      if (email) saveAccountMessages(email, next)
-      return next
-    })
-  }, [])
+  const refreshThread = useCallback(
+    async (conversationId: string, opts?: { before?: string }) => {
+      if (!apiOnlineRef.current || !getStoredToken() || !conversationId) {
+        return { hasMore: false }
+      }
+      const {
+        conversation,
+        messages: thread,
+        hasMore,
+      } = await apiFetchMessages(conversationId, {
+        before: opts?.before,
+      })
+      if (conversation.other) rememberUserRef.current(conversation.other)
+      const { other: _o, ...conv } = conversation
+      if (!opts?.before) {
+        setConversations((prev) => {
+          const rest = prev.filter((c) => c.id !== conv.id)
+          const next = [conv, ...rest].sort(
+            (a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt),
+          )
+          const email = userEmailRef.current
+          if (email) saveAccountConversations(email, next)
+          return next
+        })
+      }
+      setMessages((prev) => {
+        const others = prev.filter((m) => m.conversationId !== conversationId)
+        let threadMsgs: Message[]
+        if (opts?.before) {
+          const existing = prev.filter((m) => m.conversationId === conversationId)
+          const seen = new Set(existing.map((m) => m.id))
+          const older = thread.filter((m) => !seen.has(m.id))
+          threadMsgs = [...older, ...existing].sort(
+            (a, b) => +new Date(a.createdAt) - +new Date(b.createdAt),
+          )
+        } else {
+          const locals = prev.filter(
+            (m) =>
+              m.conversationId === conversationId &&
+              m.id.startsWith('local-') &&
+              !thread.some((t) => t.text === m.text && t.senderId === m.senderId),
+          )
+          threadMsgs = [...thread, ...locals].sort(
+            (a, b) => +new Date(a.createdAt) - +new Date(b.createdAt),
+          )
+        }
+        const next = [...others, ...threadMsgs]
+        const email = userEmailRef.current
+        if (email) saveAccountMessages(email, next)
+        return next
+      })
+      return { hasMore }
+    },
+    [],
+  )
 
   const hydrateSocialFromApi = useCallback(async () => {
     if (!apiOnlineRef.current || !getStoredToken()) return
@@ -873,36 +945,71 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setTickets(seedTicketsIfEmpty())
   }, [])
 
-  const refreshAdminDirectory = useCallback(async () => {
-    if (apiOnlineRef.current && getStoredToken()) {
-      try {
-        const [users, emails] = await Promise.all([
-          apiAdminFetchUsers().catch(() => null),
-          apiAdminFetchBlockedEmails().catch(() => null),
-        ])
-        if (users) {
-          const mapped = users.map(toAdminDirectoryUser)
-          saveDirectory(mapped)
-          setAdminDirectory(mapped)
-        } else {
-          setAdminDirectory(mergeStoredAccountsIntoDirectory())
+  const refreshAdminDirectory = useCallback(
+    async (opts?: { q?: string; activity?: 'seenToday' | 'checkedInToday' }) => {
+      const filtered = Boolean(opts?.activity || opts?.q?.trim())
+      if (apiOnlineRef.current && getStoredToken()) {
+        try {
+          const [users, emails] = await Promise.all([
+            apiAdminFetchUsers(opts).catch(() => null),
+            filtered
+              ? Promise.resolve(null)
+              : apiAdminFetchBlockedEmails().catch(() => null),
+          ])
+          if (users) {
+            const mapped = users.map(toAdminDirectoryUser)
+            if (!filtered) {
+              saveDirectory(mapped)
+              setAdminDirectory(mapped)
+            }
+            if (emails) {
+              saveBlockedEmails(emails)
+              setBlockedEmails(emails)
+            } else if (!filtered) {
+              setBlockedEmails(loadBlockedEmails())
+            }
+            if (!filtered) await refreshSupport()
+            return mapped
+          }
+        } catch {
+          /* fall through to local */
         }
-        if (emails) {
-          saveBlockedEmails(emails)
-          setBlockedEmails(emails)
-        } else {
-          setBlockedEmails(loadBlockedEmails())
-        }
-        await refreshSupport()
-        return
-      } catch {
-        /* fall through to local */
       }
+      if (!filtered) {
+        const local = mergeStoredAccountsIntoDirectory()
+        setAdminDirectory(local)
+        setBlockedEmails(loadBlockedEmails())
+        await refreshSupport()
+        return local
+      }
+      return []
+    },
+    [refreshSupport],
+  )
+
+  // Presence for DAU: any authenticated page visit, not only check-in
+  useEffect(() => {
+    if (!apiOnline || !user || !getStoredToken()) return
+    if (isDemoAccount(user.email)) return
+
+    let cancelled = false
+    const beat = () => {
+      if (cancelled || document.visibilityState === 'hidden') return
+      void apiHeartbeat().catch(() => {})
     }
-    setAdminDirectory(mergeStoredAccountsIntoDirectory())
-    setBlockedEmails(loadBlockedEmails())
-    await refreshSupport()
-  }, [refreshSupport])
+
+    beat()
+    const id = window.setInterval(beat, 60_000)
+    const onVis = () => {
+      if (document.visibilityState === 'visible') beat()
+    }
+    document.addEventListener('visibilitychange', onVis)
+    return () => {
+      cancelled = true
+      window.clearInterval(id)
+      document.removeEventListener('visibilitychange', onVis)
+    }
+  }, [apiOnline, user?.id, user?.email])
 
   // Общие лайки / уведомления / тикеты с сервера
   useEffect(() => {
@@ -1227,7 +1334,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   )
 
   const updateProfile = useCallback(
-    (data: Partial<AppUser>) => {
+    async (data: Partial<AppUser>) => {
       const safe: Partial<AppUser> = {
         ...data,
         ...(data.name !== undefined ? { name: clampText(data.name.trim(), NAME_MAX) } : {}),
@@ -1237,101 +1344,178 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ...(data.bio !== undefined ? { bio: clampText(data.bio, BIO_MAX) } : {}),
         ...(data.photos !== undefined ? { photos: clampPhotos(data.photos) } : {}),
       }
-      setUser((prev) => {
-        if (!prev) return prev
-        const merged = normalizeGymFields({
-          ...prev,
-          ...safe,
-          ...(safe.gender !== undefined ? { gender: normalizeGender(safe.gender) } : {}),
-          ...(safe.breakUntil !== undefined
-            ? { breakUntil: activeBreakUntil(safe.breakUntil) }
-            : {}),
-          lastSeenAt: new Date().toISOString(),
-        }) as AppUser
-        const nameOrGenderChanged =
-          safe.name !== undefined || safe.gender !== undefined || safe.photos !== undefined
-        const next = nameOrGenderChanged ? withSyncedAvatar(merged) : merged
-        saveJson(STORAGE_USER, next)
-        saveAccountProfile(next)
-        if (apiOnlineRef.current && !isDemoAccount(next.email)) {
-          void apiPatchMe({
-            ...safe,
-            ...(safe.photos !== undefined ? { photos: next.photos } : {}),
-            gymIds: safe.gymIds ?? next.gymIds,
-            homeGymId: safe.homeGymId ?? next.homeGymId,
-          })
-            .then((me) => applyServerUser(me as AppUser))
-            .catch(() => undefined)
+      // Never send check-in session fields — PATCH /me schema is strict (C1)
+      delete (safe as { isActive?: unknown }).isActive
+      delete (safe as { checkedInGymId?: unknown }).checkedInGymId
+      delete (safe as { checkedInAt?: unknown }).checkedInAt
+      delete (safe as { checkedInExpiresAt?: unknown }).checkedInExpiresAt
+      delete (safe as { checkInExtendCount?: unknown }).checkInExtendCount
+      delete (safe as { checkInCanExtend?: unknown }).checkInCanExtend
+
+      if (safe.gymIds !== undefined && safe.gymIds.length < 1) {
+        throw new Error('Нужен хотя бы один зал')
+      }
+
+      const snapshot = userRef.current
+      if (!snapshot) return
+
+      const clearingCheckIn =
+        Boolean(safe.breakUntil) && snapshot.isActive
+          ? {
+              isActive: false as const,
+              checkedInGymId: '',
+              checkedInAt: '',
+              checkedInExpiresAt: '',
+              checkInExtendCount: 0,
+              checkInCanExtend: false,
+            }
+          : {}
+      const merged = normalizeGymFields({
+        ...snapshot,
+        ...safe,
+        ...clearingCheckIn,
+        ...(safe.gender !== undefined ? { gender: normalizeGender(safe.gender) } : {}),
+        ...(safe.breakUntil !== undefined
+          ? { breakUntil: activeBreakUntil(safe.breakUntil) }
+          : {}),
+        lastSeenAt: new Date().toISOString(),
+      }) as AppUser
+      const nameOrGenderChanged =
+        safe.name !== undefined || safe.gender !== undefined || safe.photos !== undefined
+      const nextLocal = nameOrGenderChanged ? withSyncedAvatar(merged) : merged
+      userRef.current = nextLocal
+      setUser(nextLocal)
+      saveJson(STORAGE_USER, nextLocal)
+      saveAccountProfile(nextLocal)
+
+      if (!apiOnlineRef.current || isDemoAccount(nextLocal.email)) return
+
+      try {
+        // Break while checked-in: check out on server before PATCH breakUntil
+        if (safe.breakUntil && snapshot.isActive) {
+          const afterOut = await apiCheckOut()
+          applyServerUser(afterOut as AppUser)
         }
-        return next
-      })
+
+        const patch: Partial<AppUser> = {
+          ...(safe.name !== undefined ? { name: safe.name } : {}),
+          ...(safe.username !== undefined ? { username: safe.username } : {}),
+          ...(safe.age !== undefined ? { age: safe.age } : {}),
+          ...(safe.gender !== undefined ? { gender: safe.gender } : {}),
+          ...(safe.bio !== undefined ? { bio: safe.bio } : {}),
+          ...(safe.photos !== undefined ? { photos: nextLocal.photos } : {}),
+          ...(safe.avatar !== undefined ? { avatar: nextLocal.avatar } : {}),
+          ...(safe.city !== undefined ? { city: safe.city } : {}),
+          ...(safe.gymIds !== undefined ? { gymIds: safe.gymIds } : {}),
+          ...(safe.homeGymId !== undefined ? { homeGymId: safe.homeGymId || null } : {}),
+          ...(safe.intent !== undefined ? { intent: safe.intent } : {}),
+          ...(safe.experienceLevel !== undefined
+            ? { experienceLevel: safe.experienceLevel }
+            : {}),
+          ...(safe.interests !== undefined ? { interests: safe.interests } : {}),
+          ...(safe.sports !== undefined ? { sports: safe.sports } : {}),
+          ...(safe.isCoach !== undefined ? { isCoach: safe.isCoach } : {}),
+          ...(safe.coachSports !== undefined ? { coachSports: safe.coachSports } : {}),
+          ...(safe.visitSlots !== undefined ? { visitSlots: safe.visitSlots } : {}),
+          ...(safe.breakUntil !== undefined ? { breakUntil: safe.breakUntil } : {}),
+          ...(safe.privacy !== undefined ? { privacy: safe.privacy } : {}),
+          ...(safe.lookingToMeet !== undefined ? { lookingToMeet: safe.lookingToMeet } : {}),
+          ...(safe.onboardingDone !== undefined
+            ? { onboardingDone: safe.onboardingDone }
+            : {}),
+        }
+
+        const me = await apiPatchMe(patch)
+        applyServerUser(me as AppUser)
+      } catch (err) {
+        try {
+          const me = await apiMe()
+          applyServerUser(me as AppUser)
+        } catch {
+          /* keep optimistic local if refetch fails */
+        }
+        throw err instanceof Error ? err : new Error('Не удалось сохранить профиль')
+      }
     },
     [applyServerUser],
   )
 
   const checkIn = useCallback(
-    (gymId: string) => {
-      setUser((prev) => {
-        if (!prev || !prev.gymIds.includes(gymId)) return prev
-        const now = new Date().toISOString()
-        const session = buildCheckInSessionFields(now, 0)
-        const next = {
-          ...prev,
-          isActive: true,
-          checkedInGymId: gymId,
-          ...session,
-          breakUntil: null,
-          lastSeenAt: now,
-        }
-        saveJson(STORAGE_USER, next)
-        saveAccountProfile(next)
-        if (apiOnlineRef.current && !isDemoAccount(next.email)) {
-          void apiCheckIn(gymId)
-            .then((me) => applyServerUser(me as AppUser))
-            .catch(() => undefined)
-        }
-        return next
-      })
+    async (gymId: string) => {
+      const snapshot = userRef.current
+      if (!snapshot || !snapshot.gymIds.includes(gymId)) return
+      const now = new Date().toISOString()
+      const session = buildCheckInSessionFields(now, 0)
+      const next = {
+        ...snapshot,
+        isActive: true,
+        checkedInGymId: gymId,
+        ...session,
+        breakUntil: null,
+        lastSeenAt: now,
+      }
+      userRef.current = next
+      setUser(next)
+      saveJson(STORAGE_USER, next)
+      saveAccountProfile(next)
+      if (!apiOnlineRef.current || isDemoAccount(next.email)) return
+      try {
+        const me = await apiCheckIn(gymId)
+        applyServerUser(me as AppUser)
+      } catch (err) {
+        userRef.current = snapshot
+        setUser(snapshot)
+        saveJson(STORAGE_USER, snapshot)
+        saveAccountProfile(snapshot)
+        throw err instanceof Error ? err : new Error('Не удалось отметиться')
+      }
     },
     [applyServerUser],
   )
 
-  const checkOut = useCallback(() => {
-    setUser((prev) => {
-      if (!prev) return prev
-      const next = {
-        ...prev,
-        isActive: false,
-        checkedInGymId: '',
-        checkedInAt: '',
-        checkedInExpiresAt: '',
-        checkInExtendCount: 0,
-        checkInCanExtend: false,
-        lastSeenAt: new Date().toISOString(),
-      }
-      saveJson(STORAGE_USER, next)
-      saveAccountProfile(next)
-      if (apiOnlineRef.current && !isDemoAccount(next.email)) {
-        void apiCheckOut()
-          .then((me) => applyServerUser(me as AppUser))
-          .catch(() => undefined)
-      }
-      return next
-    })
+  const checkOut = useCallback(async () => {
+    const snapshot = userRef.current
+    if (!snapshot) return
+    const next = {
+      ...snapshot,
+      isActive: false,
+      checkedInGymId: '',
+      checkedInAt: '',
+      checkedInExpiresAt: '',
+      checkInExtendCount: 0,
+      checkInCanExtend: false,
+      lastSeenAt: new Date().toISOString(),
+    }
+    userRef.current = next
+    setUser(next)
+    saveJson(STORAGE_USER, next)
+    saveAccountProfile(next)
+    if (!apiOnlineRef.current || isDemoAccount(next.email)) return
+    try {
+      const me = await apiCheckOut()
+      applyServerUser(me as AppUser)
+    } catch (err) {
+      userRef.current = snapshot
+      setUser(snapshot)
+      saveJson(STORAGE_USER, snapshot)
+      saveAccountProfile(snapshot)
+      throw err instanceof Error ? err : new Error('Не удалось снять статус')
+    }
   }, [applyServerUser])
 
   const extendCheckIn = useCallback(async () => {
-    const prev = user
+    const prev = userRef.current
     if (!prev?.isActive || !canExtendCheckInLocal(prev)) return
 
+    // Online: server is source of truth — no silent local success on API fail
     if (apiOnlineRef.current && getStoredToken() && !isDemoAccount(prev.email)) {
       try {
         const me = await apiExtendCheckIn()
         applyServerUser(me as AppUser)
-        return
-      } catch {
-        /* local fallback */
+      } catch (err) {
+        throw err instanceof Error ? err : new Error('Не удалось продлить')
       }
+      return
     }
 
     setUser((current) => {
@@ -1346,11 +1530,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         checkInCanExtend: nextCount < CHECK_IN_MAX_EXTENDS,
         lastSeenAt: new Date().toISOString(),
       }
+      userRef.current = next
       saveJson(STORAGE_USER, next)
       saveAccountProfile(next)
       return next
     })
-  }, [user, applyServerUser])
+  }, [applyServerUser])
 
   // Auto check-out when 3h (+extends) window ends — local soft fallback + sync
   useEffect(() => {
@@ -1358,7 +1543,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const tick = () => {
       if (!user.isActive || !isCheckInExpired(user)) return
-      checkOut()
+      void Promise.resolve(checkOut()).catch(() => undefined)
     }
 
     tick()
@@ -1374,124 +1559,117 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [user, checkOut])
 
   const toggleActive = useCallback(
-    (gymId?: string) => {
-      setUser((prev) => {
-        if (!prev) return prev
-        if (prev.isActive) {
-          const next = {
-            ...prev,
-            isActive: false,
-            checkedInGymId: '',
-            checkedInAt: '',
-            checkedInExpiresAt: '',
-            checkInExtendCount: 0,
-            checkInCanExtend: false,
-            lastSeenAt: new Date().toISOString(),
-          }
-          saveJson(STORAGE_USER, next)
-          saveAccountProfile(next)
-          if (apiOnlineRef.current && !isDemoAccount(next.email)) {
-            void apiCheckOut()
-              .then((me) => applyServerUser(me as AppUser))
-              .catch(() => undefined)
-          }
-          return next
-        }
-        const target =
-          (gymId && prev.gymIds.includes(gymId) && gymId) ||
-          prev.homeGymId ||
-          prev.gymIds[0] ||
-          ''
-        if (!target) return prev
-        const now = new Date().toISOString()
-        const session = buildCheckInSessionFields(now, 0)
-        const next = {
-          ...prev,
-          isActive: true,
-          checkedInGymId: target,
-          ...session,
-          lastSeenAt: now,
-        }
-        saveJson(STORAGE_USER, next)
-        saveAccountProfile(next)
-        if (apiOnlineRef.current && !isDemoAccount(next.email)) {
-          void apiCheckIn(target)
-            .then((me) => applyServerUser(me as AppUser))
-            .catch(() => undefined)
-        }
-        return next
-      })
+    async (gymId?: string) => {
+      const snapshot = userRef.current
+      if (!snapshot) return
+      if (snapshot.isActive) {
+        await checkOut()
+        return
+      }
+      const target =
+        (gymId && snapshot.gymIds.includes(gymId) && gymId) ||
+        snapshot.homeGymId ||
+        snapshot.gymIds[0] ||
+        ''
+      if (!target) return
+      await checkIn(target)
     },
-    [applyServerUser],
+    [checkIn, checkOut],
   )
 
   const joinGym = useCallback(
-    (gymId: string, makeHome = false) => {
+    async (gymId: string, makeHome = false) => {
+      let snapshot: AppUser | null = null
+      let nextUser: AppUser | null = null
       setUser((prev) => {
         if (!prev) return prev
+        snapshot = prev
         const gym = getGym(gymId)
-        const next = {
+        nextUser = {
           ...withGymMembership(prev, gymId, true, { makeHome }),
           // Catalog → settings: city follows the club you just added
           ...(gym?.city ? { city: gym.city } : {}),
         }
-        saveJson(STORAGE_USER, next)
-        saveAccountProfile(next)
-        if (apiOnlineRef.current && !isDemoAccount(next.email)) {
-          void apiJoinGym(gymId, makeHome)
-            .then(async (me) => {
-              applyServerUser(me as AppUser)
-              if (gym?.city && gym.city !== me.city) {
-                const patched = await apiPatchMe({ city: gym.city })
-                applyServerUser(patched as AppUser)
-              }
-            })
-            .catch(() => undefined)
-        }
-        return next
+        saveJson(STORAGE_USER, nextUser)
+        saveAccountProfile(nextUser)
+        return nextUser
       })
+      if (!snapshot || !nextUser) return
+      if (!apiOnlineRef.current || isDemoAccount(nextUser.email)) return
+      try {
+        const gym = getGym(gymId)
+        const me = await apiJoinGym(gymId, makeHome)
+        applyServerUser(me as AppUser)
+        if (gym?.city && gym.city !== me.city) {
+          const patched = await apiPatchMe({ city: gym.city })
+          applyServerUser(patched as AppUser)
+        }
+      } catch (err) {
+        setUser(snapshot)
+        saveJson(STORAGE_USER, snapshot)
+        saveAccountProfile(snapshot)
+        throw err instanceof Error ? err : new Error('Не удалось добавить зал')
+      }
     },
     [applyServerUser],
   )
 
   const leaveGym = useCallback(
-    (gymId: string) => {
-      setUser((prev) => {
-        if (!prev) return prev
-        const next = withGymMembership(prev, gymId, false)
-        saveJson(STORAGE_USER, next)
-        saveAccountProfile(next)
-        if (apiOnlineRef.current && !isDemoAccount(next.email)) {
-          void apiLeaveGym(gymId)
-            .then((me) => applyServerUser(me as AppUser))
-            .catch(() => undefined)
-        }
-        return next
-      })
+    async (gymId: string) => {
+      const snapshot = userRef.current
+      if (!snapshot) return
+      if (snapshot.gymIds.length <= 1 && snapshot.gymIds.includes(gymId)) {
+        throw new Error('Нельзя убрать последний зал. Сначала добавь другой.')
+      }
+      const nextUser = withGymMembership(snapshot, gymId, false)
+      userRef.current = nextUser
+      setUser(nextUser)
+      saveJson(STORAGE_USER, nextUser)
+      saveAccountProfile(nextUser)
+      if (!apiOnlineRef.current || isDemoAccount(nextUser.email)) return
+      try {
+        const me = await apiLeaveGym(gymId)
+        applyServerUser(me as AppUser)
+      } catch (err) {
+        userRef.current = snapshot
+        setUser(snapshot)
+        saveJson(STORAGE_USER, snapshot)
+        saveAccountProfile(snapshot)
+        throw err instanceof Error ? err : new Error('Не удалось убрать зал')
+      }
     },
     [applyServerUser],
   )
 
   const setHomeGym = useCallback(
-    (gymId: string) => {
+    async (gymId: string) => {
+      let snapshot: AppUser | null = null
+      let nextUser: AppUser | null = null
       setUser((prev) => {
         if (!prev) return prev
+        snapshot = prev
         const gymIds = prev.gymIds.includes(gymId) ? prev.gymIds : [...prev.gymIds, gymId]
-        const next = {
+        nextUser = {
           ...prev,
           gymIds,
           homeGymId: gymId,
           lastSeenAt: new Date().toISOString(),
         }
-        saveJson(STORAGE_USER, next)
-        saveAccountProfile(next)
-        if (apiOnlineRef.current && !isDemoAccount(next.email)) {
-          void apiPatchMe({ gymIds, homeGymId: gymId })
-            .then((me) => applyServerUser(me as AppUser))
-            .catch(() => undefined)
-        }
-        return next
+        saveJson(STORAGE_USER, nextUser)
+        saveAccountProfile(nextUser)
+        return nextUser
       })
+      if (!snapshot || !nextUser) return
+      if (!apiOnlineRef.current || isDemoAccount(nextUser.email)) return
+      try {
+        const me = await apiPatchMe({ gymIds: nextUser.gymIds, homeGymId: gymId })
+        applyServerUser(me as AppUser)
+      } catch (err) {
+        setUser(snapshot)
+        saveJson(STORAGE_USER, snapshot)
+        saveAccountProfile(snapshot)
+        throw err instanceof Error ? err : new Error('Не удалось сменить домашний зал')
+      }
     },
     [applyServerUser],
   )
@@ -1535,36 +1713,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
     rememberUsersRef.current = rememberUsers
   }, [rememberUser, rememberUsers])
 
+  const likeInFlightRef = useRef(new Set<string>())
+
   const toggleLike = useCallback(
-    (userId: string) => {
+    async (userId: string) => {
       if (!user || user.id === userId) return
-      if (apiOnlineRef.current && getStoredToken()) {
-        void apiToggleLike(userId)
-          .then(({ likes: next, counts, actors }) => {
+      if (likeInFlightRef.current.has(userId)) return
+      likeInFlightRef.current.add(userId)
+      try {
+        if (apiOnlineRef.current && getStoredToken()) {
+          try {
+            const { likes: next, counts, actors } = await apiToggleLike(userId)
             const map = normalizeLikesMap(next)
             setLikes(map)
             setLikeCounts(normalizeLikeCounts(counts))
             persistLikesMap(map)
             rememberUsers(actors)
-          })
-          .catch(() => {
-            const liked = !hasLiked(likes, userId, user.id)
-            setLikes((prev) => {
-              const next = toggleLikeInMap(prev, userId, user.id)
-              persistLikesMap(next)
-              return next
-            })
-            setLikeCounts((prev) => toggleLikeCount(prev, userId, liked))
-          })
-        return
+          } catch (err) {
+            // Do not invent a local like on failure — keep previous state
+            throw err instanceof Error ? err : new Error('Не удалось поставить лайк')
+          }
+          return
+        }
+        const liked = !hasLiked(likes, userId, user.id)
+        setLikes((prev) => {
+          const next = toggleLikeInMap(prev, userId, user.id)
+          persistLikesMap(next)
+          return next
+        })
+        setLikeCounts((prev) => toggleLikeCount(prev, userId, liked))
+      } finally {
+        likeInFlightRef.current.delete(userId)
       }
-      const liked = !hasLiked(likes, userId, user.id)
-      setLikes((prev) => {
-        const next = toggleLikeInMap(prev, userId, user.id)
-        persistLikesMap(next)
-        return next
-      })
-      setLikeCounts((prev) => toggleLikeCount(prev, userId, liked))
     },
     [user, likes, persistLikesMap, rememberUsers],
   )
@@ -1718,11 +1898,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
         })
         try {
           await apiSendMessage(conversationId, trimmed)
-          await refreshThread(conversationId)
-          await refreshChats()
         } catch (err) {
           setMessages((prev) => prev.filter((m) => m.id !== optimistic.id))
           throw err
+        }
+        // POST succeeded — never roll back; refresh best-effort
+        try {
+          await refreshThread(conversationId)
+          await refreshChats()
+        } catch {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === optimistic.id ? { ...m, status: 'sent' as const } : m,
+            ),
+          )
         }
         return
       }
@@ -1775,11 +1964,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const trimmed = clampText(text.trim(), GREETING_MESSAGE_MAX)
 
       if (apiOnlineRef.current && getStoredToken()) {
-        const conv = await apiStartConversation(userId, trimmed || undefined)
-        if (conv.other) rememberUser(conv.other)
-        await refreshChats()
-        if (trimmed || conv.id) await refreshThread(conv.id).catch(() => undefined)
-        return conv.id
+        try {
+          const conv = await apiStartConversation(userId, trimmed || undefined)
+          if (conv.other) rememberUser(conv.other)
+          await refreshChats()
+          if (trimmed || conv.id) await refreshThread(conv.id).catch(() => undefined)
+          return conv.id
+        } catch (err) {
+          // 409 already-exists pending: open existing thread after refresh
+          if (err instanceof ApiError && err.status === 409) {
+            await refreshChats().catch(() => undefined)
+            const list = await apiFetchConversations().catch(() => null)
+            const found = list?.conversations.find((row) => {
+              const ids = row.participantIds || []
+              return ids.includes(userId) || row.other?.id === userId
+            })
+            if (found) {
+              if (found.other) rememberUser(found.other)
+              const e = new Error(err.message) as Error & { conversationId?: string }
+              e.conversationId = found.id
+              throw e
+            }
+          }
+          throw err
+        }
       }
 
       const existing = conversations.find(
@@ -1901,39 +2109,70 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [persistChats, persistMsgs, refreshChats, refreshThread],
   )
 
-  const updateNotificationPrefs = useCallback((patch: Partial<NotificationPrefs>) => {
+  const updateNotificationPrefs = useCallback(async (patch: Partial<NotificationPrefs>) => {
+    let snapshot: NotificationPrefs | null = null
     setNotificationPrefs((prev) => {
+      snapshot = prev
       const next = { ...prev, ...patch }
       const email = userEmailRef.current
       if (email) saveNotificationPrefsForUser(email, next)
       return next
     })
-    if (apiOnlineRef.current && getStoredToken()) {
-      void apiPatchNotificationPrefs(patch).catch(() => undefined)
+    if (!apiOnlineRef.current || !getStoredToken()) return
+    try {
+      const prefs = await apiPatchNotificationPrefs(patch)
+      setNotificationPrefs(prefs)
+      const email = userEmailRef.current
+      if (email) saveNotificationPrefsForUser(email, prefs)
+    } catch (err) {
+      if (snapshot) {
+        setNotificationPrefs(snapshot)
+        const email = userEmailRef.current
+        if (email) saveNotificationPrefsForUser(email, snapshot)
+      }
+      throw err instanceof Error ? err : new Error('Не удалось сохранить настройки')
     }
   }, [])
 
-  const markNotificationRead = useCallback((id: string) => {
+  const markNotificationRead = useCallback(async (id: string) => {
+    let snapshot: AppNotification[] | null = null
     setNotifications((prev) => {
+      snapshot = prev
       const next = prev.map((n) => (n.id === id ? { ...n, read: true } : n))
       const email = userEmailRef.current
       if (email) saveNotificationsForUser(email, next)
       return next
     })
-    if (apiOnlineRef.current && getStoredToken()) {
-      void apiMarkNotificationRead(id).catch(() => undefined)
+    if (!apiOnlineRef.current || !getStoredToken()) return
+    try {
+      await apiMarkNotificationRead(id)
+    } catch {
+      if (snapshot) {
+        setNotifications(snapshot)
+        const email = userEmailRef.current
+        if (email) saveNotificationsForUser(email, snapshot)
+      }
     }
   }, [])
 
-  const markAllNotificationsRead = useCallback(() => {
+  const markAllNotificationsRead = useCallback(async () => {
+    let snapshot: AppNotification[] | null = null
     setNotifications((prev) => {
+      snapshot = prev
       const next = prev.map((n) => ({ ...n, read: true }))
       const email = userEmailRef.current
       if (email) saveNotificationsForUser(email, next)
       return next
     })
-    if (apiOnlineRef.current && getStoredToken()) {
-      void apiMarkAllNotificationsRead().catch(() => undefined)
+    if (!apiOnlineRef.current || !getStoredToken()) return
+    try {
+      await apiMarkAllNotificationsRead()
+    } catch {
+      if (snapshot) {
+        setNotifications(snapshot)
+        const email = userEmailRef.current
+        if (email) saveNotificationsForUser(email, snapshot)
+      }
     }
   }, [])
 
@@ -2331,15 +2570,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
         persistChats(next)
         return next
       })
+      // Only mark peer messages read — never invent read ticks on own sends
+      const myId = user?.id
       setMessages((prev) => {
-        const next = prev.map((m) =>
-          m.conversationId === conversationId ? { ...m, status: 'read' as const } : m,
-        )
+        const next = prev.map((m) => {
+          if (m.conversationId !== conversationId) return m
+          if (m.senderId === 'me' || (myId && m.senderId === myId)) return m
+          return { ...m, status: 'read' as const }
+        })
         persistMsgs(next)
         return next
       })
     },
-    [persistChats, persistMsgs, refreshChats, refreshThread],
+    [persistChats, persistMsgs, refreshChats, refreshThread, user?.id],
   )
 
   const togglePinConversation = useCallback(

@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import type { VisitSlot } from '../types'
+import { useSheetA11y } from '../lib/sheetA11y'
 import { ScheduleEditor, sortVisitSlots } from './ScheduleEditor'
 import './ScheduleSheet.css'
 
@@ -13,25 +14,15 @@ interface Props {
 
 export function ScheduleSheet({ open, initialSlots, onClose, onSave }: Props) {
   const [slots, setSlots] = useState<VisitSlot[]>(() => sortVisitSlots(initialSlots))
+  const panelRef = useRef<HTMLDivElement>(null)
+  const saveRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (!open) return
     setSlots(sortVisitSlots(initialSlots))
   }, [open, initialSlots])
 
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      window.removeEventListener('keydown', onKey)
-      document.body.style.overflow = prev
-    }
-  }, [open, onClose])
+  useSheetA11y(open, onClose, panelRef, saveRef)
 
   if (!open) return null
 
@@ -44,6 +35,7 @@ export function ScheduleSheet({ open, initialSlots, onClose, onSave }: Props) {
         onClick={onClose}
       />
       <div
+        ref={panelRef}
         className="schedule-sheet-panel"
         role="dialog"
         aria-modal="true"
@@ -66,6 +58,7 @@ export function ScheduleSheet({ open, initialSlots, onClose, onSave }: Props) {
           </button>
           <button
             type="button"
+            ref={saveRef}
             className="btn btn-primary"
             onClick={() => {
               onSave(sortVisitSlots(slots))

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { ArrowLeft, Heart, MessageCircle } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { PresenceBadge } from '../components/PresenceBadge'
@@ -7,6 +8,7 @@ import { displayName, formatGymLabel, getContactGym, getUserGyms } from '../data
 import { profileImage, profileImageFallback } from '../lib/avatar'
 import { hasLiked } from '../lib/likes'
 import type { UserProfile } from '../types'
+import './FeedbackPage.css'
 import './LikedPage.css'
 
 export type LikesMode = 'received' | 'sent'
@@ -18,6 +20,7 @@ function LikedRow({
   onMessage,
   onToggleLike,
   likeMode,
+  messageBusy,
 }: {
   person: UserProfile
   myGymIds: string[]
@@ -25,6 +28,7 @@ function LikedRow({
   onMessage: () => void
   onToggleLike: () => void
   likeMode: LikesMode
+  messageBusy?: boolean
 }) {
   const name = displayName(person)
   const isAnon = person.privacy === 'anonymous'
@@ -82,6 +86,7 @@ function LikedRow({
           type="button"
           className="liked-action primary"
           onClick={onMessage}
+          disabled={messageBusy}
           aria-label={`Написать ${name}`}
           title="Написать"
         >
@@ -118,6 +123,9 @@ export function LikedPage({ mode = 'received' }: { mode?: LikesMode }) {
     blockedUserIds,
   } = useApp()
   const navigate = useNavigate()
+  const [msgBusyId, setMsgBusyId] = useState<string | null>(null)
+  const [msgError, setMsgError] = useState('')
+  const [likeError, setLikeError] = useState('')
 
   if (!user) return null
 
@@ -126,6 +134,28 @@ export function LikedPage({ mode = 'received' }: { mode?: LikesMode }) {
     mode === 'received'
       ? getLikesFor(user.id).likers.filter((p) => !blockedUserIds.includes(p.id))
       : getMyLikedUsers().filter((p) => !blockedUserIds.includes(p.id))
+
+  const openChat = (personId: string) => {
+    if (msgBusyId) return
+    setMsgBusyId(personId)
+    setMsgError('')
+    void Promise.resolve(startConversation(personId, ''))
+      .then((id: string) => {
+        navigate(`/app/messages/${id}`, { state: { from: listPath } })
+      })
+      .catch((err: unknown) => {
+        const cid =
+          err && typeof err === 'object' && 'conversationId' in err
+            ? (err as { conversationId?: string }).conversationId
+            : undefined
+        if (typeof cid === 'string' && cid) {
+          navigate(`/app/messages/${cid}`, { state: { from: listPath } })
+          return
+        }
+        setMsgError(err instanceof Error ? err.message : 'Не удалось открыть чат')
+      })
+      .finally(() => setMsgBusyId(null))
+  }
 
   return (
     <main className="page liked-page">
@@ -175,16 +205,27 @@ export function LikedPage({ mode = 'received' }: { mode?: LikesMode }) {
                 myGymIds={user.gymIds}
                 likedByMe={likedByMe}
                 likeMode={mode}
-                onMessage={() => {
-                  // Только открыть чат — без автосообщения (переписка могла уже идти)
-                  void Promise.resolve(startConversation(person.id, '')).then((id: string) => {
-                    navigate(`/app/messages/${id}`, { state: { from: listPath } })
+                messageBusy={msgBusyId === person.id}
+                onMessage={() => openChat(person.id)}
+                onToggleLike={() => {
+                  setLikeError('')
+                  void Promise.resolve(toggleLike(person.id)).catch((err: unknown) => {
+                    setLikeError(err instanceof Error ? err.message : 'Не удалось поставить лайк')
                   })
                 }}
-                onToggleLike={() => toggleLike(person.id)}
               />
             )
           })}
+          {likeError ? (
+            <p className="feedback-error" role="alert">
+              {likeError}
+            </p>
+          ) : null}
+          {msgError ? (
+            <p className="feedback-error" role="alert">
+              {msgError}
+            </p>
+          ) : null}
         </div>
       ) : (
         <section className="liked-empty surface">

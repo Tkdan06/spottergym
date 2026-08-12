@@ -2,7 +2,7 @@
  * Закрытый доступ к сайту (soft gate для друзей / тестёров).
  *
  * Вкл/выкл без смены пароля: public/site-lock.json → "enabled": true|false
- * Логин/пароль: переменные VITE_SITE_LOCK_* или дефолты ниже.
+ * Логин/пароль: только VITE_SITE_LOCK_* (без хардкод-дефолтов в бандле).
  *
  * Важно: это SPA — пароль попадает в бандл. Это не банковская защита,
  * а «дверь для своих», чтобы сайт не был открыт всем подряд.
@@ -16,9 +16,10 @@ export type SiteLockRemote = {
 const STORAGE_KEY = 'spotter.site-lock.ok'
 
 export function siteLockCredentials() {
+  // No hardcoded defaults — credentials only from env (not in public bundle as fallbacks)
   return {
-    user: String(import.meta.env.VITE_SITE_LOCK_USER || 'spotter').trim(),
-    password: String(import.meta.env.VITE_SITE_LOCK_PASSWORD || 'floor-test-2026').trim(),
+    user: String(import.meta.env.VITE_SITE_LOCK_USER || '').trim(),
+    password: String(import.meta.env.VITE_SITE_LOCK_PASSWORD || '').trim(),
   }
 }
 
@@ -48,8 +49,8 @@ export async function fetchSiteLockRemote(): Promise<SiteLockRemote> {
       hint: typeof data.hint === 'string' ? data.hint : undefined,
     }
   } catch {
-    // если файла нет — по умолчанию закрыто (безопаснее для теста)
-    return { enabled: true, hint: 'Закрытый тест Spotter' }
+    // Нет файла — lock выкл (прод не должен закрываться из‑за отсутствующего json)
+    return { enabled: false }
   }
 }
 
@@ -72,5 +73,6 @@ export function setSiteLockUnlocked(ok: boolean) {
 
 export function checkSiteLockCredentials(user: string, password: string) {
   const creds = siteLockCredentials()
+  if (!creds.user || !creds.password) return false
   return user.trim() === creds.user && password === creds.password
 }

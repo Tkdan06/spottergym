@@ -5,6 +5,8 @@ import { useApp } from '../context/useApp'
 import { displayName } from '../data/mock'
 import { REPORT_NOTE_MAX } from '../lib/fieldLimits'
 import { messageFieldProps } from '../lib/inputAttrs'
+import { useSheetA11y } from '../lib/sheetA11y'
+import { useKeyboardInset } from '../lib/useKeyboardInset'
 import { REPORT_REASONS, type ReportReasonId } from '../lib/userBlocks'
 import type { UserProfile } from '../types'
 import './SafetyActions.css'
@@ -17,6 +19,7 @@ export function SafetyActions({ person }: Props) {
   const { user, blockUser, unblockUser, reportUser, isBlocked } = useApp()
   const navigate = useNavigate()
   const rootRef = useRef<HTMLDivElement>(null)
+  const sheetPanelRef = useRef<HTMLElement | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [mode, setMode] = useState<'idle' | 'block' | 'report'>('idle')
   const [reason, setReason] = useState<ReportReasonId>('spam')
@@ -26,6 +29,10 @@ export function SafetyActions({ person }: Props) {
 
   const blocked = user ? isBlocked(person.id) : false
   const name = displayName(person)
+  const sheetOpen = mode === 'block' || mode === 'report'
+
+  useSheetA11y(sheetOpen, () => setMode('idle'), sheetPanelRef)
+  useKeyboardInset(mode === 'report' ? '--form-keyboard' : '')
 
   useEffect(() => {
     if (!menuOpen) return
@@ -45,20 +52,6 @@ export function SafetyActions({ person }: Props) {
       window.removeEventListener('keydown', onKey)
     }
   }, [menuOpen])
-
-  useEffect(() => {
-    if (mode !== 'block' && mode !== 'report') return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMode('idle')
-    }
-    window.addEventListener('keydown', onKey)
-    return () => {
-      document.body.style.overflow = prev
-      window.removeEventListener('keydown', onKey)
-    }
-  }, [mode])
 
   if (!user || person.id === user.id) return null
 
@@ -159,7 +152,7 @@ export function SafetyActions({ person }: Props) {
             aria-label="Закрыть"
             onClick={() => setMode('idle')}
           />
-          <div className="safety-sheet-panel">
+          <div className="safety-sheet-panel" ref={sheetPanelRef}>
             <div className="safety-sheet-grab" aria-hidden />
             <h3>Заблокировать {name}?</h3>
             <p className="muted">
@@ -184,7 +177,7 @@ export function SafetyActions({ person }: Props) {
             aria-label="Закрыть"
             onClick={() => setMode('idle')}
           />
-          <form className="safety-sheet-panel" onSubmit={onReport}>
+          <form className="safety-sheet-panel" ref={sheetPanelRef} onSubmit={onReport}>
             <div className="safety-sheet-grab" aria-hidden />
             <h3>Жалоба на {name}</h3>
             <p className="muted">Уйдёт в поддержку как обращение по безопасности.</p>

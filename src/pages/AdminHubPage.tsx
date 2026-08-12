@@ -118,13 +118,20 @@ export function AdminHubPage() {
                 Фото {analytics?.totalPhotos ?? '—'} · блок {blockedCount}
               </p>
             </article>
-            <article className="admin-stat-card">
+            <Link to="/app/admin/players?filter=seenToday" className="admin-stat-card">
               <span className="muted">DAU / MAU</span>
               <strong>
                 {analytics?.dau ?? '—'} / {analytics?.mau ?? '—'}
               </strong>
-              <p className="dim">Сегодня · 30 дней (МСК)</p>
-            </article>
+              <p className="dim">Заходили сегодня · 30 дней (МСК)</p>
+            </Link>
+            <Link to="/app/admin/players?filter=checkedInToday" className="admin-stat-card">
+              <span className="muted">В зале сегодня</span>
+              <strong>{analytics?.checkedInToday ?? '—'}</strong>
+              <p className="dim">
+                Нажали «Я в зале» · сейчас {analytics?.activeNow ?? '—'}
+              </p>
+            </Link>
             <article className="admin-stat-card">
               <span className="muted">Обращения</span>
               <strong>{analytics?.tickets.incoming ?? '—'}</strong>
@@ -197,6 +204,21 @@ export function AdminHubPage() {
                 Поиск, профиль, блок · {analytics?.users ?? '—'} чел. · блок {blockedCount}
               </p>
             </Link>
+            <Link to="/app/admin/players?filter=seenToday" className="admin-hub-card">
+              <Users size={20} />
+              <strong>Заходили сегодня</strong>
+              <p className="muted">
+                DAU {analytics?.dau ?? '—'} · любой вход в аккаунт (не только чекин)
+              </p>
+            </Link>
+            <Link to="/app/admin/players?filter=checkedInToday" className="admin-hub-card">
+              <Users size={20} />
+              <strong>В зале сегодня</strong>
+              <p className="muted">
+                Чекин {analytics?.checkedInToday ?? '—'} · сейчас в зале{' '}
+                {analytics?.activeNow ?? '—'}
+              </p>
+            </Link>
             <Link to="/app/admin/analytics" className="admin-hub-card">
               <BarChart3 size={20} />
               <strong>Retention</strong>
@@ -251,11 +273,13 @@ export function AdminHubPage() {
             </p>
           </Link>
         ) : null}
-        <Link to="/app/admin/ui" className="admin-hub-card">
-          <Palette size={20} />
-          <strong>UI kit</strong>
-          <p className="muted">Типографика, кнопки, цвета — эталон для новых экранов</p>
-        </Link>
+        {canViewUsers || canManageAdmins ? (
+          <Link to="/app/admin/ui" className="admin-hub-card">
+            <Palette size={20} />
+            <strong>UI kit</strong>
+            <p className="muted">Типографика, кнопки, цвета — эталон для новых экранов</p>
+          </Link>
+        ) : null}
         <Link to="/app/feedback" className="admin-hub-card">
           <strong>Мои обращения</strong>
           <p className="muted">Как обычный пользователь</p>

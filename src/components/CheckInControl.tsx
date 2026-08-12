@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useApp } from '../context/useApp'
 import { getGym, getUserGyms } from '../data/mock'
 import {
@@ -8,6 +8,7 @@ import {
   getCheckedInGymId,
   isCheckInExpiringSoon,
 } from '../lib/presence'
+import { useSheetA11y } from '../lib/sheetA11y'
 import './CheckInControl.css'
 
 interface Props {
@@ -42,21 +43,12 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
   const { user, checkIn, checkOut, extendCheckIn } = useApp()
   const [sheetOpen, setSheetOpen] = useState(false)
   const [extending, setExtending] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
   const [, setTick] = useState(0)
+  const panelRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (!sheetOpen) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSheetOpen(false)
-    }
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    window.addEventListener('keydown', onKey)
-    return () => {
-      document.body.style.overflow = prev
-      window.removeEventListener('keydown', onKey)
-    }
-  }, [sheetOpen])
+  useSheetA11y(sheetOpen, () => setSheetOpen(false), panelRef)
 
   // Refresh warning copy while checked in
   useEffect(() => {
@@ -94,31 +86,61 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
     )
   }
 
+  const run = async (fn: () => void | Promise<void>) => {
+    if (busy) return
+    setBusy(true)
+    setError('')
+    try {
+      await fn()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось обновить статус')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const pickGym = (gymId: string) => {
-    checkIn(gymId)
-    setSheetOpen(false)
+    void run(async () => {
+      await checkIn(gymId)
+      setSheetOpen(false)
+    })
   }
 
   const onExtend = async () => {
     if (extending || !canExtend) return
     setExtending(true)
+    setError('')
     try {
       await extendCheckIn()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось продлить')
     } finally {
       setExtending(false)
     }
   }
 
+  const errorLine = error ? (
+    <p className="feedback-error checkin-error" role="alert">
+      {error}
+    </p>
+  ) : null
+
   const sheet =
     sheetOpen && multi ? (
-      <div className="checkin-sheet" role="dialog" aria-modal="true" aria-label="Выбор зала">
+      <div className="checkin-sheet" role="presentation">
         <button
           type="button"
           className="checkin-sheet-backdrop"
           aria-label="Закрыть"
           onClick={() => setSheetOpen(false)}
         />
-        <div className="checkin-sheet-panel">
+        <div
+          ref={panelRef}
+          className="checkin-sheet-panel"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Выбор зала"
+        >
           <div className="checkin-sheet-grab" aria-hidden />
           <h3>Где отметиться?</h3>
           <p className="muted checkin-sheet-lead">Один тап — ты в этом зале · статус на 3 часа</p>
@@ -193,9 +215,15 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
               ) : null}
             </div>
           ) : null}
-          <button type="button" className="btn btn-soft" onClick={() => checkOut()}>
+          <button
+            type="button"
+            className="btn btn-soft"
+            disabled={busy}
+            onClick={() => void run(() => checkOut())}
+          >
             Уйти
           </button>
+          {errorLine}
           {multi && showExtras ? (
             <button type="button" className="checkin-other" onClick={() => setSheetOpen(true)}>
               Другой зал
@@ -223,9 +251,15 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
     return (
       <>
         <div className={shellClass}>
-          <button type="button" className="btn btn-primary" onClick={() => checkIn(targetId)}>
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={busy}
+            onClick={() => void run(() => checkIn(targetId))}
+          >
             {shortLabels ? 'Сюда' : `Перейти · ${targetLabel}`}
           </button>
+          {errorLine}
         </div>
         {sheet}
       </>
@@ -236,7 +270,12 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
   return (
     <>
       <div className={shellClass}>
-        <button type="button" className="btn btn-primary" onClick={() => checkIn(targetId)}>
+        <button
+          type="button"
+          className="btn btn-primary"
+          disabled={busy}
+          onClick={() => void run(() => checkIn(targetId))}
+        >
           {shortLabels ? 'Я в зале' : `Я в зале${targetLabel ? ` · ${targetLabel}` : ''}`}
         </button>
         {multi && showExtras ? (
@@ -245,6 +284,7 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
           </button>
         ) : null}
         {showExtras ? <p className="dim checkin-hint">Статус держится 3 часа, можно продлить</p> : null}
+        {errorLine}
       </div>
       {sheet}
     </>

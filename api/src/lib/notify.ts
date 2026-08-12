@@ -81,7 +81,8 @@ export async function pushChatMessage(input: {
   conversationId: string
 }) {
   const prefs = await getOrCreatePrefs(input.userId)
-  if (!prefs.enabled) return 0
+  // chatRequests gates OS pushes for chat traffic (requests + messages)
+  if (!prefs.enabled || !prefs.chatRequests) return 0
 
   const title = (input.senderName || 'Новое сообщение').slice(0, 80)
   const body = input.text.slice(0, 160)

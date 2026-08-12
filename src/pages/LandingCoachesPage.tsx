@@ -38,13 +38,15 @@ function CtaPair({
         {primaryLabel}
         <ArrowRight size={18} aria-hidden />
       </Link>
-      <Link
-        to={loginPath()}
-        className="lp-login-quiet"
-        onClick={() => trackLanding('cta_login', { placement: `${FROM}:${placement}` })}
-      >
-        {secondaryLabel}
-      </Link>
+      {placement === 'final' ? (
+        <Link
+          to={loginPath()}
+          className="lp-login-quiet"
+          onClick={() => trackLanding('cta_login', { placement: `${FROM}:${placement}` })}
+        >
+          {secondaryLabel}
+        </Link>
+      ) : null}
     </div>
   )
 }

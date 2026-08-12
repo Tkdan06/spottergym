@@ -9,12 +9,14 @@ import { ProfilePhotoCarousel } from '../components/ProfilePhotoCarousel'
 import { ScheduleSheet } from '../components/ScheduleSheet'
 import { SectionTitle } from '../components/SectionTitle'
 import { useApp } from '../context/useApp'
-import { experienceLabel, getGym, getUserGyms, intentLabel } from '../data/mock'
+import { COACH_DIRECTIONS, experienceLabel, getGym, getUserGyms, intentLabel } from '../data/mock'
+import { isDemoAccount } from '../lib/demoAccount'
 import { localGenderAvatar, profileImage } from '../lib/avatar'
 import { clampPhotos } from '../lib/photos'
 import { getCheckedInGymId } from '../lib/presence'
 import { breakLabel, isOnBreak } from '../lib/schedule'
 import { formatUsername } from '../lib/username'
+import './FeedbackPage.css'
 import './ProfileViews.css'
 
 export function ProfilePage() {
@@ -22,6 +24,8 @@ export function ProfilePage() {
   const [galleryOpen, setGalleryOpen] = useState(false)
   const [galleryIndex, setGalleryIndex] = useState(0)
   const [scheduleOpen, setScheduleOpen] = useState(false)
+  const [saveError, setSaveError] = useState('')
+  const [copyFlash, setCopyFlash] = useState('')
   if (!user) return <Navigate to="/login" replace />
   const gyms = getUserGyms(user)
   const likesInfo = getLikesFor(user.id)
@@ -31,6 +35,13 @@ export function ProfilePage() {
   const heroSrc = profileImage(user)
   const onBreak = isOnBreak(user.breakUntil)
   const breakText = breakLabel(user.breakUntil)
+
+  const patch = (data: Parameters<typeof updateProfile>[0]) => {
+    setSaveError('')
+    return Promise.resolve(updateProfile(data)).catch((err: unknown) => {
+      setSaveError(err instanceof Error ? err.message : 'Не удалось сохранить')
+    })
+  }
 
   return (
     <main className="page profile-view">
@@ -49,6 +60,19 @@ export function ProfilePage() {
         </div>
       </header>
 
+      {isDemoAccount(user.email) ? (
+        <p className="demo-local-banner" role="status">
+          Демо-аккаунт: зал и чаты локальные, без живого Postgres. Для QA прод-сценариев зайди
+          обычным email.
+        </p>
+      ) : null}
+
+      {saveError ? (
+        <p className="feedback-error" role="alert">
+          {saveError}
+        </p>
+      ) : null}
+
       <div className="profile-hero mine">
         <ProfilePhotoCarousel
           photos={user.photos}
@@ -64,21 +88,35 @@ export function ProfilePage() {
         />
         <div className="profile-hero-meta">
           {onBreak ? <span className="pill pill-break">{breakText}</span> : null}
-          <h1>
+          <h2 className="profile-hero-name">
             {user.name}, {user.age}
-          </h1>
+          </h2>
           {user.username ? (
             <button
               type="button"
               className="profile-username"
               onClick={() => {
-                void navigator.clipboard?.writeText(formatUsername(user.username)).catch(() => undefined)
+                void navigator.clipboard
+                  ?.writeText(formatUsername(user.username))
+                  .then(() => {
+                    setCopyFlash('Скопировано')
+                    window.setTimeout(() => setCopyFlash(''), 1600)
+                  })
+                  .catch(() => {
+                    setCopyFlash('Не удалось скопировать')
+                    window.setTimeout(() => setCopyFlash(''), 1600)
+                  })
               }}
               title="Скопировать @ник"
             >
               {formatUsername(user.username)}
               <Copy size={14} aria-hidden />
             </button>
+          ) : null}
+          {copyFlash ? (
+            <p className="dim profile-copy-flash" role="status" aria-live="polite">
+              {copyFlash}
+            </p>
           ) : null}
           <p className="muted">
             {user.isCoach
@@ -114,7 +152,9 @@ export function ProfilePage() {
         name={user.name}
         editable
         initialIndex={galleryIndex}
-        onChangePhotos={(photos) => updateProfile({ photos: clampPhotos(photos) })}
+        onChangePhotos={(photos) => {
+          void patch({ photos: clampPhotos(photos) })
+        }}
       />
 
       <section className="surface profile-block likes-block">
@@ -137,7 +177,19 @@ export function ProfilePage() {
 
       <section className="surface profile-block">
         <SectionTitle>О себе</SectionTitle>
-        <p>{user.bio || 'Добавь описание — так проще начать разговор'}</p>
+        {user.bio ? (
+          <p>{user.bio}</p>
+        ) : (
+          <div className="empty-copy-actions">
+            <div className="empty-copy" role="status">
+              <p className="empty-copy-title">Пока без описания</p>
+              <p className="empty-copy-lead">Коротко о себе — так проще начать разговор</p>
+            </div>
+            <Link to="/app/settings" className="btn btn-soft btn-block">
+              Добавить в настройках
+            </Link>
+          </div>
+        )}
         <div className="chip-grid" style={{ marginTop: 12 }}>
           {experienceLabel(user.experienceLevel) ? (
             <span className="chip level">{experienceLabel(user.experienceLevel)}</span>
@@ -164,17 +216,25 @@ export function ProfilePage() {
         >
           Мои залы
         </SectionTitle>
-        <div className="chip-grid">
-          {gyms.length ? (
-            gyms.map((gym) => (
+        {gyms.length ? (
+          <div className="chip-grid">
+            {gyms.map((gym) => (
               <Link key={gym.id} to={`/app/gym/${gym.id}`} className="chip active">
                 {gym.name}
               </Link>
-            ))
-          ) : (
-            <p className="muted">Пока нет залов — выбери в каталоге</p>
-          )}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-copy-actions">
+            <div className="empty-copy" role="status">
+              <p className="empty-copy-title">Зал не выбран</p>
+              <p className="empty-copy-lead">Выбери клуб в каталоге — без него не отметить присутствие</p>
+            </div>
+            <Link to="/app/discover" className="btn btn-primary btn-block">
+              В каталог залов
+            </Link>
+          </div>
+        )}
       </section>
 
       <section className="surface profile-block status-panel">
@@ -198,7 +258,9 @@ export function ProfilePage() {
         <button
           type="button"
           className="toggle-row"
-          onClick={() => updateProfile({ lookingToMeet: !user.lookingToMeet })}
+          role="switch"
+          aria-checked={user.lookingToMeet}
+          onClick={() => void patch({ lookingToMeet: !user.lookingToMeet })}
         >
           <div>
             <strong>Открыт к знакомству</strong>
@@ -209,13 +271,15 @@ export function ProfilePage() {
         <button
           type="button"
           className="toggle-row"
+          role="switch"
+          aria-checked={user.isCoach}
           onClick={() =>
-            updateProfile({
+            void patch({
               isCoach: !user.isCoach,
               coachSports: !user.isCoach
                 ? user.coachSports.length
                   ? user.coachSports
-                  : user.sports.slice(0, 2)
+                  : COACH_DIRECTIONS.filter((d) => user.sports.includes(d)).slice(0, 2)
                 : [],
             })
           }
@@ -226,17 +290,24 @@ export function ProfilePage() {
               {user.isCoach
                 ? user.coachSports.length
                   ? `Направления: ${user.coachSports.join(', ')}`
-                  : 'Метка «Тренер» видна в зале'
+                  : 'Укажи направления в настройках'
                 : 'Показать на карточке, что ты тренер'}
             </p>
           </div>
           <span className={`toggle ${user.isCoach ? 'on' : ''}`} />
         </button>
+        {user.isCoach && !user.coachSports.length ? (
+          <Link to="/app/settings" className="muted profile-coach-hint">
+            Выбрать направления тренера →
+          </Link>
+        ) : null}
         <button
           type="button"
           className="toggle-row"
+          role="switch"
+          aria-checked={user.privacy === 'anonymous'}
           onClick={() =>
-            updateProfile({ privacy: user.privacy === 'open' ? 'anonymous' : 'open' })
+            void patch({ privacy: user.privacy === 'open' ? 'anonymous' : 'open' })
           }
         >
           <div className="row">
@@ -269,32 +340,41 @@ export function ProfilePage() {
             {breakText}. Чек-ин в зал снимет статус автоматически.
           </p>
         ) : null}
-        <div className="slots">
-          {user.visitSlots.length ? (
-            user.visitSlots.map((slot) => (
+        {user.visitSlots.length ? (
+          <div className="slots">
+            {user.visitSlots.map((slot) => (
               <div key={`${slot.day}-${slot.from}-${slot.to}`} className="slot">
                 <strong>{slot.day}</strong>
                 <span>
                   {slot.from}–{slot.to}
                 </span>
               </div>
-            ))
-          ) : (
-            <p className="muted">
-              Не задано —{' '}
-              <button type="button" className="text-link" onClick={() => setScheduleOpen(true)}>
-                укажи дни и время
-              </button>
-            </p>
-          )}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-copy-actions">
+            <div className="empty-copy" role="status">
+              <p className="empty-copy-title">Расписание не задано</p>
+              <p className="empty-copy-lead">Укажи дни и время — так проще пересечься в зале</p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-soft btn-block"
+              onClick={() => setScheduleOpen(true)}
+            >
+              Указать расписание
+            </button>
+          </div>
+        )}
       </section>
 
       <ScheduleSheet
         open={scheduleOpen}
         initialSlots={user.visitSlots}
         onClose={() => setScheduleOpen(false)}
-        onSave={(visitSlots) => updateProfile({ visitSlots })}
+        onSave={(visitSlots) => {
+          void patch({ visitSlots })
+        }}
       />
 
       <section className="surface profile-block">

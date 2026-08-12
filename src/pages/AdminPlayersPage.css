@@ -78,6 +78,8 @@
   border-radius: var(--radius);
   border: 1px solid var(--line);
   background: var(--bg-card);
+  color: inherit;
+  text-decoration: none;
 }
 
 .admin-stat-card strong {

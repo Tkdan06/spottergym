@@ -7,6 +7,7 @@ import {
   serializePrefs,
 } from '../lib/notify.js'
 import { requireAuth, type AuthedEnv } from '../middleware/auth.js'
+import { rateLimit } from '../middleware/rateLimit.js'
 
 export const notificationRoutes = new Hono<AuthedEnv>()
 
@@ -30,17 +31,21 @@ const prefsSchema = z
   })
   .strict()
 
-notificationRoutes.patch('/prefs', async (c) => {
-  const body = prefsSchema.safeParse(await c.req.json().catch(() => null))
-  if (!body.success) return c.json({ error: 'Некорректные настройки' }, 400)
-  const userId = c.get('userId')
-  await getOrCreatePrefs(userId)
-  const prefs = await prisma.notificationPrefs.update({
-    where: { userId },
-    data: body.data,
-  })
-  return c.json({ prefs: serializePrefs(prefs) })
-})
+notificationRoutes.patch(
+  '/prefs',
+  rateLimit({ windowMs: 60_000, max: 30, route: 'notif-prefs' }),
+  async (c) => {
+    const body = prefsSchema.safeParse(await c.req.json().catch(() => null))
+    if (!body.success) return c.json({ error: 'Некорректные настройки' }, 400)
+    const userId = c.get('userId')
+    await getOrCreatePrefs(userId)
+    const prefs = await prisma.notificationPrefs.update({
+      where: { userId },
+      data: body.data,
+    })
+    return c.json({ prefs: serializePrefs(prefs) })
+  },
+)
 
 notificationRoutes.get('/', async (c) => {
   const userId = c.get('userId')
