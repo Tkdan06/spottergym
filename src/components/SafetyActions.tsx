@@ -19,7 +19,8 @@ export function SafetyActions({ person }: Props) {
   const { user, blockUser, unblockUser, reportUser, isBlocked } = useApp()
   const navigate = useNavigate()
   const rootRef = useRef<HTMLDivElement>(null)
-  const sheetPanelRef = useRef<HTMLElement | null>(null)
+  const blockPanelRef = useRef<HTMLDivElement>(null)
+  const reportPanelRef = useRef<HTMLFormElement>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [mode, setMode] = useState<'idle' | 'block' | 'report'>('idle')
   const [reason, setReason] = useState<ReportReasonId>('spam')
@@ -29,9 +30,9 @@ export function SafetyActions({ person }: Props) {
 
   const blocked = user ? isBlocked(person.id) : false
   const name = displayName(person)
-  const sheetOpen = mode === 'block' || mode === 'report'
 
-  useSheetA11y(sheetOpen, () => setMode('idle'), sheetPanelRef)
+  useSheetA11y(mode === 'block', () => setMode('idle'), blockPanelRef)
+  useSheetA11y(mode === 'report', () => setMode('idle'), reportPanelRef)
   useKeyboardInset(mode === 'report' ? '--form-keyboard' : '')
 
   useEffect(() => {
@@ -152,7 +153,7 @@ export function SafetyActions({ person }: Props) {
             aria-label="Закрыть"
             onClick={() => setMode('idle')}
           />
-          <div className="safety-sheet-panel" ref={sheetPanelRef}>
+          <div className="safety-sheet-panel" ref={blockPanelRef}>
             <div className="safety-sheet-grab" aria-hidden />
             <h3>Заблокировать {name}?</h3>
             <p className="muted">
@@ -177,7 +178,7 @@ export function SafetyActions({ person }: Props) {
             aria-label="Закрыть"
             onClick={() => setMode('idle')}
           />
-          <form className="safety-sheet-panel" ref={sheetPanelRef} onSubmit={onReport}>
+          <form className="safety-sheet-panel" ref={reportPanelRef} onSubmit={onReport}>
             <div className="safety-sheet-grab" aria-hidden />
             <h3>Жалоба на {name}</h3>
             <p className="muted">Уйдёт в поддержку как обращение по безопасности.</p>

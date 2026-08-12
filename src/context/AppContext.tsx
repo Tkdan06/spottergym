@@ -1407,7 +1407,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ...(safe.avatar !== undefined ? { avatar: nextLocal.avatar } : {}),
           ...(safe.city !== undefined ? { city: safe.city } : {}),
           ...(safe.gymIds !== undefined ? { gymIds: safe.gymIds } : {}),
-          ...(safe.homeGymId !== undefined ? { homeGymId: safe.homeGymId || null } : {}),
+          ...(safe.homeGymId !== undefined ? { homeGymId: safe.homeGymId || '' } : {}),
           ...(safe.intent !== undefined ? { intent: safe.intent } : {}),
           ...(safe.experienceLevel !== undefined
             ? { experienceLevel: safe.experienceLevel }
@@ -1579,25 +1579,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const joinGym = useCallback(
     async (gymId: string, makeHome = false) => {
-      let snapshot: AppUser | null = null
-      let nextUser: AppUser | null = null
-      setUser((prev) => {
-        if (!prev) return prev
-        snapshot = prev
-        const gym = getGym(gymId)
-        nextUser = {
-          ...withGymMembership(prev, gymId, true, { makeHome }),
-          // Catalog → settings: city follows the club you just added
-          ...(gym?.city ? { city: gym.city } : {}),
-        }
-        saveJson(STORAGE_USER, nextUser)
-        saveAccountProfile(nextUser)
-        return nextUser
-      })
-      if (!snapshot || !nextUser) return
+      const snapshot = userRef.current
+      if (!snapshot) return
+      const gym = getGym(gymId)
+      const nextUser: AppUser = {
+        ...withGymMembership(snapshot, gymId, true, { makeHome }),
+        // Catalog → settings: city follows the club you just added
+        ...(gym?.city ? { city: gym.city } : {}),
+      }
+      userRef.current = nextUser
+      setUser(nextUser)
+      saveJson(STORAGE_USER, nextUser)
+      saveAccountProfile(nextUser)
       if (!apiOnlineRef.current || isDemoAccount(nextUser.email)) return
       try {
-        const gym = getGym(gymId)
         const me = await apiJoinGym(gymId, makeHome)
         applyServerUser(me as AppUser)
         if (gym?.city && gym.city !== me.city) {
@@ -1605,6 +1600,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           applyServerUser(patched as AppUser)
         }
       } catch (err) {
+        userRef.current = snapshot
         setUser(snapshot)
         saveJson(STORAGE_USER, snapshot)
         saveAccountProfile(snapshot)
@@ -1643,28 +1639,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const setHomeGym = useCallback(
     async (gymId: string) => {
-      let snapshot: AppUser | null = null
-      let nextUser: AppUser | null = null
-      setUser((prev) => {
-        if (!prev) return prev
-        snapshot = prev
-        const gymIds = prev.gymIds.includes(gymId) ? prev.gymIds : [...prev.gymIds, gymId]
-        nextUser = {
-          ...prev,
-          gymIds,
-          homeGymId: gymId,
-          lastSeenAt: new Date().toISOString(),
-        }
-        saveJson(STORAGE_USER, nextUser)
-        saveAccountProfile(nextUser)
-        return nextUser
-      })
-      if (!snapshot || !nextUser) return
+      const snapshot = userRef.current
+      if (!snapshot) return
+      const gymIds = snapshot.gymIds.includes(gymId) ? snapshot.gymIds : [...snapshot.gymIds, gymId]
+      const nextUser: AppUser = {
+        ...snapshot,
+        gymIds,
+        homeGymId: gymId,
+        lastSeenAt: new Date().toISOString(),
+      }
+      userRef.current = nextUser
+      setUser(nextUser)
+      saveJson(STORAGE_USER, nextUser)
+      saveAccountProfile(nextUser)
       if (!apiOnlineRef.current || isDemoAccount(nextUser.email)) return
       try {
         const me = await apiPatchMe({ gymIds: nextUser.gymIds, homeGymId: gymId })
         applyServerUser(me as AppUser)
       } catch (err) {
+        userRef.current = snapshot
         setUser(snapshot)
         saveJson(STORAGE_USER, snapshot)
         saveAccountProfile(snapshot)

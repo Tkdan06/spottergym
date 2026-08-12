@@ -36,9 +36,10 @@ export function useSheetA11y(
     if (sheetRoot && appMain?.contains(sheetRoot)) {
       let current: Element | null = sheetRoot
       while (current && current !== document.body) {
-        const parent = current.parentElement
+        const parent: Element | null = current.parentElement
         if (!parent) break
-        for (const sibling of Array.from(parent.children)) {
+        const siblings: Element[] = Array.from(parent.children)
+        for (const sibling of siblings) {
           if (sibling !== current) markInert(sibling)
         }
         if (parent === appMain || parent.classList.contains('app-shell')) break
