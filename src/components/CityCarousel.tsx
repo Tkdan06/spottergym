@@ -37,9 +37,11 @@ export function CityCarousel({
   const [query, setQuery] = useState('')
   const [allOpen, setAllOpen] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
 
-  useSheetA11y(allOpen, () => setAllOpen(false), panelRef, searchRef)
+  // Focus close control — never the search field (keyboard jump on open)
+  useSheetA11y(allOpen, () => setAllOpen(false), panelRef, closeRef)
 
   const selected = CITIES_META.find((c) => c.name === value)
 
@@ -130,6 +132,7 @@ export function CityCarousel({
         </button>
       ) : null}
 
+      {/* Быстрые города — всегда в разметке под селектором (и в full, и в compact) */}
       <div className="city-strip" role="listbox" aria-label="Города по числу клубов">
         {previewCities.map((city) => (
           <button
@@ -143,7 +146,6 @@ export function CityCarousel({
             <span className="city-chip-name">{city.name}</span>
           </button>
         ))}
-        {/* В full список открывает «Все» на селекторе — дубль «Ещё» не нужен */}
         {variant === 'compact' ? (
           <button type="button" className="city-chip city-chip-more" onClick={openAll}>
             <span className="city-chip-name">Ещё</span>
@@ -170,6 +172,7 @@ export function CityCarousel({
                   <h3>Выбери город</h3>
                 </div>
                 <button
+                  ref={closeRef}
                   type="button"
                   className="icon-btn"
                   aria-label="Закрыть список"

@@ -76,8 +76,25 @@
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  /* Запас под fixed «Назад/Дальше» + safe-area PWA */
-  padding-bottom: calc(var(--onboarding-actions-h) + var(--safe-bottom) + 28px);
+  /* Запас под fixed «Назад/Дальше» + safe-area PWA — чипы городов не под футером */
+  padding-bottom: calc(var(--onboarding-actions-h) + var(--safe-bottom) + 56px);
+}
+
+/* Шаг города: карточка компактнее, быстрые чипы сразу видны над «Дальше» */
+.page.onboarding .city-picker--full {
+  gap: 10px;
+}
+
+.page.onboarding .city-picker-current {
+  padding: 10px 12px;
+}
+
+.page.onboarding .city-picker-title {
+  font-size: 1.12rem;
+}
+
+.page.onboarding .city-strip {
+  padding-bottom: 4px;
 }
 
 /* Шаг «Зал»: скролл только у списка — без «тёмной полки» над меню */

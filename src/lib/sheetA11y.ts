@@ -37,8 +37,14 @@ export function useSheetA11y(
         for (const sibling of siblings) {
           if (sibling !== current) markInert(sibling)
         }
-        // Stop at app shell when present; otherwise walk to body (onboarding has no .app-main)
-        if (parent.classList.contains('app-shell') || parent.classList.contains('app-main')) break
+        // Stop at app shell / page root (onboarding has no .app-main)
+        if (
+          parent.classList.contains('app-shell') ||
+          parent.classList.contains('app-main') ||
+          parent.classList.contains('page')
+        ) {
+          break
+        }
         current = parent
       }
     }
@@ -90,9 +96,16 @@ export function useSheetA11y(
       const target =
         initialFocusRef?.current ||
         panel.querySelector<HTMLElement>(
-          'button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          // Prefer buttons/links — never autofocus inputs (opens mobile keyboard)
+          'button:not([disabled]), [href], [data-sheet-initial-focus]',
         )
-      target?.focus()
+      // Explicitly avoid focusing text fields even if passed by mistake as query result
+      if (target && target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+        target.focus()
+      } else {
+        panel.setAttribute('tabindex', '-1')
+        panel.focus()
+      }
     }
     arm()
 
