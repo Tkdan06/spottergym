@@ -95,6 +95,8 @@ const BRAND_ALIASES: [string, string][] = [
   ['хайрокс', 'hyrox'],
   ['иксфит', 'xfit'],
   ['ддх', 'ddx'],
+  ['урбанфит', 'urbanfit'],
+  ['urban fit', 'urbanfit'],
 ]
 
 export function cyrToLat(input: string): string {
