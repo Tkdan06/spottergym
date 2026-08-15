@@ -116,6 +116,10 @@
   min-width: 0;
 }
 
+.activity-chart-block .section-title {
+  margin-bottom: 0;
+}
+
 .activity-chart-frame {
   display: grid;
   grid-template-columns: 28px minmax(0, 1fr);

@@ -1,7 +1,7 @@
 [
   {
     "name": "Москва",
-    "gymCount": 205,
+    "gymCount": 206,
     "networks": [
       "DDX Fitness",
       "Spirit. Fitness",
@@ -77,6 +77,17 @@
     "priority": true
   },
   {
+    "name": "Красноярск",
+    "gymCount": 8,
+    "networks": [
+      "DDX Fitness",
+      "World Class",
+      "BrightFit",
+      "Независимый"
+    ],
+    "priority": true
+  },
+  {
     "name": "Нижний Новгород",
     "gymCount": 18,
     "networks": [
@@ -88,77 +99,120 @@
     "priority": true
   },
   {
-    "name": "Самара",
-    "gymCount": 5,
+    "name": "Челябинск",
+    "gymCount": 8,
     "networks": [
       "DDX Fitness",
+      "Spirit. Fitness",
+      "Alex Fitness",
       "BrightFit"
-    ],
-    "priority": true
-  },
-  {
-    "name": "Ростов-на-Дону",
-    "gymCount": 3,
-    "networks": [
-      "DDX Fitness",
-      "A-Fitness"
     ],
     "priority": true
   },
   {
     "name": "Уфа",
-    "gymCount": 4,
+    "gymCount": 7,
     "networks": [
       "DDX Fitness",
       "Spirit. Fitness",
-      "A-Fitness"
+      "World Class",
+      "A-Fitness",
+      "Независимый"
     ],
     "priority": true
   },
   {
-    "name": "Красноярск",
+    "name": "Краснодар",
+    "gymCount": 28,
+    "networks": [
+      "DDX Fitness",
+      "Spirit. Fitness",
+      "World Class",
+      "XFIT",
+      "Alex Fitness",
+      "Orange Fitness",
+      "Balance",
+      "Независимый"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Самара",
+    "gymCount": 12,
+    "networks": [
+      "DDX Fitness",
+      "World Class",
+      "XFIT",
+      "BrightFit",
+      "Независимый"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Ростов-на-Дону",
+    "gymCount": 10,
+    "networks": [
+      "DDX Fitness",
+      "World Class",
+      "XFIT",
+      "Alex Fitness",
+      "A-Fitness",
+      "Независимый"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Омск",
     "gymCount": 6,
     "networks": [
       "DDX Fitness",
-      "BrightFit"
+      "Energy Zone",
+      "Независимый"
     ],
     "priority": true
   },
   {
     "name": "Воронеж",
-    "gymCount": 5,
+    "gymCount": 8,
     "networks": [
       "DDX Fitness",
       "Spirit. Fitness",
+      "World Class",
       "XFIT"
     ],
     "priority": true
   },
   {
     "name": "Пермь",
-    "gymCount": 2,
+    "gymCount": 8,
     "networks": [
       "DDX Fitness",
-      "XFIT"
+      "World Class",
+      "XFIT",
+      "Alex Fitness",
+      "Независимый"
     ],
     "priority": true
   },
   {
     "name": "Волгоград",
-    "gymCount": 5,
+    "gymCount": 6,
     "networks": [
       "DDX Fitness",
-      "XFIT"
+      "XFIT",
+      "Независимый"
     ],
     "priority": true
   },
   {
-    "name": "Челябинск",
-    "gymCount": 6,
+    "name": "Сочи",
+    "gymCount": 13,
     "networks": [
       "DDX Fitness",
-      "Spirit. Fitness",
-      "BrightFit"
+      "World Class",
+      "Encore Fitness",
+      "Orange Fitness",
+      "Независимый"
     ],
     "priority": true
   },
@@ -172,14 +226,10 @@
     "priority": true
   },
   {
-    "name": "Сочи",
-    "gymCount": 13,
+    "name": "Иркутск",
+    "gymCount": 3,
     "networks": [
-      "DDX Fitness",
-      "World Class",
-      "Encore Fitness",
-      "Orange Fitness",
-      "Независимый"
+      "DDX Fitness"
     ],
     "priority": true
   },
@@ -203,25 +253,6 @@
     "priority": true
   },
   {
-    "name": "Кудрово",
-    "gymCount": 2,
-    "networks": [
-      "URBANFIT",
-      "Fitness House"
-    ],
-    "priority": true
-  },
-  {
-    "name": "Мурино",
-    "gymCount": 5,
-    "networks": [
-      "URBANFIT",
-      "Fitness House",
-      "A-Fitness"
-    ],
-    "priority": true
-  },
-  {
     "name": "Мытищи",
     "gymCount": 12,
     "networks": [
@@ -230,20 +261,15 @@
       "XFIT",
       "Независимый"
     ],
-    "priority": true
+    "priority": false
   },
   {
-    "name": "Краснодар",
-    "gymCount": 28,
+    "name": "Мурино",
+    "gymCount": 5,
     "networks": [
-      "DDX Fitness",
-      "Spirit. Fitness",
-      "World Class",
-      "XFIT",
-      "Alex Fitness",
-      "Orange Fitness",
-      "Balance",
-      "Независимый"
+      "URBANFIT",
+      "Fitness House",
+      "A-Fitness"
     ],
     "priority": false
   },
@@ -257,23 +283,7 @@
     "priority": false
   },
   {
-    "name": "Иркутск",
-    "gymCount": 3,
-    "networks": [
-      "DDX Fitness"
-    ],
-    "priority": false
-  },
-  {
     "name": "Новороссийск",
-    "gymCount": 3,
-    "networks": [
-      "DDX Fitness"
-    ],
-    "priority": false
-  },
-  {
-    "name": "Омск",
     "gymCount": 3,
     "networks": [
       "DDX Fitness"
@@ -327,6 +337,15 @@
     "gymCount": 2,
     "networks": [
       "DDX Fitness"
+    ],
+    "priority": false
+  },
+  {
+    "name": "Кудрово",
+    "gymCount": 2,
+    "networks": [
+      "URBANFIT",
+      "Fitness House"
     ],
     "priority": false
   },

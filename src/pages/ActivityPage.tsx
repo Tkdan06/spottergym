@@ -219,6 +219,7 @@ export function ActivityPage() {
           ) : (
             <>
               <section className="surface activity-chart-block">
+                <SectionTitle>График</SectionTitle>
                 <div
                   className={`activity-chart-frame range-${stats.range}`}
                   role="img"
