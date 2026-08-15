@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Bell, Copy, Eye, EyeOff, MessageSquareText, Settings, Share2, Shield } from 'lucide-react'
+import { Bell, ChartNoAxesColumn, Copy, Eye, EyeOff, MessageSquareText, Settings, Share2, Shield } from 'lucide-react'
 import { Link, Navigate } from 'react-router-dom'
 import { CheckInControl } from '../components/CheckInControl'
 import { InviteFriendsButton } from '../components/InviteFriendsButton'
@@ -52,6 +52,9 @@ export function ProfilePage() {
           <h1 className="page-title">Профиль</h1>
         </div>
         <div className="page-header-actions profile-top-actions">
+          <Link to="/app/activity" className="icon-btn" aria-label="Активность" title="Активность">
+            <ChartNoAxesColumn size={20} />
+          </Link>
           <Link to="/app/notifications" className="icon-btn" aria-label="Уведомления">
             <Bell size={20} />
             {unreadNotifications > 0 ? <i className="nav-badge">{unreadNotifications}</i> : null}

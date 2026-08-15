@@ -29,6 +29,7 @@ import {
   expireStaleCheckIns,
   resolveExpiresAt,
 } from '../lib/checkInExpiry.js'
+import { buildMyActivityStats, type ActivityRange } from '../lib/activityStats.js'
 import { notifyGymMembers } from '../lib/gymNotify.js'
 import {
   deleteRemovedMedia,
@@ -117,6 +118,22 @@ meRoutes.get('/', async (c) => {
   if (!user) return c.json({ error: 'Аккаунт не найден' }, 404)
   return c.json({ user: serializeUser(user) })
 })
+
+/** Personal check-in history / gym time stats (MSK days). */
+meRoutes.get(
+  '/activity',
+  rateLimit({ windowMs: 60_000, max: 60, route: 'me-activity' }),
+  async (c) => {
+    const raw = c.req.query('range') || '30'
+    const rangeNum = Number(raw)
+    const range: ActivityRange =
+      rangeNum === 7 || rangeNum === 90 || rangeNum === 30 ? (rangeNum as ActivityRange) : 30
+
+    await expireStaleCheckIns()
+    const stats = await buildMyActivityStats(c.get('userId'), range)
+    return c.json({ activity: stats })
+  },
+)
 
 /** Throttled presence bump — counts as app activity without check-in. */
 meRoutes.post(

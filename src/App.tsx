@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './components/AppLayout'
 import { GuestOnly, ProtectedRoute } from './components/ProtectedRoute'
 import { AppProvider } from './context/AppContext'
+import { ActivityPage } from './pages/ActivityPage'
 import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage'
 import { AdminGeographyPage } from './pages/AdminGeographyPage'
 import { AdminHubPage } from './pages/AdminHubPage'
@@ -67,6 +68,7 @@ export default function App() {
               <Route path="messages" element={<MessagesPage />} />
               <Route path="messages/:conversationId" element={<ChatPage />} />
               <Route path="profile" element={<ProfilePage />} />
+              <Route path="activity" element={<ActivityPage />} />
               <Route path="likes" element={<LikedPage mode="received" />} />
               <Route path="likes/sent" element={<LikedPage mode="sent" />} />
               <Route path="feedback" element={<FeedbackPage />} />

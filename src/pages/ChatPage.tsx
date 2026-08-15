@@ -18,6 +18,7 @@ import { SoftLoader } from '../components/SoftLoader'
 import { useApp } from '../context/useApp'
 import { displayName, formatGymLabel, getContactGym, getUser } from '../data/mock'
 import { profileImage, profileImageFallback } from '../lib/avatar'
+import { apiMarkConversationRead } from '../lib/apiClient'
 import { otherParticipantId } from '../lib/conversations'
 import { CHAT_MESSAGE_MAX } from '../lib/fieldLimits'
 import { chatComposerProps } from '../lib/inputAttrs'
@@ -136,14 +137,36 @@ export function ChatPage() {
   /** Poll while the thread is open (inbox poll lives in AppContext) */
   useEffect(() => {
     if (!conversationId || !apiOnline) return
-    const id = window.setInterval(() => {
+    const tick = () => {
       if (document.visibilityState === 'hidden') return
       void refreshThread(conversationId)
-        .then((res) => setHasMore(Boolean(res?.hasMore)))
+        .then(async (res) => {
+          setHasMore(Boolean(res?.hasMore))
+          // Stay-in-chat: mark peer messages read so the sender gets ✓✓ blue on their poll
+          try {
+            await apiMarkConversationRead(conversationId)
+          } catch {
+            /* ignore */
+          }
+        })
         .catch(() => undefined)
-    }, 4000)
+    }
+    const id = window.setInterval(tick, 4000)
     return () => window.clearInterval(id)
   }, [conversationId, apiOnline, refreshThread])
+
+  /** When returning to the tab with chat open, refresh + mark read immediately */
+  useEffect(() => {
+    if (!conversationId || !apiOnline) return
+    const onVis = () => {
+      if (document.visibilityState !== 'visible') return
+      void markRead(conversationId)
+        .then(() => undefined)
+        .catch(() => undefined)
+    }
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
+  }, [conversationId, apiOnline, markRead])
 
   useEffect(() => {
     const root = document.documentElement

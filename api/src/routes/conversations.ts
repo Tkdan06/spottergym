@@ -261,7 +261,17 @@ conversationRoutes.get(
       })
     }
 
-    const chronological = page.reverse()
+    // Reflect delivered in this response (updateMany runs after findMany)
+    const chronological = page.reverse().map((m) => {
+      if (
+        !before &&
+        m.senderId !== userId &&
+        m.status === 'sent'
+      ) {
+        return serializeChatMessage({ ...m, status: 'delivered' })
+      }
+      return serializeChatMessage(m)
+    })
     const other = await prisma.user.findUnique({
       where: { id: otherUserId(conv, userId) },
       include: userInclude,
@@ -269,7 +279,7 @@ conversationRoutes.get(
 
     return c.json({
       conversation: serializeConversation(conv, userId, other),
-      messages: chronological.map(serializeChatMessage),
+      messages: chronological,
       hasMore,
     })
   },

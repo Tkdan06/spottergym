@@ -899,12 +899,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
             (a, b) => +new Date(a.createdAt) - +new Date(b.createdAt),
           )
         } else {
-          const locals = prev.filter(
-            (m) =>
-              m.conversationId === conversationId &&
-              m.id.startsWith('local-') &&
-              !thread.some((t) => t.text === m.text && t.senderId === m.senderId),
-          )
+          const myId = userRef.current?.id || ''
+          const locals = prev.filter((m) => {
+            if (m.conversationId !== conversationId || !m.id.startsWith('local-')) {
+              return false
+            }
+            // Drop optimistic bubble once the server echo exists (match 'me' → real id)
+            const matched = thread.some(
+              (t) =>
+                t.text === m.text &&
+                (t.senderId === m.senderId ||
+                  (myId && t.senderId === myId && (m.senderId === myId || m.senderId === 'me'))),
+            )
+            return !matched
+          })
           threadMsgs = [...thread, ...locals].sort(
             (a, b) => +new Date(a.createdAt) - +new Date(b.createdAt),
           )

@@ -206,6 +206,40 @@ export async function apiExtendCheckIn() {
   return data.user
 }
 
+export type ActivityRange = 7 | 30 | 90
+
+export type ActivityDay = {
+  date: string
+  minutes: number
+  sessions: number
+  gymIds: string[]
+}
+
+export type ActivityDayHighlight = {
+  date: string
+  minutes: number
+  sessions: number
+}
+
+export type ActivityStats = {
+  range: ActivityRange
+  timezone: 'Europe/Moscow'
+  generatedAt: string
+  totalMinutes: number
+  totalSessions: number
+  streakDays: number
+  busiestDay: ActivityDayHighlight | null
+  quietestDay: ActivityDayHighlight | null
+  days: ActivityDay[]
+}
+
+export async function apiFetchMyActivity(range: ActivityRange = 30) {
+  const data = await request<{ activity: ActivityStats }>(
+    `/me/activity?range=${encodeURIComponent(String(range))}`,
+  )
+  return data.activity
+}
+
 export async function apiJoinGym(gymId: string, makeHome = false) {
   const data = await request<{ user: AppUser }>(
     `/me/gyms/${encodeURIComponent(gymId)}${makeHome ? '?home=1' : ''}`,
