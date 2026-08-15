@@ -8,6 +8,8 @@ export type ActivityDay = {
   minutes: number
   sessions: number
   gymIds: string[]
+  /** Check-in intervals (ISO UTC); render in the user's local timezone on the client. */
+  intervals: { start: string; end: string }[]
 }
 
 export type ActivityDayHighlight = {
@@ -54,7 +56,7 @@ function buildEmptyDays(rangeStartKey: string, todayKey: string): ActivityDay[] 
   const days: ActivityDay[] = []
   let cursor = rangeStartKey
   while (true) {
-    days.push({ date: cursor, minutes: 0, sessions: 0, gymIds: [] })
+    days.push({ date: cursor, minutes: 0, sessions: 0, gymIds: [], intervals: [] })
     if (cursor === todayKey) break
     cursor = addDaysKey(cursor, 1)
   }
@@ -115,6 +117,10 @@ export async function buildMyActivityStats(
     bucket.minutes += minutes
     bucket.sessions += 1
     if (!bucket.gymIds.includes(row.gymId)) bucket.gymIds.push(row.gymId)
+    bucket.intervals.push({
+      start: row.checkedInAt.toISOString(),
+      end: new Date(end).toISOString(),
+    })
   }
 
   const withSessions = days.filter((d) => d.sessions > 0)

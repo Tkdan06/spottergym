@@ -46,6 +46,28 @@ function formatDayLabel(dateKey: string, compact = false) {
   })
 }
 
+/** Local browser timezone clock, e.g. "22:05". */
+function formatLocalClock(iso: string) {
+  return new Date(iso).toLocaleTimeString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+/** "22:05 – 23:40" or several sessions joined; empty if no intervals. */
+function formatLocalTrainingWindow(intervals: { start: string; end: string }[]) {
+  if (!intervals.length) return ''
+  if (intervals.length === 1) {
+    const [one] = intervals
+    return `${formatLocalClock(one.start)} – ${formatLocalClock(one.end)}`
+  }
+  const starts = intervals.map((i) => Date.parse(i.start))
+  const ends = intervals.map((i) => Date.parse(i.end))
+  const from = new Date(Math.min(...starts)).toISOString()
+  const to = new Date(Math.max(...ends)).toISOString()
+  return `${formatLocalClock(from)} – ${formatLocalClock(to)}`
+}
+
 function yAxisCeilingMinutes(maxMinutes: number) {
   if (maxMinutes <= 0) return 60
   const hours = Math.max(1, Math.ceil(maxMinutes / 60))
@@ -197,11 +219,6 @@ export function ActivityPage() {
           ) : (
             <>
               <section className="surface activity-chart-block">
-                <div className="activity-chart-head">
-                  <SectionTitle>График</SectionTitle>
-                  <p className="dim activity-chart-hint">Часы · МСК · нажми день</p>
-                </div>
-
                 <div
                   className={`activity-chart-frame range-${stats.range}`}
                   role="img"
@@ -277,6 +294,11 @@ export function ActivityPage() {
                           : 'В этот день отметок не было'}
                       </p>
                     </div>
+                    {selectedDay.minutes > 0 && selectedDay.intervals?.length ? (
+                      <div className="activity-day-card-range">
+                        {formatLocalTrainingWindow(selectedDay.intervals)}
+                      </div>
+                    ) : null}
                   </div>
                 ) : null}
               </section>

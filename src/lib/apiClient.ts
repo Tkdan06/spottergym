@@ -213,6 +213,7 @@ export type ActivityDay = {
   minutes: number
   sessions: number
   gymIds: string[]
+  intervals: { start: string; end: string }[]
 }
 
 export type ActivityDayHighlight = {
