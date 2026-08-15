@@ -62,11 +62,19 @@ export function ChatPage() {
   const [hydrate, setHydrate] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
   const [hasMore, setHasMore] = useState(false)
   const [loadingOlder, setLoadingOlder] = useState(false)
+  const pageRef = useRef<HTMLElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const threadRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const touchStartY = useRef<number | null>(null)
   const tapStart = useRef<{ x: number; y: number } | null>(null)
+  const sendingRef = useRef(false)
+
+  const scrollThreadToEnd = () => {
+    const el = threadRef.current
+    if (!el) return
+    el.scrollTop = el.scrollHeight
+  }
 
   const conversation = conversations.find((c) => c.id === conversationId)
   const otherId = conversation ? otherParticipantId(conversation, user?.id) : ''
@@ -166,31 +174,44 @@ export function ChatPage() {
     return () => document.removeEventListener('visibilitychange', onVis)
   }, [conversationId, apiOnline, markRead])
 
+  /**
+   * Lock the chat page to the visual viewport (Telegram-style):
+   * composer stays glued above the keyboard; no layout jump on send.
+   */
   useEffect(() => {
     const root = document.documentElement
+    const page = pageRef.current
     const vv = window.visualViewport
-    if (!vv) return
+    if (!vv || !page) return
 
     const sync = () => {
-      const keyboard = Math.max(0, window.innerHeight - vv.height - vv.offsetTop)
+      const offsetTop = vv.offsetTop
+      const height = vv.height
+      page.style.height = `${height}px`
+      page.style.maxHeight = `${height}px`
+      page.style.transform = offsetTop ? `translateY(${offsetTop}px)` : ''
+      const keyboard = Math.max(0, window.innerHeight - height - offsetTop)
       root.style.setProperty('--chat-keyboard', `${keyboard}px`)
-      if (keyboard > 40) {
-        bottomRef.current?.scrollIntoView({ block: 'end' })
-      }
+      if (keyboard > 40) scrollThreadToEnd()
     }
 
     sync()
     vv.addEventListener('resize', sync)
     vv.addEventListener('scroll', sync)
+    window.addEventListener('resize', sync)
     return () => {
       vv.removeEventListener('resize', sync)
       vv.removeEventListener('scroll', sync)
+      window.removeEventListener('resize', sync)
+      page.style.height = ''
+      page.style.maxHeight = ''
+      page.style.transform = ''
       root.style.removeProperty('--chat-keyboard')
     }
-  }, [])
+  }, [conversationId, hydrate, conversation?.id, other?.id, user?.id])
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ block: 'end' })
+    scrollThreadToEnd()
   }, [thread.length, conversationId])
 
   useEffect(() => {
@@ -228,7 +249,7 @@ export function ChatPage() {
 
   if (hydrate === 'loading' && !conversation) {
     return (
-      <main className="page chat-page">
+      <main className="page chat-page" ref={pageRef}>
         <SoftLoader label="Открываем чат…" />
       </main>
     )
@@ -236,7 +257,7 @@ export function ChatPage() {
 
   if ((!conversation || !other || !user) && hydrate === 'error') {
     return (
-      <main className="page chat-page">
+      <main className="page chat-page" ref={pageRef}>
         <div className="empty-copy-actions chat-empty-state">
           <div className="empty-copy" role="alert">
             <p className="empty-copy-title">Не удалось открыть чат</p>
@@ -268,7 +289,7 @@ export function ChatPage() {
 
   if (!conversation || !other || !user) {
     return (
-      <main className="page chat-page">
+      <main className="page chat-page" ref={pageRef}>
         <div className="empty-copy-actions chat-empty-state">
           <div className="empty-copy" role="status">
             <p className="empty-copy-title">Чат не найден</p>
@@ -296,27 +317,31 @@ export function ChatPage() {
   }
 
   const keepComposerFocused = () => {
+    // Never blur on send — re-assert focus without scrolling the page (iOS).
+    inputRef.current?.focus({ preventScroll: true })
     requestAnimationFrame(() => {
       inputRef.current?.focus({ preventScroll: true })
       resizeComposer()
-      bottomRef.current?.scrollIntoView({ block: 'end' })
+      scrollThreadToEnd()
     })
   }
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
     const trimmed = text.trim()
-    if (!trimmed || locked || busy) return
+    if (!trimmed || locked || sendingRef.current) return
+    sendingRef.current = true
     setBusy(true)
     setError('')
     setText('')
-    inputRef.current?.focus({ preventScroll: true })
+    keepComposerFocused()
     try {
       await sendMessage(conversation.id, trimmed)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось отправить')
       setText(trimmed)
     } finally {
+      sendingRef.current = false
       setBusy(false)
       keepComposerFocused()
     }
@@ -386,7 +411,7 @@ export function ChatPage() {
   }
 
   return (
-    <main className="chat-page">
+    <main className="chat-page" ref={pageRef}>
       <h1 className="sr-only">Чат с {name}</h1>
       <header className="chat-header">
         <button
@@ -552,7 +577,8 @@ export function ChatPage() {
                   ? 'Сначала прими запрос'
                   : 'Сообщение'
             }
-            disabled={locked || incoming || busy}
+            /* Never disable while sending — iOS blurs disabled fields and drops the keyboard */
+            disabled={locked || incoming}
             maxLength={CHAT_MESSAGE_MAX}
             aria-label="Сообщение"
           />
@@ -560,6 +586,8 @@ export function ChatPage() {
             className="btn btn-primary"
             type="submit"
             disabled={locked || incoming || busy || !text.trim()}
+            /* Keep focus on textarea so the keyboard stays open (Telegram-style) */
+            onMouseDown={(e) => e.preventDefault()}
             onPointerDown={(e) => e.preventDefault()}
             aria-label="Отправить"
           >

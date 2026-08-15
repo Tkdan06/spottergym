@@ -8,14 +8,18 @@
   max-height: 100dvh;
   max-height: 100svh;
   padding: calc(12px + var(--standalone-top)) 12px 0;
-  /* Composer sits above keyboard; safe-area only when keyboard closed */
+  /*
+    VisualViewport JS locks page height to the visible area above the keyboard.
+    Only compensate home-indicator when the keyboard is closed — do not also add
+    --chat-keyboard here (that would double-count and shove the composer up).
+  */
   padding-bottom: calc(
-    8px + max(0px, var(--safe-bottom) - min(var(--chat-keyboard), var(--safe-bottom))) +
-      var(--chat-keyboard)
+    8px + max(0px, var(--safe-bottom) - min(var(--chat-keyboard), var(--safe-bottom)))
   );
   overflow: hidden;
   box-sizing: border-box;
-  transition: padding-bottom 0.12s ease-out;
+  /* No transition: padding lag makes the composer crawl under the keyboard */
+  will-change: transform;
 }
 
 .chat-header {
@@ -238,6 +242,8 @@
     linear-gradient(180deg, transparent, var(--bg) 28%),
     var(--bg);
   z-index: 5;
+  /* Stay in the flex column bottom — page itself tracks visualViewport */
+  position: relative;
 }
 
 .chat-input textarea {
@@ -282,7 +288,7 @@
     height: 100dvh;
     max-height: 100dvh;
     padding: 24px 28px 0;
-    padding-bottom: calc(16px + var(--chat-keyboard));
+    padding-bottom: 16px;
   }
 
   .chat-input {
@@ -297,4 +303,10 @@
 
 .app-shell.chat-open .app-main {
   min-height: 100dvh;
+  overflow: hidden;
+}
+
+.app-shell.chat-open {
+  overflow: hidden;
+  overscroll-behavior: none;
 }
