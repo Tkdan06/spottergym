@@ -160,9 +160,7 @@ export function ChatPage() {
     if (!conversationId || !apiOnline) return
     const onVis = () => {
       if (document.visibilityState !== 'visible') return
-      void markRead(conversationId)
-        .then(() => undefined)
-        .catch(() => undefined)
+      void Promise.resolve(markRead(conversationId)).catch(() => undefined)
     }
     document.addEventListener('visibilitychange', onVis)
     return () => document.removeEventListener('visibilitychange', onVis)
