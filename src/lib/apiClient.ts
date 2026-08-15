@@ -240,6 +240,11 @@ export async function apiFetchMyActivity(range: ActivityRange = 30) {
   return data.activity
 }
 
+/** Clears closed check-in history used for personal activity stats. */
+export async function apiResetMyActivity() {
+  return request<{ ok: true; deleted: number }>('/me/activity', { method: 'DELETE' })
+}
+
 export async function apiJoinGym(gymId: string, makeHome = false) {
   const data = await request<{ user: AppUser }>(
     `/me/gyms/${encodeURIComponent(gymId)}${makeHome ? '?home=1' : ''}`,

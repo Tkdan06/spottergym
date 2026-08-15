@@ -135,6 +135,26 @@ meRoutes.get(
   },
 )
 
+/**
+ * Clear personal gym activity history used for the stats chart.
+ * Keeps the current open check-in so the user stays on the floor.
+ */
+meRoutes.delete(
+  '/activity',
+  rateLimit({ windowMs: 60_000, max: 6, route: 'me-activity-reset' }),
+  async (c) => {
+    const userId = c.get('userId')
+    await expireStaleCheckIns()
+    const result = await prisma.checkIn.deleteMany({
+      where: {
+        userId,
+        checkedOutAt: { not: null },
+      },
+    })
+    return c.json({ ok: true, deleted: result.count })
+  },
+)
+
 /** Throttled presence bump — counts as app activity without check-in. */
 meRoutes.post(
   '/heartbeat',

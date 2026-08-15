@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Bell, ChevronRight, MapPin } from 'lucide-react'
+import { Bell, ChartNoAxesColumn, ChevronRight, MapPin } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { CheckInControl } from '../components/CheckInControl'
 import {
@@ -99,6 +99,9 @@ export function HomePage() {
       <header className="page-header home-top">
         <h1 className="page-title">Мой зал</h1>
         <div className="page-header-actions">
+          <Link to="/app/activity" className="icon-btn" aria-label="Активность" title="Активность">
+            <ChartNoAxesColumn size={20} />
+          </Link>
           <Link to="/app/notifications" className="icon-btn home-bell" aria-label="Уведомления">
             <Bell size={20} />
             {unreadNotifications > 0 ? <i className="nav-badge">{unreadNotifications}</i> : null}
