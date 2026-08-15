@@ -12,7 +12,6 @@ import { AdminPlayersPage } from './pages/AdminPlayersPage'
 import { AdminStoragePage } from './pages/AdminStoragePage'
 import { AdminTicketsPage } from './pages/AdminTicketsPage'
 import { AdminUsersPage } from './pages/AdminUsersPage'
-import { BrandMotionLabPage } from './pages/BrandMotionLabPage'
 import { ChatPage } from './pages/ChatPage'
 import { DiscoverPage } from './pages/DiscoverPage'
 import { FeedbackPage } from './pages/FeedbackPage'
@@ -52,8 +51,6 @@ export default function App() {
           {/* Ad landings — public even if logged in (preview + cold traffic) */}
           <Route path="/lp" element={<LandingPage />} />
           <Route path="/lp-coaches" element={<LandingCoachesPage />} />
-          {/* Motion sandbox — letter intro preview */}
-          <Route path="/brand-lab" element={<BrandMotionLabPage />} />
 
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
