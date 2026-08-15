@@ -1,0 +1,123 @@
+.brand-reveal {
+  --reveal-stagger: 55ms;
+  --reveal-duration: 720ms;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 140px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.brand-reveal-stripes {
+  pointer-events: none;
+  position: absolute;
+  inset: -20% -10%;
+  z-index: 0;
+  opacity: 0;
+  background: repeating-linear-gradient(
+    -18deg,
+    transparent 0 10px,
+    color-mix(in srgb, var(--accent) 18%, transparent) 10px 12px
+  );
+  transform: translateX(-12%) skewX(-8deg);
+}
+
+.brand-reveal.is-playing .brand-reveal-stripes {
+  animation: brand-stripes-sweep 1.15s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.brand-reveal-word {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.02em;
+  font-family: var(--font-brand, var(--font-display));
+  font-weight: 800;
+  font-size: clamp(2.6rem, 14vw, 5.5rem);
+  letter-spacing: -0.05em;
+  line-height: 0.92;
+  color: var(--text);
+}
+
+.brand-reveal-letter {
+  display: inline-block;
+  overflow: hidden;
+  line-height: 1;
+}
+
+.brand-reveal-glyph {
+  display: inline-block;
+  transform: translate3d(0, 110%, 0) skewY(8deg);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.brand-reveal-letter.is-accent .brand-reveal-glyph {
+  color: var(--accent);
+}
+
+.brand-reveal.is-playing .brand-reveal-glyph {
+  animation: brand-letter-rise var(--reveal-duration) cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i) * var(--reveal-stagger) + 80ms);
+}
+
+.brand-reveal.is-done .brand-reveal-glyph {
+  transform: none;
+  opacity: 1;
+}
+
+.brand-reveal--idle .brand-reveal-letter {
+  opacity: 0.22;
+  color: var(--text-muted);
+}
+
+.brand-reveal--idle .brand-reveal-letter.is-accent {
+  color: color-mix(in srgb, var(--accent) 45%, var(--text-muted));
+}
+
+@keyframes brand-letter-rise {
+  0% {
+    transform: translate3d(0, 115%, 0) skewY(10deg) scaleY(1.15);
+    opacity: 0;
+  }
+  55% {
+    opacity: 1;
+  }
+  72% {
+    transform: translate3d(0, -6%, 0) skewY(-2deg) scaleY(1);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) skewY(0) scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes brand-stripes-sweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-28%) skewX(-10deg);
+  }
+  35% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(24%) skewX(-4deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-reveal.is-playing .brand-reveal-glyph,
+  .brand-reveal.is-playing .brand-reveal-stripes {
+    animation: none;
+  }
+
+  .brand-reveal.is-playing .brand-reveal-glyph,
+  .brand-reveal.is-done .brand-reveal-glyph {
+    transform: none;
+    opacity: 1;
+  }
+}

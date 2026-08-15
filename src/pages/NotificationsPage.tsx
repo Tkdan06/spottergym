@@ -234,7 +234,7 @@ export function NotificationsPage() {
           </div>
 
           <div className={`prefs-list ${notificationPrefs.enabled ? '' : 'dims'}`}>
-            {NOTIF_PREF_LABELS.map((item) => (
+            {NOTIF_PREF_LABELS.filter((item) => !item.adminOnly || user?.isAdmin).map((item) => (
               <button
                 key={item.key}
                 type="button"

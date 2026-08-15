@@ -1,0 +1,86 @@
+.brand-lab {
+  min-height: 100dvh;
+  max-width: min(100%, var(--desktop-max, 720px));
+  margin: 0 auto;
+  padding: calc(20px + var(--standalone-top, 0px)) 16px calc(28px + var(--safe-bottom, 0px));
+  display: grid;
+  gap: 18px;
+  align-content: start;
+  box-sizing: border-box;
+}
+
+.brand-lab-top {
+  display: grid;
+  gap: 6px;
+}
+
+.brand-lab-back {
+  width: fit-content;
+  margin-bottom: 4px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.brand-lab-back:hover {
+  color: var(--accent);
+}
+
+.brand-lab-kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.brand-lab-lead {
+  margin: 0;
+  max-width: 40ch;
+  line-height: 1.45;
+}
+
+.brand-lab-stage {
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+  padding: 36px 16px 28px;
+  min-height: 240px;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 40%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 70%),
+    var(--bg-card);
+}
+
+.brand-lab-status {
+  margin: 0;
+  font-size: 0.86rem;
+  text-align: center;
+}
+
+.brand-lab-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.brand-lab-notes {
+  display: grid;
+  gap: 10px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.brand-lab-notes p {
+  margin: 0;
+}
+
+.brand-lab-notes strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.brand-lab-accent {
+  color: var(--accent);
+  font-weight: 700;
+}

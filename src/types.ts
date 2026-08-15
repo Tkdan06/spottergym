@@ -28,6 +28,8 @@ export interface UserProfile {
   id: string
   /** Public findable handle without @ */
   username?: string
+  /** Optional Instagram handle without @ */
+  instagram?: string
   name: string
   age: number
   gender: Gender
@@ -192,6 +194,10 @@ export interface AdminDirectoryUser {
   /** First check-in of today (MSK), if any */
   checkedInTodayAt?: string
   checkedInTodayGymId?: string
+  /** IP at registration (admin only) */
+  signupIp?: string
+  /** How many non-deleted accounts share this signup IP (admin only) */
+  signupIpCount?: number
   /** Сид из mock — не «живой» зарегистрированный пользователь */
   isDemoSeed?: boolean
 }
@@ -205,6 +211,7 @@ export type NotificationType =
   | 'system'
   | 'admin'
   | 'workout_reminder'
+  | 'new_registration'
 
 export interface AppNotification {
   id: string
@@ -229,4 +236,6 @@ export interface NotificationPrefs {
   system: boolean
   /** За час до слота тренировки */
   workoutReminders: boolean
+  /** Только для админов: пуш о новых регистрациях */
+  newRegistrations: boolean
 }

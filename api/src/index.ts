@@ -3,10 +3,18 @@ import { Hono } from 'hono'
 import { bodyLimit } from 'hono/body-limit'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
-import { env } from './env.js'
-import { HTTP_BODY_MAX_BYTES } from './lib/fieldLimits.js'
+import { z } from 'zod'
+import { prisma } from './db.js'
+import { env, isMasterAdminEmail, normalizeEmail } from './env.js'
+import {
+  disableEmergencyShutdown,
+  isEmergencyShutdown,
+} from './lib/emergency.js'
+import { HTTP_BODY_MAX_BYTES, PASSWORD_MAX } from './lib/fieldLimits.js'
+import { verifyPassword } from './lib/password.js'
 import { isPushConfigured } from './lib/push.js'
 import { startWorkoutReminderLoop } from './lib/workoutReminders.js'
+import { rateLimit } from './middleware/rateLimit.js'
 import { adminRoutes } from './routes/admin.js'
 import { analyticsRoutes } from './routes/analytics.js'
 import { authRoutes } from './routes/auth.js'
@@ -56,7 +64,65 @@ app.use(
   }),
 )
 
-app.get('/health', (c) => c.json({ ok: true, service: 'spotter-api' }))
+/** When emergency flag is on, block everything except health + recover. */
+app.use('*', async (c, next) => {
+  if (c.req.method === 'OPTIONS') return next()
+  const path = c.req.path
+  if (path === '/health' || path === '/admin/emergency-recover') {
+    return next()
+  }
+  if (await isEmergencyShutdown()) {
+    return c.json({ error: 'Сервис временно отключён', emergency: true }, 503)
+  }
+  return next()
+})
+
+app.get('/health', async (c) => {
+  const emergency = await isEmergencyShutdown()
+  return c.json(
+    { ok: !emergency, service: 'spotter-api', emergency },
+    emergency ? 503 : 200,
+  )
+})
+
+/** Turn service back on without a session (master email + password). */
+app.post(
+  '/admin/emergency-recover',
+  rateLimit({ windowMs: 60 * 60_000, max: 10, route: 'admin-emergency-recover' }),
+  async (c) => {
+    if (!(await isEmergencyShutdown())) {
+      return c.json({ ok: true, emergency: false, message: 'Сервис уже работает' })
+    }
+
+    const body = z
+      .object({
+        email: z.string().email().max(254),
+        password: z.string().min(1).max(PASSWORD_MAX),
+      })
+      .safeParse(await c.req.json().catch(() => null))
+    if (!body.success) {
+      return c.json({ error: 'Укажи email и пароль главного админа' }, 400)
+    }
+
+    const email = normalizeEmail(body.data.email)
+    if (!isMasterAdminEmail(email)) {
+      return c.json({ error: 'Неверные данные' }, 401)
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } })
+    if (!user || user.deletedAt) {
+      return c.json({ error: 'Неверные данные' }, 401)
+    }
+
+    const ok = await verifyPassword(user.passwordHash, body.data.password)
+    if (!ok) {
+      return c.json({ error: 'Неверные данные' }, 401)
+    }
+
+    await disableEmergencyShutdown(user.id)
+    return c.json({ ok: true, emergency: false, message: 'Сервис снова доступен' })
+  },
+)
 
 app.route('/analytics', analyticsRoutes)
 app.route('/media', mediaRoutes)
@@ -81,5 +147,8 @@ app.onError((err, c) => {
 serve({ fetch: app.fetch, port: env.port }, (info) => {
   console.log(`Spotter API http://localhost:${info.port}`)
   console.log(`[push] ${isPushConfigured() ? 'VAPID ready' : 'disabled (set VAPID_* keys)'}`)
+  void isEmergencyShutdown().then((on) => {
+    if (on) console.error('[emergency] API started in SHUTDOWN mode — only /health and recover')
+  })
   startWorkoutReminderLoop()
 })

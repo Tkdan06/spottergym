@@ -267,8 +267,14 @@ export async function apiSearchUsers(q: string) {
   return data.users
 }
 
-export async function apiFetchUser(userId: string) {
-  const data = await request<{ user: AppUser }>(`/users/${encodeURIComponent(userId)}`)
+export async function apiFetchUser(
+  userId: string,
+  opts?: { revealAnonymous?: boolean },
+) {
+  const sp = opts?.revealAnonymous ? '?reveal=1' : ''
+  const data = await request<{ user: AppUser }>(
+    `/users/${encodeURIComponent(userId)}${sp}`,
+  )
   return data.user
 }
 
@@ -420,6 +426,64 @@ export async function apiAdminUnblockEmail(email: string) {
     { method: 'DELETE' },
   )
   return data.emails
+}
+
+export async function apiAdminFetchBlockedIps() {
+  const data = await request<{ ips: string[] }>('/admin/blocked-ips')
+  return data.ips
+}
+
+export async function apiAdminBlockIp(ip: string, reason?: string) {
+  const data = await request<{ ips: string[] }>('/admin/blocked-ips', {
+    method: 'POST',
+    json: { ip, reason },
+  })
+  return data.ips
+}
+
+export async function apiAdminUnblockIp(ip: string) {
+  const data = await request<{ ips: string[] }>(
+    `/admin/blocked-ips/${encodeURIComponent(ip)}`,
+    { method: 'DELETE' },
+  )
+  return data.ips
+}
+
+export async function apiAdminEmergencyShutdown(password: string) {
+  return request<{ ok: boolean; emergency: boolean; message: string }>(
+    '/admin/emergency-shutdown',
+    {
+      method: 'POST',
+      json: { password, confirm: 'SHUTDOWN' },
+    },
+  )
+}
+
+export async function apiAdminEmergencyRecover(email: string, password: string) {
+  return request<{ ok: boolean; emergency: boolean; message: string }>(
+    '/admin/emergency-recover',
+    {
+      method: 'POST',
+      json: { email, password },
+    },
+  )
+}
+
+export async function apiFetchHealth() {
+  const res = await fetch(`${getApiBase()}/health`, {
+    credentials: 'include',
+    cache: 'no-store',
+  })
+  const data = (await res.json().catch(() => ({}))) as {
+    ok?: boolean
+    emergency?: boolean
+    service?: string
+  }
+  return {
+    ok: Boolean(data.ok),
+    emergency: Boolean(data.emergency),
+    status: res.status,
+  }
 }
 
 export async function apiAdminDeleteUser(userId: string, options?: { alsoBlock?: boolean }) {

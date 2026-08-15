@@ -8,6 +8,7 @@ import {
   Megaphone,
   MessagesSquare,
   Palette,
+  Power,
   RefreshCw,
   Shield,
   Users,
@@ -22,7 +23,10 @@ import {
 } from '../lib/adminAnalytics'
 import { formatAdminDate, formatBytes } from '../lib/adminStats'
 import { permissionSummary } from '../lib/adminPermissions'
-import { apiAdminFetchAnalytics } from '../lib/apiClient'
+import {
+  apiAdminEmergencyShutdown,
+  apiAdminFetchAnalytics,
+} from '../lib/apiClient'
 import './FeedbackPage.css'
 import './AdminPlayersPage.css'
 
@@ -39,6 +43,11 @@ export function AdminHubPage() {
   const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [killPassword, setKillPassword] = useState('')
+  const [killConfirm, setKillConfirm] = useState('')
+  const [killBusy, setKillBusy] = useState(false)
+  const [killError, setKillError] = useState('')
+  const [killOpen, setKillOpen] = useState(false)
 
   const load = useCallback(async () => {
     if (!canViewUsers) return
@@ -285,6 +294,104 @@ export function AdminHubPage() {
           <p className="muted">Как обычный пользователь</p>
         </Link>
       </div>
+
+      {user.isMasterAdmin ? (
+        <section className="surface admin-emergency" aria-label="Аварийное отключение">
+          <div className="admin-emergency-head">
+            <Power size={20} aria-hidden />
+            <div>
+              <h2>Аварийное отключение</h2>
+              <p className="muted">
+                Выключает API на сервере. Сайт станет недоступен, пока главный админ не включит
+                снова (email + пароль на экране офлайна).
+              </p>
+            </div>
+          </div>
+          {!killOpen ? (
+            <button
+              type="button"
+              className="btn btn-danger admin-emergency-btn"
+              onClick={() => {
+                setKillOpen(true)
+                setKillError('')
+                setKillPassword('')
+                setKillConfirm('')
+              }}
+            >
+              Выключить Spotter
+            </button>
+          ) : (
+            <form
+              className="admin-emergency-form"
+              onSubmit={(e) => {
+                e.preventDefault()
+                setKillError('')
+                if (killConfirm.trim() !== 'SHUTDOWN') {
+                  setKillError('Введи SHUTDOWN для подтверждения')
+                  return
+                }
+                const ok = window.confirm(
+                  'Точно выключить весь сервис? Пользователи потеряют доступ сразу.',
+                )
+                if (!ok) return
+                setKillBusy(true)
+                void apiAdminEmergencyShutdown(killPassword)
+                  .then(() => {
+                    setKillError('')
+                    window.location.reload()
+                  })
+                  .catch((err: unknown) => {
+                    setKillError(err instanceof Error ? err.message : 'Не удалось выключить')
+                  })
+                  .finally(() => setKillBusy(false))
+              }}
+            >
+              <label>
+                Твой пароль
+                <input
+                  type="password"
+                  autoComplete="current-password"
+                  value={killPassword}
+                  onChange={(e) => setKillPassword(e.target.value)}
+                  required
+                  disabled={killBusy}
+                />
+              </label>
+              <label>
+                Напиши SHUTDOWN
+                <input
+                  type="text"
+                  autoComplete="off"
+                  value={killConfirm}
+                  onChange={(e) => setKillConfirm(e.target.value)}
+                  placeholder="SHUTDOWN"
+                  required
+                  disabled={killBusy}
+                />
+              </label>
+              {killError ? <p className="feedback-error">{killError}</p> : null}
+              <div className="admin-emergency-actions">
+                <button type="submit" className="btn btn-danger" disabled={killBusy}>
+                  {killBusy ? 'Отключаем…' : 'Подтвердить отключение'}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  disabled={killBusy}
+                  onClick={() => {
+                    setKillOpen(false)
+                    setKillPassword('')
+                    setKillConfirm('')
+                    setKillError('')
+                  }}
+                >
+                  Отмена
+                </button>
+              </div>
+            </form>
+          )}
+        </section>
+      ) : null}
     </main>
   )
 }

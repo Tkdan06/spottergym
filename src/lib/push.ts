@@ -42,6 +42,24 @@ export async function registerSpotterServiceWorker() {
   }
 }
 
+/**
+ * Tell the service worker which chat is open so OS pushes for that thread are suppressed
+ * while the page is visible. Pass null on leave / when the tab is hidden.
+ */
+export function setActiveChatForPush(conversationId: string | null) {
+  if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return
+  const post = (sw: ServiceWorker | null | undefined) => {
+    sw?.postMessage({
+      type: 'spotter:active-chat',
+      conversationId: conversationId || null,
+    })
+  }
+  post(navigator.serviceWorker.controller)
+  void navigator.serviceWorker.ready
+    .then((reg) => post(reg.active))
+    .catch(() => undefined)
+}
+
 async function getReadyRegistration() {
   if (!pushSupported()) return null
   await registerSpotterServiceWorker()

@@ -357,6 +357,36 @@
   opacity: 0.72;
 }
 
+.admin-player-row.is-shared-ip {
+  border-color: color-mix(in srgb, var(--danger) 55%, var(--border, transparent));
+  background: color-mix(in srgb, var(--danger) 12%, var(--bg-card));
+}
+
+.admin-player-row.is-shared-ip.is-selected {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 1px var(--danger);
+}
+
+.admin-player-row-flags {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.admin-ip-flag {
+  color: var(--danger);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.admin-detail-ip-warn {
+  color: var(--danger);
+  font-weight: 700;
+}
+
 .admin-player-row-top {
   display: flex;
   justify-content: space-between;

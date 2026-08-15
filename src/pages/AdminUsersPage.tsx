@@ -32,15 +32,19 @@ export function AdminUsersPage() {
     user,
     adminDirectory,
     blockedEmails,
+    blockedIps,
     canManageAdmins,
     canBlockUsers,
     adminSetUserAdmin,
     adminSetPermissions,
     adminBlockEmail,
     adminUnblockEmail,
+    adminBlockIp,
+    adminUnblockIp,
   } = useApp()
   const [search, setSearch] = useState('')
   const [blockEmail, setBlockEmail] = useState('')
+  const [blockIp, setBlockIp] = useState('')
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -66,6 +70,21 @@ export function AdminUsersPage() {
         await adminBlockEmail(blockEmail)
         setBlockEmail('')
         setNotice('Email заблокирован')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Ошибка')
+      }
+    })()
+  }
+
+  const onBlockIp = (e: FormEvent) => {
+    e.preventDefault()
+    setError('')
+    void (async () => {
+      try {
+        if (!blockIp.trim()) return
+        await adminBlockIp(blockIp)
+        setBlockIp('')
+        setNotice('IP заблокирован')
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Ошибка')
       }
@@ -302,6 +321,60 @@ export function AdminUsersPage() {
                 ))
               ) : (
                 <p className="muted">Список блокировок пуст</p>
+              )}
+            </div>
+          </>
+        ) : (
+          <p className="muted">У тебя нет права блокировать пользователей.</p>
+        )}
+      </section>
+
+      <section id="block-ip" className="surface block-form">
+        <h2>Блокировка по IP</h2>
+        {canBlockUsers ? (
+          <>
+            <p className="muted">
+              С заблокированного IP нельзя войти, зарегистрироваться или пользоваться API.
+              Осторожно с общим Wi‑Fi зала.
+            </p>
+            <form onSubmit={onBlockIp} className="feedback-actions">
+              <input
+                name="ip"
+                type="text"
+                autoComplete="off"
+                inputMode="decimal"
+                value={blockIp}
+                onChange={(e) => setBlockIp(e.target.value)}
+                placeholder="203.0.113.10"
+                required
+              />
+              <button type="submit" className="btn btn-danger btn-block">
+                Заблокировать IP
+              </button>
+            </form>
+            <div className="chip-grid">
+              {blockedIps.length ? (
+                blockedIps.map((ip) => (
+                  <button
+                    key={ip}
+                    type="button"
+                    className="chip"
+                    onClick={() => {
+                      void (async () => {
+                        try {
+                          await adminUnblockIp(ip)
+                          setNotice('IP разблокирован')
+                        } catch (err) {
+                          setError(err instanceof Error ? err.message : 'Ошибка')
+                        }
+                      })()
+                    }}
+                  >
+                    {ip} · снять
+                  </button>
+                ))
+              ) : (
+                <p className="muted">Список IP-блокировок пуст</p>
               )}
             </div>
           </>

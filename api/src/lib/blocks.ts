@@ -1,10 +1,21 @@
 import { prisma } from '../db.js'
 import { normalizeEmail } from '../env.js'
 
+export function normalizeIp(ip: string) {
+  return ip.trim().toLowerCase().slice(0, 64)
+}
+
 export async function isEmailBlocked(email: string) {
   const row = await prisma.blockedEmail.findUnique({
     where: { email: normalizeEmail(email) },
   })
+  return Boolean(row)
+}
+
+export async function isIpBlocked(ip: string) {
+  const key = normalizeIp(ip)
+  if (!key || key === 'unknown') return false
+  const row = await prisma.blockedIp.findUnique({ where: { ip: key } })
   return Boolean(row)
 }
 

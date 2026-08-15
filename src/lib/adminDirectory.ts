@@ -14,7 +14,12 @@ import { loadJson, saveJson } from './storage'
 
 export const STORAGE_ADMIN_DIR = 'spotter.admin.directory'
 export const STORAGE_BLOCKED = 'spotter.admin.blockedEmails'
+export const STORAGE_BLOCKED_IPS = 'spotter.admin.blockedIps'
 export const ACCOUNT_KEY_PREFIX = 'spotter.account:'
+
+export function normalizeIp(ip: string) {
+  return ip.trim().toLowerCase().slice(0, 64)
+}
 
 export function utf8ByteLength(value: string) {
   try {
@@ -78,6 +83,36 @@ export function blockEmail(email: string) {
 export function unblockEmail(email: string) {
   const next = loadBlockedEmails().filter((e) => e !== normalizeEmail(email))
   saveBlockedEmails(next)
+  return next
+}
+
+export function loadBlockedIps(): string[] {
+  const raw = loadJson<string[]>(STORAGE_BLOCKED_IPS, [])
+  return [...new Set(raw.map(normalizeIp).filter((ip) => ip && ip !== 'unknown'))]
+}
+
+export function saveBlockedIps(ips: string[]) {
+  saveJson(STORAGE_BLOCKED_IPS, [...new Set(ips.map(normalizeIp).filter(Boolean))])
+}
+
+export function isIpBlockedLocal(ip: string) {
+  const key = normalizeIp(ip)
+  if (!key || key === 'unknown') return false
+  return loadBlockedIps().includes(key)
+}
+
+export function blockIp(ip: string) {
+  const key = normalizeIp(ip)
+  if (!key || key === 'unknown') return loadBlockedIps()
+  const next = [...loadBlockedIps(), key]
+  saveBlockedIps(next)
+  return next
+}
+
+export function unblockIp(ip: string) {
+  const key = normalizeIp(ip)
+  const next = loadBlockedIps().filter((e) => e !== key)
+  saveBlockedIps(next)
   return next
 }
 

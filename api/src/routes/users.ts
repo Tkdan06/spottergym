@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { expireStaleCheckIns } from '../lib/checkInExpiry.js'
 import { prisma } from '../db.js'
+import { resolveAdminFlags } from '../lib/admin.js'
 import { areUsersBlocked, listHiddenUserIds } from '../lib/blocks.js'
 import { serializePublicUser } from '../lib/serialize.js'
 import { loadAuthedUser, requireAuth, type AuthedEnv } from '../middleware/auth.js'
@@ -16,6 +17,22 @@ const userInclude = {
   gyms: true,
   checkIns: { where: { checkedOutAt: null }, take: 1 },
 } as const
+
+async function viewerCanRevealAnonymous(userId: string) {
+  const me = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      email: true,
+      isAdmin: true,
+      isMasterAdmin: true,
+      adminPermissions: true,
+      deletedAt: true,
+    },
+  })
+  if (!me || me.deletedAt) return false
+  const flags = resolveAdminFlags(me)
+  return flags.isAdmin && flags.adminPermissions.viewUsers
+}
 
 /** Partial @username / name search */
 userRoutes.get(
@@ -56,7 +73,7 @@ userRoutes.get(
     orderBy: { username: 'asc' },
   })
 
-  return c.json({ users: found.map(serializePublicUser) })
+  return c.json({ users: found.map((u) => serializePublicUser(u)) })
 })
 
 /** Exact lookup by public @username */
@@ -89,10 +106,17 @@ userRoutes.get('/:id', async (c) => {
   }
 
   const me = c.get('userId')
+  const wantReveal =
+    c.req.query('reveal') === '1' || c.req.query('reveal') === 'true'
+  const revealAnonymous = wantReveal ? await viewerCanRevealAnonymous(me) : false
+  if (wantReveal && !revealAnonymous) {
+    return c.json({ error: 'Недостаточно прав' }, 403)
+  }
+
   if (id.data === me) {
     const self = await loadAuthedUser(me)
     if (!self) return c.json({ error: 'Аккаунт не найден' }, 404)
-    return c.json({ user: serializePublicUser(self) })
+    return c.json({ user: serializePublicUser(self, { revealAnonymous }) })
   }
 
   if (await areUsersBlocked(me, id.data)) {
@@ -107,5 +131,7 @@ userRoutes.get('/:id', async (c) => {
     return c.json({ error: 'Пользователь не найден' }, 404)
   }
 
-  return c.json({ user: serializePublicUser(found) })
+  return c.json({
+    user: serializePublicUser(found, { revealAnonymous }),
+  })
 })

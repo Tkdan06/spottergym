@@ -16,12 +16,12 @@ export function buildInvitePayload(opts: {
 }): InvitePayload {
   // Always production HTTPS so Telegram/WhatsApp/Max can fetch OG tags + og-image.png
   const url = `${SHARE_ORIGIN}/register?invite=${encodeURIComponent(opts.userId)}`
-  const title = 'SPOTTER — найди своих в зале'
+  const title = 'SPOTTER — найди людей в своём клубе'
   const gym = opts.gymName?.trim()
   // Текст без сырого URL: ссылка уходит отдельно в `url`, мессенджер рисует красивое OG-превью
   const text = gym
-    ? `Привет! Присоединяйся ко мне в Spotter — ищем своих в «${gym}».`
-    : 'Привет! Присоединяйся ко мне в Spotter — найди своих в зале.'
+    ? `Привет! Присоединяйся ко мне в Spotter — находи людей в «${gym}».`
+    : 'Привет! Присоединяйся ко мне в Spotter — найди людей в своём клубе.'
 
   return { title, text, url }
 }

@@ -13,7 +13,7 @@ export function WelcomePage() {
             SPOT<span>TER</span>
           </h1>
           <p className="welcome-lead">
-            Найди своих в зале: кто рядом, кто на тренировке и кто открыт к общению
+            Найди людей в своём клубе: кто рядом, кто на тренировке и кто открыт к общению
           </p>
           <div className="welcome-actions">
             <Link to="/register" className="btn btn-primary btn-block">

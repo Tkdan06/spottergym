@@ -29,12 +29,15 @@ import {
   ApiError,
   apiAcceptConversation,
   apiAdminBlockEmail,
+  apiAdminBlockIp,
   apiAdminDeleteUser,
   apiAdminFetchBlockedEmails,
+  apiAdminFetchBlockedIps,
   apiAdminFetchUsers,
   apiAdminOutboundTicket,
   apiAdminPatchUserAdmin,
   apiAdminUnblockEmail,
+  apiAdminUnblockIp,
   apiBlockUser,
   apiCheckIn,
   apiCheckOut,
@@ -86,19 +89,23 @@ import {
 import {
   adminFlagsForEmail,
   blockEmail,
+  blockIp,
   isEmailBlocked,
   loadBlockedEmails,
+  loadBlockedIps,
   estimatePhotosBytes,
   loadDirectory,
   mergeStoredAccountsIntoDirectory,
   removeUserAccount,
   saveBlockedEmails,
+  saveBlockedIps,
   saveDirectory,
   setAdminPermissions as dirSetAdminPermissions,
   setCanGrantAdmin as dirSetCanGrant,
   setUserAdmin as dirSetUserAdmin,
   syncDirectoryFromAppUser,
   unblockEmail,
+  unblockIp,
 } from '../lib/adminDirectory'
 import {
   EMPTY_PERMISSIONS,
@@ -126,6 +133,7 @@ import {
   isValidUsername,
   normalizeUsername,
 } from '../lib/username'
+import { normalizeInstagram } from '../lib/instagram'
 import { activeBreakUntil } from '../lib/schedule'
 import {
   blockUserId,
@@ -228,7 +236,10 @@ export interface AppContextValue {
   /** Partial @ник / имя — серверный поиск */
   searchUsers: (query: string) => Promise<UserProfile[]>
   /** Профиль по id с сервера (кэширует). bypassCache — всегда дернуть API. */
-  fetchUserById: (userId: string, opts?: { bypassCache?: boolean }) => Promise<UserProfile>
+  fetchUserById: (
+    userId: string,
+    opts?: { bypassCache?: boolean; revealAnonymous?: boolean },
+  ) => Promise<UserProfile>
   rememberUser: (person: UserProfile) => void
   sendMessage: (conversationId: string, text: string) => void | Promise<void>
   startConversation: (userId: string, text: string) => string | Promise<string>
@@ -249,6 +260,7 @@ export interface AppContextValue {
   tickets: FeedbackTicket[]
   adminDirectory: AdminDirectoryUser[]
   blockedEmails: string[]
+  blockedIps: string[]
   canManageAdmins: boolean
   canBlockUsers: boolean
   canRemoveUsers: boolean
@@ -282,6 +294,8 @@ export interface AppContextValue {
   adminSetCanGrant: (userId: string, canGrant: boolean) => void
   adminBlockEmail: (email: string) => void | Promise<void>
   adminUnblockEmail: (email: string) => void | Promise<void>
+  adminBlockIp: (ip: string) => void | Promise<void>
+  adminUnblockIp: (ip: string) => void | Promise<void>
   adminRemoveUser: (email: string, alsoBlock?: boolean) => void | Promise<void>
   /** Админ пишет пользователю (тикет + уведомление в его ленту) */
   adminMessageUser: (target: AdminDirectoryUser, message: string) => Promise<FeedbackTicket>
@@ -354,6 +368,8 @@ function toAdminDirectoryUser(
     photosBytes?: number
     checkedInTodayAt?: string
     checkedInTodayGymId?: string
+    signupIp?: string
+    signupIpCount?: number
   },
 ): AdminDirectoryUser {
   const photosCount =
@@ -389,6 +405,8 @@ function toAdminDirectoryUser(
     lastSeenAt: u.lastSeenAt,
     checkedInTodayAt: u.checkedInTodayAt || undefined,
     checkedInTodayGymId: u.checkedInTodayGymId || undefined,
+    signupIp: typeof u.signupIp === 'string' ? u.signupIp : undefined,
+    signupIpCount: typeof u.signupIpCount === 'number' ? u.signupIpCount : undefined,
     isDemoSeed: false,
   }
 }
@@ -401,6 +419,7 @@ function createDefaultUser(name: string, email: string, gender: Gender = 'male')
   return withAdminFlags({
     id: 'me',
     username: generateLocalUsername(name),
+    instagram: '',
     name,
     email: normalizeEmail(email),
     age: 25,
@@ -460,10 +479,13 @@ function loadUser(): AppUser | null {
         : ''
   const existingUsername =
     typeof raw.username === 'string' ? normalizeUsername(raw.username) : ''
+  const existingInstagram =
+    typeof raw.instagram === 'string' ? normalizeInstagram(raw.instagram) : ''
   const normalized = withAdminFlags(
     withSyncedAvatar({
       ...gymNormalized,
       username: existingUsername || generateLocalUsername(gymNormalized.name || 'user'),
+      instagram: existingInstagram,
       photos: Array.isArray(raw.photos) ? raw.photos : [],
       sports: Array.isArray(raw.sports) ? raw.sports : [],
       interests: Array.isArray(raw.interests) ? raw.interests : [],
@@ -577,6 +599,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [tickets, setTickets] = useState<FeedbackTicket[]>(() => seedTicketsIfEmpty())
   const [adminDirectory, setAdminDirectory] = useState<AdminDirectoryUser[]>(() => loadDirectory())
   const [blockedEmails, setBlockedEmails] = useState<string[]>(() => loadBlockedEmails())
+  const [blockedIps, setBlockedIps] = useState<string[]>(() => loadBlockedIps())
   const [blockedUserIds, setBlockedUserIds] = useState<string[]>(() =>
     loadBlockedUserIds(loadUser()?.id || ''),
   )
@@ -950,11 +973,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const filtered = Boolean(opts?.activity || opts?.q?.trim())
       if (apiOnlineRef.current && getStoredToken()) {
         try {
-          const [users, emails] = await Promise.all([
+          const [users, emails, ips] = await Promise.all([
             apiAdminFetchUsers(opts).catch(() => null),
             filtered
               ? Promise.resolve(null)
               : apiAdminFetchBlockedEmails().catch(() => null),
+            filtered
+              ? Promise.resolve(null)
+              : apiAdminFetchBlockedIps().catch(() => null),
           ])
           if (users) {
             const mapped = users.map(toAdminDirectoryUser)
@@ -968,6 +994,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
             } else if (!filtered) {
               setBlockedEmails(loadBlockedEmails())
             }
+            if (ips) {
+              saveBlockedIps(ips)
+              setBlockedIps(ips)
+            } else if (!filtered) {
+              setBlockedIps(loadBlockedIps())
+            }
             if (!filtered) await refreshSupport()
             return mapped
           }
@@ -979,6 +1011,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const local = mergeStoredAccountsIntoDirectory()
         setAdminDirectory(local)
         setBlockedEmails(loadBlockedEmails())
+        setBlockedIps(loadBlockedIps())
         await refreshSupport()
         return local
       }
@@ -1341,6 +1374,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ...(data.username !== undefined
           ? { username: normalizeUsername(data.username) }
           : {}),
+        ...(data.instagram !== undefined
+          ? { instagram: normalizeInstagram(data.instagram) }
+          : {}),
         ...(data.bio !== undefined ? { bio: clampText(data.bio, BIO_MAX) } : {}),
         ...(data.photos !== undefined ? { photos: clampPhotos(data.photos) } : {}),
       }
@@ -1400,6 +1436,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         const patch: Partial<AppUser> = {
           ...(safe.name !== undefined ? { name: safe.name } : {}),
           ...(safe.username !== undefined ? { username: safe.username } : {}),
+          ...(safe.instagram !== undefined ? { instagram: safe.instagram } : {}),
           ...(safe.age !== undefined ? { age: safe.age } : {}),
           ...(safe.gender !== undefined ? { gender: safe.gender } : {}),
           ...(safe.bio !== undefined ? { bio: safe.bio } : {}),
@@ -1825,10 +1862,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   )
 
   const fetchUserById = useCallback(
-    async (userId: string, opts?: { bypassCache?: boolean }) => {
+    async (
+      userId: string,
+      opts?: { bypassCache?: boolean; revealAnonymous?: boolean },
+    ) => {
       if (!userId) throw new Error('Пользователь не найден')
       if (user && user.id === userId) return user as UserProfile
-      if (!opts?.bypassCache) {
+      if (!opts?.bypassCache && !opts?.revealAnonymous) {
         const cached = knownUsersRef.current.find((u) => u.id === userId)
         if (cached) return cached
       }
@@ -1846,8 +1886,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (cached) return cached
         throw new Error('Пользователь не найден')
       }
-      const found = await apiFetchUser(userId)
-      rememberUser(found)
+      const found = await apiFetchUser(userId, {
+        revealAnonymous: opts?.revealAnonymous,
+      })
+      // Never cache admin-revealed anonymous profiles — would leak into hall cards
+      if (!opts?.revealAnonymous) {
+        rememberUser(found)
+      }
       return found
     },
     [user, rememberUser],
@@ -2231,7 +2276,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ticketId,
         senderType: 'admin',
         senderId: user!.id,
-        senderName: user!.name,
+        senderName: 'Админ',
         message,
         closeAs,
         takeInProgress: !closeAs,
@@ -2278,7 +2323,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         targetUserName: target.name,
         targetUserEmail: target.email,
         adminId: user!.id,
-        adminName: user!.name,
+        adminName: 'Админ',
         message,
       })
       setTickets(seedTicketsIfEmpty())
@@ -2460,6 +2505,36 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return
       }
       setBlockedEmails(unblockEmail(email))
+    },
+    [canBlockUsers],
+  )
+
+  const adminBlockIp = useCallback(
+    async (ip: string) => {
+      if (!canBlockUsers) throw new Error('Нет права блокировать')
+      const key = ip.trim().toLowerCase()
+      if (!key || key === 'unknown') throw new Error('Некорректный IP')
+      if (apiOnlineRef.current && getStoredToken()) {
+        const ips = await apiAdminBlockIp(key)
+        saveBlockedIps(ips)
+        setBlockedIps(ips)
+        return
+      }
+      setBlockedIps(blockIp(key))
+    },
+    [canBlockUsers],
+  )
+
+  const adminUnblockIp = useCallback(
+    async (ip: string) => {
+      if (!canBlockUsers) throw new Error('Нет права блокировать')
+      if (apiOnlineRef.current && getStoredToken()) {
+        const ips = await apiAdminUnblockIp(ip)
+        saveBlockedIps(ips)
+        setBlockedIps(ips)
+        return
+      }
+      setBlockedIps(unblockIp(ip))
     },
     [canBlockUsers],
   )
@@ -2671,6 +2746,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       tickets,
       adminDirectory,
       blockedEmails,
+      blockedIps,
       canManageAdmins,
       canBlockUsers,
       canRemoveUsers,
@@ -2687,6 +2763,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       adminSetCanGrant,
       adminBlockEmail,
       adminUnblockEmail,
+      adminBlockIp,
+      adminUnblockIp,
       adminRemoveUser,
       adminMessageUser,
       refreshAdminDirectory,
@@ -2714,6 +2792,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       tickets,
       adminDirectory,
       blockedEmails,
+      blockedIps,
       blockedUserIds,
       canManageAdmins,
       canBlockUsers,
@@ -2759,6 +2838,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       adminSetCanGrant,
       adminBlockEmail,
       adminUnblockEmail,
+      adminBlockIp,
+      adminUnblockIp,
       isBlocked,
       blockUser,
       unblockUser,

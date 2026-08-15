@@ -62,7 +62,7 @@ async function buildViewerLikesPayload(viewerId: string) {
           where: { id: { in: actorIds }, deletedAt: null },
           include: userInclude,
         })
-      ).map(serializePublicUser)
+      ).map((u) => serializePublicUser(u))
     : []
 
   return { likes, counts, actors }

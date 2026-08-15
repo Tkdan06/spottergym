@@ -213,7 +213,7 @@
 
 .safety {
   padding: 16px;
-  margin-bottom: 12px;
+  margin-bottom: 0;
 }
 
 .safety .section-title {
@@ -227,6 +227,34 @@
   display: grid;
   gap: 6px;
   font-size: 0.9rem;
+}
+
+.settings-session {
+  margin-top: 16px;
+}
+
+.settings-delete {
+  display: grid;
+  gap: 12px;
+  margin-top: 28px;
+  margin-bottom: 8px;
+  padding: 16px;
+  border-color: color-mix(in srgb, var(--danger, #c23b3b) 35%, var(--line));
+  background: color-mix(in srgb, var(--danger, #c23b3b) 6%, var(--bg-card));
+}
+
+.settings-delete .section-title {
+  margin: 0;
+}
+
+.settings-delete-lead {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.settings-delete-confirm {
+  gap: 10px;
 }
 
 .blocked-list {

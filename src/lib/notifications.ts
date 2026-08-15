@@ -25,12 +25,15 @@ export const DEFAULT_NOTIF_PREFS: NotificationPrefs = {
   coaches: true,
   system: true,
   workoutReminders: true,
+  newRegistrations: true,
 }
 
 export const NOTIF_PREF_LABELS: {
   key: keyof Omit<NotificationPrefs, 'enabled'>
   title: string
   hint: string
+  /** Shown only to admins */
+  adminOnly?: boolean
 }[] = [
   {
     key: 'gymNewMembers',
@@ -66,6 +69,12 @@ export const NOTIF_PREF_LABELS: {
     key: 'workoutReminders',
     title: 'Напоминание о тренировке',
     hint: 'За час до слота: собраться и отметить статус в зале',
+  },
+  {
+    key: 'newRegistrations',
+    title: 'Новые регистрации',
+    hint: 'Пуш, когда в приложении регистрируется новый пользователь',
+    adminOnly: true,
   },
 ]
 
@@ -251,6 +260,8 @@ export function prefKeyForType(type: NotificationType): keyof Omit<NotificationP
       return 'system'
     case 'workout_reminder':
       return 'workoutReminders'
+    case 'new_registration':
+      return 'newRegistrations'
     default:
       return null
   }
@@ -296,6 +307,8 @@ export function typeLabel(type: NotificationType) {
       return 'Поддержка'
     case 'workout_reminder':
       return 'Тренировка'
+    case 'new_registration':
+      return 'Регистрация'
     default:
       return 'Spotter'
   }

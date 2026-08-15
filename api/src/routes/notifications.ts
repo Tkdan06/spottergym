@@ -1,12 +1,13 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
 import { prisma } from '../db.js'
+import { resolveAdminFlags } from '../lib/admin.js'
 import {
   getOrCreatePrefs,
   serializeNotification,
   serializePrefs,
 } from '../lib/notify.js'
-import { requireAuth, type AuthedEnv } from '../middleware/auth.js'
+import { loadAuthedUser, requireAuth, type AuthedEnv } from '../middleware/auth.js'
 import { rateLimit } from '../middleware/rateLimit.js'
 
 export const notificationRoutes = new Hono<AuthedEnv>()
@@ -28,6 +29,7 @@ const prefsSchema = z
     coaches: z.boolean().optional(),
     system: z.boolean().optional(),
     workoutReminders: z.boolean().optional(),
+    newRegistrations: z.boolean().optional(),
   })
   .strict()
 
@@ -38,10 +40,20 @@ notificationRoutes.patch(
     const body = prefsSchema.safeParse(await c.req.json().catch(() => null))
     if (!body.success) return c.json({ error: 'Некорректные настройки' }, 400)
     const userId = c.get('userId')
+    const data = { ...body.data }
+
+    // Admin-only pref — ignore from non-admins
+    if (data.newRegistrations !== undefined) {
+      const me = await loadAuthedUser(userId)
+      if (!me || !resolveAdminFlags(me).isAdmin) {
+        delete data.newRegistrations
+      }
+    }
+
     await getOrCreatePrefs(userId)
     const prefs = await prisma.notificationPrefs.update({
       where: { userId },
-      data: body.data,
+      data,
     })
     return c.json({ prefs: serializePrefs(prefs) })
   },

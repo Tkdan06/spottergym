@@ -9,6 +9,7 @@
     "dev:all": "npm run dev:api & npm run dev",
     "db:up": "docker compose up -d postgres",
     "db:setup": "npm run db:setup --prefix api",
+    "users:export-emails": "npm run users:export-emails --prefix api",
     "build": "tsc -b && vite build",
     "build:api": "npm run build --prefix api",
     "lint": "oxlint",

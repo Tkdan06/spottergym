@@ -288,7 +288,7 @@ export function GymDetailPage() {
                 className="btn btn-primary btn-block"
                 onClick={() => navigate('/app/settings')}
               >
-                Готово · к настройкам
+                К настройкам
               </button>
             ) : null}
             {fromHome ? (
@@ -297,7 +297,7 @@ export function GymDetailPage() {
                 className="btn btn-primary btn-block"
                 onClick={() => navigate('/app')}
               >
-                Готово · на главную
+                На главную
               </button>
             ) : null}
             {!isHome ? (

@@ -1,0 +1,93 @@
+.emergency-gate {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: calc(24px + var(--standalone-top)) 16px calc(24px + var(--safe-bottom));
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(220, 60, 50, 0.18), transparent 55%),
+    var(--bg, #0c0c0c);
+  color: var(--text, #f2f2f2);
+}
+
+.emergency-gate-loading {
+  opacity: 0.7;
+  font-family: Syne, Unbounded, system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.emergency-gate-card {
+  width: min(100%, 400px);
+  display: grid;
+  gap: 12px;
+  padding: 28px 22px;
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid rgba(220, 70, 60, 0.45);
+  background: rgba(20, 12, 12, 0.92);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+.emergency-gate-brand {
+  margin: 0;
+  font-family: Syne, Unbounded, system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: #ff6b5c;
+}
+
+.emergency-gate-card h1 {
+  margin: 0;
+  font-size: 1.45rem;
+  letter-spacing: -0.03em;
+}
+
+.emergency-gate-copy {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  opacity: 0.78;
+}
+
+.emergency-gate-link {
+  justify-self: start;
+  margin-top: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #ff8a7a;
+  font: inherit;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.emergency-gate-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.emergency-gate-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.emergency-gate-form input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.35);
+  color: inherit;
+  font: inherit;
+}
+
+.emergency-gate-error {
+  margin: 0;
+  color: #ff8a7a;
+  font-size: 0.9rem;
+}

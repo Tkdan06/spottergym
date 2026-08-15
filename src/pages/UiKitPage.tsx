@@ -156,6 +156,16 @@ export function UiKitPage() {
         </div>
       </section>
 
+      <section className="surface ui-kit-block">
+        <SectionTitle>Motion</SectionTitle>
+        <p className="muted" style={{ margin: '0 0 10px' }}>
+          Черновик letter-reveal логотипа после регистрации.
+        </p>
+        <Link to="/brand-lab" className="btn btn-soft btn-block">
+          Открыть Brand lab
+        </Link>
+      </section>
+
       <p className="dim ui-kit-note">
         Токены в <code>src/styles/global.css</code> (<code>--text-section-*</code>, цвета). Компонент{' '}
         <code>src/components/SectionTitle.tsx</code>. Перед новым экраном сверься с этой страницей.

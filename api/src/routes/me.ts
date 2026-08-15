@@ -10,6 +10,7 @@ import {
   CITY_MAX,
   GYM_IDS_MAX,
   GYM_ID_MAX,
+  INSTAGRAM_MAX,
   NAME_MAX,
   NAME_MIN,
   PHOTO_DATA_URL_MAX_CHARS,
@@ -35,6 +36,7 @@ import {
   persistPhotoList,
 } from '../lib/mediaStore.js'
 import { isAllowedAvatarRef, isAllowedPhotoRef } from '../lib/photos.js'
+import { isValidInstagram, normalizeInstagram } from '../lib/instagram.js'
 import { serializeUser } from '../lib/serialize.js'
 import { SoftDeleteError, softDeleteUser } from '../lib/softDeleteUser.js'
 import { isValidUsername, normalizeUsername } from '../lib/username.js'
@@ -78,6 +80,8 @@ const patchSchema = z
   .object({
     name: z.string().trim().min(NAME_MIN).max(NAME_MAX).optional(),
     username: z.string().trim().min(USERNAME_MIN).max(USERNAME_MAX).optional(),
+    /** Empty string clears the link */
+    instagram: z.string().max(INSTAGRAM_MAX + 64).optional(),
     age: z.number().int().min(18).max(80).optional(),
     gender: z.enum(['female', 'male']).optional(),
     bio: z.string().min(BIO_MIN).max(BIO_MAX).optional(),
@@ -188,6 +192,20 @@ meRoutes.patch(
       return c.json({ error: 'Этот @ник уже занят' }, 409)
     }
     data.username = username
+  }
+
+  if (data.instagram !== undefined) {
+    const instagram = normalizeInstagram(data.instagram)
+    if (!isValidInstagram(instagram)) {
+      return c.json(
+        {
+          error:
+            'Instagram: до 30 символов, латиница, цифры, точка и _. Или оставь пустым',
+        },
+        400,
+      )
+    }
+    data.instagram = instagram
   }
 
   if (data.gymIds) {

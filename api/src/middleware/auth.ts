@@ -1,9 +1,11 @@
 import { createMiddleware } from 'hono/factory'
 import { getCookie } from 'hono/cookie'
+import { isIpBlocked } from '../lib/blocks.js'
 import { expireStaleCheckIns } from '../lib/checkInExpiry.js'
 import { prisma } from '../db.js'
 import { verifySession } from '../lib/jwt.js'
 import { serializeUser } from '../lib/serialize.js'
+import { clientIp } from './rateLimit.js'
 
 export type AuthedEnv = {
   Variables: {
@@ -30,6 +32,10 @@ export const requireAuth = createMiddleware<AuthedEnv>(async (c, next) => {
   const session = await verifySession(token)
   if (!session) {
     return c.json({ error: 'Сессия недействительна' }, 401)
+  }
+
+  if (await isIpBlocked(clientIp(c))) {
+    return c.json({ error: 'Доступ с этой сети ограничен' }, 403)
   }
 
   const row = await prisma.user.findUnique({

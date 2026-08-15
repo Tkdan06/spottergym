@@ -21,6 +21,7 @@ import { profileImage, profileImageFallback } from '../lib/avatar'
 import { otherParticipantId } from '../lib/conversations'
 import { CHAT_MESSAGE_MAX } from '../lib/fieldLimits'
 import { chatComposerProps } from '../lib/inputAttrs'
+import { setActiveChatForPush } from '../lib/push'
 import { shortGymName } from '../data/mock'
 import './ChatPage.css'
 import './FeedbackPage.css'
@@ -111,6 +112,26 @@ export function ChatPage() {
       cancelled = true
     }
   }, [conversationId, apiOnline, refreshThread, markRead])
+
+  /** Suppress OS pushes for this conversation while the chat is on screen */
+  useEffect(() => {
+    if (!conversationId) return
+
+    const sync = () => {
+      if (document.visibilityState === 'hidden') setActiveChatForPush(null)
+      else setActiveChatForPush(conversationId)
+    }
+
+    sync()
+    document.addEventListener('visibilitychange', sync)
+    const onHide = () => setActiveChatForPush(null)
+    window.addEventListener('pagehide', onHide)
+    return () => {
+      document.removeEventListener('visibilitychange', sync)
+      window.removeEventListener('pagehide', onHide)
+      setActiveChatForPush(null)
+    }
+  }, [conversationId])
 
   /** Poll while the thread is open (inbox poll lives in AppContext) */
   useEffect(() => {

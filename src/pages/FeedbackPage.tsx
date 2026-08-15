@@ -108,7 +108,7 @@ export function FeedbackPage() {
           {selected.messages.map((msg) => (
             <div key={msg.id} className={`feedback-msg feedback-msg--${msg.senderType}`}>
               <div className="feedback-msg-head">
-                <strong>{msg.senderName}</strong>
+                <strong>{msg.senderType === 'admin' ? 'Админ' : msg.senderName}</strong>
                 <span>{formatWhen(msg.createdAt)}</span>
               </div>
               <p>{msg.text}</p>

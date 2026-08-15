@@ -6,6 +6,8 @@ export const NAME_MAX = 30
 export const USERNAME_MIN = 3
 export const USERNAME_MAX = 20
 
+export const INSTAGRAM_MAX = 30
+
 /** Tinder-style about-me */
 /** Aligned with API: bio may be empty; onboarding no longer hard-requires length */
 export const BIO_MIN = 0

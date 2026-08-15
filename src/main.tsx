@@ -13,6 +13,7 @@ import '@fontsource/manrope/500.css'
 import '@fontsource/manrope/600.css'
 import '@fontsource/manrope/700.css'
 import App from './App'
+import { EmergencyOfflineGate } from './components/EmergencyOfflineGate'
 import { SiteLockGate } from './components/SiteLockGate'
 import { registerSpotterServiceWorker } from './lib/push'
 import './styles/global.css'
@@ -34,8 +35,10 @@ void registerSpotterServiceWorker()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <SiteLockGate>
-      <App />
-    </SiteLockGate>
+    <EmergencyOfflineGate>
+      <SiteLockGate>
+        <App />
+      </SiteLockGate>
+    </EmergencyOfflineGate>
   </StrictMode>,
 )

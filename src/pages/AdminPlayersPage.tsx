@@ -1,5 +1,15 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, Ban, MessageSquare, RefreshCw, ShieldAlert, Trash2 } from 'lucide-react'
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  Ban,
+  MessageCircle,
+  MessageSquare,
+  Network,
+  RefreshCw,
+  ShieldAlert,
+  Trash2,
+} from 'lucide-react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { useApp } from '../context/useApp'
 import { formatAdminDate, formatBytes } from '../lib/adminStats'
@@ -18,11 +28,13 @@ type PlayerFilter =
   | 'demo'
   | 'seenToday'
   | 'checkedInToday'
+  | 'sharedIp'
 
 const FILTERS: { id: PlayerFilter; label: string }[] = [
   { id: 'real', label: 'Пользователи' },
   { id: 'seenToday', label: 'Заходили сегодня' },
   { id: 'checkedInToday', label: 'В зале сегодня' },
+  { id: 'sharedIp', label: 'Один IP' },
   { id: 'active', label: 'Сейчас в зале' },
   { id: 'blocked', label: 'Блок' },
   { id: 'demo', label: 'Сиды' },
@@ -33,6 +45,7 @@ function parseFilter(raw: string | null): PlayerFilter {
   if (
     raw === 'seenToday' ||
     raw === 'checkedInToday' ||
+    raw === 'sharedIp' ||
     raw === 'active' ||
     raw === 'blocked' ||
     raw === 'demo' ||
@@ -57,6 +70,7 @@ export function AdminPlayersPage() {
   const {
     user,
     blockedEmails,
+    blockedIps,
     canViewUsers,
     canBlockUsers,
     canMessageUsers,
@@ -64,9 +78,12 @@ export function AdminPlayersPage() {
     adminDirectory,
     adminBlockEmail,
     adminUnblockEmail,
+    adminBlockIp,
+    adminUnblockIp,
     adminRemoveUser,
     adminMessageUser,
     refreshAdminDirectory,
+    startConversation,
   } = useApp()
 
   const [query, setQuery] = useState('')
@@ -142,6 +159,7 @@ export function AdminPlayersPage() {
       if (filter === 'real' && p.isDemoSeed) return false
       if (filter === 'demo' && !p.isDemoSeed) return false
       if (filter === 'active' && !p.isActive) return false
+      if (filter === 'sharedIp' && (p.signupIpCount || 0) < 2) return false
       if (filter === 'blocked' && !blockedEmails.includes(p.email.toLowerCase())) return false
       if (!q) return true
       const hay = [
@@ -149,6 +167,7 @@ export function AdminPlayersPage() {
         p.email,
         p.city,
         p.homeGymId,
+        p.signupIp,
         ...(p.gymIds || []),
         String(p.age || ''),
       ]
@@ -200,6 +219,34 @@ export function AdminPlayersPage() {
     })()
   }
 
+  const onIpBlockToggle = (entry: AdminDirectoryUser) => {
+    setError('')
+    setNotice('')
+    const ip = entry.signupIp?.trim()
+    if (!ip || ip === 'unknown') {
+      setError('IP регистрации неизвестен')
+      return
+    }
+    void (async () => {
+      try {
+        const blocked = blockedIps.includes(ip.toLowerCase())
+        if (blocked) {
+          await adminUnblockIp(ip)
+          setNotice(`IP ${ip} разблокирован`)
+          return
+        }
+        const ok = window.confirm(
+          `Заблокировать IP ${ip}?\n\nС этой сети нельзя будет войти, зарегистрироваться или пользоваться API. Осторожно: общий Wi‑Fi зала заблокирует и других.`,
+        )
+        if (!ok) return
+        await adminBlockIp(ip)
+        setNotice(`IP ${ip} заблокирован`)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Ошибка')
+      }
+    })()
+  }
+
   const onSend = async (e: FormEvent) => {
     e.preventDefault()
     if (!selected) return
@@ -213,6 +260,39 @@ export function AdminPlayersPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка')
     }
+  }
+
+  const onOpenProfile = (entry: AdminDirectoryUser) => {
+    navigate(`/app/user/${entry.id}`, {
+      state: { from: '/app/admin/players' },
+    })
+  }
+
+  const onOpenChat = (entry: AdminDirectoryUser) => {
+    if (!user || entry.isDemoSeed) return
+    if (entry.id === user.id) {
+      setError('Нельзя написать себе')
+      return
+    }
+    setError('')
+    setNotice('')
+    setBusy(true)
+    void Promise.resolve(startConversation(entry.id, ''))
+      .then((id: string) => {
+        navigate(`/app/messages/${id}`, { state: { from: '/app/admin/players' } })
+      })
+      .catch((err: unknown) => {
+        const cid =
+          err && typeof err === 'object' && 'conversationId' in err
+            ? (err as { conversationId?: string }).conversationId
+            : undefined
+        if (typeof cid === 'string' && cid) {
+          navigate(`/app/messages/${cid}`, { state: { from: '/app/admin/players' } })
+          return
+        }
+        setError(err instanceof Error ? err.message : 'Не удалось открыть чат')
+      })
+      .finally(() => setBusy(false))
   }
 
   const onRemove = (entry: AdminDirectoryUser) => {
@@ -283,7 +363,7 @@ export function AdminPlayersPage() {
         <input
           {...searchFieldProps}
           className="search-input"
-          placeholder="Поиск: имя, email, город, зал, возраст"
+          placeholder="Поиск: имя, email, город, зал, IP"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -314,11 +394,12 @@ export function AdminPlayersPage() {
         <div className="admin-players-list">
           {list.map((entry) => {
             const blocked = blockedEmails.includes(entry.email.toLowerCase())
+            const sharedIp = (entry.signupIpCount || 0) >= 2
             return (
               <button
                 key={`${entry.id}-${entry.email}`}
                 type="button"
-                className={`admin-player-row ${selected?.email === entry.email ? 'is-selected' : ''} ${blocked ? 'is-blocked' : ''}`}
+                className={`admin-player-row ${selected?.email === entry.email ? 'is-selected' : ''} ${blocked ? 'is-blocked' : ''} ${sharedIp ? 'is-shared-ip' : ''}`}
                 onClick={() => setSelectedId(entry.email)}
               >
                 <div className="admin-player-row-top">
@@ -327,7 +408,14 @@ export function AdminPlayersPage() {
                     {entry.isMasterAdmin ? ' · главный' : entry.isAdmin ? ' · админ' : ''}
                     {entry.isDemoSeed ? ' · сид' : ''}
                   </strong>
-                  {entry.isActive ? <span className="mock-online">в зале</span> : null}
+                  <span className="admin-player-row-flags">
+                    {sharedIp ? (
+                      <span className="admin-ip-flag" title={entry.signupIp || ''}>
+                        IP ×{entry.signupIpCount}
+                      </span>
+                    ) : null}
+                    {entry.isActive ? <span className="mock-online">в зале</span> : null}
+                  </span>
                 </div>
                 <p className="muted">{entry.email}</p>
                 <div className="admin-player-meta">
@@ -365,6 +453,29 @@ export function AdminPlayersPage() {
                 <div>
                   <dt>Регистрация</dt>
                   <dd>{formatAdminDate(selected.registeredAt)}</dd>
+                </div>
+                <div>
+                  <dt>IP регистрации</dt>
+                  <dd
+                    className={
+                      (selected.signupIpCount || 0) >= 2 ||
+                      (selected.signupIp &&
+                        blockedIps.includes(selected.signupIp.toLowerCase()))
+                        ? 'admin-detail-ip-warn'
+                        : undefined
+                    }
+                  >
+                    {selected.signupIp && selected.signupIp !== 'unknown'
+                      ? selected.signupIp
+                      : '—'}
+                    {(selected.signupIpCount || 0) >= 2
+                      ? ` · ещё ${(selected.signupIpCount || 0) - 1} с этим IP`
+                      : ''}
+                    {selected.signupIp &&
+                    blockedIps.includes(selected.signupIp.toLowerCase())
+                      ? ' · забанен'
+                      : ''}
+                  </dd>
                 </div>
                 <div>
                   <dt>Последний визит</dt>
@@ -449,6 +560,27 @@ export function AdminPlayersPage() {
               </dl>
 
               <div className="admin-player-actions" role="toolbar" aria-label="Действия">
+                <button
+                  type="button"
+                  className="admin-action-icon"
+                  onClick={() => onOpenProfile(selected)}
+                  title="Открыть профиль"
+                  aria-label="Открыть профиль"
+                >
+                  <ArrowUpRight size={18} />
+                </button>
+                {!selected.isDemoSeed && selected.id !== user?.id ? (
+                  <button
+                    type="button"
+                    className="admin-action-icon"
+                    onClick={() => onOpenChat(selected)}
+                    disabled={busy}
+                    title="Написать в чат"
+                    aria-label="Написать в чат"
+                  >
+                    <MessageCircle size={18} />
+                  </button>
+                ) : null}
                 {canBlockUsers ? (
                   <button
                     type="button"
@@ -457,16 +589,38 @@ export function AdminPlayersPage() {
                     disabled={busy || selected.isMasterAdmin}
                     title={
                       blockedEmails.includes(selected.email.toLowerCase())
-                        ? 'Разблокировать'
-                        : 'Заблокировать'
+                        ? 'Разблокировать email'
+                        : 'Заблокировать email'
                     }
                     aria-label={
                       blockedEmails.includes(selected.email.toLowerCase())
-                        ? 'Разблокировать'
-                        : 'Заблокировать'
+                        ? 'Разблокировать email'
+                        : 'Заблокировать email'
                     }
                   >
                     <Ban size={18} />
+                  </button>
+                ) : null}
+                {canBlockUsers &&
+                selected.signupIp &&
+                selected.signupIp !== 'unknown' ? (
+                  <button
+                    type="button"
+                    className="admin-action-icon"
+                    onClick={() => onIpBlockToggle(selected)}
+                    disabled={busy}
+                    title={
+                      blockedIps.includes(selected.signupIp.toLowerCase())
+                        ? 'Разблокировать IP'
+                        : 'Заблокировать IP'
+                    }
+                    aria-label={
+                      blockedIps.includes(selected.signupIp.toLowerCase())
+                        ? 'Разблокировать IP'
+                        : 'Заблокировать IP'
+                    }
+                  >
+                    <Network size={18} />
                   </button>
                 ) : null}
                 {canRemoveUsers && !selected.isDemoSeed && !selected.isMasterAdmin ? (
@@ -494,10 +648,11 @@ export function AdminPlayersPage() {
               {!selected.isDemoSeed && canMessageUsers ? (
                 <form className="admin-message-form" onSubmit={onSend}>
                   <h3>
-                    <MessageSquare size={16} /> Написать пользователю
+                    <MessageSquare size={16} /> Тикет поддержки
                   </h3>
                   <p className="muted">
-                    Создаст обращение и положит уведомление в ленту этого аккаунта.
+                    Служба поддержки: создаст обращение. Для личного чата от своего имени — иконка
+                    сообщения выше.
                   </p>
                   <textarea
                     {...messageFieldProps}
@@ -526,7 +681,7 @@ export function AdminPlayersPage() {
             </>
           ) : (
             <p className="muted">
-              Выбери пользователя слева, чтобы увидеть детали, заблокировать или написать.
+              Выбери пользователя слева: профиль, чат, блок или тикет поддержки.
             </p>
           )}
         </aside>

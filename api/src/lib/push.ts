@@ -4,7 +4,13 @@ import { prisma } from '../db.js'
 import type { NotifType } from './notify.js'
 
 /** Types that also fire an OS push (not every in-app bell ping). */
-const PUSH_TYPES = new Set<NotifType>(['like', 'chat_request', 'admin', 'workout_reminder'])
+const PUSH_TYPES = new Set<NotifType>([
+  'like',
+  'chat_request',
+  'admin',
+  'workout_reminder',
+  'new_registration',
+])
 
 let configured = false
 
@@ -61,6 +67,7 @@ export async function sendPushToUser(
     body: string
     href?: string
     type?: string
+    conversationId?: string
   },
 ) {
   if (!ensureVapid()) return 0
@@ -78,6 +85,7 @@ export async function sendPushToUser(
     href: payload.href || '/app/notifications',
     type: payload.type || 'system',
     unreadCount,
+    ...(payload.conversationId ? { conversationId: payload.conversationId } : {}),
   })
 
   // High urgency for chat/likes so locked-screen devices deliver sooner when possible.

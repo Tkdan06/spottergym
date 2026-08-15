@@ -14,6 +14,7 @@ export function serializeUser(user: UserWithRels) {
       id: user.id,
       email: user.email,
       username: '',
+      instagram: '',
       name: 'Удалённый пользователь',
       age: 0,
       gender: user.gender,
@@ -66,6 +67,7 @@ export function serializeUser(user: UserWithRels) {
     id: user.id,
     email: user.email,
     username: user.username,
+    instagram: user.instagram || '',
     name: user.name,
     age: user.age,
     gender: user.gender,
@@ -105,11 +107,15 @@ export function serializeUser(user: UserWithRels) {
 }
 
 /** Profile safe to show to other users (no email / admin flags). Honors anonymous privacy. */
-export function serializePublicUser(user: UserWithRels) {
+export function serializePublicUser(
+  user: UserWithRels,
+  opts?: { revealAnonymous?: boolean },
+) {
   const full = serializeUser(user)
   const base = {
     id: full.id,
     username: full.username,
+    instagram: full.instagram,
     name: full.name,
     age: full.age,
     gender: full.gender,
@@ -144,6 +150,7 @@ export function serializePublicUser(user: UserWithRels) {
     return {
       ...base,
       username: '',
+      instagram: '',
       name: 'Удалённый пользователь',
       age: 0,
       bio: '',
@@ -160,11 +167,12 @@ export function serializePublicUser(user: UserWithRels) {
     }
   }
 
-  if (full.privacy === 'anonymous') {
+  if (full.privacy === 'anonymous' && !opts?.revealAnonymous) {
     // Presence only — no gym graph / city / intent / lastSeen leakage
     return {
       ...base,
       username: '',
+      instagram: '',
       name: 'Аноним',
       age: 0,
       gender: full.gender,

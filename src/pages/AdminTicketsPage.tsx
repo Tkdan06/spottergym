@@ -101,7 +101,7 @@ export function AdminTicketsPage() {
             <div key={msg.id} className={`feedback-msg feedback-msg--${msg.senderType}`}>
               <div className="feedback-msg-head">
                 <strong>
-                  {msg.senderType === 'admin' ? `Админ · ${msg.senderName}` : msg.senderName}
+                  {msg.senderType === 'admin' ? 'Админ' : msg.senderName}
                 </strong>
                 <span>{formatWhen(msg.createdAt)}</span>
               </div>

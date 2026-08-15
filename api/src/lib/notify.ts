@@ -11,6 +11,7 @@ export type NotifType =
   | 'system'
   | 'admin'
   | 'workout_reminder'
+  | 'new_registration'
 
 const TYPE_PREF: Record<NotifType, keyof Omit<PrefsRow, 'userId' | 'enabled'> | null> = {
   gym_new_member: 'gymNewMembers',
@@ -21,6 +22,7 @@ const TYPE_PREF: Record<NotifType, keyof Omit<PrefsRow, 'userId' | 'enabled'> | 
   system: 'system',
   admin: 'system',
   workout_reminder: 'workoutReminders',
+  new_registration: 'newRegistrations',
 }
 
 export async function getOrCreatePrefs(userId: string) {
@@ -91,6 +93,7 @@ export async function pushChatMessage(input: {
     body,
     href: `/app/messages/${input.conversationId}`,
     type: 'chat_message',
+    conversationId: input.conversationId,
   })
 }
 
@@ -128,5 +131,6 @@ export function serializePrefs(p: PrefsRow) {
     coaches: p.coaches,
     system: p.system,
     workoutReminders: p.workoutReminders,
+    newRegistrations: p.newRegistrations,
   }
 }

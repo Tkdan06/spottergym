@@ -15,7 +15,9 @@ import { localGenderAvatar, profileImage } from '../lib/avatar'
 import { clampPhotos } from '../lib/photos'
 import { getCheckedInGymId } from '../lib/presence'
 import { breakLabel, isOnBreak } from '../lib/schedule'
+import { InstagramIcon } from '../components/InstagramIcon'
 import { formatUsername } from '../lib/username'
+import { formatInstagram, instagramProfileUrl, normalizeInstagram } from '../lib/instagram'
 import './FeedbackPage.css'
 import './ProfileViews.css'
 
@@ -91,28 +93,42 @@ export function ProfilePage() {
           <h2 className="profile-hero-name">
             {user.name}, {user.age}
           </h2>
-          {user.username ? (
-            <button
-              type="button"
-              className="profile-username"
-              onClick={() => {
-                void navigator.clipboard
-                  ?.writeText(formatUsername(user.username))
-                  .then(() => {
-                    setCopyFlash('Скопировано')
-                    window.setTimeout(() => setCopyFlash(''), 1600)
-                  })
-                  .catch(() => {
-                    setCopyFlash('Не удалось скопировать')
-                    window.setTimeout(() => setCopyFlash(''), 1600)
-                  })
-              }}
-              title="Скопировать @ник"
-            >
-              {formatUsername(user.username)}
-              <Copy size={14} aria-hidden />
-            </button>
-          ) : null}
+          <div className="profile-handles">
+            {user.username ? (
+              <button
+                type="button"
+                className="profile-username"
+                onClick={() => {
+                  void navigator.clipboard
+                    ?.writeText(formatUsername(user.username))
+                    .then(() => {
+                      setCopyFlash('Скопировано')
+                      window.setTimeout(() => setCopyFlash(''), 1600)
+                    })
+                    .catch(() => {
+                      setCopyFlash('Не удалось скопировать')
+                      window.setTimeout(() => setCopyFlash(''), 1600)
+                    })
+                }}
+                title="Скопировать @ник"
+              >
+                {formatUsername(user.username)}
+                <Copy size={14} aria-hidden />
+              </button>
+            ) : null}
+            {normalizeInstagram(user.instagram || '') ? (
+              <a
+                className="profile-instagram"
+                href={instagramProfileUrl(user.instagram || '')}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={formatInstagram(user.instagram)}
+                aria-label={`Instagram ${formatInstagram(user.instagram)}`}
+              >
+                <InstagramIcon width={18} height={18} />
+              </a>
+            ) : null}
+          </div>
           {copyFlash ? (
             <p className="dim profile-copy-flash" role="status" aria-live="polite">
               {copyFlash}

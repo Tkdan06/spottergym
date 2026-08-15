@@ -12,7 +12,8 @@
     "db:migrate:dev": "prisma migrate dev",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
-    "db:setup": "prisma db push && tsx prisma/seed.ts"
+    "db:setup": "prisma db push && tsx prisma/seed.ts",
+    "users:export-emails": "tsx scripts/export-user-emails.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.14.4",

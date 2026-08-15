@@ -68,6 +68,7 @@ export async function softDeleteUser(
         photos: [],
         avatar: '',
         city: '',
+        instagram: '',
         homeGymId: null,
         interests: [],
         sports: [],

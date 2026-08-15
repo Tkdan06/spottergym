@@ -1,5 +1,8 @@
 /* Spotter PWA service worker — Web Push + home-screen badge */
 
+/** clientId → conversationId while that window is viewing a chat */
+const activeChatByClient = new Map()
+
 self.addEventListener('install', (event) => {
   event.waitUntil(self.skipWaiting())
 })
@@ -19,6 +22,45 @@ async function setBadge(count) {
   }
 }
 
+/** Conversation id from /app/messages/:id (optional trailing slash / query). */
+function conversationIdFromHref(href) {
+  if (!href || typeof href !== 'string') return ''
+  try {
+    const path = new URL(href, self.location.origin).pathname
+    const m = /^\/app\/messages\/([^/]+)\/?$/.exec(path)
+    return m ? decodeURIComponent(m[1]) : ''
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * Skip OS banner when the user already has this chat open and visible.
+ * Other conversations still notify. Background / other tabs still notify.
+ */
+async function isViewingConversation(conversationId) {
+  if (!conversationId) return false
+  const needle = `/app/messages/${conversationId}`
+  const windowClients = await self.clients.matchAll({
+    type: 'window',
+    includeUncontrolled: true,
+  })
+  for (const client of windowClients) {
+    try {
+      const reported = activeChatByClient.get(client.id)
+      if (reported === conversationId) {
+        if (client.visibilityState === 'visible' || client.focused === true) return true
+      }
+      const path = new URL(client.url).pathname.replace(/\/$/, '')
+      if (path !== needle) continue
+      if (client.visibilityState === 'visible' || client.focused === true) return true
+    } catch {
+      /* ignore bad client url */
+    }
+  }
+  return false
+}
+
 self.addEventListener('push', (event) => {
   let data = {
     title: 'Уведомление',
@@ -26,6 +68,7 @@ self.addEventListener('push', (event) => {
     href: '/app/notifications',
     type: 'system',
     unreadCount: 1,
+    conversationId: '',
   }
   try {
     if (event.data) {
@@ -42,25 +85,41 @@ self.addEventListener('push', (event) => {
   }
 
   const unread = Number(data.unreadCount) || 1
-  // Title + body only. On iOS PWA the OS always appends "from {app name}" — cannot be removed.
   const title = String(data.title || 'Уведомление').trim()
   const body = String(data.body || '').trim()
+  const href = data.href || '/app/notifications'
+  const conversationId =
+    String(data.conversationId || '').trim() || conversationIdFromHref(href)
+
   event.waitUntil(
-    Promise.all([
-      self.registration.showNotification(title, {
-        body,
-        icon: '/og-image.png',
-        badge: '/og-image.png',
-        data: { href: data.href || '/app/notifications', type: data.type },
-        // Prefer unique tag (e.g. per ticket href) so alerts don't collapse into one.
-        tag:
-          data.tag ||
-          (data.href ? `spotter-${String(data.href).slice(0, 120)}` : null) ||
-          (data.type ? `spotter-${data.type}` : 'spotter'),
-        renotify: true,
-      }),
-      setBadge(unread),
-    ]),
+    (async () => {
+      const isChatPush =
+        data.type === 'chat_message' ||
+        (conversationId && String(href).includes('/app/messages/'))
+      if (isChatPush && (await isViewingConversation(conversationId))) {
+        await setBadge(unread)
+        return
+      }
+
+      await Promise.all([
+        self.registration.showNotification(title, {
+          body,
+          icon: '/og-image.png',
+          badge: '/og-image.png',
+          data: {
+            href,
+            type: data.type,
+            conversationId: conversationId || undefined,
+          },
+          tag:
+            data.tag ||
+            (href ? `spotter-${String(href).slice(0, 120)}` : null) ||
+            (data.type ? `spotter-${data.type}` : 'spotter'),
+          renotify: true,
+        }),
+        setBadge(unread),
+      ])
+    })(),
   )
 })
 
@@ -97,5 +156,13 @@ self.addEventListener('message', (event) => {
   if (data.type === 'spotter:badge') {
     const count = Number(data.count) || 0
     event.waitUntil(setBadge(count))
+    return
+  }
+  if (data.type === 'spotter:active-chat') {
+    const source = event.source
+    if (!source || !('id' in source) || typeof source.id !== 'string') return
+    const id = String(data.conversationId || '').trim()
+    if (id) activeChatByClient.set(source.id, id)
+    else activeChatByClient.delete(source.id)
   }
 })

@@ -16,8 +16,16 @@ import { buildLandingAnalytics } from '../lib/landingAnalytics.js'
 import { buildPasswordResetAnalytics } from '../lib/passwordResetAnalytics.js'
 import { isMasterAdminEmail, normalizeEmail } from '../env.js'
 import { serializeUser } from '../lib/serialize.js'
+import { normalizeIp } from '../lib/blocks.js'
+import {
+  enableEmergencyShutdown,
+  scheduleProcessShutdown,
+} from '../lib/emergency.js'
+import { PASSWORD_MAX } from '../lib/fieldLimits.js'
+import { verifyPassword } from '../lib/password.js'
 import { SoftDeleteError, softDeleteUser } from '../lib/softDeleteUser.js'
 import { requireAuth, type AuthedEnv } from '../middleware/auth.js'
+import { rateLimit } from '../middleware/rateLimit.js'
 
 export const adminRoutes = new Hono<AuthedEnv>()
 
@@ -110,6 +118,7 @@ adminRoutes.get('/users', async (c) => {
               { username: { contains: q, mode: 'insensitive' } },
               { name: { contains: q, mode: 'insensitive' } },
               { city: { contains: q, mode: 'insensitive' } },
+              { signupIp: { contains: q, mode: 'insensitive' } },
             ],
           }
         : {}),
@@ -153,6 +162,26 @@ adminRoutes.get('/users', async (c) => {
   }
 
   const viewerIsMaster = gate.flags.isMasterAdmin
+
+  const signupIps = [
+    ...new Set(
+      users
+        .map((u) => u.signupIp?.trim() || '')
+        .filter((ip) => ip && ip !== 'unknown'),
+    ),
+  ]
+  const signupIpCounts = new Map<string, number>()
+  if (signupIps.length) {
+    const grouped = await prisma.user.groupBy({
+      by: ['signupIp'],
+      where: { deletedAt: null, signupIp: { in: signupIps } },
+      _count: { _all: true },
+    })
+    for (const row of grouped) {
+      signupIpCounts.set(row.signupIp, row._count._all)
+    }
+  }
+
   return c.json({
     users: users.map((u) => {
       const full = serializeUser(u)
@@ -161,6 +190,9 @@ adminRoutes.get('/users', async (c) => {
       const { photos: _photos, avatar: _avatar, ...rest } = full
       const hideMasterEmail = !viewerIsMaster && isMasterAdminEmail(u.email)
       const todayCheckIn = checkedInTodayByUser.get(u.id)
+      const signupIp = u.signupIp?.trim() || ''
+      const signupIpCount =
+        signupIp && signupIp !== 'unknown' ? signupIpCounts.get(signupIp) || 1 : 0
       return {
         ...rest,
         // Master email stays server-side for non-master admins
@@ -171,6 +203,8 @@ adminRoutes.get('/users', async (c) => {
         photosBytes: estimatePhotosBytes(photos),
         checkedInTodayAt: todayCheckIn?.checkedInAt.toISOString() || '',
         checkedInTodayGymId: todayCheckIn?.gymId || '',
+        signupIp,
+        signupIpCount,
       }
     }),
   })
@@ -226,6 +260,60 @@ adminRoutes.delete('/blocked-emails/:email', async (c) => {
   await prisma.blockedEmail.deleteMany({ where: { email } })
   const rows = await prisma.blockedEmail.findMany({ orderBy: { createdAt: 'desc' } })
   return c.json({ emails: rows.map((r) => r.email) })
+})
+
+adminRoutes.get('/blocked-ips', async (c) => {
+  const gate = await requirePerm(c.get('userId'), 'blockUsers')
+  if (!gate.ok) return c.json({ error: gate.error }, gate.status)
+
+  const rows = await prisma.blockedIp.findMany({ orderBy: { createdAt: 'desc' } })
+  return c.json({ ips: rows.map((r) => r.ip) })
+})
+
+adminRoutes.post('/blocked-ips', async (c) => {
+  const gate = await requirePerm(c.get('userId'), 'blockUsers')
+  if (!gate.ok) return c.json({ error: gate.error }, gate.status)
+
+  const body = z
+    .object({
+      ip: z.string().min(2).max(64),
+      reason: z.string().max(500).optional(),
+    })
+    .safeParse(await c.req.json().catch(() => null))
+  if (!body.success) return c.json({ error: 'Некорректный IP' }, 400)
+
+  const ip = normalizeIp(body.data.ip)
+  if (!ip || ip === 'unknown') {
+    return c.json({ error: 'Некорректный IP' }, 400)
+  }
+
+  await prisma.blockedIp.upsert({
+    where: { ip },
+    create: {
+      ip,
+      reason: body.data.reason || '',
+      blockedById: c.get('userId'),
+    },
+    update: {
+      reason: body.data.reason || '',
+      blockedById: c.get('userId'),
+    },
+  })
+
+  const rows = await prisma.blockedIp.findMany({ orderBy: { createdAt: 'desc' } })
+  return c.json({ ips: rows.map((r) => r.ip) })
+})
+
+adminRoutes.delete('/blocked-ips/:ip', async (c) => {
+  const gate = await requirePerm(c.get('userId'), 'blockUsers')
+  if (!gate.ok) return c.json({ error: gate.error }, gate.status)
+
+  const ip = normalizeIp(decodeURIComponent(c.req.param('ip') || ''))
+  if (!ip) return c.json({ error: 'Некорректный IP' }, 400)
+
+  await prisma.blockedIp.deleteMany({ where: { ip } })
+  const rows = await prisma.blockedIp.findMany({ orderBy: { createdAt: 'desc' } })
+  return c.json({ ips: rows.map((r) => r.ip) })
 })
 
 adminRoutes.delete('/users/:id', async (c) => {
@@ -304,3 +392,47 @@ adminRoutes.patch('/users/:id/admin', async (c) => {
 
   return c.json({ user: serializeUser(updated) })
 })
+
+/** Master-only kill switch: re-check password, persist flag, then exit process. */
+adminRoutes.post(
+  '/emergency-shutdown',
+  rateLimit({ windowMs: 60 * 60_000, max: 5, route: 'admin-emergency-shutdown' }),
+  async (c) => {
+    const userId = c.get('userId')
+    const user = await prisma.user.findUnique({ where: { id: userId } })
+    if (!user || user.deletedAt) {
+      return c.json({ error: 'Требуется вход' }, 401)
+    }
+    const flags = resolveAdminFlags(user)
+    if (!flags.isMasterAdmin) {
+      return c.json({ error: 'Только главный админ может выключить сервис' }, 403)
+    }
+
+    const body = z
+      .object({
+        password: z.string().min(1).max(PASSWORD_MAX),
+        confirm: z.literal('SHUTDOWN'),
+      })
+      .safeParse(await c.req.json().catch(() => null))
+    if (!body.success) {
+      return c.json(
+        { error: 'Нужен пароль и подтверждение SHUTDOWN' },
+        400,
+      )
+    }
+
+    const ok = await verifyPassword(user.passwordHash, body.data.password)
+    if (!ok) {
+      return c.json({ error: 'Неверный пароль' }, 401)
+    }
+
+    await enableEmergencyShutdown(user.id)
+    scheduleProcessShutdown(500)
+
+    return c.json({
+      ok: true,
+      emergency: true,
+      message: 'Сервис отключается',
+    })
+  },
+)

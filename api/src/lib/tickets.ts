@@ -24,7 +24,8 @@ export function serializeTicket(t: TicketWithMsgs) {
         id: m.id,
         senderType: m.senderType,
         senderId: m.senderId,
-        senderName: m.senderName,
+        /** Never expose admin real name to clients */
+        senderName: m.senderType === 'admin' ? 'Админ' : m.senderName,
         text: m.text,
         createdAt: m.createdAt.toISOString(),
       })),

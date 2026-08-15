@@ -21,5 +21,5 @@
   <line x1="310" y1="340" x2="890" y2="340" stroke="#C8F542" stroke-width="4" stroke-linecap="round"/>
   <circle cx="310" cy="340" r="5" fill="#C8F542"/>
   <circle cx="890" cy="340" r="5" fill="#C8F542"/>
-  <text x="600" y="400" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="36" font-weight="500" fill="#F2F5F3">Найди своих в зале</text>
+  <text x="600" y="400" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="36" font-weight="500" fill="#F2F5F3">Найди людей в своём клубе</text>
 </svg>

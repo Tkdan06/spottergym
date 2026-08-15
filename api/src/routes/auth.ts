@@ -21,8 +21,9 @@ import {
   sessionCookieName,
   type AuthedEnv,
 } from '../middleware/auth.js'
-import { isEmailBlocked } from '../lib/blocks.js'
+import { isEmailBlocked, isIpBlocked } from '../lib/blocks.js'
 import { createNotification } from '../lib/notify.js'
+import { notifyRegistrationAdmins } from '../lib/registrationNotify.js'
 import {
   consumePasswordResetToken,
   issuePasswordResetForUser,
@@ -59,13 +60,17 @@ function setSessionCookie(c: Parameters<typeof setCookie>[0], token: string) {
 
 authRoutes.post(
   '/register',
-  rateLimit({ windowMs: 60_000, max: 8, route: 'auth-register' }),
+  // Per IP: stop fake-inbox spam. Keep a little headroom for shared Wi‑Fi (gym/café NAT).
+  rateLimit({ windowMs: 60 * 60_000, max: 6, route: 'auth-register' }),
   async (c) => {
     const body = registerSchema.safeParse(await c.req.json().catch(() => null))
     if (!body.success) {
       return c.json({ error: 'Некорректные данные регистрации' }, 400)
     }
     const email = normalizeEmail(body.data.email)
+    if (await isIpBlocked(clientIp(c))) {
+      return c.json({ error: 'Доступ с этой сети ограничен' }, 403)
+    }
     if (await isEmailBlocked(email)) {
       return c.json({ error: 'Этот email заблокирован' }, 403)
     }
@@ -79,6 +84,7 @@ authRoutes.post(
     const passwordHash = await hashPassword(body.data.password)
     const displayName = master ? 'Bogdan' : body.data.name
     const username = await allocateUsername(displayName)
+    const signupIp = clientIp(c)
     const user = await prisma.user.create({
       data: {
         email,
@@ -91,6 +97,7 @@ authRoutes.post(
         adminPermissions: master ? FULL_PERMISSIONS : undefined,
         // Всегда онбординг — даже для главного админа
         onboardingDone: false,
+        signupIp,
       },
       include: { gyms: true, checkIns: { where: { checkedOutAt: null }, take: 1 } },
     })
@@ -113,6 +120,12 @@ authRoutes.post(
       }
     }
 
+    void notifyRegistrationAdmins({
+      userId: user.id,
+      userName: user.name,
+      userEmail: user.email,
+    }).catch((err) => console.warn('[notify] registration admins', err))
+
     const token = await signSession({
       sub: user.id,
       email: user.email,
@@ -133,6 +146,9 @@ authRoutes.post(
       return c.json({ error: 'Некорректные данные входа' }, 400)
     }
     const email = normalizeEmail(body.data.email)
+    if (await isIpBlocked(clientIp(c))) {
+      return c.json({ error: 'Доступ с этой сети ограничен' }, 403)
+    }
     if (await isEmailBlocked(email)) {
       return c.json({ error: 'Этот email заблокирован' }, 403)
     }
@@ -270,6 +286,9 @@ authRoutes.post(
 
     const email = normalizeEmail(body.data.email)
     const ip = clientIp(c)
+    if (await isIpBlocked(ip)) {
+      return c.json({ error: 'Доступ с этой сети ограничен' }, 403)
+    }
     // Same response whether or not the account exists (anti-enumeration)
     const user = await prisma.user.findUnique({
       where: { email },

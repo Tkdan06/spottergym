@@ -71,6 +71,30 @@ export function resolveAdminFlags(
   }
 }
 
+/** All admins (incl. master), optionally excluding one user. */
+export async function listAdminUserIds(excludeUserId?: string): Promise<string[]> {
+  const candidates = await prisma.user.findMany({
+    where: {
+      deletedAt: null,
+      OR: [{ isAdmin: true }, { email: env.masterAdminEmail }],
+    },
+    select: {
+      id: true,
+      email: true,
+      isAdmin: true,
+      isMasterAdmin: true,
+      adminPermissions: true,
+    },
+  })
+
+  return candidates
+    .filter((u) => {
+      if (excludeUserId && u.id === excludeUserId) return false
+      return resolveAdminFlags(u).isAdmin
+    })
+    .map((u) => u.id)
+}
+
 /** Admins with tickets permission (incl. master), optionally excluding the actor. */
 export async function listTicketAdminIds(excludeUserId?: string): Promise<string[]> {
   const candidates = await prisma.user.findMany({

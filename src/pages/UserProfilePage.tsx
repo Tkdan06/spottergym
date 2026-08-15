@@ -1,5 +1,5 @@
 import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, Clock3, Heart, MessageCircle } from 'lucide-react'
+import { ArrowLeft, Clock3, Eye, Heart, MessageCircle, Shield } from 'lucide-react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { LikesRow } from '../components/LikesRow'
 import { PhotoGalleryModal } from '../components/PhotoGalleryModal'
@@ -16,7 +16,9 @@ import { GREETING_MESSAGE_MAX } from '../lib/fieldLimits'
 import { messageFieldProps } from '../lib/inputAttrs'
 import { getCheckedInGymId } from '../lib/presence'
 import { breakLabel, isOnBreak } from '../lib/schedule'
+import { InstagramIcon } from '../components/InstagramIcon'
 import { formatUsername } from '../lib/username'
+import { formatInstagram, instagramProfileUrl, normalizeInstagram } from '../lib/instagram'
 import type { UserProfile } from '../types'
 import './FeedbackPage.css'
 import './ProfileViews.css'
@@ -40,12 +42,16 @@ export function UserProfilePage() {
     fetchUserById,
     rememberUser,
     apiOnline,
+    canViewUsers,
   } = useApp()
   const navigate = useNavigate()
   const [remote, setRemote] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(false)
   const [loadError, setLoadError] = useState('')
   const [likeError, setLikeError] = useState('')
+  const [adminRevealed, setAdminRevealed] = useState(false)
+  const [revealBusy, setRevealBusy] = useState(false)
+  const [revealError, setRevealError] = useState('')
   const fetchUserByIdRef = useRef(fetchUserById)
   fetchUserByIdRef.current = fetchUserById
 
@@ -73,6 +79,8 @@ export function UserProfilePage() {
   useEffect(() => {
     setRemote(null)
     setLoadError('')
+    setAdminRevealed(false)
+    setRevealError('')
     if (!userId) return
 
     if (!apiOnline) {
@@ -164,8 +172,13 @@ export function UserProfilePage() {
   }
 
   const name = displayName(person)
-  const isAnon = person.privacy === 'anonymous'
+  const privacyAnonymous = person.privacy === 'anonymous'
+  const isAnon = privacyAnonymous && !adminRevealed
   const isSelf = Boolean(user && person.id === user.id)
+  const canAdminMessage = Boolean(user?.isAdmin) && !isSelf
+  const canRevealAnon =
+    Boolean(canViewUsers) && privacyAnonymous && !isSelf && !adminRevealed && apiOnline
+  const canStartChat = Boolean(person.lookingToMeet || canAdminMessage)
   const photo = profileImage(person)
   const galleryPhotos = isAnon ? [] : Array.isArray(person.photos) ? person.photos : []
   const sports = Array.isArray(person.sports) ? person.sports : []
@@ -173,6 +186,32 @@ export function UserProfilePage() {
   const visitSlots = Array.isArray(person.visitSlots) ? person.visitSlots : []
   const onBreak = isOnBreak(person.breakUntil)
   const breakText = breakLabel(person.breakUntil)
+
+  const onAdminReveal = () => {
+    setRevealError('')
+    setRevealBusy(true)
+    void fetchUserById(person.id, { bypassCache: true, revealAnonymous: true })
+      .then((found) => {
+        setRemote(found)
+        setAdminRevealed(true)
+      })
+      .catch((err: unknown) => {
+        setRevealError(err instanceof Error ? err.message : 'Не удалось открыть')
+      })
+      .finally(() => setRevealBusy(false))
+  }
+
+  const onHideAdminReveal = () => {
+    setAdminRevealed(false)
+    setRevealError('')
+    setRevealBusy(true)
+    void fetchUserById(person.id, { bypassCache: true })
+      .then((found) => setRemote(found))
+      .catch(() => {
+        /* keep last remote */
+      })
+      .finally(() => setRevealBusy(false))
+  }
 
   const onSend = async (e: FormEvent) => {
     e.preventDefault()
@@ -214,6 +253,40 @@ export function UserProfilePage() {
         {!isSelf ? <SafetyActions person={person} /> : null}
       </header>
 
+      {adminRevealed ? (
+        <div className="profile-admin-reveal-banner" role="status">
+          <Shield size={16} aria-hidden />
+          <span>Просмотр как админ — для остальных профиль анонимный</span>
+          <button
+            type="button"
+            className="profile-admin-reveal-hide"
+            onClick={onHideAdminReveal}
+            disabled={revealBusy}
+          >
+            Скрыть
+          </button>
+        </div>
+      ) : null}
+
+      {canRevealAnon ? (
+        <div className="profile-admin-reveal-actions">
+          <button
+            type="button"
+            className="btn btn-ghost btn-block"
+            onClick={onAdminReveal}
+            disabled={revealBusy}
+          >
+            <Eye size={18} />
+            {revealBusy ? 'Открываем…' : 'Открыть профиль как админ'}
+          </button>
+          {revealError ? (
+            <p className="feedback-error" role="alert">
+              {revealError}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
       <div className="profile-hero">
         <ProfilePhotoCarousel
           photos={galleryPhotos}
@@ -240,9 +313,23 @@ export function UserProfilePage() {
             {name}
             {!isAnon ? <span>, {person.age}</span> : null}
           </h1>
-          {person.username ? (
-            <p className="profile-username-static">{formatUsername(person.username)}</p>
-          ) : null}
+          <div className="profile-handles">
+            {person.username ? (
+              <p className="profile-username-static">{formatUsername(person.username)}</p>
+            ) : null}
+            {!isAnon && normalizeInstagram(person.instagram || '') ? (
+              <a
+                className="profile-instagram"
+                href={instagramProfileUrl(person.instagram || '')}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={formatInstagram(person.instagram)}
+                aria-label={`Instagram ${formatInstagram(person.instagram)}`}
+              >
+                <InstagramIcon width={18} height={18} />
+              </a>
+            ) : null}
+          </div>
           <p className="muted">
             {!isAnon && person.isCoach
               ? coachSports.length
@@ -395,11 +482,11 @@ export function UserProfilePage() {
             <button
               type="button"
               className="btn btn-primary btn-block"
-              disabled={!person.lookingToMeet}
+              disabled={!canStartChat}
               onClick={() => setOpenComposer(true)}
             >
               <MessageCircle size={18} />
-              {person.lookingToMeet ? 'Написать' : 'Сейчас не открыт к общению'}
+              {canStartChat ? 'Написать' : 'Сейчас не открыт к общению'}
             </button>
           ) : (
             <form className="composer" onSubmit={(e) => void onSend(e)}>

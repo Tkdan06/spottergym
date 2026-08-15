@@ -131,7 +131,7 @@ ticketRoutes.post(
         create: {
           senderType: 'admin',
           senderId: me.id,
-          senderName: me.name,
+          senderName: 'Админ',
           text,
         },
       },
@@ -219,7 +219,7 @@ ticketRoutes.post(
         create: {
           senderType: asAdmin ? 'admin' : 'user',
           senderId: me.id,
-          senderName: asAdmin ? me.name : me.name,
+          senderName: asAdmin ? 'Админ' : me.name,
           text,
         },
       },

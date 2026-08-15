@@ -15,12 +15,13 @@ import {
 } from '../data/mock'
 import { apiDeleteAccount } from '../lib/apiClient'
 import { isDemoAccount } from '../lib/demoAccount'
-import { BIO_MAX, NAME_MAX, NAME_MIN, USERNAME_MAX, USERNAME_MIN } from '../lib/fieldLimits'
+import { BIO_MAX, INSTAGRAM_MAX, NAME_MAX, NAME_MIN, USERNAME_MAX, USERNAME_MIN } from '../lib/fieldLimits'
 import {
   ageFieldProps,
   bioFieldProps,
   displayNameFieldProps,
 } from '../lib/inputAttrs'
+import { isValidInstagram, normalizeInstagram } from '../lib/instagram'
 import { isValidUsername, normalizeUsername } from '../lib/username'
 import { activeBreakUntil, todayISO } from '../lib/schedule'
 import type { ExperienceLevel, Gender, Intent } from '../types'
@@ -46,6 +47,8 @@ export function SettingsPage() {
   const [name, setName] = useState(user?.name || '')
   const [username, setUsername] = useState(user?.username || '')
   const [usernameError, setUsernameError] = useState('')
+  const [instagram, setInstagram] = useState(user?.instagram || '')
+  const [instagramError, setInstagramError] = useState('')
   const [ageError, setAgeError] = useState('')
   const [saveError, setSaveError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -149,6 +152,13 @@ export function SettingsPage() {
     }
     setUsernameError('')
 
+    const nextInstagram = normalizeInstagram(instagram)
+    if (!isValidInstagram(nextInstagram)) {
+      setInstagramError('Instagram: до 30 символов, латиница, цифры, точка и _')
+      return
+    }
+    setInstagramError('')
+
     if (gymIds.length < 1) {
       setSaveError('Нужен хотя бы один зал')
       return
@@ -163,6 +173,7 @@ export function SettingsPage() {
       updateProfile({
         name: name.trim(),
         username: nextUsername,
+        instagram: nextInstagram,
         age: parsedAge,
         gender,
         bio: bio.trim(),
@@ -234,6 +245,26 @@ export function SettingsPage() {
             placeholder="masha_ddx"
           />
           {usernameError ? <p className="feedback-error">{usernameError}</p> : null}
+        </div>
+        <div className="field">
+          <label htmlFor="instagram">Instagram</label>
+          <input
+            {...displayNameFieldProps}
+            id="instagram"
+            value={instagram}
+            onChange={(e) => {
+              setInstagram(e.target.value.replace(/^@+/, ''))
+              setInstagramError('')
+            }}
+            maxLength={INSTAGRAM_MAX + 40}
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
+            placeholder="username или ссылка"
+            inputMode="url"
+          />
+          <p className="muted">Необязательно. На профиле появится иконка со ссылкой.</p>
+          {instagramError ? <p className="feedback-error">{instagramError}</p> : null}
         </div>
         <div className="field">
           <label htmlFor="age">Возраст</label>
@@ -564,24 +595,26 @@ export function SettingsPage() {
         )}
       </section>
 
-      <button
-        type="button"
-        className="btn btn-danger btn-block"
-        onClick={() => {
-          void (async () => {
-            await logout()
-            navigate('/login', { replace: true })
-          })()
-        }}
-      >
-        Выйти
-      </button>
+      <section className="settings-session">
+        <button
+          type="button"
+          className="btn btn-soft btn-block"
+          onClick={() => {
+            void (async () => {
+              await logout()
+              navigate('/login', { replace: true })
+            })()
+          }}
+        >
+          Выйти
+        </button>
+      </section>
 
-      <section className="settings-panel settings-delete">
-        <div className="settings-panel-head">
-          <h2>Удалить аккаунт</h2>
-          <p className="muted">Переписка останется как «Удалённый пользователь». Это необратимо.</p>
-        </div>
+      <section className="surface settings-delete">
+        <SectionTitle>Удалить аккаунт</SectionTitle>
+        <p className="muted settings-delete-lead">
+          Переписка останется как «Удалённый пользователь». Это необратимо.
+        </p>
         {deleteStep === 'idle' ? (
           <button
             type="button"
@@ -594,7 +627,7 @@ export function SettingsPage() {
             Удалить аккаунт…
           </button>
         ) : (
-          <div className="empty-copy-actions">
+          <div className="empty-copy-actions settings-delete-confirm">
             {deleteError ? (
               <p className="feedback-error" role="alert">
                 {deleteError}

@@ -54,7 +54,12 @@ function uid(prefix: string) {
 }
 
 export function loadTickets(): FeedbackTicket[] {
-  return loadJson<FeedbackTicket[]>(STORAGE_TICKETS, [])
+  return loadJson<FeedbackTicket[]>(STORAGE_TICKETS, []).map((t) => ({
+    ...t,
+    messages: (t.messages || []).map((m) =>
+      m.senderType === 'admin' ? { ...m, senderName: 'Админ' } : m,
+    ),
+  }))
 }
 
 export function saveTickets(tickets: FeedbackTicket[]) {
@@ -118,7 +123,7 @@ export function ensureDemoFeedbackTickets() {
           id: 'tm-3',
           senderType: 'admin',
           senderId: 'me',
-          senderName: 'Поддержка',
+          senderName: 'Админ',
           text: 'Взяли в работу. Напиши, если снова повторится на конкретном клубе.',
           createdAt: new Date(now - 1000 * 60 * 40).toISOString(),
         },
@@ -207,7 +212,7 @@ export function createAdminOutboundTicket(input: {
     id: uid('tm'),
     senderType: 'admin',
     senderId: input.adminId,
-    senderName: input.adminName,
+    senderName: 'Админ',
     text,
     createdAt: now,
   }
@@ -217,7 +222,7 @@ export function createAdminOutboundTicket(input: {
     userName: input.targetUserName,
     userEmail: input.targetUserEmail,
     category: 'other',
-    subject: `Админ: ${text.slice(0, 40)}`,
+    subject: `Поддержка: ${text.slice(0, 40)}`,
     status: 'in_progress',
     createdAt: now,
     updatedAt: now,

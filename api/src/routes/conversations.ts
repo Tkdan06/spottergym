@@ -14,8 +14,9 @@ import {
   CHAT_MESSAGE_MAX,
   GREETING_MESSAGE_MAX,
 } from '../lib/fieldLimits.js'
+import { resolveAdminFlags } from '../lib/admin.js'
 import { createNotification, pushChatMessage } from '../lib/notify.js'
-import { requireAuth, type AuthedEnv } from '../middleware/auth.js'
+import { loadAuthedUser, requireAuth, type AuthedEnv } from '../middleware/auth.js'
 import { rateLimit } from '../middleware/rateLimit.js'
 
 export const conversationRoutes = new Hono<AuthedEnv>()
@@ -115,9 +116,13 @@ conversationRoutes.post(
       ? sanitizeChatText(body.data.message, GREETING_MESSAGE_MAX)
       : ''
 
-    // New thread: respect «открыт к общению»
+    // New thread: respect «открыт к общению» (admins may message anyone)
     if (!conv && !other.lookingToMeet) {
-      return c.json({ error: 'Сейчас не открыт к общению' }, 403)
+      const meUser = await loadAuthedUser(me)
+      const adminOk = meUser ? resolveAdminFlags(meUser).isAdmin : false
+      if (!adminOk) {
+        return c.json({ error: 'Сейчас не открыт к общению' }, 403)
+      }
     }
 
     if (!conv) {

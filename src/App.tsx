@@ -1,7 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './components/AppLayout'
 import { GuestOnly, ProtectedRoute } from './components/ProtectedRoute'
-import { SmartCatchAll } from './components/SmartCatchAll'
 import { AppProvider } from './context/AppContext'
 import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage'
 import { AdminGeographyPage } from './pages/AdminGeographyPage'
@@ -12,6 +11,7 @@ import { AdminPlayersPage } from './pages/AdminPlayersPage'
 import { AdminStoragePage } from './pages/AdminStoragePage'
 import { AdminTicketsPage } from './pages/AdminTicketsPage'
 import { AdminUsersPage } from './pages/AdminUsersPage'
+import { BrandMotionLabPage } from './pages/BrandMotionLabPage'
 import { ChatPage } from './pages/ChatPage'
 import { DiscoverPage } from './pages/DiscoverPage'
 import { FeedbackPage } from './pages/FeedbackPage'
@@ -19,20 +19,21 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { GymDetailPage } from './pages/GymDetailPage'
 import { HomePage } from './pages/HomePage'
 import { InstallGuidePage } from './pages/InstallGuidePage'
+import { LandingCoachesPage } from './pages/LandingCoachesPage'
+import { LandingPage } from './pages/LandingPage'
 import { LikedPage } from './pages/LikedPage'
 import { LoginPage } from './pages/LoginPage'
-import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { MessagesPage } from './pages/MessagesPage'
+import { NotFoundPage } from './pages/NotFoundPage'
 import { NotificationsPage } from './pages/NotificationsPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { RegisterPage } from './pages/RegisterPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { TermsPage } from './pages/TermsPage'
 import { UiKitPage } from './pages/UiKitPage'
 import { UserProfilePage } from './pages/UserProfilePage'
-import { LandingCoachesPage } from './pages/LandingCoachesPage'
-import { LandingPage } from './pages/LandingPage'
 import { WelcomePage } from './pages/WelcomePage'
 
 export default function App() {
@@ -50,6 +51,8 @@ export default function App() {
           {/* Ad landings — public even if logged in (preview + cold traffic) */}
           <Route path="/lp" element={<LandingPage />} />
           <Route path="/lp-coaches" element={<LandingCoachesPage />} />
+          {/* Motion sandbox — letter intro preview */}
+          <Route path="/brand-lab" element={<BrandMotionLabPage />} />
 
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -81,10 +84,11 @@ export default function App() {
               <Route path="notifications" element={<NotificationsPage />} />
               <Route path="install" element={<InstallGuidePage />} />
               <Route path="settings" element={<SettingsPage />} />
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Route>
 
-          <Route path="*" element={<SmartCatchAll />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
     </AppProvider>

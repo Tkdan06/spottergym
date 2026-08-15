@@ -68,6 +68,8 @@ model User {
   passwordHash     String
   /** Public findable handle, e.g. masha_ddx — without @ */
   username         String          @unique
+  /** Optional Instagram handle without @ */
+  instagram        String          @default("")
   name             String
   age              Int             @default(25)
   gender           Gender          @default(male)
@@ -92,6 +94,8 @@ model User {
   adminPermissions Json?
   registeredAt     DateTime        @default(now())
   lastSeenAt       DateTime        @default(now())
+  /** Client IP at registration (admin abuse / shared-IP review) */
+  signupIp         String          @default("")
   /** Soft-delete: аккаунт анонимизирован, чаты сохраняются */
   deletedAt        DateTime?
   /** Bump to invalidate all JWTs (password change / reset / soft-delete) */
@@ -119,6 +123,7 @@ model User {
   @@index([city])
   @@index([username])
   @@index([deletedAt])
+  @@index([signupIp])
 }
 
 /** One-time password reset links (raw token never stored — only sha256 hash). */
@@ -227,6 +232,22 @@ model BlockedEmail {
   reason      String   @default("")
   blockedById String?
   createdAt   DateTime @default(now())
+}
+
+/** IP ban — enforced on register/login and authenticated API */
+model BlockedIp {
+  ip          String   @id
+  reason      String   @default("")
+  blockedById String?
+  createdAt   DateTime @default(now())
+}
+
+/** Key/value flags (e.g. emergency_shutdown) */
+model SystemSetting {
+  key         String   @id
+  value       String
+  updatedById String?
+  updatedAt   DateTime @updatedAt
 }
 
 model Invite {
@@ -375,6 +396,8 @@ model NotificationPrefs {
   coaches          Boolean @default(true)
   system           Boolean @default(true)
   workoutReminders Boolean @default(true)
+  /** Admin-only: push when a new user registers */
+  newRegistrations Boolean @default(true)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

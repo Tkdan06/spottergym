@@ -1,4 +1,5 @@
 import { prisma } from '../db.js'
+import { isEmergencyShutdown } from './emergency.js'
 import { createNotification } from './notify.js'
 
 const DAY_MAP: Record<string, string> = {
@@ -96,11 +97,11 @@ export async function runWorkoutRemindersTick() {
 
 export function startWorkoutReminderLoop() {
   const tick = () => {
-    void runWorkoutRemindersTick()
-      .then((n) => {
-        if (n > 0) console.log(`[workout-reminders] sent ${n}`)
-      })
-      .catch((err) => console.warn('[workout-reminders]', err))
+    void (async () => {
+      if (await isEmergencyShutdown()) return
+      const n = await runWorkoutRemindersTick()
+      if (n > 0) console.log(`[workout-reminders] sent ${n}`)
+    })().catch((err) => console.warn('[workout-reminders]', err))
   }
 
   // Align roughly to minute boundaries

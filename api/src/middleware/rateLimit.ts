@@ -40,7 +40,7 @@ export function rateLimit(opts: { windowMs: number; max: number; route: string }
           if (now >= b.resetAt) buckets.delete(k)
         }
         if (buckets.size >= MAX_BUCKETS) {
-          return c.json({ error: 'Слишком много запросов. Подожди минуту.' }, 429)
+          return c.json({ error: 'Слишком много запросов. Попробуй позже.' }, 429)
         }
       }
       buckets.set(key, { count: 1, resetAt: now + opts.windowMs })
@@ -49,7 +49,7 @@ export function rateLimit(opts: { windowMs: number; max: number; route: string }
     }
     bucket.count += 1
     if (bucket.count > opts.max) {
-      return c.json({ error: 'Слишком много запросов. Подожди минуту.' }, 429)
+      return c.json({ error: 'Слишком много запросов. Попробуй позже.' }, 429)
     }
     await next()
   })

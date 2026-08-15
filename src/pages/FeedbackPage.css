@@ -131,6 +131,53 @@
   font-size: 1.1rem;
 }
 
+.admin-emergency {
+  margin-top: 28px;
+  padding: 18px 16px;
+  border: 1px solid rgba(220, 70, 60, 0.45);
+  background:
+    linear-gradient(160deg, rgba(220, 60, 50, 0.12), transparent 50%),
+    var(--bg-card);
+}
+
+.admin-emergency-head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.admin-emergency-head h2 {
+  margin: 0 0 4px;
+  font-size: 1.1rem;
+  color: #e85d4c;
+}
+
+.admin-emergency-head .muted {
+  margin: 0;
+}
+
+.admin-emergency-btn {
+  width: 100%;
+}
+
+.admin-emergency-form {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-emergency-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.88rem;
+}
+
+.admin-emergency-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .admin-user-row {
   display: grid;
   gap: 10px;
