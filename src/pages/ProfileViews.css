@@ -184,9 +184,14 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   margin: 0 0 6px;
   min-height: 0;
+}
+
+.profile-hero.mine .profile-handles {
+  justify-content: flex-start;
 }
 
 .profile-handles:empty {

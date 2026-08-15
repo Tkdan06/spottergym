@@ -43,9 +43,13 @@ services:
       APP_PUBLIC_URL: ${APP_PUBLIC_URL:-https://spottergym.ru}
     ports:
       - '127.0.0.1:3001:3001'
+    volumes:
+      # Persist uploaded profile photos across image rebuilds
+      - spotter_media:/app/data/media
     depends_on:
       postgres:
         condition: service_healthy
 
 volumes:
   spotter_pg:
+  spotter_media:

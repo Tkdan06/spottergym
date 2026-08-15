@@ -18,16 +18,17 @@ export function profileImage(
   user: Pick<UserProfile, 'photos' | 'avatar' | 'privacy' | 'name' | 'gender' | 'isDeleted'>,
 ) {
   if (user.isDeleted) return '/images/deleted-user.svg'
+  // Prefer real photos when present (incl. admin reveal of anonymous profiles)
+  const photo = Array.isArray(user.photos) ? user.photos.find(Boolean) : undefined
+  if (photo) return photo
   if (user.privacy === 'anonymous') {
-    // Старые dicebear URL в avatar — сразу локальный силуэт
+    // Redacted payload has no photos — gender silhouette only
     const av = user.avatar || ''
     if (!av || av.includes('dicebear.com') || av.includes('api.dicebear')) {
       return localGenderAvatar(user.gender)
     }
     return av
   }
-  const photo = Array.isArray(user.photos) ? user.photos[0] : undefined
-  if (photo) return photo
   const av = user.avatar || ''
   if (!av || av.includes('dicebear.com') || av.includes('api.dicebear')) {
     return localGenderAvatar(user.gender)

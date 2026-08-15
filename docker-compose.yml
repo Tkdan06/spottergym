@@ -30,9 +30,12 @@ services:
       SEED_ADMIN_EMAILS: ''
     ports:
       - '3001:3001'
+    volumes:
+      - spotter_media:/app/data/media
     depends_on:
       postgres:
         condition: service_healthy
 
 volumes:
   spotter_pg:
+  spotter_media:

@@ -641,7 +641,11 @@ export function formatGymAddressLines(
 
 export function displayName(user: UserProfile) {
   if (user.isDeleted) return 'Удалённый пользователь'
-  return user.privacy === 'anonymous' ? 'Аноним' : user.name
+  // Redacted anonymous API payload uses placeholder name; admin reveal returns the real one
+  if (user.privacy === 'anonymous' && (!user.name || user.name === 'Аноним')) {
+    return 'Аноним'
+  }
+  return user.name
 }
 
 export function intentLabel(intent: UserProfile['intent']) {
