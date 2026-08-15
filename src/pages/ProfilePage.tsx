@@ -93,7 +93,7 @@ export function ProfilePage() {
           <h2 className="profile-hero-name">
             {user.name}, {user.age}
           </h2>
-          <div className="profile-handles">
+          <div className="profile-identity">
             {user.username ? (
               <button
                 type="button"
@@ -110,7 +110,7 @@ export function ProfilePage() {
                       window.setTimeout(() => setCopyFlash(''), 1600)
                     })
                 }}
-                title="Скопировать @ник"
+                title="Скопировать ник Spotter"
               >
                 {formatUsername(user.username)}
                 <Copy size={14} aria-hidden />
@@ -118,14 +118,18 @@ export function ProfilePage() {
             ) : null}
             {normalizeInstagram(user.instagram || '') ? (
               <a
-                className="profile-instagram"
+                className="profile-instagram-link"
                 href={instagramProfileUrl(user.instagram || '')}
                 target="_blank"
                 rel="noopener noreferrer"
-                title={formatInstagram(user.instagram)}
+                title={`Открыть Instagram ${formatInstagram(user.instagram)}`}
                 aria-label={`Instagram ${formatInstagram(user.instagram)}`}
               >
-                <InstagramIcon width={18} height={18} />
+                <InstagramIcon width={16} height={16} aria-hidden />
+                <span className="profile-instagram-label">Instagram</span>
+                <span className="profile-instagram-handle">
+                  {formatInstagram(user.instagram)}
+                </span>
               </a>
             ) : null}
           </div>

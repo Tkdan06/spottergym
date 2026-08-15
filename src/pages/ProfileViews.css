@@ -180,42 +180,58 @@
   font-weight: 700;
 }
 
-.profile-handles {
+/** Spotter @ник и Instagram — отдельные строки, не один «логин» */
+.profile-identity {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 8px;
-  margin: 0 0 6px;
-  min-height: 0;
+  margin: 0 0 8px;
+  width: 100%;
 }
 
-.profile-hero.mine .profile-handles {
-  justify-content: flex-start;
+.profile-hero.mine .profile-identity {
+  align-items: flex-start;
 }
 
-.profile-handles:empty {
+.profile-identity:empty {
   display: none;
 }
 
-.profile-instagram {
+.profile-instagram-link {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
+  gap: 8px;
+  max-width: 100%;
+  padding: 6px 10px;
   border-radius: 10px;
   color: var(--text);
-  background: color-mix(in srgb, var(--bg-elevated) 88%, var(--accent) 12%);
-  border: 1px solid color-mix(in srgb, var(--border, transparent) 80%, var(--accent) 20%);
+  background: color-mix(in srgb, var(--bg-elevated) 88%, var(--accent) 10%);
+  border: 1px solid color-mix(in srgb, var(--line, transparent) 85%, var(--accent) 15%);
   text-decoration: none;
-  transition: color 0.15s ease, background 0.15s ease;
+  font-size: 0.88rem;
+  font-weight: 650;
+  line-height: 1.2;
 }
 
-.profile-instagram:hover,
-.profile-instagram:focus-visible {
+.profile-instagram-link:hover,
+.profile-instagram-link:focus-visible {
   color: var(--accent);
   outline: none;
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.profile-instagram-label {
+  flex-shrink: 0;
+}
+
+.profile-instagram-handle {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.72;
+  font-weight: 550;
 }
 
 .profile-block {

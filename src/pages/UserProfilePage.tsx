@@ -313,20 +313,24 @@ export function UserProfilePage() {
             {name}
             {!isAnon ? <span>, {person.age}</span> : null}
           </h1>
-          <div className="profile-handles">
+          <div className="profile-identity">
             {person.username ? (
               <p className="profile-username-static">{formatUsername(person.username)}</p>
             ) : null}
             {!isAnon && normalizeInstagram(person.instagram || '') ? (
               <a
-                className="profile-instagram"
+                className="profile-instagram-link"
                 href={instagramProfileUrl(person.instagram || '')}
                 target="_blank"
                 rel="noopener noreferrer"
-                title={formatInstagram(person.instagram)}
+                title={`Открыть Instagram ${formatInstagram(person.instagram)}`}
                 aria-label={`Instagram ${formatInstagram(person.instagram)}`}
               >
-                <InstagramIcon width={18} height={18} />
+                <InstagramIcon width={16} height={16} aria-hidden />
+                <span className="profile-instagram-label">Instagram</span>
+                <span className="profile-instagram-handle">
+                  {formatInstagram(person.instagram)}
+                </span>
               </a>
             ) : null}
           </div>
