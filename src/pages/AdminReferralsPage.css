@@ -1,0 +1,130 @@
+.admin-referrals-search {
+  display: grid;
+  gap: 6px;
+  margin: 4px 0 12px;
+}
+
+.admin-referrals-search input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  color: var(--text);
+}
+
+.admin-referrals-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.admin-referrals-tabs button {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-weight: 650;
+}
+
+.admin-referrals-tabs button.active {
+  border-color: rgba(200, 245, 66, 0.45);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.admin-referrals-list li {
+  list-style: none;
+}
+
+.admin-referrals-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+  width: 100%;
+}
+
+.admin-referrals-rank {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.admin-referrals-main {
+  min-width: 0;
+}
+
+.admin-referrals-main a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.admin-referrals-main a:hover {
+  color: var(--accent);
+}
+
+.admin-referrals-link {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  word-break: break-all;
+}
+
+.admin-referrals-actions {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+
+.admin-referrals-count {
+  min-width: 40px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.admin-referrals-copy {
+  min-height: 36px;
+  padding: 0 10px;
+  gap: 6px;
+  font-size: 0.82rem;
+}
+
+.admin-referrals-feed {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+}
+
+.admin-referrals-feed a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.admin-referrals-feed a:hover {
+  color: var(--accent);
+}
+
+.admin-referrals-when {
+  margin: 0;
+  font-size: 0.82rem;
+}

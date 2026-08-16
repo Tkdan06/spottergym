@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Heart, MessageCircle, Pin, PinOff, Search, UserRound } from 'lucide-react'
+import { Heart, MessageCircle, Pin, PinOff, Search, Trash2, UserRound } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { PresenceBadge } from '../components/PresenceBadge'
 import { SmartImage } from '../components/SmartImage'
@@ -274,6 +274,7 @@ export function MessagesPage() {
     apiOnline,
     refreshChats,
     togglePinConversation,
+    deleteConversation,
   } = useApp()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
@@ -281,7 +282,7 @@ export function MessagesPage() {
   const [searchError, setSearchError] = useState('')
   const [results, setResults] = useState<UserProfile[]>([])
   const [sheetConv, setSheetConv] = useState<Conversation | null>(null)
-  const [pinBusy, setPinBusy] = useState(false)
+  const [actionBusy, setActionBusy] = useState(false)
   const [hasMoreChats, setHasMoreChats] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -402,13 +403,28 @@ export function MessagesPage() {
     : ''
 
   const onTogglePin = async () => {
-    if (!sheetConv || pinBusy) return
-    setPinBusy(true)
+    if (!sheetConv || actionBusy) return
+    setActionBusy(true)
     try {
       await togglePinConversation(sheetConv.id, !sheetConv.pinned)
       setSheetConv(null)
     } finally {
-      setPinBusy(false)
+      setActionBusy(false)
+    }
+  }
+
+  const onDeleteChat = async () => {
+    if (!sheetConv || actionBusy) return
+    const name = sheetConv.other?.name || 'чат'
+    const ok = window.confirm(`Удалить чат с ${name} у себя? У собеседника переписка останется.`)
+    if (!ok) return
+    setActionBusy(true)
+    try {
+      const id = sheetConv.id
+      await deleteConversation(id)
+      setSheetConv(null)
+    } finally {
+      setActionBusy(false)
     }
   }
 
@@ -522,38 +538,46 @@ export function MessagesPage() {
           />
           <div className="chat-pin-sheet-panel" ref={pinPanelRef}>
             <div className="chat-pin-sheet-grab" aria-hidden />
-            <p className="muted chat-pin-sheet-hint">Удерживай чат, чтобы закрепить сверху</p>
-            <button
-              type="button"
-              ref={pinActionRef}
-              className="btn btn-primary btn-block"
-              disabled={pinBusy}
-              onClick={() => void onTogglePin()}
-            >
-              {sheetConv.pinned ? (
-                <>
-                  <PinOff size={18} aria-hidden /> Открепить
-                </>
-              ) : (
-                <>
-                  <Pin size={18} aria-hidden /> Закрепить сверху
-                </>
-              )}
-            </button>
-            <button
-              type="button"
-              className="btn btn-ghost btn-block"
-              onClick={() => {
-                const id = sheetConv.id
-                setSheetConv(null)
-                navigate(`/app/messages/${id}`)
-              }}
-            >
-              Открыть чат
-            </button>
-            <button type="button" className="btn btn-soft btn-block" onClick={() => setSheetConv(null)}>
-              Отмена
-            </button>
+            <div className="chat-pin-sheet-actions" role="group" aria-label="Действия">
+              <button
+                type="button"
+                ref={pinActionRef}
+                className="chat-pin-sheet-action"
+                disabled={actionBusy}
+                onClick={() => void onTogglePin()}
+              >
+                <span className="chat-pin-sheet-icon" aria-hidden>
+                  {sheetConv.pinned ? <PinOff size={22} /> : <Pin size={22} />}
+                </span>
+                <span>{sheetConv.pinned ? 'Открепить' : 'Закрепить'}</span>
+              </button>
+              <button
+                type="button"
+                className="chat-pin-sheet-action"
+                disabled={actionBusy}
+                onClick={() => {
+                  const id = sheetConv.id
+                  setSheetConv(null)
+                  navigate(`/app/messages/${id}`)
+                }}
+              >
+                <span className="chat-pin-sheet-icon" aria-hidden>
+                  <MessageCircle size={22} />
+                </span>
+                <span>Открыть</span>
+              </button>
+              <button
+                type="button"
+                className="chat-pin-sheet-action is-danger"
+                disabled={actionBusy}
+                onClick={() => void onDeleteChat()}
+              >
+                <span className="chat-pin-sheet-icon" aria-hidden>
+                  <Trash2 size={22} />
+                </span>
+                <span>Удалить</span>
+              </button>
+            </div>
           </div>
         </div>
       ) : null}

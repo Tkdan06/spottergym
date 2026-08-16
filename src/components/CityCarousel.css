@@ -185,9 +185,10 @@
   right: 0;
   top: 0;
   z-index: 200;
-  /* Height/transform are set from visualViewport in JS — no keyboard padding here */
-  height: 100dvh;
-  max-height: 100dvh;
+  /* Height locked in JS on open (layout viewport). Do not follow visualViewport —
+     that jumps the sheet with the keyboard and dismisses focus on iOS PWA. */
+  height: 100svh;
+  max-height: 100svh;
   display: grid;
   align-items: end;
   box-sizing: border-box;

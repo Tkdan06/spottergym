@@ -9,6 +9,7 @@ import { AdminHubPage } from './pages/AdminHubPage'
 import { AdminLandingPage } from './pages/AdminLandingPage'
 import { AdminPasswordResetsPage } from './pages/AdminPasswordResetsPage'
 import { AdminPlayersPage } from './pages/AdminPlayersPage'
+import { AdminReferralsPage } from './pages/AdminReferralsPage'
 import { AdminStoragePage } from './pages/AdminStoragePage'
 import { AdminTicketsPage } from './pages/AdminTicketsPage'
 import { AdminUsersPage } from './pages/AdminUsersPage'
@@ -19,6 +20,7 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { GymDetailPage } from './pages/GymDetailPage'
 import { HomePage } from './pages/HomePage'
 import { InstallGuidePage } from './pages/InstallGuidePage'
+import { InviteCirclePage } from './pages/InviteCirclePage'
 import { LandingCoachesPage } from './pages/LandingCoachesPage'
 import { LandingPage } from './pages/LandingPage'
 import { LikedPage } from './pages/LikedPage'
@@ -65,6 +67,7 @@ export default function App() {
               <Route path="messages" element={<MessagesPage />} />
               <Route path="messages/:conversationId" element={<ChatPage />} />
               <Route path="profile" element={<ProfilePage />} />
+              <Route path="invite" element={<InviteCirclePage />} />
               <Route path="activity" element={<ActivityPage />} />
               <Route path="likes" element={<LikedPage mode="received" />} />
               <Route path="likes/sent" element={<LikedPage mode="sent" />} />
@@ -76,6 +79,7 @@ export default function App() {
               <Route path="admin/geography" element={<AdminGeographyPage />} />
               <Route path="admin/storage" element={<AdminStoragePage />} />
               <Route path="admin/password-resets" element={<AdminPasswordResetsPage />} />
+              <Route path="admin/referrals" element={<AdminReferralsPage />} />
               <Route path="admin/landing" element={<AdminLandingPage />} />
               <Route path="admin/tickets" element={<AdminTicketsPage />} />
               <Route path="admin/users" element={<AdminUsersPage />} />

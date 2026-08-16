@@ -4,6 +4,7 @@ import { isIpBlocked } from '../lib/blocks.js'
 import { expireStaleCheckIns } from '../lib/checkInExpiry.js'
 import { prisma } from '../db.js'
 import { verifySession } from '../lib/jwt.js'
+import { getReferralStatsForUser } from '../lib/referralStats.js'
 import { serializeUser } from '../lib/serialize.js'
 import { clientIp } from './rateLimit.js'
 
@@ -70,7 +71,8 @@ export async function loadAuthedUser(userId: string) {
 export async function authedUserJson(userId: string) {
   const user = await loadAuthedUser(userId)
   if (!user) return null
-  return serializeUser(user)
+  const referral = await getReferralStatsForUser(userId)
+  return serializeUser(user, { referral })
 }
 
 /** Invalidate all existing JWTs for this user. */

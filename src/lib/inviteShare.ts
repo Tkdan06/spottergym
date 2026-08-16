@@ -13,15 +13,21 @@ export interface InvitePayload {
 export function buildInvitePayload(opts: {
   userId: string
   gymName?: string | null
+  /** Current referral status title, e.g. Gym Crew */
+  statusTitle?: string | null
 }): InvitePayload {
   // Always production HTTPS so Telegram/WhatsApp/Max can fetch OG tags + og-image.png
   const url = `${SHARE_ORIGIN}/register?invite=${encodeURIComponent(opts.userId)}`
   const title = 'SPOTTER — найди людей в своём клубе'
   const gym = opts.gymName?.trim()
-  // Текст без сырого URL: ссылка уходит отдельно в `url`, мессенджер рисует красивое OG-превью
-  const text = gym
-    ? `Привет! Присоединяйся ко мне в Spotter — находи людей в «${gym}».`
-    : 'Привет! Присоединяйся ко мне в Spotter — найди людей в своём клубе.'
+  const status = opts.statusTitle?.trim()
+  const text = status
+    ? gym
+      ? `Я уже ${status} в Spotter — зайди по ссылке, будем в «${gym}».`
+      : `Я уже ${status} в Spotter — зайди по ссылке, найдём людей в зале.`
+    : gym
+      ? `Привет! Присоединяйся ко мне в Spotter — находи людей в «${gym}».`
+      : 'Привет! Присоединяйся ко мне в Spotter — найди людей в своём клубе.'
 
   return { title, text, url }
 }

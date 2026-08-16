@@ -11,6 +11,7 @@ import {
   Power,
   RefreshCw,
   Shield,
+  UserPlus,
   Users,
 } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
@@ -253,6 +254,11 @@ export function AdminHubPage() {
               <p className="muted">
                 7д {analytics?.passwordResets?.last7d ?? '—'} запросов · спам и забывчивость
               </p>
+            </Link>
+            <Link to="/app/admin/referrals" className="admin-hub-card">
+              <UserPlus size={20} />
+              <strong>Рефералы</strong>
+              <p className="muted">Круг Spotter · кто кого · статусы Friend→GymBro</p>
             </Link>
             <Link to="/app/admin/landing" className="admin-hub-card">
               <Megaphone size={20} />

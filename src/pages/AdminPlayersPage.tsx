@@ -86,12 +86,17 @@ export function AdminPlayersPage() {
     startConversation,
   } = useApp()
 
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(() => searchParams.get('q')?.trim() || '')
   const filter = parseFilter(searchParams.get('filter'))
   const [activityList, setActivityList] = useState<AdminDirectoryUser[] | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [message, setMessage] = useState('')
   const [notice, setNotice] = useState('')
+
+  useEffect(() => {
+    const fromUrl = searchParams.get('q')?.trim() || ''
+    if (fromUrl) setQuery(fromUrl)
+  }, [searchParams])
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
 

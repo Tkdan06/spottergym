@@ -62,6 +62,7 @@ import {
   apiMarkConversationRead,
   apiMarkNotificationRead,
   apiPinConversation,
+  apiDeleteConversation,
   apiMe,
   apiPatchMe,
   apiPatchNotificationPrefs,
@@ -247,6 +248,8 @@ export interface AppContextValue {
   markRead: (conversationId: string) => void | Promise<void>
   /** Закрепить / открепить чат (только для текущего пользователя) */
   togglePinConversation: (conversationId: string, pinned?: boolean) => void | Promise<void>
+  /** Удалить чат у себя (скрыть из списка) */
+  deleteConversation: (conversationId: string) => void | Promise<void>
   /** Подтянуть список чатов / тред с сервера */
   refreshChats: (opts?: { before?: string; append?: boolean }) => Promise<{ hasMore: boolean }>
   refreshThread: (
@@ -2701,6 +2704,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [conversations, persistChats, rememberUser],
   )
 
+  const deleteConversation = useCallback(
+    async (conversationId: string) => {
+      const applyLocal = () => {
+        setConversations((prev) => {
+          const next = prev.filter((c) => c.id !== conversationId)
+          persistChats(next)
+          return next
+        })
+        setMessages((prev) => {
+          const next = prev.filter((m) => m.conversationId !== conversationId)
+          persistMsgs(next)
+          return next
+        })
+      }
+
+      if (apiOnlineRef.current && getStoredToken()) {
+        try {
+          await apiDeleteConversation(conversationId)
+          applyLocal()
+          return
+        } catch {
+          /* local fallback */
+        }
+      }
+      applyLocal()
+    },
+    [persistChats, persistMsgs],
+  )
+
   const directory = useMemo(() => {
     const map = new Map<string, UserProfile>()
     if (user && isDemoAccount(user.email)) {
@@ -2746,6 +2778,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       acceptRequest,
       markRead,
       togglePinConversation,
+      deleteConversation,
       refreshChats,
       refreshThread,
       updateNotificationPrefs,
@@ -2832,6 +2865,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       acceptRequest,
       markRead,
       togglePinConversation,
+      deleteConversation,
       refreshChats,
       refreshThread,
       updateNotificationPrefs,

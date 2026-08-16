@@ -213,6 +213,7 @@
 
 .safety {
   padding: 16px;
+  margin-top: 4px;
   margin-bottom: 0;
 }
 
@@ -292,7 +293,7 @@
 }
 
 .settings-password-panel {
-  margin-bottom: 4px;
+  margin-bottom: 16px;
 }
 
 .settings-password-form {

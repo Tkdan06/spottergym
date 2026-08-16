@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { LikesRow } from '../components/LikesRow'
 import { PhotoGalleryModal } from '../components/PhotoGalleryModal'
 import { ProfilePhotoCarousel } from '../components/ProfilePhotoCarousel'
+import { ReferralBadge, referralChromeClass } from '../components/ReferralBadge'
 import { SafetyActions } from '../components/SafetyActions'
 import { SectionTitle } from '../components/SectionTitle'
 import { SmartImage } from '../components/SmartImage'
@@ -287,7 +288,7 @@ export function UserProfilePage() {
         </div>
       ) : null}
 
-      <div className="profile-hero">
+      <div className={`profile-hero ${referralChromeClass(person)}`}>
         <ProfilePhotoCarousel
           photos={galleryPhotos}
           fallbackSrc={photo}
@@ -313,6 +314,7 @@ export function UserProfilePage() {
             {name}
             {!isAnon ? <span>, {person.age}</span> : null}
           </h1>
+          {!isAnon ? <ReferralBadge user={person} size="md" showTitle /> : null}
           <div className="profile-identity">
             {person.username ? (
               <p className="profile-username-static">{formatUsername(person.username)}</p>

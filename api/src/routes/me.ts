@@ -39,9 +39,15 @@ import {
 import { isAllowedAvatarRef, isAllowedPhotoRef } from '../lib/photos.js'
 import { isValidInstagram, normalizeInstagram } from '../lib/instagram.js'
 import { serializeUser } from '../lib/serialize.js'
+import {
+  buildInviteCircle,
+  getReferralStatsForUser,
+} from '../lib/referralStats.js'
 import { SoftDeleteError, softDeleteUser } from '../lib/softDeleteUser.js'
 import { isValidUsername, normalizeUsername } from '../lib/username.js'
 import { ensureWelcomeInstallNotification } from '../lib/welcomeInstall.js'
+import { createNotification } from '../lib/notify.js'
+import { referralTierFromCount } from '../lib/referralTiers.js'
 import {
   loadAuthedUser,
   requireAuth,
@@ -109,6 +115,13 @@ function publicActorName(user: { name: string; privacy: string }) {
   return user.privacy === 'anonymous' ? 'Аноним' : user.name
 }
 
+async function serializeMe(
+  user: NonNullable<Awaited<ReturnType<typeof loadAuthedUser>>>,
+) {
+  const referral = await getReferralStatsForUser(user.id)
+  return serializeUser(user, { referral })
+}
+
 export const meRoutes = new Hono<AuthedEnv>()
 
 meRoutes.use('*', requireAuth)
@@ -116,8 +129,19 @@ meRoutes.use('*', requireAuth)
 meRoutes.get('/', async (c) => {
   const user = await loadAuthedUser(c.get('userId'))
   if (!user) return c.json({ error: 'Аккаунт не найден' }, 404)
-  return c.json({ user: serializeUser(user) })
+  const referral = await getReferralStatsForUser(user.id)
+  return c.json({ user: serializeUser(user, { referral }) })
 })
+
+/** Invite circle: credited friends, pending, tier progress */
+meRoutes.get(
+  '/referrals',
+  rateLimit({ windowMs: 60_000, max: 60, route: 'me-referrals' }),
+  async (c) => {
+    const circle = await buildInviteCircle(c.get('userId'))
+    return c.json({ circle })
+  },
+)
 
 /** Personal check-in history / gym time stats (MSK days). */
 meRoutes.get(
@@ -334,9 +358,44 @@ meRoutes.patch(
     await ensureWelcomeInstallNotification(userId).catch((err) =>
       console.warn('[welcome-install] notify failed', err),
     )
+    // Credit inviter: friend finished onboarding → +1 to circle / maybe new tier
+    const invite = await prisma.invite.findUnique({
+      where: { inviteeId: userId },
+      select: { inviterId: true },
+    })
+    if (invite?.inviterId) {
+      const credited = await prisma.user.count({
+        where: {
+          deletedAt: null,
+          onboardingDone: true,
+          id: {
+            in: (
+              await prisma.invite.findMany({
+                where: { inviterId: invite.inviterId },
+                select: { inviteeId: true },
+              })
+            ).map((i) => i.inviteeId),
+          },
+        },
+      })
+      const tier = referralTierFromCount(credited)
+      const prevTier = referralTierFromCount(Math.max(0, credited - 1))
+      const leveledUp = tier.id > prevTier.id && tier.title
+      await createNotification({
+        userId: invite.inviterId,
+        type: 'system',
+        title: leveledUp ? `Новый статус: ${tier.title}` : 'Друг в круге Spotter',
+        body: leveledUp
+          ? `${user.name} завершил онбординг — ты ${tier.title} (${credited})`
+          : `${user.name} завершил онбординг по твоей ссылке · ${credited} в круге`,
+        href: '/app/invite',
+        actorId: userId,
+      }).catch((err) => console.warn('[referral] credit notify failed', err))
+    }
   }
 
-  return c.json({ user: serializeUser(user) })
+  const referral = await getReferralStatsForUser(user.id)
+  return c.json({ user: serializeUser(user, { referral }) })
   },
 )
 
@@ -400,7 +459,7 @@ meRoutes.post(
       })
     }
   }
-  return c.json({ user: user ? serializeUser(user) : null })
+  return c.json({ user: user ? await serializeMe(user) : null })
   },
 )
 
@@ -418,7 +477,7 @@ meRoutes.post(
     data: { lastSeenAt: new Date() },
   })
   const user = await loadAuthedUser(userId)
-  return c.json({ user: user ? serializeUser(user) : null })
+  return c.json({ user: user ? await serializeMe(user) : null })
   },
 )
 
@@ -463,7 +522,7 @@ meRoutes.post(
   })
 
   const user = await loadAuthedUser(userId)
-  return c.json({ user: user ? serializeUser(user) : null })
+  return c.json({ user: user ? await serializeMe(user) : null })
   },
 )
 
@@ -508,7 +567,7 @@ meRoutes.post(
   }
 
   const next = await loadAuthedUser(userId)
-  return c.json({ user: next ? serializeUser(next) : null })
+  return c.json({ user: next ? await serializeMe(next) : null })
   },
 )
 
@@ -546,7 +605,7 @@ meRoutes.delete(
   })
 
   const next = await loadAuthedUser(userId)
-  return c.json({ user: next ? serializeUser(next) : null })
+  return c.json({ user: next ? await serializeMe(next) : null })
   },
 )
 

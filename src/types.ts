@@ -74,6 +74,13 @@ export interface UserProfile {
   /** Soft-deleted account — chats kept, show «Удалённый пользователь» */
   isDeleted?: boolean
   verified?: boolean
+  /** Credited referrals (onboarded friends) */
+  referralCreditedCount?: number
+  /** 0–4 ladder tier */
+  referralTier?: number
+  referralTitle?: string
+  referralBadge?: string
+  referralChrome?: 'none' | 'soft' | 'strong' | 'hero'
 }
 
 /** Как в Telegram: часы → ✓ → ✓✓ → ✓✓ синие */

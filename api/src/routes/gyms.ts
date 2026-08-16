@@ -3,6 +3,7 @@ import { expireStaleCheckIns } from '../lib/checkInExpiry.js'
 import { prisma } from '../db.js'
 import { expandGymQueryVariants, gymMatchesQuery } from '../lib/gymSearch.js'
 import { listHiddenUserIds } from '../lib/blocks.js'
+import { getReferralStatsMap } from '../lib/referralStats.js'
 import { serializeGym, serializePublicUser } from '../lib/serialize.js'
 import { requireAuth, type AuthedEnv } from '../middleware/auth.js'
 import { rateLimit } from '../middleware/rateLimit.js'
@@ -134,9 +135,11 @@ gymRoutes.get('/:gymId/people', requireAuth, async (c) => {
     },
   })
 
+  const tierMap = await getReferralStatsMap(members.map((m) => m.userId))
+
   return c.json({
     people: members.map((m) => {
-      const person = serializePublicUser(m.user)
+      const person = serializePublicUser(m.user, { referral: tierMap.get(m.userId) })
       // «В зале» только если открытый чек-ин именно в этом клубе (не во всех клубах профиля)
       return {
         ...person,

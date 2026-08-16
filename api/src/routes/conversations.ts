@@ -54,7 +54,10 @@ conversationRoutes.get(
 
     const list = await prisma.conversation.findMany({
       where: {
-        OR: [{ userLowId: userId }, { userHighId: userId }],
+        OR: [
+          { userLowId: userId, hiddenLowAt: null },
+          { userHighId: userId, hiddenHighAt: null },
+        ],
         ...(before ? { lastMessageAt: { lt: before } } : {}),
       },
       orderBy: { lastMessageAt: 'desc' },
@@ -195,6 +198,8 @@ conversationRoutes.post(
           data: {
             lastMessageText: text,
             lastMessageAt: now,
+            hiddenLowAt: null,
+            hiddenHighAt: null,
             unreadLow: low === otherId ? { increment: 1 } : undefined,
             unreadHigh: high === otherId ? { increment: 1 } : undefined,
           },
@@ -210,6 +215,15 @@ conversationRoutes.post(
           text,
           conversationId: conv.id,
         }).catch((err) => console.warn('[push] chat message', err))
+      }
+    } else {
+      // Re-open from profile: show chat again for the current user
+      const isLow = conv.userLowId === me
+      if ((isLow && conv.hiddenLowAt) || (!isLow && conv.hiddenHighAt)) {
+        conv = await prisma.conversation.update({
+          where: { id: conv.id },
+          data: isLow ? { hiddenLowAt: null } : { hiddenHighAt: null },
+        })
       }
     }
 
@@ -326,6 +340,8 @@ conversationRoutes.post(
         data: {
           lastMessageText: text,
           lastMessageAt: now,
+          hiddenLowAt: null,
+          hiddenHighAt: null,
           ...(conv.userLowId === otherId
             ? { unreadLow: { increment: 1 } }
             : { unreadHigh: { increment: 1 } }),
@@ -455,5 +471,26 @@ conversationRoutes.post(
     })
 
     return c.json({ conversation: serializeConversation(updated, userId, other) })
+  },
+)
+
+/** Delete chat for me only (hides from inbox; peer keeps the thread) */
+conversationRoutes.delete(
+  '/:id',
+  rateLimit({ windowMs: 60_000, max: 40, route: 'chat-hide' }),
+  async (c) => {
+    const userId = c.get('userId')
+    const conv = await loadConvForUser(c.req.param('id'), userId)
+    if (!conv) return c.json({ error: 'Чат не найден' }, 404)
+
+    const isLow = conv.userLowId === userId
+    await prisma.conversation.update({
+      where: { id: conv.id },
+      data: isLow
+        ? { hiddenLowAt: new Date(), pinnedLowAt: null, unreadLow: 0 }
+        : { hiddenHighAt: new Date(), pinnedHighAt: null, unreadHigh: 0 },
+    })
+
+    return c.json({ ok: true, id: conv.id })
   },
 )

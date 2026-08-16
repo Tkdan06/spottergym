@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Bell, ChartNoAxesColumn, Copy, Eye, EyeOff, MessageSquareText, Settings, Share2, Shield } from 'lucide-react'
 import { Link, Navigate } from 'react-router-dom'
 import { CheckInControl } from '../components/CheckInControl'
-import { InviteFriendsButton } from '../components/InviteFriendsButton'
 import { LikesRow } from '../components/LikesRow'
+import { ReferralBadge, referralChromeClass } from '../components/ReferralBadge'
 import { PhotoGalleryModal } from '../components/PhotoGalleryModal'
 import { ProfilePhotoCarousel } from '../components/ProfilePhotoCarousel'
 import { ScheduleSheet } from '../components/ScheduleSheet'
@@ -78,7 +78,7 @@ export function ProfilePage() {
         </p>
       ) : null}
 
-      <div className="profile-hero mine">
+      <div className={`profile-hero mine ${referralChromeClass(user)}`}>
         <ProfilePhotoCarousel
           photos={user.photos}
           fallbackSrc={heroSrc}
@@ -96,6 +96,7 @@ export function ProfilePage() {
           <h2 className="profile-hero-name">
             {user.name}, {user.age}
           </h2>
+          <ReferralBadge user={user} size="md" showTitle />
           <div className="profile-identity">
             {user.username ? (
               <button
@@ -415,11 +416,15 @@ export function ProfilePage() {
       </section>
 
       <section className="surface profile-block profile-invite-block">
-        <SectionTitle>Пригласить друзей</SectionTitle>
-        <p className="muted profile-invite-hint">Расскажи о Spotter тем, с кем ходишь в зал</p>
-        <InviteFriendsButton userId={user.id} className="btn btn-ghost btn-block">
-          <Share2 size={16} /> Поделиться ссылкой
-        </InviteFriendsButton>
+        <SectionTitle>Круг Spotter</SectionTitle>
+        <p className="muted profile-invite-hint">
+          {user.referralTitle
+            ? `${user.referralTitle} · ${user.referralCreditedCount || 0} в круге — приглашай друзей и открывай статусы`
+            : 'Приглашай друзей из зала и открывай статусы на аватаре'}
+        </p>
+        <Link to="/app/invite" className="btn btn-ghost btn-block">
+          <Share2 size={16} /> Открыть круг и ссылку
+        </Link>
       </section>
 
       <Link to="/app/settings" className="btn btn-ghost btn-block">

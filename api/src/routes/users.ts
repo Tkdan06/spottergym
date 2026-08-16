@@ -5,6 +5,7 @@ import { prisma } from '../db.js'
 import { resolveAdminFlags } from '../lib/admin.js'
 import { areUsersBlocked, listHiddenUserIds } from '../lib/blocks.js'
 import { serializePublicUser } from '../lib/serialize.js'
+import { getReferralStatsForUser, getReferralStatsMap } from '../lib/referralStats.js'
 import { loadAuthedUser, requireAuth, type AuthedEnv } from '../middleware/auth.js'
 import { rateLimit } from '../middleware/rateLimit.js'
 import { normalizeUsername } from '../lib/username.js'
@@ -73,7 +74,10 @@ userRoutes.get(
     orderBy: { username: 'asc' },
   })
 
-  return c.json({ users: found.map((u) => serializePublicUser(u)) })
+  const tierMap = await getReferralStatsMap(found.map((u) => u.id))
+  return c.json({
+    users: found.map((u) => serializePublicUser(u, { referral: tierMap.get(u.id) })),
+  })
 })
 
 /** Exact lookup by public @username */
@@ -96,7 +100,8 @@ userRoutes.get('/by-username/:username', async (c) => {
     return c.json({ error: 'Пользователь недоступен' }, 403)
   }
 
-  return c.json({ user: serializePublicUser(found) })
+  const referral = await getReferralStatsForUser(found.id)
+  return c.json({ user: serializePublicUser(found, { referral }) })
 })
 
 userRoutes.get('/:id', async (c) => {
@@ -116,22 +121,22 @@ userRoutes.get('/:id', async (c) => {
   if (id.data === me) {
     const self = await loadAuthedUser(me)
     if (!self) return c.json({ error: 'Аккаунт не найден' }, 404)
-    return c.json({ user: serializePublicUser(self, { revealAnonymous }) })
+    const referral = await getReferralStatsForUser(self.id)
+    return c.json({ user: serializePublicUser(self, { revealAnonymous, referral }) })
   }
 
-  if (await areUsersBlocked(me, id.data)) {
+  await expireStaleCheckIns()
+  const found = await prisma.user.findFirst({
+    where: { id: id.data, deletedAt: null },
+    include: userInclude,
+  })
+  if (!found) return c.json({ error: 'Пользователь не найден' }, 404)
+  if (await areUsersBlocked(me, found.id)) {
     return c.json({ error: 'Пользователь недоступен' }, 403)
   }
 
-  const found = await prisma.user.findUnique({
-    where: { id: id.data },
-    include: userInclude,
-  })
-  if (!found) {
-    return c.json({ error: 'Пользователь не найден' }, 404)
-  }
-
+  const referral = await getReferralStatsForUser(found.id)
   return c.json({
-    user: serializePublicUser(found, { revealAnonymous }),
+    user: serializePublicUser(found, { revealAnonymous, referral }),
   })
 })

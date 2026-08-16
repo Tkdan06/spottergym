@@ -1,4 +1,4 @@
-import { type RefObject, useEffect } from 'react'
+import { type RefObject, useEffect, useRef } from 'react'
 
 type SheetA11yOptions = {
   /** When false, only focus the panel container (no control autofocus / no keyboard). Default true. */
@@ -8,6 +8,9 @@ type SheetA11yOptions = {
 /**
  * Focus trap + inert background for modal sheets (matches Messages pin sheet).
  * `panelRef` must point at the dialog panel that contains focusable controls.
+ *
+ * `onClose` is read from a ref so typing / parent re-renders do not re-arm the effect
+ * (re-focusing the panel would dismiss the iOS keyboard).
  */
 export function useSheetA11y(
   open: boolean,
@@ -17,6 +20,8 @@ export function useSheetA11y(
   options?: SheetA11yOptions,
 ) {
   const autoFocus = options?.autoFocus !== false
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
 
   useEffect(() => {
     if (!open) return
@@ -62,7 +67,7 @@ export function useSheetA11y(
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose()
+        onCloseRef.current()
         return
       }
       if (e.key !== 'Tab') return
@@ -105,9 +110,21 @@ export function useSheetA11y(
 
       panel.setAttribute('tabindex', '-1')
 
+      // Never steal focus from an input/textarea the user already activated
+      const active = document.activeElement as HTMLElement | null
+      if (
+        active &&
+        panel.contains(active) &&
+        (active.tagName === 'INPUT' ||
+          active.tagName === 'TEXTAREA' ||
+          active.isContentEditable)
+      ) {
+        return
+      }
+
       if (!autoFocus) {
-        // Keep focus in the dialog without focusing inputs/buttons that scroll or open the keyboard
-        focusEl(panel)
+        // Keep focus in the dialog without focusing inputs that open the keyboard
+        if (!active || !panel.contains(active)) focusEl(panel)
         return
       }
 
@@ -138,7 +155,11 @@ export function useSheetA11y(
       document.body.style.overflow = prevOverflow
       for (const node of inertNodes) node.removeAttribute('inert')
       window.removeEventListener('keydown', onKey)
-      if (restoreFocus && typeof restoreFocus.focus === 'function') {
+      // Only restore if focus is still inside this panel (avoid yanking focus mid-type)
+      const active = document.activeElement as HTMLElement | null
+      const panel = panelRef.current
+      const stillInPanel = Boolean(panel && active && panel.contains(active))
+      if (!stillInPanel && restoreFocus && typeof restoreFocus.focus === 'function') {
         try {
           restoreFocus.focus({ preventScroll: true })
         } catch {
@@ -146,5 +167,5 @@ export function useSheetA11y(
         }
       }
     }
-  }, [open, onClose, panelRef, initialFocusRef, autoFocus])
+  }, [open, panelRef, initialFocusRef, autoFocus])
 }

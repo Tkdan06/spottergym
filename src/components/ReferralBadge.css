@@ -1,0 +1,73 @@
+.referral-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  border-radius: 999px;
+  font-weight: 750;
+  line-height: 1;
+  white-space: nowrap;
+  border: 1px solid rgba(200, 245, 66, 0.35);
+  background: rgba(200, 245, 66, 0.14);
+  color: var(--accent);
+}
+
+.referral-badge--sm {
+  min-height: 20px;
+  padding: 0 7px;
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+}
+
+.referral-badge--md {
+  min-height: 26px;
+  padding: 0 10px;
+  font-size: 0.78rem;
+}
+
+.referral-badge--t3,
+.referral-badge--t4 {
+  border-color: rgba(200, 245, 66, 0.55);
+  background: linear-gradient(135deg, rgba(200, 245, 66, 0.22), rgba(200, 245, 66, 0.08));
+}
+
+.referral-badge--t4 {
+  box-shadow: 0 0 0 1px rgba(200, 245, 66, 0.18);
+}
+
+.referral-chrome--soft {
+  box-shadow: inset 0 0 0 1px rgba(200, 245, 66, 0.28);
+}
+
+.referral-chrome--strong {
+  box-shadow: inset 0 0 0 1.5px rgba(200, 245, 66, 0.42);
+}
+
+.referral-chrome--hero {
+  box-shadow:
+    inset 0 0 0 2px rgba(200, 245, 66, 0.5),
+    0 0 24px rgba(200, 245, 66, 0.08);
+}
+
+.user-card-media {
+  position: relative;
+}
+
+.user-card-media .referral-badge {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  z-index: 2;
+  max-width: calc(100% - 12px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-hero.referral-chrome--hero .profile-hero-photo,
+.profile-hero.referral-chrome--strong .profile-hero-photo {
+  box-shadow: 0 0 0 2px rgba(200, 245, 66, 0.45);
+}
+
+.profile-hero-meta .referral-badge {
+  margin-top: 6px;
+}

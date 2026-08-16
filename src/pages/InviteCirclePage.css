@@ -1,0 +1,126 @@
+.invite-circle-page {
+  display: grid;
+  gap: 14px;
+  padding-bottom: calc(24px + var(--safe-bottom));
+}
+
+.invite-circle-head h1 {
+  margin: 4px 0 8px;
+  font-size: 1.55rem;
+  line-height: 1.15;
+}
+
+.invite-circle-kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.invite-circle-status,
+.invite-circle-ladder {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.invite-circle-status-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.invite-circle-title {
+  display: block;
+  font-size: 1.25rem;
+  margin-top: 2px;
+}
+
+.invite-circle-progress {
+  display: grid;
+  gap: 8px;
+}
+
+.invite-circle-progress-track {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.invite-circle-progress-track i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: inherit;
+}
+
+.invite-circle-tiers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.invite-circle-tier {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+  opacity: 0.72;
+}
+
+.invite-circle-tier.is-reached {
+  opacity: 1;
+  border-color: rgba(200, 245, 66, 0.35);
+}
+
+.invite-circle-tier.is-current {
+  background: var(--accent-soft);
+}
+
+.invite-circle-tier-count {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  background: var(--bg-elevated);
+  color: var(--accent);
+}
+
+.invite-circle-friends {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.invite-circle-friends li,
+.invite-circle-friends a {
+  display: grid;
+  gap: 2px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.invite-circle-friends a:hover strong {
+  color: var(--accent);
+}
+
+.invite-circle-pending {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}

@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronDown, Search, X } from 'lucide-react'
 import { CITIES_META, type CityMeta } from '../data/mock'
 import { searchFieldProps } from '../lib/inputAttrs'
@@ -40,7 +40,8 @@ export function CityCarousel({
   const panelRef = useRef<HTMLDivElement>(null)
   const sheetRef = useRef<HTMLDivElement>(null)
 
-  useSheetA11y(allOpen, () => setAllOpen(false), panelRef, undefined, { autoFocus: false })
+  const closeAll = useCallback(() => setAllOpen(false), [])
+  useSheetA11y(allOpen, closeAll, panelRef, undefined, { autoFocus: false })
 
   useEffect(() => {
     if (!allOpen) setQuery('')
@@ -69,8 +70,9 @@ export function CityCarousel({
   }, [citiesByGymCount, query])
 
   /**
-   * Pin the sheet to the visual viewport (same idea as chat composer).
-   * Use vv.height only — do NOT also pad by keyboard height (that double-counts and jumps the list).
+   * Lock sheet size once on open. Do NOT follow visualViewport — resizing/transforming
+   * the sheet while the search input is focused dismisses the iOS PWA keyboard and
+   * makes the curtain jump with the keyboard.
    */
   useEffect(() => {
     const root = document.documentElement
@@ -80,33 +82,11 @@ export function CityCarousel({
       return
     }
     root.setAttribute('data-city-sheet', 'open')
-
-    const sync = () => {
-      const vv = window.visualViewport
-      if (!vv) {
-        sheet.style.height = `${window.innerHeight}px`
-        sheet.style.maxHeight = `${window.innerHeight}px`
-        sheet.style.transform = ''
-        return
-      }
-      sheet.style.height = `${vv.height}px`
-      sheet.style.maxHeight = `${vv.height}px`
-      sheet.style.transform = vv.offsetTop ? `translateY(${vv.offsetTop}px)` : ''
-      // Keep document from scrolling under the sheet when the keyboard opens
-      window.scrollTo(0, 0)
-      root.scrollTop = 0
-      document.body.scrollTop = 0
-    }
-
-    sync()
-    const vv = window.visualViewport
-    vv?.addEventListener('resize', sync)
-    vv?.addEventListener('scroll', sync)
-    window.addEventListener('resize', sync)
+    const h = window.innerHeight
+    sheet.style.height = `${h}px`
+    sheet.style.maxHeight = `${h}px`
+    sheet.style.transform = ''
     return () => {
-      vv?.removeEventListener('resize', sync)
-      vv?.removeEventListener('scroll', sync)
-      window.removeEventListener('resize', sync)
       sheet.style.height = ''
       sheet.style.maxHeight = ''
       sheet.style.transform = ''
@@ -180,7 +160,7 @@ export function CityCarousel({
             type="button"
             className="city-sheet-backdrop"
             aria-label="Закрыть"
-            onClick={() => setAllOpen(false)}
+            onClick={closeAll}
           />
           <div className="city-sheet-panel" ref={panelRef}>
             <div className="city-sheet-chrome">
@@ -193,25 +173,20 @@ export function CityCarousel({
                   type="button"
                   className="icon-btn"
                   aria-label="Закрыть список"
-                  onClick={() => setAllOpen(false)}
+                  onClick={closeAll}
                 >
                   <X size={18} />
                 </button>
               </div>
 
               <label className="city-search">
-                <Search size={16} />
+                <Search size={16} aria-hidden />
                 <input
                   {...searchFieldProps}
+                  type="text"
                   ref={searchRef}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  onFocus={() => {
-                    // Stop iOS from scrolling the page under the fixed sheet
-                    window.scrollTo(0, 0)
-                    document.documentElement.scrollTop = 0
-                    document.body.scrollTop = 0
-                  }}
                   placeholder="Найти город"
                   aria-label="Поиск города"
                 />

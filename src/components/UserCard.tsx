@@ -7,6 +7,7 @@ import { profileImage, profileImageFallback } from '../lib/avatar'
 import { breakLabel, isOnBreak } from '../lib/schedule'
 import type { UserProfile } from '../types'
 import { LikesRow } from './LikesRow'
+import { ReferralBadge, referralChromeClass } from './ReferralBadge'
 import { SmartImage } from './SmartImage'
 import './UserCard.css'
 
@@ -52,7 +53,7 @@ export function UserCard({
 
   return (
     <article
-      className={`user-card ${compact ? 'compact' : ''} ${isMe ? 'is-me' : ''} ${isCoach ? 'is-coach' : ''}`}
+      className={`user-card ${compact ? 'compact' : ''} ${isMe ? 'is-me' : ''} ${isCoach ? 'is-coach' : ''} ${referralChromeClass(user)}`}
       role="link"
       tabIndex={0}
       aria-label={isMe ? `${name} — это ты` : name}
@@ -75,6 +76,7 @@ export function UserCard({
             size="avatar"
             priority={priority}
           />
+          <ReferralBadge user={user} size="sm" />
         </div>
         {onBreak ? (
           <span className="presence-pill break" title={breakText}>

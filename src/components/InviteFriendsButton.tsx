@@ -5,6 +5,7 @@ import './InviteFriendsButton.css'
 interface InviteButtonProps {
   userId: string
   gymName?: string | null
+  statusTitle?: string | null
   className?: string
   children?: ReactNode
 }
@@ -16,6 +17,7 @@ interface InviteButtonProps {
 export function InviteFriendsButton({
   userId,
   gymName,
+  statusTitle,
   className = 'btn btn-primary btn-block',
   children = 'Пригласить друзей',
 }: InviteButtonProps) {
@@ -28,7 +30,7 @@ export function InviteFriendsButton({
   }, [status])
 
   const onClick = () => {
-    const payload = buildInvitePayload({ userId, gymName })
+    const payload = buildInvitePayload({ userId, gymName, statusTitle })
     void shareOrCopyInvite(payload).then((result) => {
       if (result === 'shared') setStatus('Отправлено')
       else if (result === 'copied') setStatus('Ссылка скопирована')

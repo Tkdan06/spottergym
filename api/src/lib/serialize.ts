@@ -1,13 +1,36 @@
 import type { CheckIn, Gym, User, UserGym } from '@prisma/client'
 import { resolveAdminFlags } from './admin.js'
 import { canExtendCheckIn, resolveExpiresAt } from './checkInExpiry.js'
+import type { ReferralPublicStats } from './referralStats.js'
 
 type UserWithRels = User & {
   gyms?: UserGym[]
   checkIns?: CheckIn[]
 }
 
-export function serializeUser(user: UserWithRels) {
+const EMPTY_REFERRAL: ReferralPublicStats = {
+  referralCreditedCount: 0,
+  referralTier: 0,
+  referralTitle: '',
+  referralBadge: '',
+  referralChrome: 'none',
+}
+
+function referralFields(stats?: ReferralPublicStats | null) {
+  const s = stats || EMPTY_REFERRAL
+  return {
+    referralCreditedCount: s.referralCreditedCount,
+    referralTier: s.referralTier,
+    referralTitle: s.referralTitle,
+    referralBadge: s.referralBadge,
+    referralChrome: s.referralChrome,
+  }
+}
+
+export function serializeUser(
+  user: UserWithRels,
+  opts?: { referral?: ReferralPublicStats | null },
+) {
   const isDeleted = Boolean(user.deletedAt)
   if (isDeleted) {
     return {
@@ -49,6 +72,7 @@ export function serializeUser(user: UserWithRels) {
       canGrantAdmin: false,
       adminPermissions: resolveAdminFlags({ ...user, isAdmin: false, isMasterAdmin: false })
         .adminPermissions,
+      ...referralFields(opts?.referral),
     }
   }
 
@@ -103,15 +127,16 @@ export function serializeUser(user: UserWithRels) {
     isMasterAdmin: flags.isMasterAdmin,
     canGrantAdmin: flags.canGrantAdmin,
     adminPermissions: flags.adminPermissions,
+    ...referralFields(opts?.referral),
   }
 }
 
 /** Profile safe to show to other users (no email / admin flags). Honors anonymous privacy. */
 export function serializePublicUser(
   user: UserWithRels,
-  opts?: { revealAnonymous?: boolean },
+  opts?: { revealAnonymous?: boolean; referral?: ReferralPublicStats | null },
 ) {
-  const full = serializeUser(user)
+  const full = serializeUser(user, { referral: opts?.referral })
   const base = {
     id: full.id,
     username: full.username,
@@ -144,6 +169,11 @@ export function serializePublicUser(
     lastSeenAt: full.lastSeenAt,
     isDeleted: Boolean(full.isDeleted),
     verified: false,
+    referralCreditedCount: full.referralCreditedCount,
+    referralTier: full.referralTier,
+    referralTitle: full.referralTitle,
+    referralBadge: full.referralBadge,
+    referralChrome: full.referralChrome,
   }
 
   if (full.isDeleted) {
@@ -164,6 +194,7 @@ export function serializePublicUser(
       lookingToMeet: false,
       isActive: false,
       isDeleted: true,
+      ...EMPTY_REFERRAL,
     }
   }
 
@@ -201,6 +232,7 @@ export function serializePublicUser(
       checkedInGymId: full.checkedInGymId,
       breakUntil: full.breakUntil,
       privacy: 'anonymous' as const,
+      ...EMPTY_REFERRAL,
     }
   }
 

@@ -275,6 +275,9 @@ model Conversation {
   /** Per-participant pin (Telegram-style); null = not pinned */
   pinnedLowAt     DateTime?
   pinnedHighAt    DateTime?
+  /** Per-participant hide / delete-for-me; null = visible in inbox */
+  hiddenLowAt     DateTime?
+  hiddenHighAt    DateTime?
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 

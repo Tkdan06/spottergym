@@ -447,6 +447,88 @@ export async function apiAdminFetchLanding() {
   return request<LandingAnalytics>('/admin/landing')
 }
 
+export type ReferralUserBrief = {
+  id: string
+  name: string
+  username: string | null
+  email: string
+  city: string
+  deleted: boolean
+  createdAt: string | null
+}
+
+export type ReferralAnalytics = {
+  generatedAt: string
+  summary: {
+    totalInvites: number
+    creditedInvites: number
+    pendingInvites: number
+    uniqueInviters: number
+    invites24h: number
+    invites7d: number
+    invites30d: number
+    credited7d: number
+    activeUsers: number
+    referredUsers: number
+    organicUsers: number
+    referredSharePct: number | null
+  }
+  leaders: Array<
+    ReferralUserBrief & {
+      inviteCount: number
+      creditedCount: number
+      pendingCount: number
+      tier: number
+      tierTitle: string
+      lastInviteAt: string | null
+    }
+  >
+  recent: Array<{
+    id: string
+    createdAt: string
+    credited: boolean
+    inviter: ReferralUserBrief
+    invitee: ReferralUserBrief & { onboardingDone: boolean }
+  }>
+}
+
+export async function apiAdminFetchReferrals() {
+  return request<ReferralAnalytics>('/admin/referrals')
+}
+
+export type InviteCirclePayload = {
+  creditedCount: number
+  pendingCount: number
+  tier: number
+  title: string
+  badge: string
+  chrome: 'none' | 'soft' | 'strong' | 'hero'
+  nextTitle: string | null
+  nextMin: number | null
+  toNext: number | null
+  friends: Array<{
+    id: string
+    name: string
+    username: string | null
+    city: string
+    createdAt: string
+    creditedAt: string
+  }>
+  pending: Array<{
+    id: string
+    name: string
+    username: string | null
+    city: string
+    createdAt: string
+    creditedAt: string
+  }>
+}
+
+export async function apiFetchMyReferrals() {
+  const data = await request<{ circle: InviteCirclePayload }>('/me/referrals')
+  return data.circle
+}
+
 export async function apiAdminFetchBlockedEmails() {
   const data = await request<{ emails: string[] }>('/admin/blocked-emails')
   return data.emails
@@ -715,4 +797,12 @@ export async function apiPinConversation(conversationId: string, pinned?: boolea
     { method: 'POST', json: pinned === undefined ? {} : { pinned } },
   )
   return data.conversation
+}
+
+/** Hide chat from my inbox only (Telegram-style delete for me) */
+export async function apiDeleteConversation(conversationId: string) {
+  await request<{ ok: true; id: string }>(
+    `/conversations/${encodeURIComponent(conversationId)}`,
+    { method: 'DELETE' },
+  )
 }
