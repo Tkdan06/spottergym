@@ -417,6 +417,7 @@ const PRIORITY = new Set([
   'Иркутск',
   'Владивосток',
   'Калининград',
+  'Пенза',
 ])
 
 const NETWORK_ORDER = [
@@ -439,6 +440,9 @@ const NETWORK_ORDER = [
   'Планета Фитнес',
   'Nebo',
   'Kometa.fit',
+  'UNI-GYM',
+  'Dozafit',
+  'Квартал FIT',
   'Независимый',
 ]
 

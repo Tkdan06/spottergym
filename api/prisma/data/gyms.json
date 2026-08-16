@@ -234,6 +234,32 @@
     "lng": 82.88
   },
   {
+    "id": "gym-alex-fitness-alex-fitness-onezhskiy-penza",
+    "name": "Alex Fitness Онежский",
+    "network": "Alex Fitness",
+    "city": "Пенза",
+    "district": "Октябрьский",
+    "address": "1-й Онежский проезд, 4",
+    "membersCount": 62,
+    "activeNow": 4,
+    "image": "/images/gyms/gym-02.jpg",
+    "lat": 53.2278,
+    "lng": 44.9995
+  },
+  {
+    "id": "gym-alex-fitness-alex-fitness-passazh-penza",
+    "name": "Alex Fitness Пассаж",
+    "network": "Alex Fitness",
+    "city": "Пенза",
+    "district": "Центр",
+    "address": "улица Московская, 83, ТЦ «Пассаж»",
+    "membersCount": 102,
+    "activeNow": 6,
+    "image": "/images/gyms/gym-01.jpg",
+    "lat": 53.1954,
+    "lng": 45.0182
+  },
+  {
     "id": "gym-alex-fitness-alex-fitness-gagarina-perm",
     "name": "Alex Fitness Гагарина",
     "network": "Alex Fitness",
@@ -3458,6 +3484,32 @@
     "lng": 39.766307
   },
   {
+    "id": "gym-dozafit-dozafit-antonova-penza",
+    "name": "Dozafit Антонова",
+    "network": "Dozafit",
+    "city": "Пенза",
+    "district": "ГПЗ-24",
+    "address": "улица Антонова, 47",
+    "membersCount": 59,
+    "activeNow": 2,
+    "image": "/images/gyms/gym-05.jpg",
+    "lat": 53.2185,
+    "lng": 45.0455
+  },
+  {
+    "id": "gym-dozafit-dozafit-chkalova-penza",
+    "name": "Dozafit Чкалова",
+    "network": "Dozafit",
+    "city": "Пенза",
+    "district": "Центр",
+    "address": "улица Чкалова, 32",
+    "membersCount": 122,
+    "activeNow": 6,
+    "image": "/images/gyms/gym-01.jpg",
+    "lat": 53.1885,
+    "lng": 45.0085
+  },
+  {
     "id": "gym-encore-fitness-encore-iset-ekaterinburg",
     "name": "Encore Исеть",
     "network": "Encore Fitness",
@@ -4147,6 +4199,19 @@
     "lng": 30.5755
   },
   {
+    "id": "gym-gw-fitness-gw-fitness-komendantskiy-sankt-peterburg",
+    "network": "GW Fitness",
+    "name": "GW Fitness Комендантский",
+    "city": "Санкт-Петербург",
+    "district": "Приморский",
+    "address": "Долгоозёрная улица, 14к2, ТРК «5 озёр», м. Комендантский проспект",
+    "lat": 60.0328,
+    "lng": 30.2265,
+    "image": "/images/gyms/gym-03.jpg",
+    "membersCount": 56,
+    "activeNow": 6
+  },
+  {
     "id": "gym-kometa-fit-kometa-black-neglinnaya-moskva",
     "name": "Kometa Black Неглинная",
     "network": "Kometa.fit",
@@ -4821,6 +4886,45 @@
     "image": "/images/gyms/gym-02.jpg",
     "lat": 55.19058,
     "lng": 61.303254
+  },
+  {
+    "id": "gym-uni-gym-uni-gym-vysshaya-liga-penza",
+    "name": "UNI-GYM Высшая Лига",
+    "network": "UNI-GYM",
+    "city": "Пенза",
+    "district": "Центр",
+    "address": "улица Московская, 37, ТРЦ «Высшая Лига»",
+    "membersCount": 162,
+    "activeNow": 13,
+    "image": "/images/gyms/gym-01.jpg",
+    "lat": 53.1925,
+    "lng": 45.0125
+  },
+  {
+    "id": "gym-uni-gym-uni-gym-kvadrat-penza",
+    "name": "UNI-GYM Квадрат",
+    "network": "UNI-GYM",
+    "city": "Пенза",
+    "district": "Арбеково",
+    "address": "проспект Победы, 124б, РЦ «Квадрат»",
+    "membersCount": 124,
+    "activeNow": 11,
+    "image": "/images/gyms/gym-05.jpg",
+    "lat": 53.2275,
+    "lng": 44.9785
+  },
+  {
+    "id": "gym-uni-gym-uni-gym-okruzhnoy-penza",
+    "name": "UNI-GYM Окружной",
+    "network": "UNI-GYM",
+    "city": "Пенза",
+    "district": "Окружная",
+    "address": "улица Окружная, 27в, ТЦ «Окружной»",
+    "membersCount": 88,
+    "activeNow": 13,
+    "image": "/images/gyms/gym-02.jpg",
+    "lat": 53.2145,
+    "lng": 44.9685
   },
   {
     "id": "gym-urbanfit-urbanfit-kudrovo-kudrovo",
@@ -6201,6 +6305,32 @@
     "lng": 82.8925
   },
   {
+    "id": "gym-xfit-xfit-zhk-semeynyy-penza",
+    "name": "XFIT ЖК Семейный",
+    "network": "XFIT",
+    "city": "Пенза",
+    "district": "Засечное",
+    "address": "улица Натальи Лавровой, 20/2, с. Засечное",
+    "membersCount": 142,
+    "activeNow": 4,
+    "image": "/images/gyms/gym-04.jpg",
+    "lat": 53.1485,
+    "lng": 45.0525
+  },
+  {
+    "id": "gym-xfit-xfit-studio-kvartal-55-penza",
+    "name": "XFIT Studio Квартал 55",
+    "network": "XFIT",
+    "city": "Пенза",
+    "district": "Центр",
+    "address": "улица Урицкого, 48",
+    "membersCount": 82,
+    "activeNow": 3,
+    "image": "/images/gyms/gym-03.jpg",
+    "lat": 53.1968,
+    "lng": 45.0145
+  },
+  {
     "id": "gym-xfit-xfit-zhemchuzhina-perm",
     "name": "XFIT Жемчужина",
     "network": "XFIT",
@@ -6407,6 +6537,19 @@
     "image": "/images/gyms/gym-04.jpg",
     "lat": 55.8025,
     "lng": 37.7455
+  },
+  {
+    "id": "gym-kvartal-fit-kvartal-fit-ternovskogo-penza",
+    "name": "Квартал FIT Терновского",
+    "network": "Квартал FIT",
+    "city": "Пенза",
+    "district": "Терновка",
+    "address": "улица Терновского, 154В",
+    "membersCount": 151,
+    "activeNow": 7,
+    "image": "/images/gyms/gym-03.jpg",
+    "lat": 53.2015,
+    "lng": 45.0655
   },
   {
     "id": "gym-nezavisimyy-volgafit-volgograd",
@@ -7746,6 +7889,45 @@
     "image": "/images/gyms/gym-05.jpg",
     "lat": 54.9885,
     "lng": 73.3685
+  },
+  {
+    "id": "gym-nezavisimyy-stantsiya-penza",
+    "name": "СтаNция",
+    "network": "Независимый",
+    "city": "Пенза",
+    "district": "Арбеково",
+    "address": "проспект Строителей, 21в",
+    "membersCount": 100,
+    "activeNow": 10,
+    "image": "/images/gyms/gym-02.jpg",
+    "lat": 53.2325,
+    "lng": 44.9855
+  },
+  {
+    "id": "gym-nezavisimyy-enigma-sura-penza",
+    "name": "Энигма Сура",
+    "network": "Независимый",
+    "city": "Пенза",
+    "district": "Южная поляна",
+    "address": "улица Калинина, 115",
+    "membersCount": 77,
+    "activeNow": 8,
+    "image": "/images/gyms/gym-04.jpg",
+    "lat": 53.1785,
+    "lng": 45.0015
+  },
+  {
+    "id": "gym-nezavisimyy-zavod-penza",
+    "name": "ZAVOD",
+    "network": "Независимый",
+    "city": "Пенза",
+    "district": "Центр",
+    "address": "улица Захарова, 19",
+    "membersCount": 58,
+    "activeNow": 9,
+    "image": "/images/gyms/gym-03.jpg",
+    "lat": 53.1945,
+    "lng": 45.0055
   },
   {
     "id": "gym-nezavisimyy-legenda-perm",

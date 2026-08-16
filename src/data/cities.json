@@ -19,7 +19,7 @@
   },
   {
     "name": "Санкт-Петербург",
-    "gymCount": 104,
+    "gymCount": 105,
     "networks": [
       "DDX Fitness",
       "Spirit. Fitness",
@@ -31,7 +31,8 @@
       "Fitness House",
       "A-Fitness",
       "Nebo",
-      "Независимый"
+      "Независимый",
+      "GW Fitness"
     ],
     "priority": true
   },
@@ -248,6 +249,19 @@
       "World Class",
       "XFIT",
       "BrightFit",
+      "Независимый"
+    ],
+    "priority": true
+  },
+  {
+    "name": "Пенза",
+    "gymCount": 13,
+    "networks": [
+      "XFIT",
+      "Alex Fitness",
+      "UNI-GYM",
+      "Dozafit",
+      "Квартал FIT",
       "Независимый"
     ],
     "priority": true
