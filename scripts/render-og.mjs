@@ -1,7 +1,8 @@
-import sharp from 'sharp'
-import { readFileSync, writeFileSync } from 'fs'
+import { spawnSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
 
-const svg = readFileSync('public/og-image.svg')
-const png = await sharp(svg, { density: 150 }).resize(1200, 630).png().toBuffer()
-writeFileSync('public/og-image.png', png)
-console.log('wrote', png.length, 'bytes')
+const root = path.dirname(fileURLToPath(import.meta.url))
+const script = path.join(root, 'render-og.py')
+const result = spawnSync('python3', [script], { stdio: 'inherit' })
+process.exit(result.status ?? 1)

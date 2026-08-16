@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Bell, ChartNoAxesColumn, Copy, Eye, EyeOff, MessageSquareText, Settings, Share2, Shield } from 'lucide-react'
 import { Link, Navigate } from 'react-router-dom'
-import { CheckInControl } from '../components/CheckInControl'
 import { LikesRow } from '../components/LikesRow'
 import { ReferralBadge, referralChromeClass } from '../components/ReferralBadge'
 import { PhotoGalleryModal } from '../components/PhotoGalleryModal'
@@ -9,11 +8,10 @@ import { ProfilePhotoCarousel } from '../components/ProfilePhotoCarousel'
 import { ScheduleSheet } from '../components/ScheduleSheet'
 import { SectionTitle } from '../components/SectionTitle'
 import { useApp } from '../context/useApp'
-import { COACH_DIRECTIONS, experienceLabel, getGym, getUserGyms, intentLabel } from '../data/mock'
+import { COACH_DIRECTIONS, experienceLabel, getUserGyms, intentLabel } from '../data/mock'
 import { isDemoAccount } from '../lib/demoAccount'
 import { localGenderAvatar, profileImage } from '../lib/avatar'
 import { clampPhotos } from '../lib/photos'
-import { getCheckedInGymId } from '../lib/presence'
 import { breakLabel, isOnBreak } from '../lib/schedule'
 import { InstagramIcon } from '../components/InstagramIcon'
 import { formatUsername } from '../lib/username'
@@ -32,7 +30,6 @@ export function ProfilePage() {
   const gyms = getUserGyms(user)
   const likesInfo = getLikesFor(user.id)
   const myLiked = getMyLikedUsers()
-  const checkedGym = getGym(getCheckedInGymId(user))
   const photoCount = user.photos.length
   const heroSrc = profileImage(user)
   const onBreak = isOnBreak(user.breakUntil)
@@ -261,24 +258,60 @@ export function ProfilePage() {
         )}
       </section>
 
-      <section className="surface profile-block status-panel">
-        <div className="checkin-block">
-          <div>
-            <strong>
-              {user.isActive
-                ? checkedGym
-                  ? `Ты в зале · ${checkedGym.name.replace(/^(DDX|Spirit\. Fitness|World Class|Encore|Crocus Fitness|XFIT|Alex Fitness)\s*/i, '')}`
-                  : 'Ты сейчас в зале'
-                : 'Отметиться в зале'}
-            </strong>
-            <p className="muted">
-              {gyms.length > 1
-                ? 'Если залов несколько — выбери, где ты сейчас'
-                : 'Статус «на тренировке» виден участникам клуба'}
-            </p>
+      <section className="surface profile-block">
+        <SectionTitle
+          action={
+            <button type="button" className="text-link muted" onClick={() => setScheduleOpen(true)}>
+              Изменить
+            </button>
+          }
+        >
+          Расписание
+        </SectionTitle>
+        {onBreak ? (
+          <p className="break-note">
+            {breakText}. Чек-ин в зал снимет статус автоматически.
+          </p>
+        ) : null}
+        {user.visitSlots.length ? (
+          <div className="slots">
+            {user.visitSlots.map((slot) => (
+              <div key={`${slot.day}-${slot.from}-${slot.to}`} className="slot">
+                <strong>{slot.day}</strong>
+                <span>
+                  {slot.from}–{slot.to}
+                </span>
+              </div>
+            ))}
           </div>
-          <CheckInControl preferredGymId={user.homeGymId} />
-        </div>
+        ) : (
+          <div className="empty-copy-actions">
+            <div className="empty-copy" role="status">
+              <p className="empty-copy-title">Расписание не задано</p>
+              <p className="empty-copy-lead">Укажи дни и время — так проще пересечься в зале</p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-soft btn-block"
+              onClick={() => setScheduleOpen(true)}
+            >
+              Указать расписание
+            </button>
+          </div>
+        )}
+      </section>
+
+      <ScheduleSheet
+        open={scheduleOpen}
+        initialSlots={user.visitSlots}
+        onClose={() => setScheduleOpen(false)}
+        onSave={(visitSlots) => {
+          void patch({ visitSlots })
+        }}
+      />
+
+      <section className="surface profile-block status-panel">
+        <SectionTitle>Общение и видимость</SectionTitle>
         <button
           type="button"
           className="toggle-row"
@@ -348,58 +381,6 @@ export function ProfilePage() {
           <span className={`toggle ${user.privacy === 'anonymous' ? 'on' : ''}`} />
         </button>
       </section>
-
-      <section className="surface profile-block">
-        <SectionTitle
-          action={
-            <button type="button" className="text-link muted" onClick={() => setScheduleOpen(true)}>
-              Изменить
-            </button>
-          }
-        >
-          Расписание
-        </SectionTitle>
-        {onBreak ? (
-          <p className="break-note">
-            {breakText}. Чек-ин в зал снимет статус автоматически.
-          </p>
-        ) : null}
-        {user.visitSlots.length ? (
-          <div className="slots">
-            {user.visitSlots.map((slot) => (
-              <div key={`${slot.day}-${slot.from}-${slot.to}`} className="slot">
-                <strong>{slot.day}</strong>
-                <span>
-                  {slot.from}–{slot.to}
-                </span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="empty-copy-actions">
-            <div className="empty-copy" role="status">
-              <p className="empty-copy-title">Расписание не задано</p>
-              <p className="empty-copy-lead">Укажи дни и время — так проще пересечься в зале</p>
-            </div>
-            <button
-              type="button"
-              className="btn btn-soft btn-block"
-              onClick={() => setScheduleOpen(true)}
-            >
-              Указать расписание
-            </button>
-          </div>
-        )}
-      </section>
-
-      <ScheduleSheet
-        open={scheduleOpen}
-        initialSlots={user.visitSlots}
-        onClose={() => setScheduleOpen(false)}
-        onSave={(visitSlots) => {
-          void patch({ visitSlots })
-        }}
-      />
 
       <section className="surface profile-block">
         <SectionTitle>Обратная связь</SectionTitle>

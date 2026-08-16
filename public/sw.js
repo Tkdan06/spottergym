@@ -104,8 +104,8 @@ self.addEventListener('push', (event) => {
       await Promise.all([
         self.registration.showNotification(title, {
           body,
-          icon: '/og-image.png',
-          badge: '/og-image.png',
+          icon: '/og-share.png',
+          badge: '/og-share.png',
           data: {
             href,
             type: data.type,

@@ -16,7 +16,7 @@ export function buildInvitePayload(opts: {
   /** Current referral status title, e.g. Gym Crew */
   statusTitle?: string | null
 }): InvitePayload {
-  // Always production HTTPS so Telegram/WhatsApp/Max can fetch OG tags + og-image.png
+  // Always production HTTPS so Telegram/WhatsApp/Max can fetch OG tags + og-share.png
   const url = `${SHARE_ORIGIN}/register?invite=${encodeURIComponent(opts.userId)}`
   const title = 'SPOTTER — найди людей в своём клубе'
   const gym = opts.gymName?.trim()

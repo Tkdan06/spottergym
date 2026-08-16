@@ -12,14 +12,13 @@
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
   <rect width="1200" height="630" fill="url(#glow)"/>
-  <text x="780" y="520" font-family="Arial Black, Helvetica Neue, Arial, sans-serif" font-size="620" font-weight="900" fill="#121816">S</text>
 
-  <!-- Two separate runs so colors cannot merge: SPOT white, TER lime -->
-  <text x="392" y="300" font-family="Arial Black, Helvetica Neue, Arial, sans-serif" font-size="118" font-weight="900" letter-spacing="-4" fill="#FFFFFF">SPOT</text>
-  <text x="678" y="300" font-family="Arial Black, Helvetica Neue, Arial, sans-serif" font-size="118" font-weight="900" letter-spacing="-4" fill="#C8F542">TER</text>
+  <!-- Brand mark matches Instagram Stories: SPOT white, TER lime -->
+  <text x="392" y="300" font-family="Syne, Unbounded, Arial Black, Helvetica Neue, Arial, sans-serif" font-size="118" font-weight="800" letter-spacing="-4" fill="#FFFFFF">SPOT</text>
+  <text x="678" y="300" font-family="Syne, Unbounded, Arial Black, Helvetica Neue, Arial, sans-serif" font-size="118" font-weight="800" letter-spacing="-4" fill="#C8F542">TER</text>
 
   <line x1="310" y1="340" x2="890" y2="340" stroke="#C8F542" stroke-width="4" stroke-linecap="round"/>
   <circle cx="310" cy="340" r="5" fill="#C8F542"/>
   <circle cx="890" cy="340" r="5" fill="#C8F542"/>
-  <text x="600" y="400" text-anchor="middle" font-family="Helvetica Neue, Arial, sans-serif" font-size="32" font-weight="500" fill="#F2F5F3">Социальная сеть для тех, кто в зале</text>
+  <text x="600" y="400" text-anchor="middle" font-family="Manrope, Helvetica Neue, Arial, sans-serif" font-size="32" font-weight="500" fill="#F2F5F3">Социальная сеть для тех, кто в зале</text>
 </svg>
