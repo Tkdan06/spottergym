@@ -185,11 +185,11 @@
   right: 0;
   top: 0;
   z-index: 200;
-  height: var(--city-sheet-vh, 100dvh);
-  max-height: var(--city-sheet-vh, 100dvh);
+  /* Height/transform are set from visualViewport in JS — no keyboard padding here */
+  height: 100dvh;
+  max-height: 100dvh;
   display: grid;
   align-items: end;
-  padding-bottom: var(--city-sheet-kb, 0px);
   box-sizing: border-box;
 }
 
@@ -208,8 +208,8 @@
   /* Definite height (not only max-height) so the list row can scroll.
      Without this + body overflow:hidden from useSheetA11y, the sheet
      grows to all cities, covers the backdrop, and freezes the page. */
-  height: min(calc(var(--city-sheet-vh, 100dvh) - 8px), 720px);
-  max-height: min(calc(var(--city-sheet-vh, 100dvh) - 8px), 720px);
+  height: min(calc(100% - 8px), 720px);
+  max-height: min(calc(100% - 8px), 720px);
   margin: 0 auto;
   padding: 14px 16px calc(14px + var(--safe-bottom));
   border-radius: 24px 24px 0 0;
@@ -303,13 +303,12 @@
   .city-sheet {
     align-items: center;
     padding: 24px;
-    padding-bottom: max(24px, var(--city-sheet-kb, 0px));
   }
 
   .city-sheet-panel {
     border-radius: 24px;
     border-bottom: 1px solid var(--line);
-    height: min(calc(var(--city-sheet-vh, 100dvh) - 48px), 680px);
-    max-height: min(calc(var(--city-sheet-vh, 100dvh) - 48px), 680px);
+    height: min(calc(100% - 48px), 680px);
+    max-height: min(calc(100% - 48px), 680px);
   }
 }

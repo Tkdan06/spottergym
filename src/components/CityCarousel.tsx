@@ -36,18 +36,14 @@ export function CityCarousel({
 }: Props) {
   const [query, setQuery] = useState('')
   const [allOpen, setAllOpen] = useState(false)
-  /** Search stays inert until the user taps it — avoids iOS autofocus + keyboard */
-  const [searchActive, setSearchActive] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+  const sheetRef = useRef<HTMLDivElement>(null)
 
   useSheetA11y(allOpen, () => setAllOpen(false), panelRef, undefined, { autoFocus: false })
 
   useEffect(() => {
-    if (!allOpen) {
-      setSearchActive(false)
-      setQuery('')
-    }
+    if (!allOpen) setQuery('')
   }, [allOpen])
 
   const selected = CITIES_META.find((c) => c.name === value)
@@ -72,28 +68,36 @@ export function CityCarousel({
     return citiesByGymCount.filter((c) => c.name.toLowerCase().includes(q))
   }, [citiesByGymCount, query])
 
-  /** Viewport height for the sheet only — ignore keyboard inset until search is active */
+  /**
+   * Pin the sheet to the visual viewport (same idea as chat composer).
+   * Use vv.height only — do NOT also pad by keyboard height (that double-counts and jumps the list).
+   */
   useEffect(() => {
     const root = document.documentElement
-    if (!allOpen) {
+    const sheet = sheetRef.current
+    if (!allOpen || !sheet) {
       root.removeAttribute('data-city-sheet')
-      root.style.removeProperty('--city-sheet-kb')
-      root.style.removeProperty('--city-sheet-vh')
       return
     }
     root.setAttribute('data-city-sheet', 'open')
+
     const sync = () => {
       const vv = window.visualViewport
       if (!vv) {
-        root.style.setProperty('--city-sheet-vh', `${window.innerHeight}px`)
-        root.style.setProperty('--city-sheet-kb', '0px')
+        sheet.style.height = `${window.innerHeight}px`
+        sheet.style.maxHeight = `${window.innerHeight}px`
+        sheet.style.transform = ''
         return
       }
-      const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop)
-      root.style.setProperty('--city-sheet-vh', `${vv.height}px`)
-      // Only shrink for keyboard when the user opened search
-      root.style.setProperty('--city-sheet-kb', `${searchActive && kb > 40 ? kb : 0}px`)
+      sheet.style.height = `${vv.height}px`
+      sheet.style.maxHeight = `${vv.height}px`
+      sheet.style.transform = vv.offsetTop ? `translateY(${vv.offsetTop}px)` : ''
+      // Keep document from scrolling under the sheet when the keyboard opens
+      window.scrollTo(0, 0)
+      root.scrollTop = 0
+      document.body.scrollTop = 0
     }
+
     sync()
     const vv = window.visualViewport
     vv?.addEventListener('resize', sync)
@@ -103,26 +107,20 @@ export function CityCarousel({
       vv?.removeEventListener('resize', sync)
       vv?.removeEventListener('scroll', sync)
       window.removeEventListener('resize', sync)
+      sheet.style.height = ''
+      sheet.style.maxHeight = ''
+      sheet.style.transform = ''
       root.removeAttribute('data-city-sheet')
-      root.style.removeProperty('--city-sheet-kb')
-      root.style.removeProperty('--city-sheet-vh')
     }
-  }, [allOpen, searchActive])
+  }, [allOpen])
 
   const pick = (city: string) => {
     onChange(city)
     setAllOpen(false)
     setQuery('')
-    setSearchActive(false)
   }
 
   const openAll = () => setAllOpen(true)
-
-  const activateSearch = () => {
-    if (searchActive) return
-    setSearchActive(true)
-    window.setTimeout(() => searchRef.current?.focus({ preventScroll: true }), 0)
-  }
 
   return (
     <section
@@ -171,7 +169,13 @@ export function CityCarousel({
       {afterStrip}
 
       {allOpen ? (
-        <div className="city-sheet" role="dialog" aria-modal="true" aria-label="Все города">
+        <div
+          ref={sheetRef}
+          className="city-sheet"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Все города"
+        >
           <button
             type="button"
             className="city-sheet-backdrop"
@@ -195,20 +199,18 @@ export function CityCarousel({
                 </button>
               </div>
 
-              <label className="city-search" onPointerDown={activateSearch}>
+              <label className="city-search">
                 <Search size={16} />
                 <input
                   {...searchFieldProps}
                   ref={searchRef}
                   value={query}
-                  readOnly={!searchActive}
-                  inputMode={searchActive ? 'search' : 'none'}
-                  tabIndex={searchActive ? 0 : -1}
                   onChange={(e) => setQuery(e.target.value)}
                   onFocus={() => {
-                    if (!searchActive) {
-                      searchRef.current?.blur()
-                    }
+                    // Stop iOS from scrolling the page under the fixed sheet
+                    window.scrollTo(0, 0)
+                    document.documentElement.scrollTop = 0
+                    document.body.scrollTop = 0
                   }}
                   placeholder="Найти город"
                   aria-label="Поиск города"
