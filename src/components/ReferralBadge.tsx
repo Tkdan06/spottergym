@@ -4,7 +4,9 @@ import './ReferralBadge.css'
 
 type Size = 'sm' | 'md'
 
-export function referralChromeClass(user: Pick<UserProfile, 'referralChrome' | 'referralTier'>) {
+export function referralChromeClass(
+  user: Pick<UserProfile, 'referralChrome' | 'referralTier' | 'referralCreditedCount'>,
+) {
   const chrome = user.referralChrome || referralTierFromCount(user.referralCreditedCount || 0).chrome
   if (!chrome || chrome === 'none') return ''
   return `referral-chrome referral-chrome--${chrome}`

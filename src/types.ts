@@ -107,6 +107,8 @@ export interface Conversation {
   /** Pinned for the current user only */
   pinned?: boolean
   pinnedAt?: string | null
+  /** Other participant when loaded from API / cache */
+  other?: UserProfile
 }
 
 /** Гранулярные права админа (главный админ всегда имеет все) */
