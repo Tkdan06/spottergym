@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Bell, ChartNoAxesColumn, Copy, Eye, EyeOff, MessageSquareText, Settings, Share2, Shield } from 'lucide-react'
+import { Bell, ChartNoAxesColumn, Copy, MessageSquareText, Settings, Share2, Shield } from 'lucide-react'
 import { Link, Navigate } from 'react-router-dom'
 import { LikesRow } from '../components/LikesRow'
 import { ReferralBadge, referralChromeClass } from '../components/ReferralBadge'
