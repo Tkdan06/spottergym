@@ -374,16 +374,13 @@ export function ProfilePage() {
             void patch({ privacy: user.privacy === 'open' ? 'anonymous' : 'open' })
           }
         >
-          <div className="row">
-            {user.privacy === 'open' ? <Eye size={18} /> : <EyeOff size={18} />}
-            <div>
-              <strong>{user.privacy === 'open' ? 'Открытый профиль' : 'Анонимный режим'}</strong>
-              <p className="muted">
-                {user.privacy === 'open'
-                  ? 'Имя и фото видны'
-                  : 'Видна только заглушка до твоего решения'}
-              </p>
-            </div>
+          <div>
+            <strong>Анонимный режим</strong>
+            <p className="muted">
+              {user.privacy === 'anonymous'
+                ? 'Информация в профиле скрыта'
+                : 'Информация в профиле открыта'}
+            </p>
           </div>
           <span className={`toggle ${user.privacy === 'anonymous' ? 'on' : ''}`} />
         </button>
