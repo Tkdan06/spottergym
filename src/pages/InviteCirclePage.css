@@ -16,54 +16,19 @@
 
 .invite-circle-lead {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 6px;
   min-width: 0;
 }
 
 .invite-circle-lead .muted {
   margin: 0;
+  line-height: 1.35;
 }
 
 .invite-circle-hint {
-  position: relative;
-  flex-shrink: 0;
-}
-
-.invite-circle-hint-btn {
-  width: 30px;
-  height: 30px;
-  display: grid;
-  place-items: center;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--text-dim);
-  cursor: pointer;
-}
-
-.invite-circle-hint-btn:hover,
-.invite-circle-hint-btn[aria-expanded='true'] {
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-}
-
-.invite-circle-hint-pop {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  z-index: 20;
-  width: min(280px, 78vw);
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  background: var(--bg-elevated);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
-  color: var(--text-muted);
-  font-size: 0.88rem;
-  line-height: 1.4;
+  /* uses global .ui-hint */
+  margin-bottom: 1px; /* optical align with muted glyph bottoms */
 }
 
 .invite-circle-section {

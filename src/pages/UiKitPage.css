@@ -61,6 +61,13 @@
   line-height: 1.4;
 }
 
+.ui-kit-hint-demo {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 0;
+}
+
 @media (min-width: 480px) {
   .ui-kit-swatches {
     grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowLeft, Bell, Share2 } from 'lucide-react'
+import { ArrowLeft, Bell, Info, Share2 } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { SectionTitle } from '../components/SectionTitle'
 import { useApp } from '../context/useApp'
@@ -26,6 +26,7 @@ export function UiKitPage() {
   const navigate = useNavigate()
   const { user, canViewUsers, canManageAdmins } = useApp()
   const [toggleOn, setToggleOn] = useState(true)
+  const [hintOpen, setHintOpen] = useState(false)
 
   if (!user?.isAdmin) return <Navigate to="/app/profile" replace />
   // UI kit — internal design reference; only for staff with broader access
@@ -154,6 +155,37 @@ export function UiKitPage() {
           </div>
           <span className={`toggle ${toggleOn ? 'on' : ''}`} />
         </button>
+      </section>
+
+      <section className="surface ui-kit-block">
+        <SectionTitle>Тултип / подсказка</SectionTitle>
+        <p className="muted" style={{ margin: '0 0 10px' }}>
+          Классы <code>.ui-hint</code>, <code>.ui-hint-trigger</code>, <code>.ui-hint-pop</code>.
+          Иконка Info выравнивается по нижнему краю соседнего текста; отступ до панели 8px; шрифт
+          панели — muted (<code>--text-muted-size</code>). Только короткие пояснения (1–2
+          предложения), не для ошибок и не вместо основного текста.
+        </p>
+        <div className="ui-kit-hint-demo">
+          <p className="muted" style={{ margin: 0 }}>
+            Пример подписи рядом с подсказкой
+          </p>
+          <div className="ui-hint">
+            <button
+              type="button"
+              className="ui-hint-trigger"
+              aria-label="Пример подсказки"
+              aria-expanded={hintOpen}
+              onClick={() => setHintOpen((v) => !v)}
+            >
+              <Info size={14} strokeWidth={2.25} />
+            </button>
+            {hintOpen ? (
+              <div className="ui-hint-pop" role="tooltip">
+                Короткая подсказка: одно–два предложения, без лишней декорации.
+              </div>
+            ) : null}
+          </div>
+        </div>
       </section>
 
       <section className="surface ui-kit-block">

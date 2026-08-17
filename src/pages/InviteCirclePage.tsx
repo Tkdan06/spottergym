@@ -112,18 +112,18 @@ export function InviteCirclePage() {
         <h1 className="page-title">Мой круг</h1>
         <div className="invite-circle-lead">
           <p className="muted">Приглашай друзей — расти в статусе</p>
-          <div className="invite-circle-hint" ref={hintRef}>
+          <div className="ui-hint invite-circle-hint" ref={hintRef}>
             <button
               type="button"
-              className="invite-circle-hint-btn"
+              className="ui-hint-trigger"
               aria-label="Как засчитываются друзья"
               aria-expanded={hintOpen}
               onClick={() => setHintOpen((v) => !v)}
             >
-              <Info size={16} />
+              <Info size={14} strokeWidth={2.25} />
             </button>
             {hintOpen ? (
-              <div className="invite-circle-hint-pop" role="tooltip">
+              <div className="ui-hint-pop" role="tooltip">
                 Засчитываются друзья, которые зарегистрировались по твоей ссылке и прошли онбординг.
               </div>
             ) : null}
@@ -214,10 +214,7 @@ export function InviteCirclePage() {
             )
           })}
         </div>
-        <p className="invite-circle-track-caption muted">
-          {previewTierDef.title}
-          {previewTier !== realTier ? ' · превью' : ''}
-        </p>
+        <p className="invite-circle-track-caption muted">{previewTierDef.title}</p>
       </section>
 
       <section className="surface invite-circle-section">

@@ -315,6 +315,61 @@ html.standalone {
   color: var(--text-dim);
 }
 
+/*
+  Inline hint tooltip (Info next to muted lead copy).
+  Rules:
+  - Trigger sits on the same baseline / lower edge as the adjacent text (not vertically centered in a tall hit box).
+  - Gap text→icon: 6px. Gap trigger→panel: 8px.
+  - Panel text: .muted size (--text-muted-size), line-height 1.4, color --text-muted.
+  - Use for short clarification only (1–2 sentences). Not for errors or primary actions.
+  - Open on tap/click; close on outside / Escape. Prefer role="tooltip" + aria-expanded on trigger.
+*/
+.ui-hint {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: flex-end;
+}
+
+.ui-hint-trigger {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  line-height: 0;
+}
+
+.ui-hint-trigger:hover,
+.ui-hint-trigger[aria-expanded='true'] {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.ui-hint-pop {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  width: min(280px, calc(100vw - 32px));
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.32);
+  color: var(--text-muted);
+  font-size: var(--text-muted-size);
+  line-height: 1.4;
+  font-weight: 500;
+  text-align: left;
+}
+
 .stack {
   display: flex;
   flex-direction: column;
