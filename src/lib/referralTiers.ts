@@ -15,7 +15,7 @@ export const REFERRAL_TIERS: ReferralTierDef[] = [
   { id: 1, minCredited: 1, title: 'Друг Spotter', badge: 'Muscle', chrome: 'soft' },
   { id: 2, minCredited: 3, title: 'Команда Spotter', badge: 'Dumbbell', chrome: 'soft' },
   { id: 3, minCredited: 5, title: 'Амбассадор Spotter', badge: '100kg', chrome: 'strong' },
-  { id: 4, minCredited: 10, title: 'GymBroSpotter', badge: 'Crown', chrome: 'hero' },
+  { id: 4, minCredited: 10, title: 'GymBro Spotter', badge: 'Crown', chrome: 'hero' },
 ]
 
 export function referralTierFromCount(creditedCount: number): ReferralTierDef {

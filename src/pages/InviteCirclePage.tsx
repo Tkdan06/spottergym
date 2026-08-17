@@ -169,7 +169,7 @@ export function InviteCirclePage() {
               ? toNext === 0
                 ? `Достигнут ${nextTitle}`
                 : `Ещё ${toNext} до «${nextTitle}»`
-              : 'Максимальный статус — GymBroSpotter'}
+              : 'Максимальный статус — GymBro Spotter'}
           </p>
         </div>
 
