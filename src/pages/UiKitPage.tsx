@@ -91,6 +91,10 @@ export function UiKitPage() {
 
       <section className="surface ui-kit-block">
         <SectionTitle>Кнопки</SectionTitle>
+        <p className="muted" style={{ margin: '0 0 10px' }}>
+          Primary — главное действие. Soft — вторичное в блоке. Ghost — переход / «открыть
+          раздел» в профиле (круг, обращения, настройки).
+        </p>
         <div className="stack">
           <button type="button" className="btn btn-primary btn-block">
             Primary
@@ -114,6 +118,10 @@ export function UiKitPage() {
 
       <section className="surface ui-kit-block">
         <SectionTitle>Чипы и пиллы</SectionTitle>
+        <p className="muted" style={{ margin: '0 0 10px' }}>
+          Чипы — метки и сущности (спорт, зал). Не использовать как главные CTA раздела — для
+          переходов в экраны бери <code>.btn</code> (ghost / soft / primary).
+        </p>
         <div className="chip-grid">
           <span className="chip">Обычный</span>
           <span className="chip active">Active</span>

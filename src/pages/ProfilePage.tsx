@@ -76,24 +76,31 @@ export function ProfilePage() {
       ) : null}
 
       <div className={`profile-hero mine ${referralChromeClass(user)}`}>
-        <ProfilePhotoCarousel
-          photos={user.photos}
-          fallbackSrc={heroSrc}
-          errorFallbackSrc={localGenderAvatar(user.gender)}
-          name={user.name}
-          mine
-          emptyHint="Фото"
-          onOpen={(index) => {
-            setGalleryIndex(index)
-            setGalleryOpen(true)
-          }}
-        />
+        <div className="profile-hero-photo-wrap">
+          <ProfilePhotoCarousel
+            photos={user.photos}
+            fallbackSrc={heroSrc}
+            errorFallbackSrc={localGenderAvatar(user.gender)}
+            name={user.name}
+            mine
+            emptyHint="Фото"
+            onOpen={(index) => {
+              setGalleryIndex(index)
+              setGalleryOpen(true)
+            }}
+          />
+          {user.referralTier || user.referralTitle ? (
+            <ReferralBadge user={user} size="lg" className="referral-badge--on-photo" />
+          ) : null}
+        </div>
         <div className="profile-hero-meta">
           {onBreak ? <span className="pill pill-break">{breakText}</span> : null}
           <h2 className="profile-hero-name">
             {user.name}, {user.age}
           </h2>
-          <ReferralBadge user={user} size="md" showTitle />
+          {user.referralTitle ? (
+            <p className="referral-status-title-only">{user.referralTitle}</p>
+          ) : null}
           <div className="profile-identity">
             {user.username ? (
               <button
@@ -382,33 +389,33 @@ export function ProfilePage() {
         </button>
       </section>
 
-      <section className="surface profile-block">
+      <section className="surface profile-block profile-invite-block">
+        <SectionTitle>Мой круг</SectionTitle>
+        <p className="muted profile-invite-hint">
+          {user.referralTitle
+            ? `${user.referralTitle} · ${user.referralCreditedCount || 0} в круге — приглашай друзей и открывай статусы`
+            : 'Приглашай друзей и открывай статусы на аватаре'}
+        </p>
+        <Link to="/app/invite" className="btn btn-ghost btn-block">
+          <Share2 size={16} /> Открыть мой круг
+        </Link>
+      </section>
+
+      <section className="surface profile-block profile-nav-block">
         <SectionTitle>Обратная связь</SectionTitle>
-        <div className="chip-grid">
-          <Link to="/app/feedback" className="chip active">
-            <MessageSquareText size={14} /> Мои обращения
+        <div className="profile-nav-actions">
+          <Link to="/app/feedback" className="btn btn-ghost btn-block">
+            <MessageSquareText size={16} /> Мои обращения
           </Link>
           {user.isAdmin ? (
-            <Link to="/app/admin" className="chip coach">
-              <Shield size={14} /> Админка
+            <Link to="/app/admin" className="btn btn-ghost btn-block">
+              <Shield size={16} /> Админка
             </Link>
           ) : null}
         </div>
       </section>
 
-      <section className="surface profile-block profile-invite-block">
-        <SectionTitle>Круг Spotter</SectionTitle>
-        <p className="muted profile-invite-hint">
-          {user.referralTitle
-            ? `${user.referralTitle} · ${user.referralCreditedCount || 0} в круге — приглашай друзей и открывай статусы`
-            : 'Приглашай друзей из зала и открывай статусы на аватаре'}
-        </p>
-        <Link to="/app/invite" className="btn btn-ghost btn-block">
-          <Share2 size={16} /> Открыть круг и ссылку
-        </Link>
-      </section>
-
-      <Link to="/app/settings" className="btn btn-ghost btn-block">
+      <Link to="/app/settings" className="btn btn-ghost btn-block profile-edit-btn">
         Редактировать профиль
       </Link>
     </main>

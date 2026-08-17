@@ -289,17 +289,22 @@ export function UserProfilePage() {
       ) : null}
 
       <div className={`profile-hero ${referralChromeClass(person)}`}>
-        <ProfilePhotoCarousel
-          photos={galleryPhotos}
-          fallbackSrc={photo}
-          errorFallbackSrc={localGenderAvatar(person.gender)}
-          name={name}
-          onOpen={(index) => {
-            if (!galleryPhotos.length) return
-            setGalleryIndex(index)
-            setGalleryOpen(true)
-          }}
-        />
+        <div className="profile-hero-photo-wrap">
+          <ProfilePhotoCarousel
+            photos={galleryPhotos}
+            fallbackSrc={photo}
+            errorFallbackSrc={localGenderAvatar(person.gender)}
+            name={name}
+            onOpen={(index) => {
+              if (!galleryPhotos.length) return
+              setGalleryIndex(index)
+              setGalleryOpen(true)
+            }}
+          />
+          {!isAnon && (person.referralTier || person.referralTitle) ? (
+            <ReferralBadge user={person} size="lg" className="referral-badge--on-photo" />
+          ) : null}
+        </div>
         <div className="profile-hero-meta">
           {onBreak ? (
             <span className="pill pill-break">{breakText}</span>
@@ -314,7 +319,9 @@ export function UserProfilePage() {
             {name}
             {!isAnon ? <span>, {person.age}</span> : null}
           </h1>
-          {!isAnon ? <ReferralBadge user={person} size="md" showTitle /> : null}
+          {!isAnon && person.referralTitle ? (
+            <p className="referral-status-title-only">{person.referralTitle}</p>
+          ) : null}
           <div className="profile-identity">
             {person.username ? (
               <p className="profile-username-static">{formatUsername(person.username)}</p>

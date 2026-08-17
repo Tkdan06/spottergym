@@ -236,7 +236,7 @@
 
 .profile-block {
   padding: 16px;
-  margin-bottom: 12px;
+  margin-bottom: 14px; /* match UIKit page block gap */
 }
 
 /* Bare h2 in block → same as .section-heading (UI kit) */
@@ -291,7 +291,29 @@
 }
 
 .profile-invite-hint {
-  margin: -4px 0 12px;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.profile-invite-block,
+.profile-nav-block {
+  display: grid;
+  gap: 10px;
+}
+
+.profile-invite-block > .section-title,
+.profile-nav-block > .section-title {
+  margin-bottom: 0;
+}
+
+.profile-nav-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.profile-edit-btn {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .slots {
@@ -311,6 +333,10 @@
 .status-panel {
   display: grid;
   gap: 10px;
+}
+
+.status-panel > .section-title {
+  margin-bottom: 0;
 }
 
 .checkin-block {

@@ -4,26 +4,78 @@
   padding-bottom: calc(24px + var(--safe-bottom));
 }
 
-.invite-circle-head h1 {
-  margin: 4px 0 8px;
-  font-size: 1.55rem;
-  line-height: 1.15;
-}
-
-.invite-circle-kicker {
-  margin: 0;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-
-.invite-circle-status,
-.invite-circle-ladder {
+.invite-circle-head {
   display: grid;
-  gap: 14px;
+  gap: 6px;
+  min-width: 0;
+}
+
+.invite-circle-head .page-title {
+  margin: 0;
+}
+
+.invite-circle-lead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.invite-circle-lead .muted {
+  margin: 0;
+}
+
+.invite-circle-hint {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.invite-circle-hint-btn {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.invite-circle-hint-btn:hover,
+.invite-circle-hint-btn[aria-expanded='true'] {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.invite-circle-hint-pop {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  width: min(280px, 78vw);
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.invite-circle-section {
+  display: grid;
+  gap: 10px;
   padding: 16px;
+  min-width: 0;
+}
+
+/* UIKit: spacing after heading is 12px via .section-title — don't stack with grid gap */
+.invite-circle-section > .section-title {
+  margin-bottom: 0;
 }
 
 .invite-circle-status-top {
@@ -31,17 +83,37 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+  min-width: 0;
+}
+
+.invite-circle-status-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.invite-circle-status-copy > .muted,
+.invite-circle-status-copy > .dim {
+  margin: 0;
+}
+
+.invite-circle-status-title-row {
+  margin-top: 2px;
 }
 
 .invite-circle-title {
-  display: block;
-  font-size: 1.25rem;
-  margin-top: 2px;
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
 }
 
 .invite-circle-progress {
   display: grid;
   gap: 8px;
+}
+
+.invite-circle-progress .muted {
+  margin: 0;
 }
 
 .invite-circle-progress-track {
@@ -59,49 +131,92 @@
   border-radius: inherit;
 }
 
-.invite-circle-tiers {
-  list-style: none;
+.invite-circle-ladder .section-title {
+  margin-bottom: 0;
+}
+
+.invite-circle-status {
+  gap: 12px;
+}
+
+.invite-circle-track {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  align-items: start;
+}
+
+.invite-circle-track::before {
+  content: '';
+  position: absolute;
+  top: 30px;
+  left: 12.5%;
+  right: 12.5%;
+  height: 2px;
+  background: var(--line);
+  pointer-events: none;
+}
+
+.invite-circle-step {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
   margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 8px;
+  padding: 8px 4px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  opacity: 0.55;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.invite-circle-tier {
-  display: grid;
-  grid-template-columns: 42px 1fr;
-  gap: 10px;
-  align-items: center;
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  background: var(--bg-card);
-  opacity: 0.72;
-}
-
-.invite-circle-tier.is-reached {
+.invite-circle-step.is-reached {
   opacity: 1;
-  border-color: rgba(200, 245, 66, 0.35);
 }
 
-.invite-circle-tier.is-current {
-  background: var(--accent-soft);
+.invite-circle-step.is-current .referral-badge,
+.invite-circle-step.is-preview .referral-badge {
+  outline: none;
+  transform: scale(1.1);
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
 }
 
-.invite-circle-tier-count {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  font-weight: 800;
-  background: var(--bg-elevated);
+.invite-circle-step .referral-badge {
+  width: 48px;
+  height: 48px;
+  transform: none;
+}
+
+.invite-circle-step.is-preview {
+  opacity: 1;
+}
+
+.invite-circle-step-count {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.invite-circle-step.is-current .invite-circle-step-count,
+.invite-circle-step.is-preview .invite-circle-step-count {
   color: var(--accent);
+}
+
+.invite-circle-track-caption {
+  margin: 0;
+  text-align: center;
+  font-size: 0.9rem;
 }
 
 .invite-circle-friends {
   list-style: none;
-  margin: 8px 0 0;
+  margin: 0;
   padding: 0;
   display: grid;
   gap: 8px;
@@ -113,6 +228,7 @@
   gap: 2px;
   color: inherit;
   text-decoration: none;
+  min-width: 0;
 }
 
 .invite-circle-friends a:hover strong {
@@ -120,7 +236,36 @@
 }
 
 .invite-circle-pending {
-  margin-top: 16px;
+  margin-top: 4px;
   padding-top: 12px;
   border-top: 1px solid var(--line);
+  display: grid;
+  gap: 8px;
+}
+
+.invite-circle-pending > .muted {
+  margin: 0;
+}
+
+.invite-circle-preview-hint {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.invite-circle-section > .muted {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.invite-circle-preview-card {
+  min-width: 0;
+}
+
+.invite-circle-preview-card .user-card {
+  animation: none;
+  cursor: default;
+}
+
+.invite-circle-preview-card .user-card.is-static-preview:hover {
+  transform: none;
 }

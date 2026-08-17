@@ -246,6 +246,7 @@
   overflow-y: auto;
   display: grid;
   gap: 8px;
+  align-content: start;
   padding-right: 2px;
   /* Последние города не обрезаются у низа шторки */
   padding-bottom: calc(20px + var(--safe-bottom));

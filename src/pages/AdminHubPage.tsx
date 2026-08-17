@@ -258,7 +258,7 @@ export function AdminHubPage() {
             <Link to="/app/admin/referrals" className="admin-hub-card">
               <UserPlus size={20} />
               <strong>Рефералы</strong>
-              <p className="muted">Круг Spotter · кто кого · статусы Friend→GymBro</p>
+              <p className="muted">Круг Spotter · кто кого · статусы Друг→GymBroSpotter</p>
             </Link>
             <Link to="/app/admin/landing" className="admin-hub-card">
               <Megaphone size={20} />

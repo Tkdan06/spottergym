@@ -19,6 +19,8 @@ interface Props {
   priority?: boolean
   /** Лайк прямо с карточки (не для своего профиля) */
   enableLike?: boolean
+  /** Read-only preview — no navigation */
+  staticPreview?: boolean
 }
 
 export function UserCard({
@@ -27,6 +29,7 @@ export function UserCard({
   rank,
   priority = false,
   enableLike = true,
+  staticPreview = false,
 }: Props) {
   const navigate = useNavigate()
   const { user: me, getLikesFor, toggleLike } = useApp()
@@ -48,22 +51,27 @@ export function UserCard({
   const profileTo = isMe ? '/app/profile' : `/app/user/${user.id}`
 
   const goProfile = () => {
+    if (staticPreview) return
     navigate(profileTo, { state: isMe ? undefined : { person: user } })
   }
 
   return (
     <article
-      className={`user-card ${compact ? 'compact' : ''} ${isMe ? 'is-me' : ''} ${isCoach ? 'is-coach' : ''} ${referralChromeClass(user)}`}
-      role="link"
-      tabIndex={0}
+      className={`user-card ${compact ? 'compact' : ''} ${isMe ? 'is-me' : ''} ${isCoach ? 'is-coach' : ''} ${referralChromeClass(user)} ${staticPreview ? 'is-static-preview' : ''}`}
+      role={staticPreview ? 'group' : 'link'}
+      tabIndex={staticPreview ? undefined : 0}
       aria-label={isMe ? `${name} — это ты` : name}
-      onClick={goProfile}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          goProfile()
-        }
-      }}
+      onClick={staticPreview ? undefined : goProfile}
+      onKeyDown={
+        staticPreview
+          ? undefined
+          : (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                goProfile()
+              }
+            }
+      }
     >
       {isMe ? <span className="me-tab">Ты</span> : null}
 

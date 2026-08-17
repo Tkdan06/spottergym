@@ -415,7 +415,7 @@ export function MessagesPage() {
 
   const onDeleteChat = async () => {
     if (!sheetConv || actionBusy) return
-    const name = sheetConv.other?.name || 'чат'
+    const name = sheetConv.other ? displayName(sheetConv.other) : 'Удалённый пользователь'
     const ok = window.confirm(`Удалить чат с ${name} у себя? У собеседника переписка останется.`)
     if (!ok) return
     setActionBusy(true)

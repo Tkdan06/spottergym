@@ -13,7 +13,7 @@ export interface InvitePayload {
 export function buildInvitePayload(opts: {
   userId: string
   gymName?: string | null
-  /** Current referral status title, e.g. Gym Crew */
+  /** Current referral status title, e.g. Команда Spotter */
   statusTitle?: string | null
 }): InvitePayload {
   // Always production HTTPS so Telegram/WhatsApp/Max can fetch OG tags + og-share.png
