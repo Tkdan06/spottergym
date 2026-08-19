@@ -57,6 +57,28 @@ certbot --nginx -d spottergym.ru -d www.spottergym.ru
 
 DNS A/AAAA → IP VPS. Если раньше был GitHub Pages — отключи для домена.
 
+### Photo 404 / gender stub (важный баг)
+
+Если в профиле «слот фото есть», а видно гендерную заглушку: nginx `location ~* \.(jpg|png)$` перехватывает `/api/media/...jpg` и отдаёт static 404. UI ловит ошибку картинки и показывает `localGenderAvatar`.
+
+Проверка:
+
+```bash
+curl -sI https://spottergym.ru/api/media/x/y.jpg | head -8
+# плохо: nginx HTML 404
+# хорошо: ответ API (JSON 404 для несуществующего файла — нормально)
+```
+
+Патч **живого** конфига (после certbot, без затирания SSL):
+
+```bash
+cd ~/spottergym && git pull
+chmod +x deploy/fix-nginx-media.sh
+sudo ./deploy/fix-nginx-media.sh
+```
+
+После патча старые фото с `.jpg` в URL снова должны открываться (файлы на volume `spotter_media`). Новые загрузки API пишут URL **без** расширения — они работают даже если статический regex снова сломают.
+
 ## 5. Admin
 
 1. Открой `https://spottergym.ru`
@@ -71,4 +93,6 @@ git pull
 docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
 npm ci && VITE_API_URL= VITE_SITE_LOCK_ENABLED=false npm run build
 rsync -a --delete dist/ /var/www/spottergym/dist/
+# If photos show stubs again after a certbot/nginx edit:
+# sudo ./deploy/fix-nginx-media.sh
 ```

@@ -4,34 +4,36 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-/** api/data/media — outside src, persisted on disk */
-export const MEDIA_ROOT = path.resolve(__dirname, '../../data/media')
+/**
+ * api/data/media — outside src, persisted on disk (Docker: /app/data/media).
+ * Override with MEDIA_ROOT if the process cwd/layout differs.
+ */
+export const MEDIA_ROOT =
+  process.env.MEDIA_ROOT?.trim() || path.resolve(__dirname, '../../data/media')
 
 const DATA_URL_RE =
   /^data:image\/(jpeg|jpg|png|webp);base64,([A-Za-z0-9+/=\s]+)$/i
 
+/**
+ * Public media URLs must NOT end with .jpg/.png — nginx `location ~* \.(jpg|…)$`
+ * otherwise steals them from the API proxy and returns a static 404 (gender stub in UI).
+ * Legacy paths with extensions are still accepted for existing DB rows.
+ */
 export function isMediaPath(value: string) {
   return /^\/api\/media\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9._-]+$/.test(value)
 }
 
-function extForMime(mime: string) {
-  const m = mime.toLowerCase()
-  if (m === 'png') return 'png'
-  if (m === 'webp') return 'webp'
-  return 'jpg'
-}
-
-/** Persist a data-URL photo; returns public `/api/media/...` path. */
+/** Persist a data-URL photo; returns public `/api/media/...` path (no file extension). */
 export async function storePhotoDataUrl(userId: string, dataUrl: string): Promise<string> {
   const match = DATA_URL_RE.exec(dataUrl.trim())
   if (!match) throw new Error('bad_photo')
-  const ext = extForMime(match[1])
   const buf = Buffer.from(match[2].replace(/\s/g, ''), 'base64')
   if (buf.length < 32 || buf.length > 3_500_000) throw new Error('bad_photo_size')
 
   const safeUser = userId.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64) || 'user'
   const hash = createHash('sha256').update(buf).digest('hex').slice(0, 16)
-  const name = `${randomUUID().slice(0, 8)}_${hash}.${ext}`
+  // No extension in the public URL / on-disk name — see isMediaPath note above
+  const name = `${randomUUID().slice(0, 8)}_${hash}`
   const dir = path.join(MEDIA_ROOT, safeUser)
   await mkdir(dir, { recursive: true })
   const filePath = path.join(dir, name)
