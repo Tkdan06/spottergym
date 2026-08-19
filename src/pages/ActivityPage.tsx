@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, MoreVertical, RotateCcw } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, RotateCcw } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/useApp'
 import {
@@ -196,7 +196,7 @@ export function ActivityPage() {
               onClick={() => setSheet('menu')}
               disabled={resetting}
             >
-              <MoreVertical size={20} />
+              <MoreHorizontal size={20} />
             </button>
           ) : null}
         </div>

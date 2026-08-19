@@ -107,9 +107,18 @@
 }
 
 .home-gym-checkin {
+  display: grid;
+  gap: 8px;
   min-width: 0;
   max-width: 100%;
   min-height: 48px;
+}
+
+.home-log-workout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 /* Переключатель залов внутри блока зала */

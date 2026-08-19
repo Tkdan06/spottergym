@@ -246,6 +246,127 @@ export async function apiResetMyActivity() {
   return request<{ ok: true; deleted: number }>('/me/activity', { method: 'DELETE' })
 }
 
+export type WorkoutSetInput = { weightKg: number; reps: number }
+
+export type WorkoutExerciseDto = {
+  id?: string
+  name: string
+  sortOrder: number
+  sets: (WorkoutSetInput & { id?: string; setIndex: number })[]
+  weightDelta?: number | null
+  repsDelta?: number | null
+}
+
+export type WorkoutSessionSummary = {
+  id: string
+  title: string
+  performedAt: string
+  bodyWeightKg: number | null
+  notes: string
+  exerciseCount: number
+  setCount: number
+  createdAt: string
+  updatedAt: string
+}
+
+export type WorkoutSessionDetail = {
+  id: string
+  title: string
+  performedAt: string
+  bodyWeightKg: number | null
+  notes: string
+  exercises: WorkoutExerciseDto[]
+  createdAt: string
+  updatedAt: string
+}
+
+export type WorkoutSessionInput = {
+  title: string
+  performedAt: string
+  bodyWeightKg?: number | null
+  notes?: string
+  exercises: { name: string; sets: WorkoutSetInput[] }[]
+}
+
+export type WorkoutProgressRange = 7 | 30 | 90
+
+export type WorkoutProgress = {
+  range: WorkoutProgressRange
+  body: {
+    points: { at: string; kg: number }[]
+    latestKg: number | null
+    deltaKg: number | null
+  }
+  exercises: { name: string; sessionCount: number }[]
+  strength: {
+    exercise: string | null
+    points: { at: string; weightKg: number; reps: number }[]
+    latestWeightKg: number | null
+    deltaWeightKg: number | null
+    deltaReps: number | null
+  }
+  highlight: {
+    bodyLatestKg: number | null
+    bodyDeltaKg: number | null
+    liftName: string | null
+    liftDeltaWeightKg: number | null
+    liftDeltaReps: number | null
+  }
+}
+
+export async function apiFetchWorkouts(opts?: {
+  limit?: number
+  before?: string
+  beforeId?: string
+}) {
+  const sp = new URLSearchParams()
+  if (opts?.limit) sp.set('limit', String(opts.limit))
+  if (opts?.before) sp.set('before', opts.before)
+  if (opts?.beforeId) sp.set('beforeId', opts.beforeId)
+  const qs = sp.toString()
+  const data = await request<{ workouts: WorkoutSessionSummary[]; hasMore?: boolean }>(
+    `/me/workouts${qs ? `?${qs}` : ''}`,
+  )
+  return {
+    workouts: data.workouts,
+    hasMore: Boolean(data.hasMore),
+  }
+}
+
+export async function apiFetchWorkoutProgress(range: WorkoutProgressRange, exercise?: string) {
+  const q = new URLSearchParams({ range: String(range) })
+  if (exercise) q.set('exercise', exercise)
+  const data = await request<{ progress: WorkoutProgress }>(`/me/workouts/progress?${q}`)
+  return data.progress
+}
+
+export async function apiFetchWorkout(id: string) {
+  const data = await request<{ workout: WorkoutSessionDetail }>(
+    `/me/workouts/${encodeURIComponent(id)}`,
+  )
+  return data.workout
+}
+
+export async function apiCreateWorkout(body: WorkoutSessionInput) {
+  const data = await request<{ workout: WorkoutSessionDetail }>('/me/workouts', {
+    method: 'POST',
+    json: body,
+  })
+  return data.workout
+}
+
+export async function apiUpdateWorkout(id: string, body: WorkoutSessionInput) {
+  const data = await request<{ workout: WorkoutSessionDetail }>(
+    `/me/workouts/${encodeURIComponent(id)}`,
+    { method: 'PATCH', json: body },
+  )
+  return data.workout
+}
+
+export async function apiDeleteWorkout(id: string) {
+  return request<{ ok: true }>(`/me/workouts/${encodeURIComponent(id)}`, { method: 'DELETE' })
+}
+
 export async function apiJoinGym(gymId: string, makeHome = false) {
   const data = await request<{ user: AppUser }>(
     `/me/gyms/${encodeURIComponent(gymId)}${makeHome ? '?home=1' : ''}`,
@@ -721,6 +842,31 @@ export async function apiAdminOutboundTicket(userId: string, message: string) {
     json: { userId, message },
   })
   return data.ticket
+}
+
+export type AdminBroadcast = {
+  id: string
+  title: string
+  body: string
+  createdAt: string
+  createdById: string
+  createdByName: string
+  recipientCount: number
+  readCount: number
+  unreadCount: number
+}
+
+export async function apiAdminFetchBroadcasts() {
+  const data = await request<{ broadcasts: AdminBroadcast[] }>('/admin/broadcasts')
+  return data.broadcasts
+}
+
+export async function apiAdminCreateBroadcast(title: string, body: string) {
+  const data = await request<{ broadcast: AdminBroadcast }>('/admin/broadcasts', {
+    method: 'POST',
+    json: { title, body },
+  })
+  return data.broadcast
 }
 
 export type ApiConversation = Conversation & { other?: UserProfile }

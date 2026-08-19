@@ -41,6 +41,7 @@ export async function createNotification(input: {
   href?: string
   gymId?: string
   actorId?: string
+  broadcastId?: string
   /** Skip user prefs (e.g. critical admin ticket alerts). */
   force?: boolean
 }) {
@@ -60,6 +61,7 @@ export async function createNotification(input: {
       href: input.href?.slice(0, 200),
       gymId: input.gymId?.slice(0, 64),
       actorId: input.actorId?.slice(0, 64),
+      broadcastId: input.broadcastId?.slice(0, 64),
     },
   })
 

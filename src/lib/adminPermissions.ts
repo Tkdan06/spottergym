@@ -19,7 +19,7 @@ export const ADMIN_PERMISSION_LABELS: Record<
   },
   messageUsers: {
     title: 'Писать пользователям',
-    hint: 'Исходящие сообщения из админки',
+    hint: 'Исходящие сообщения и рассылка всем в колокольчик',
   },
   viewUsers: {
     title: 'Пользователи и статистика',

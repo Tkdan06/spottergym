@@ -22,6 +22,11 @@ import {
   enableEmergencyShutdown,
   scheduleProcessShutdown,
 } from '../lib/emergency.js'
+import {
+  createAndSendBroadcast,
+  getBroadcast,
+  listBroadcasts,
+} from '../lib/adminBroadcast.js'
 import { PASSWORD_MAX } from '../lib/fieldLimits.js'
 import { verifyPassword } from '../lib/password.js'
 import { SoftDeleteError, softDeleteUser } from '../lib/softDeleteUser.js'
@@ -400,6 +405,54 @@ adminRoutes.patch('/users/:id/admin', async (c) => {
 
   return c.json({ user: serializeUser(updated) })
 })
+
+adminRoutes.get('/broadcasts', async (c) => {
+  const gate = await requirePerm(c.get('userId'), 'messageUsers')
+  if (!gate.ok) return c.json({ error: gate.error }, gate.status)
+  const broadcasts = await listBroadcasts()
+  return c.json({ broadcasts })
+})
+
+adminRoutes.get('/broadcasts/:id', async (c) => {
+  const gate = await requirePerm(c.get('userId'), 'messageUsers')
+  if (!gate.ok) return c.json({ error: gate.error }, gate.status)
+  const broadcast = await getBroadcast(c.req.param('id'))
+  if (!broadcast) return c.json({ error: 'Рассылка не найдена' }, 404)
+  return c.json({ broadcast })
+})
+
+adminRoutes.post(
+  '/broadcasts',
+  rateLimit({ windowMs: 60 * 60_000, max: 10, route: 'admin-broadcast' }),
+  async (c) => {
+    const gate = await requirePerm(c.get('userId'), 'messageUsers')
+    if (!gate.ok) return c.json({ error: gate.error }, gate.status)
+
+    const parsed = z
+      .object({
+        title: z.string().trim().min(1).max(120),
+        body: z.string().trim().min(1).max(500),
+      })
+      .safeParse(await c.req.json().catch(() => null))
+    if (!parsed.success) {
+      return c.json({ error: 'Укажи заголовок и текст сообщения' }, 400)
+    }
+
+    try {
+      const broadcast = await createAndSendBroadcast({
+        adminId: c.get('userId'),
+        title: parsed.data.title,
+        body: parsed.data.body,
+      })
+      return c.json({ broadcast }, 201)
+    } catch (err) {
+      return c.json(
+        { error: err instanceof Error ? err.message : 'Не удалось отправить' },
+        400,
+      )
+    }
+  },
+)
 
 /** Master-only kill switch: re-check password, persist flag, then exit process. */
 adminRoutes.post(

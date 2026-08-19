@@ -1,0 +1,25 @@
+.set-weight-dual {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  min-width: 0;
+}
+
+.set-weight-col {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.set-weight-col-label {
+  margin: 0;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.set-weight-wheel .weight-kg-wheel-unit {
+  display: none;
+}

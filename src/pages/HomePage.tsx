@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Bell, ChartNoAxesColumn, ChevronRight, MapPin } from 'lucide-react'
+import { Bell, ChartNoAxesColumn, ChevronRight, ClipboardList, MapPin } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { CheckInControl } from '../components/CheckInControl'
 import {
@@ -99,6 +99,9 @@ export function HomePage() {
       <header className="page-header home-top">
         <h1 className="page-title">Мой зал</h1>
         <div className="page-header-actions">
+          <Link to="/app/workouts" className="icon-btn" aria-label="Тренировки" title="Тренировки">
+            <ClipboardList size={20} />
+          </Link>
           <Link to="/app/activity" className="icon-btn" aria-label="Активность" title="Активность">
             <ChartNoAxesColumn size={20} />
           </Link>
@@ -152,6 +155,14 @@ export function HomePage() {
 
             <div className="home-gym-checkin">
               <CheckInControl preferredGymId={floorGymId} block />
+              {youHere ? (
+                <Link
+                  to="/app/workouts/new?fromCheckIn=1"
+                  className="btn btn-soft btn-block home-log-workout"
+                >
+                  <ClipboardList size={16} /> Записать тренировку
+                </Link>
+              ) : null}
             </div>
 
             {multi ? (

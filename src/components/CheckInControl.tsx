@@ -9,6 +9,7 @@ import {
   isCheckInExpiringSoon,
 } from '../lib/presence'
 import { useSheetA11y } from '../lib/sheetA11y'
+import { useMoment } from './MomentFX'
 import './CheckInControl.css'
 
 interface Props {
@@ -41,10 +42,12 @@ function minutesLeftLabel(expiresAtIso: string) {
 
 export function CheckInControl({ preferredGymId, compact, block, className = '' }: Props) {
   const { user, checkIn, checkOut, extendCheckIn } = useApp()
+  const { celebrate } = useMoment()
   const [sheetOpen, setSheetOpen] = useState(false)
   const [extending, setExtending] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [pop, setPop] = useState(false)
   const [, setTick] = useState(0)
   const panelRef = useRef<HTMLDivElement>(null)
 
@@ -86,12 +89,20 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
     )
   }
 
-  const run = async (fn: () => void | Promise<void>) => {
+  const run = async (
+    fn: () => void | Promise<void>,
+    moment?: 'checkin' | 'checkout',
+  ) => {
     if (busy) return
     setBusy(true)
     setError('')
     try {
       await fn()
+      if (moment) {
+        setPop(true)
+        window.setTimeout(() => setPop(false), 600)
+        celebrate(moment)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось обновить статус')
     } finally {
@@ -103,7 +114,7 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
     void run(async () => {
       await checkIn(gymId)
       setSheetOpen(false)
-    })
+    }, 'checkin')
   }
 
   const onExtend = async () => {
@@ -217,9 +228,9 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
           ) : null}
           <button
             type="button"
-            className="btn btn-soft"
+            className={`btn btn-soft ${pop ? 'moment-btn-pop' : ''}`}
             disabled={busy}
-            onClick={() => void run(() => checkOut())}
+            onClick={() => void run(() => checkOut(), 'checkout')}
           >
             Уйти
           </button>
@@ -253,9 +264,9 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
         <div className={shellClass}>
           <button
             type="button"
-            className="btn btn-primary"
+            className={`btn btn-primary ${pop ? 'moment-btn-pop' : ''}`}
             disabled={busy}
-            onClick={() => void run(() => checkIn(targetId))}
+            onClick={() => void run(() => checkIn(targetId), 'checkin')}
           >
             {shortLabels ? 'Сюда' : `Перейти · ${targetLabel}`}
           </button>
@@ -272,9 +283,9 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
       <div className={shellClass}>
         <button
           type="button"
-          className="btn btn-primary"
+          className={`btn btn-primary ${pop ? 'moment-btn-pop' : ''}`}
           disabled={busy}
-          onClick={() => void run(() => checkIn(targetId))}
+          onClick={() => void run(() => checkIn(targetId), 'checkin')}
         >
           {shortLabels ? 'Я в зале' : `Я в зале${targetLabel ? ` · ${targetLabel}` : ''}`}
         </button>

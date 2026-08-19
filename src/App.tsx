@@ -2,7 +2,12 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './components/AppLayout'
 import { GuestOnly, ProtectedRoute } from './components/ProtectedRoute'
 import { AppProvider } from './context/AppContext'
+import { MomentProvider } from './components/MomentFX'
 import { ActivityPage } from './pages/ActivityPage'
+import { WorkoutEditorPage } from './pages/WorkoutEditorPage'
+import { WorkoutsPage } from './pages/WorkoutsPage'
+import { WorkoutsProgressPage } from './pages/WorkoutsProgressPage'
+import { AdminBroadcastsPage } from './pages/AdminBroadcastsPage'
 import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage'
 import { AdminGeographyPage } from './pages/AdminGeographyPage'
 import { AdminHubPage } from './pages/AdminHubPage'
@@ -41,6 +46,7 @@ import { WelcomePage } from './pages/WelcomePage'
 export default function App() {
   return (
     <AppProvider>
+      <MomentProvider>
       <BrowserRouter>
         <Routes>
           <Route element={<GuestOnly />}>
@@ -69,6 +75,10 @@ export default function App() {
               <Route path="profile" element={<ProfilePage />} />
               <Route path="invite" element={<InviteCirclePage />} />
               <Route path="activity" element={<ActivityPage />} />
+              <Route path="workouts" element={<WorkoutsPage />} />
+              <Route path="workouts/progress" element={<WorkoutsProgressPage />} />
+              <Route path="workouts/new" element={<WorkoutEditorPage />} />
+              <Route path="workouts/:id" element={<WorkoutEditorPage />} />
               <Route path="likes" element={<LikedPage mode="received" />} />
               <Route path="likes/sent" element={<LikedPage mode="sent" />} />
               <Route path="feedback" element={<FeedbackPage />} />
@@ -81,6 +91,7 @@ export default function App() {
               <Route path="admin/password-resets" element={<AdminPasswordResetsPage />} />
               <Route path="admin/referrals" element={<AdminReferralsPage />} />
               <Route path="admin/landing" element={<AdminLandingPage />} />
+              <Route path="admin/broadcasts" element={<AdminBroadcastsPage />} />
               <Route path="admin/tickets" element={<AdminTicketsPage />} />
               <Route path="admin/users" element={<AdminUsersPage />} />
               <Route path="admin/ui" element={<UiKitPage />} />
@@ -94,6 +105,7 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
+      </MomentProvider>
     </AppProvider>
   )
 }

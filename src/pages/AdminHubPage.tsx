@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   ArrowLeft,
   BarChart3,
+  Bell,
   HardDrive,
   KeyRound,
   MapPin,
@@ -40,6 +41,7 @@ export function AdminHubPage() {
     canBlockUsers,
     canViewUsers,
     canHandleTickets,
+    canMessageUsers,
   } = useApp()
   const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null)
   const [loading, setLoading] = useState(false)
@@ -266,6 +268,13 @@ export function AdminHubPage() {
               <p className="muted">Визиты, скролл, CTA и регистрации с рекламы</p>
             </Link>
           </>
+        ) : null}
+        {canMessageUsers ? (
+          <Link to="/app/admin/broadcasts" className="admin-hub-card">
+            <Bell size={20} />
+            <strong>Рассылка</strong>
+            <p className="muted">Сообщение всем в колокольчик · доставка и прочтения</p>
+          </Link>
         ) : null}
         {canHandleTickets ? (
           <Link to="/app/admin/tickets" className="admin-hub-card">

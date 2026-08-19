@@ -54,6 +54,7 @@ import {
   type AuthedEnv,
 } from '../middleware/auth.js'
 import { rateLimit } from '../middleware/rateLimit.js'
+import { workoutRoutes } from './meWorkouts.js'
 
 const tagList = z.array(z.string().trim().min(1).max(TAG_ITEM_MAX)).max(TAGS_MAX)
 
@@ -125,6 +126,7 @@ async function serializeMe(
 export const meRoutes = new Hono<AuthedEnv>()
 
 meRoutes.use('*', requireAuth)
+meRoutes.route('/', workoutRoutes)
 
 meRoutes.get('/', async (c) => {
   const user = await loadAuthedUser(c.get('userId'))
