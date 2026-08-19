@@ -58,6 +58,12 @@
   margin-bottom: 0;
 }
 
+.workouts-history-count {
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .workouts-list {
   list-style: none;
   margin: 0;
@@ -66,24 +72,125 @@
   gap: 8px;
 }
 
-.workouts-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 14px;
+.workouts-board {
   border-radius: 14px;
   border: 1px solid var(--line);
   background: var(--bg-elevated);
-  color: inherit;
-  text-decoration: none;
   min-width: 0;
+  overflow: hidden;
+}
+
+.workouts-board-top {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  min-width: 0;
+}
+
+.workouts-board-toggle {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 10px 12px 14px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.workouts-board-chevron {
+  flex-shrink: 0;
+  color: var(--text-dim);
+  transition: transform 0.18s ease;
+}
+
+.workouts-board-chevron.is-open {
+  transform: rotate(180deg);
+}
+
+.workouts-row-copy-btn {
+  flex: 0 0 auto;
+  align-self: center;
+  width: 42px;
+  height: 42px;
+  margin-right: 4px;
+  border-radius: 12px;
+}
+
+.workouts-board-body {
+  display: grid;
+  gap: 12px;
+  padding: 0 14px 14px;
+  border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  padding-top: 12px;
+}
+
+.workouts-board-open {
+  justify-self: start;
+}
+
+.workouts-page .text-link {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.workouts-page .text-link.muted {
+  text-decoration: none;
+  color: var(--text-muted);
+}
+
+.workouts-page a.text-link.muted {
+  color: var(--text-muted);
+}
+
+.workout-readonly-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.workout-readonly-ex {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.workout-readonly-ex strong {
+  font-size: 0.95rem;
+}
+
+.workout-readonly-sets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .workouts-row-copy {
   display: grid;
   gap: 2px;
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .workouts-row-copy .muted {
@@ -103,6 +210,21 @@
   flex-shrink: 0;
   font-size: 0.82rem;
   white-space: nowrap;
+}
+
+.workout-view-meta {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+}
+
+.workout-view-meta p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.workout-view-note {
+  white-space: pre-wrap;
 }
 
 .workout-editor-top {
@@ -425,6 +547,93 @@
 .workouts-progress-strip-chevron {
   flex-shrink: 0;
   color: var(--text-dim);
+}
+
+.workout-progress-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+  min-width: 0;
+}
+
+.workout-progress-mode {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  min-width: 0;
+}
+
+.workout-progress-mode button {
+  margin: 0;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 650;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.workout-progress-mode button.is-active {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--accent);
+}
+
+.workout-progress-period {
+  display: inline-flex;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.workout-progress-period button {
+  min-width: 44px;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.workout-progress-period button.is-active {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+
+.workout-progress-period button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+@media (max-width: 420px) {
+  .workout-progress-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .workout-progress-mode {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .workout-progress-period {
+    margin-left: 0;
+    justify-content: flex-end;
+  }
 }
 
 .workout-exercise-picker select {

@@ -152,7 +152,7 @@ function LineChart({
 export function WorkoutsProgressPage() {
   const navigate = useNavigate()
   const { user, apiOnline } = useApp()
-  const [tab, setTab] = useState<Tab>('body')
+  const [tab, setTab] = useState<Tab>('strength')
   const [range, setRange] = useState<WorkoutProgressRange>(30)
   const [pickedExercise, setPickedExercise] = useState<string | undefined>()
   const [progress, setProgress] = useState<WorkoutProgress | null>(null)
@@ -221,44 +221,44 @@ export function WorkoutsProgressPage() {
 
       <header className="workouts-head">
         <h1 className="page-title">Прогресс</h1>
-        <p className="muted">Изменения веса тела и лучших подходов</p>
       </header>
 
-      <div className="activity-range workouts-progress-tabs" role="tablist" aria-label="Тип прогресса">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'body'}
-          className={`activity-range-btn ${tab === 'body' ? 'is-active' : ''}`}
-          onClick={() => setTab('body')}
-        >
-          Тело
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'strength'}
-          className={`activity-range-btn ${tab === 'strength' ? 'is-active' : ''}`}
-          onClick={() => setTab('strength')}
-        >
-          Сила
-        </button>
-      </div>
-
-      <div className="activity-range" role="tablist" aria-label="Период">
-        {RANGES.map((r) => (
+      <div className="workout-progress-toolbar">
+        <div className="workout-progress-mode" role="tablist" aria-label="Что смотреть">
           <button
-            key={r.id}
             type="button"
             role="tab"
-            aria-selected={range === r.id}
-            className={`activity-range-btn ${range === r.id ? 'is-active' : ''}`}
-            onClick={() => setRange(r.id)}
-            disabled={loading}
+            aria-selected={tab === 'strength'}
+            className={tab === 'strength' ? 'is-active' : ''}
+            onClick={() => setTab('strength')}
           >
-            {r.label}
+            Упражнения
           </button>
-        ))}
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'body'}
+            className={tab === 'body' ? 'is-active' : ''}
+            onClick={() => setTab('body')}
+          >
+            Мой вес
+          </button>
+        </div>
+        <div className="workout-progress-period" role="tablist" aria-label="Период">
+          {RANGES.map((r) => (
+            <button
+              key={r.id}
+              type="button"
+              role="tab"
+              aria-selected={range === r.id}
+              className={range === r.id ? 'is-active' : ''}
+              onClick={() => setRange(r.id)}
+              disabled={loading}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {tab === 'strength' && progress && progress.exercises.length > 0 ? (
@@ -287,7 +287,7 @@ export function WorkoutsProgressPage() {
         <>
           <section className="activity-summary" aria-label="Сводка">
             <span className="activity-summary-label">
-              {tab === 'body' ? 'Твой вес' : progress.strength.exercise || 'Сила'}
+              {tab === 'body' ? 'Твой вес' : progress.strength.exercise || 'Упражнение'}
             </span>
             <strong className="activity-summary-total">
               {tab === 'body'
@@ -306,7 +306,7 @@ export function WorkoutsProgressPage() {
                 : strengthDelta
                   ? `${strengthDelta.tone === 'up' ? '↑ ' : strengthDelta.tone === 'down' ? '↓ ' : ''}${strengthDelta.text} за период`
                   : progress.strength.points.length < 2
-                    ? 'Нужно ещё одно повторение упражнения'
+                    ? 'Нужна ещё одна такая тренировка'
                     : 'Без изменений за период'}
             </p>
           </section>
@@ -317,7 +317,7 @@ export function WorkoutsProgressPage() {
               <p className="muted">
                 {tab === 'body'
                   ? 'Укажи свой вес в тренировке — здесь появится график.'
-                  : 'Запиши подходы в упражнениях — здесь будет динамика лучших весов.'}
+                  : 'Запиши подходы — здесь будет динамика по упражнению.'}
               </p>
               <Link to="/app/workouts/new" className="btn btn-primary btn-block">
                 Записать тренировку
@@ -327,7 +327,7 @@ export function WorkoutsProgressPage() {
             <section className="surface workout-progress-chart-block">
               <LineChart
                 points={activePoints}
-                unit={tab === 'body' ? 'кг' : 'кг на штанге'}
+                unit={tab === 'body' ? 'кг' : 'кг'}
                 selectedIndex={selected}
                 onSelect={setSelected}
               />

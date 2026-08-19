@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft, Copy, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
 import {
   Navigate,
   useLocation,
@@ -33,6 +33,9 @@ import {
 } from '../components/SetWeightSheet'
 import {
   formatDeltaLabel,
+  formatKg,
+  formatSetPair,
+  formatWorkoutWhen,
   fromDatetimeLocalValue,
   toDatetimeLocalValue,
 } from '../lib/workouts'
@@ -136,9 +139,12 @@ function notePreview(text: string) {
 
 export function WorkoutEditorPage() {
   const { id } = useParams()
-  const isNew = !id || id === 'new'
-  const navigate = useNavigate()
   const location = useLocation()
+  const isNew = !id || id === 'new'
+  const isEditRoute = /\/edit\/?$/.test(location.pathname)
+  const isEditing = isNew || isEditRoute
+  const isViewing = !isNew && !isEditRoute
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { user, apiOnline } = useApp()
   const { celebrate } = useMoment()
@@ -298,6 +304,8 @@ export function WorkoutEditorPage() {
 
   if (!user) return <Navigate to="/login" replace />
 
+  const pageTitle = isNew ? 'Новая тренировка' : isViewing ? title || 'Тренировка' : 'Редактирование'
+
   return (
     <main className="page workouts-page workout-editor">
       <div className="workout-editor-top">
@@ -317,7 +325,7 @@ export function WorkoutEditorPage() {
       </div>
 
       <header className="workouts-head">
-        <h1 className="page-title">{isNew ? 'Новая тренировка' : 'Тренировка'}</h1>
+        <h1 className="page-title">{pageTitle}</h1>
       </header>
 
       {error ? (
@@ -326,7 +334,52 @@ export function WorkoutEditorPage() {
         </p>
       ) : null}
 
-      {!loading ? (
+      {!loading && isViewing ? (
+        <>
+          <section className="surface workout-view-meta">
+            <p className="muted">{formatWorkoutWhen(fromDatetimeLocalValue(when))}</p>
+            {bodyWeightKg != null ? <p>Вес: {formatKg(bodyWeightKg)}</p> : null}
+            {notes.trim() ? <p className="workout-view-note">{notes.trim()}</p> : null}
+          </section>
+          <section className="surface workouts-form-block">
+            {exercises.length ? (
+              <ul className="workout-readonly-list">
+                {exercises.map((ex, i) => {
+                  const delta = formatDeltaLabel(ex.weightDelta, ex.repsDelta)
+                  return (
+                    <li key={ex.trackKey || i} className="workout-readonly-ex">
+                      <div className="workout-exercise-head">
+                        <strong>{ex.name || 'Упражнение'}</strong>
+                        {delta ? (
+                          <span className={`workout-delta is-${delta.tone}`}>
+                            {delta.tone === 'up' ? '↑ ' : delta.tone === 'down' ? '↓ ' : ''}
+                            {delta.text}
+                          </span>
+                        ) : null}
+                      </div>
+                      <ul className="workout-readonly-sets">
+                        {ex.sets.map((s, si) => (
+                          <li key={si}>
+                            <span className="dim">{si + 1}.</span>{' '}
+                            {formatSetPair(
+                              Number(String(s.weightKg).replace(',', '.')) || 0,
+                              Math.max(0, Math.floor(Number(s.reps) || 0)),
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  )
+                })}
+              </ul>
+            ) : (
+              <p className="muted">Нет упражнений</p>
+            )}
+          </section>
+        </>
+      ) : null}
+
+      {!loading && isEditing ? (
         <>
           <section className="surface workouts-form-block">
             <label className="field">
@@ -382,7 +435,7 @@ export function WorkoutEditorPage() {
             {exercises.map((ex, ei) => {
               const delta = formatDeltaLabel(ex.weightDelta, ex.repsDelta)
               return (
-                <article key={ei} className="surface workout-exercise-card">
+                <article key={ex.trackKey || ei} className="surface workout-exercise-card">
                   <div className="workout-exercise-head">
                     <input
                       className="workout-exercise-name"
@@ -392,7 +445,10 @@ export function WorkoutEditorPage() {
                       maxLength={EXERCISE_NAME_MAX}
                     />
                     {delta ? (
-                      <span className={`workout-delta is-${delta.tone}`} title="Относительно прошлой такой тренировки">
+                      <span
+                        className={`workout-delta is-${delta.tone}`}
+                        title="Относительно прошлой такой тренировки"
+                      >
                         {delta.tone === 'up' ? '↑ ' : delta.tone === 'down' ? '↓ ' : ''}
                         {delta.text}
                       </span>
@@ -423,7 +479,9 @@ export function WorkoutEditorPage() {
                         onClick={() => setBarWeightTarget({ ei, si })}
                       >
                         {set.weightKg ? (
-                          <strong>{formatBarWeight(Number(set.weightKg.replace(',', '.')) || 0)}</strong>
+                          <strong>
+                            {formatBarWeight(Number(set.weightKg.replace(',', '.')) || 0)}
+                          </strong>
                         ) : (
                           <span className="muted">&nbsp;</span>
                         )}
@@ -496,16 +554,6 @@ export function WorkoutEditorPage() {
           >
             {saving ? 'Сохраняем…' : 'Сохранить'}
           </button>
-
-          {!isNew ? (
-            <button
-              type="button"
-              className="btn btn-soft btn-block"
-              onClick={() => navigate('/app/workouts/new', { state: { copyFromId: id } })}
-            >
-              Повторить эту тренировку
-            </button>
-          ) : null}
         </>
       ) : null}
 
@@ -519,6 +567,28 @@ export function WorkoutEditorPage() {
           />
           <div className="activity-sheet-panel" ref={menuRef}>
             <div className="activity-sheet-grab" aria-hidden />
+            {isViewing ? (
+              <button
+                type="button"
+                className="activity-sheet-item"
+                onClick={() => {
+                  setMenuOpen(false)
+                  navigate(`/app/workouts/${id}/edit`)
+                }}
+              >
+                <Pencil size={18} /> Редактировать
+              </button>
+            ) : null}
+            <button
+              type="button"
+              className="activity-sheet-item"
+              onClick={() => {
+                setMenuOpen(false)
+                navigate('/app/workouts/new', { state: { copyFromId: id } })
+              }}
+            >
+              <Copy size={18} /> Скопировать как новую
+            </button>
             <button
               type="button"
               className="activity-sheet-item is-danger"
@@ -527,7 +597,7 @@ export function WorkoutEditorPage() {
                 setConfirmOpen(true)
               }}
             >
-              <Trash2 size={18} /> Удалить тренировку
+              <Trash2 size={18} /> Удалить
             </button>
             <button type="button" className="btn btn-ghost btn-block" onClick={() => setMenuOpen(false)}>
               Отмена

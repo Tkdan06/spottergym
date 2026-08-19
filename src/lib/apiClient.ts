@@ -248,6 +248,11 @@ export async function apiResetMyActivity() {
 
 export type WorkoutSetInput = { weightKg: number; reps: number }
 
+export type WorkoutExercisePreview = {
+  name: string
+  sets: WorkoutSetInput[]
+}
+
 export type WorkoutExerciseDto = {
   id?: string
   name: string
@@ -266,6 +271,7 @@ export type WorkoutSessionSummary = {
   notes: string
   exerciseCount: number
   setCount: number
+  exercises: WorkoutExercisePreview[]
   createdAt: string
   updatedAt: string
 }

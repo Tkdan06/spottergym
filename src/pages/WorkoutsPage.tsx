@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, ChevronRight, ClipboardList, Copy, Plus, TrendingUp } from 'lucide-react'
+import {
+  ArrowLeft,
+  ChevronDown,
+  ChevronRight,
+  ClipboardList,
+  Copy,
+  Plus,
+  TrendingUp,
+} from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { SectionTitle } from '../components/SectionTitle'
 import { useApp } from '../context/useApp'
@@ -13,12 +21,22 @@ import {
   formatBodyDelta,
   formatDeltaLabel,
   formatKg,
+  formatSetPair,
   formatWorkoutWhen,
 } from '../lib/workouts'
 import './WorkoutsPage.css'
 import './FeedbackPage.css'
 
 const PAGE_SIZE = 20
+
+function workoutsCountLabel(n: number) {
+  const abs = Math.abs(n) % 100
+  const last = abs % 10
+  if (abs > 10 && abs < 20) return `${n} тренировок`
+  if (last === 1) return `${n} тренировка`
+  if (last >= 2 && last <= 4) return `${n} тренировки`
+  return `${n} тренировок`
+}
 
 export function WorkoutsPage() {
   const navigate = useNavigate()
@@ -31,6 +49,7 @@ export function WorkoutsPage() {
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState('')
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     if (!apiOnline) {
@@ -99,12 +118,19 @@ export function WorkoutsPage() {
 
   if (!user) return <Navigate to="/login" replace />
 
-  const last = list[0]
   const bodyDeltaText = formatBodyDelta(progress?.highlight.bodyDeltaKg)
   const liftDelta = formatDeltaLabel(
     progress?.highlight.liftDeltaWeightKg,
     progress?.highlight.liftDeltaReps,
   )
+
+  const copyWorkout = (id: string) => {
+    navigate('/app/workouts/new', { state: { copyFromId: id } })
+  }
+
+  const toggleExpand = (id: string) => {
+    setExpandedId((prev) => (prev === id ? null : id))
+  }
 
   return (
     <main className="page workouts-page">
@@ -114,7 +140,7 @@ export function WorkoutsPage() {
 
       <header className="workouts-head">
         <h1 className="page-title">Мои тренировки</h1>
-        <p className="muted">Дневник подходов, веса и прогресса</p>
+        <p className="muted">Дневник прогресса</p>
       </header>
 
       {error ? (
@@ -135,17 +161,6 @@ export function WorkoutsPage() {
         <Link to="/app/workouts/new" className="btn btn-primary btn-block">
           <Plus size={16} /> Записать тренировку
         </Link>
-        {last ? (
-          <button
-            type="button"
-            className="btn btn-soft btn-block"
-            onClick={() =>
-              navigate('/app/workouts/new', { state: { copyFromId: last.id } })
-            }
-          >
-            <Copy size={16} /> Повторить последнюю
-          </button>
-        ) : null}
       </div>
 
       {showStrip && progress ? (
@@ -190,27 +205,87 @@ export function WorkoutsPage() {
 
       {list.length ? (
         <section className="surface workouts-list-block">
-          <SectionTitle>История</SectionTitle>
+          <SectionTitle
+            action={
+              totalCount > 0 ? (
+                <span className="dim workouts-history-count">{workoutsCountLabel(totalCount)}</span>
+              ) : null
+            }
+          >
+            История
+          </SectionTitle>
           <ul className="workouts-list">
-            {list.map((w) => (
-              <li key={w.id}>
-                <Link to={`/app/workouts/${w.id}`} className="workouts-row">
-                  <div className="workouts-row-copy">
-                    <strong>{w.title}</strong>
-                    <span className="muted">
-                      {formatWorkoutWhen(w.performedAt)}
-                      {w.bodyWeightKg != null ? ` · ${formatKg(w.bodyWeightKg)}` : ''}
-                    </span>
-                    {w.notes?.trim() ? (
-                      <span className="dim workouts-row-note">{w.notes.trim()}</span>
-                    ) : null}
+            {list.map((w) => {
+              const open = expandedId === w.id
+              const exercises = Array.isArray(w.exercises) ? w.exercises : []
+              return (
+                <li key={w.id} className={`workouts-board ${open ? 'is-open' : ''}`}>
+                  <div className="workouts-board-top">
+                    <button
+                      type="button"
+                      className="workouts-board-toggle"
+                      aria-expanded={open}
+                      onClick={() => toggleExpand(w.id)}
+                    >
+                      <div className="workouts-row-copy">
+                        <strong>{w.title}</strong>
+                        <span className="muted">
+                          {formatWorkoutWhen(w.performedAt)}
+                          {w.bodyWeightKg != null ? ` · ${formatKg(w.bodyWeightKg)}` : ''}
+                        </span>
+                        {w.notes?.trim() ? (
+                          <span className="dim workouts-row-note">{w.notes.trim()}</span>
+                        ) : null}
+                      </div>
+                      <span className="dim workouts-row-meta">
+                        {w.exerciseCount} упр. · {w.setCount} подх.
+                      </span>
+                      <ChevronDown
+                        size={18}
+                        className={`workouts-board-chevron ${open ? 'is-open' : ''}`}
+                        aria-hidden
+                      />
+                    </button>
+                    <button
+                      type="button"
+                      className="icon-btn workouts-row-copy-btn"
+                      aria-label={`Скопировать «${w.title}» как новую`}
+                      title="Скопировать как новую"
+                      onClick={() => copyWorkout(w.id)}
+                    >
+                      <Copy size={18} strokeWidth={2.2} />
+                    </button>
                   </div>
-                  <span className="dim workouts-row-meta">
-                    {w.exerciseCount} упр. · {w.setCount} подх.
-                  </span>
-                </Link>
-              </li>
-            ))}
+
+                  {open ? (
+                    <div className="workouts-board-body">
+                      {exercises.length ? (
+                        <ul className="workout-readonly-list">
+                          {exercises.map((ex, i) => (
+                            <li key={`${w.id}-${i}`} className="workout-readonly-ex">
+                              <strong>{ex.name}</strong>
+                              <ul className="workout-readonly-sets">
+                                {ex.sets.map((s, si) => (
+                                  <li key={si}>
+                                    <span className="dim">{si + 1}.</span>{' '}
+                                    {formatSetPair(s.weightKg, s.reps)}
+                                  </li>
+                                ))}
+                              </ul>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="muted">Нет упражнений</p>
+                      )}
+                      <Link to={`/app/workouts/${w.id}`} className="text-link muted workouts-board-open">
+                        Открыть тренировку
+                      </Link>
+                    </div>
+                  ) : null}
+                </li>
+              )
+            })}
           </ul>
           {hasMore ? (
             <button

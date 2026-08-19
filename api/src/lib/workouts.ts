@@ -29,6 +29,7 @@ export type WorkoutSessionSummary = {
   notes: string
   exerciseCount: number
   setCount: number
+  exercises: WorkoutExercisePreview[]
   createdAt: string
   updatedAt: string
 }
@@ -87,14 +88,29 @@ export const WORKOUT_LIST_PAGE_SIZE = 20
 
 const listInclude = {
   exercises: {
+    orderBy: { sortOrder: 'asc' as const },
     select: {
-      id: true,
-      sets: { select: { id: true } },
+      name: true,
+      sortOrder: true,
+      sets: {
+        orderBy: { setIndex: 'asc' as const },
+        select: { weightKg: true, reps: true, setIndex: true },
+      },
     },
   },
 } satisfies Prisma.WorkoutSessionInclude
 
 type SessionListRow = Prisma.WorkoutSessionGetPayload<{ include: typeof listInclude }>
+
+export type WorkoutSetPreview = {
+  weightKg: number
+  reps: number
+}
+
+export type WorkoutExercisePreview = {
+  name: string
+  sets: WorkoutSetPreview[]
+}
 
 function num(d: unknown) {
   if (typeof d === 'number') return d
@@ -168,15 +184,23 @@ function newTrackKey() {
 }
 
 export function serializeSessionSummary(row: SessionFull | SessionListRow): WorkoutSessionSummary {
-  const setCount = row.exercises.reduce((n, e) => n + e.sets.length, 0)
+  const exercises: WorkoutExercisePreview[] = row.exercises.map((ex) => ({
+    name: ex.name,
+    sets: ex.sets.map((s) => ({
+      weightKg: round1(num(s.weightKg)),
+      reps: s.reps,
+    })),
+  }))
+  const setCount = exercises.reduce((n, e) => n + e.sets.length, 0)
   return {
     id: row.id,
     title: row.title,
     performedAt: row.performedAt.toISOString(),
     bodyWeightKg: bodyKg(row),
     notes: row.notes || '',
-    exerciseCount: row.exercises.length,
+    exerciseCount: exercises.length,
     setCount,
+    exercises,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   }

@@ -58,3 +58,13 @@ export function formatKg(kg: number | null | undefined) {
   return Number.isInteger(kg) ? `${kg} кг` : `${kg.toFixed(1)} кг`
 }
 
+export function formatBarWeightValue(kg: number) {
+  const n = Math.round(kg * 10) / 10
+  return Number.isInteger(n) ? String(n) : n.toFixed(1)
+}
+
+/** e.g. «80 × 10» or «80,5 × 8» */
+export function formatSetPair(weightKg: number, reps: number) {
+  return `${formatBarWeightValue(weightKg)} × ${reps}`
+}
+

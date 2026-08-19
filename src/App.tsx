@@ -78,6 +78,7 @@ export default function App() {
               <Route path="workouts" element={<WorkoutsPage />} />
               <Route path="workouts/progress" element={<WorkoutsProgressPage />} />
               <Route path="workouts/new" element={<WorkoutEditorPage />} />
+              <Route path="workouts/:id/edit" element={<WorkoutEditorPage />} />
               <Route path="workouts/:id" element={<WorkoutEditorPage />} />
               <Route path="likes" element={<LikedPage mode="received" />} />
               <Route path="likes/sent" element={<LikedPage mode="sent" />} />
