@@ -19,14 +19,15 @@ const setSchema = z.object({
 
 const exerciseSchema = z.object({
   name: z.string().trim().min(1).max(60),
+  trackKey: z.string().trim().max(64).optional(),
   sets: z.array(setSchema).min(1).max(6),
 })
 
 const bodySchema = z.object({
   title: z.string().trim().min(1).max(40),
   performedAt: z.string().datetime({ offset: true }).or(z.string().datetime()),
+  /** Whole kg only — fractions coerced server-side. */
   bodyWeightKg: z.number().min(30).max(250).nullable().optional(),
-  notes: z.string().max(500).optional(),
   exercises: z.array(exerciseSchema).min(1).max(10),
 })
 
@@ -53,12 +54,15 @@ workoutRoutes.get(
     const limit = Number.isFinite(limitRaw) ? limitRaw : undefined
     const beforePerformedAt = c.req.query('before') || undefined
     const beforeId = c.req.query('beforeId') || undefined
-    const { workouts, hasMore } = await listWorkoutSessions(c.get('userId'), {
-      limit,
-      beforePerformedAt,
-      beforeId,
-    })
-    return c.json({ workouts, hasMore })
+    const { workouts, hasMore, totalCount, atRetentionCap } = await listWorkoutSessions(
+      c.get('userId'),
+      {
+        limit,
+        beforePerformedAt,
+        beforeId,
+      },
+    )
+    return c.json({ workouts, hasMore, totalCount, atRetentionCap })
   },
 )
 
@@ -95,7 +99,6 @@ workoutRoutes.post(
       title: parsed.data.title,
       performedAt,
       bodyWeightKg: parsed.data.bodyWeightKg,
-      notes: parsed.data.notes,
       exercises: parsed.data.exercises,
     })
     return c.json({ workout }, 201)
@@ -114,7 +117,6 @@ workoutRoutes.patch(
       title: parsed.data.title,
       performedAt,
       bodyWeightKg: parsed.data.bodyWeightKg,
-      notes: parsed.data.notes,
       exercises: parsed.data.exercises,
     })
     if (!workout) return c.json({ error: 'Тренировка не найдена' }, 404)

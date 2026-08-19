@@ -396,17 +396,27 @@ model Notification {
 
 /** Admin announcement to all users — stats via linked Notification rows. */
 model AdminBroadcast {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   title          String
   body           String
   createdById    String
-  recipientCount Int      @default(0)
-  createdAt      DateTime @default(now())
+  /** Planned audience size at enqueue time. */
+  recipientCount Int       @default(0)
+  /** pending | sending | sent | failed */
+  status         String    @default("pending")
+  deliveredCount Int       @default(0)
+  failedCount    Int       @default(0)
+  /** How many user ids already processed in the fan-out cursor. */
+  cursorOffset   Int       @default(0)
+  lastError      String    @default("")
+  createdAt      DateTime  @default(now())
+  finishedAt     DateTime?
 
   createdBy     User           @relation(fields: [createdById], references: [id], onDelete: Cascade)
   notifications Notification[]
 
   @@index([createdAt])
+  @@index([status, createdAt])
 }
 
 model NotificationPrefs {
@@ -479,6 +489,8 @@ model WorkoutExercise {
   id        String @id @default(cuid())
   sessionId String
   name      String
+  /** Stable id across renames — used for deltas / progress (empty = name fallback). */
+  trackKey  String @default("")
   sortOrder Int    @default(0)
 
   session WorkoutSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)

@@ -12,6 +12,17 @@ export function clampPhotos(photos: string[]): string[] {
   return photos.filter(Boolean).slice(0, MAX_PROFILE_PHOTOS)
 }
 
+/** Inline data-URL — только для отправки на API, не для localStorage. */
+export function isInlinePhotoDataUrl(value: string) {
+  return /^data:image\//i.test(String(value || '').trim())
+}
+
+/** Пути `/api/media/...` и локальные SVG — ок в кэше; base64 выкидываем (QuotaExceeded). */
+export function sanitizePhotosForCache(photos: string[] | undefined | null): string[] {
+  if (!Array.isArray(photos)) return []
+  return clampPhotos(photos.filter((p) => p && !isInlinePhotoDataUrl(p)))
+}
+
 export function setMainPhoto(photos: string[], index: number): string[] {
   if (index <= 0 || index >= photos.length) return photos
   const next = [...photos]

@@ -13,6 +13,7 @@ import {
 import { HTTP_BODY_MAX_BYTES, PASSWORD_MAX } from './lib/fieldLimits.js'
 import { verifyPassword } from './lib/password.js'
 import { isPushConfigured } from './lib/push.js'
+import { startBroadcastLoop } from './lib/adminBroadcast.js'
 import { startWorkoutReminderLoop } from './lib/workoutReminders.js'
 import { rateLimit } from './middleware/rateLimit.js'
 import { adminRoutes } from './routes/admin.js'
@@ -151,4 +152,5 @@ serve({ fetch: app.fetch, port: env.port }, (info) => {
     if (on) console.error('[emergency] API started in SHUTDOWN mode — only /health and recover')
   })
   startWorkoutReminderLoop()
+  startBroadcastLoop()
 })

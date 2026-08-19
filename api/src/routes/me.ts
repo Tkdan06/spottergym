@@ -221,7 +221,12 @@ meRoutes.patch(
         : []
       data.photos = await persistPhotoList(userId, data.photos)
       await deleteRemovedMedia(userId, prevPhotos, data.photos)
-    } catch {
+    } catch (err) {
+      const code = err && typeof err === 'object' && 'code' in err ? String((err as { code?: unknown }).code) : ''
+      if (code === 'ENOSPC' || /no space|ENOSPC/i.test(String(err))) {
+        return c.json({ error: 'На сервере закончилось место для фото. Попробуй позже' }, 507)
+      }
+      console.error('[me] photo persist failed', err)
       return c.json({ error: 'Не удалось сохранить фото' }, 400)
     }
   }
@@ -231,7 +236,12 @@ meRoutes.patch(
     }
     try {
       data.avatar = await persistAvatar(userId, data.avatar)
-    } catch {
+    } catch (err) {
+      const code = err && typeof err === 'object' && 'code' in err ? String((err as { code?: unknown }).code) : ''
+      if (code === 'ENOSPC' || /no space|ENOSPC/i.test(String(err))) {
+        return c.json({ error: 'На сервере закончилось место для фото. Попробуй позже' }, 507)
+      }
+      console.error('[me] avatar persist failed', err)
       return c.json({ error: 'Не удалось сохранить аватар' }, 400)
     }
   }

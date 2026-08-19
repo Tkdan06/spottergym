@@ -18,6 +18,7 @@ import {
   saveAccountLikes,
   saveAccountMessages,
   saveAccountProfile,
+  userForLocalStorage,
 } from '../lib/accountData'
 import { otherParticipantId } from '../lib/conversations'
 import {
@@ -180,7 +181,7 @@ import {
   WELCOME_INSTALL_LOCAL_ID,
   WELCOME_INSTALL_TITLE,
 } from '../lib/welcomeInstall'
-import { loadJson, saveJson } from '../lib/storage'
+import { loadJson, saveJson, isQuotaExceededError } from '../lib/storage'
 import { normalizeGymFields, withGymMembership } from '../lib/userGyms'
 import type {
   AdminDirectoryUser,
@@ -320,6 +321,22 @@ export interface AppContextValue {
 }
 
 const STORAGE_USER = 'spotter.user'
+
+/** Persist session without base64 photos (avoids QuotaExceeded on upload). */
+function persistSessionUser(user: AppUser) {
+  const cached = userForLocalStorage(user)
+  try {
+    saveJson(STORAGE_USER, cached)
+    if (cached.email) saveAccountProfile(cached)
+  } catch (err) {
+    // Don't block API upload if browser storage is full
+    if (isQuotaExceededError(err)) {
+      console.warn('[persistSessionUser] localStorage quota exceeded')
+      return
+    }
+    throw err
+  }
+}
 
 function createDemoAppUser(): AppUser {
   const demo = createDefaultUser(DEMO_ACCOUNT_NAME, DEMO_ACCOUNT_EMAIL, 'male')
@@ -552,17 +569,14 @@ function loadUser(): AppUser | null {
         checkInExtendCount: 0,
         checkInCanExtend: false,
       }
-      saveJson(STORAGE_USER, cleared)
-      if (cleared.email) saveAccountProfile(cleared)
+      persistSessionUser(cleared)
       return cleared
     }
-    saveJson(STORAGE_USER, withExpiry)
-    if (withExpiry.email) saveAccountProfile(withExpiry)
+    persistSessionUser(withExpiry)
     return withExpiry
   }
 
-  saveJson(STORAGE_USER, normalized)
-  if (normalized.email) saveAccountProfile(normalized)
+  persistSessionUser(normalized)
   return normalized
 }
 
@@ -646,8 +660,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           normalizeGymFields(me as AppUser) as AppUser,
         )
         setUser(normalized)
-        saveJson(STORAGE_USER, normalized)
-        saveAccountProfile(normalized)
+        persistSessionUser(normalized)
         hydrateAccountData(normalized.email)
       } catch (err) {
         if (cancelled || bootEpoch !== sessionEpochRef.current) return
@@ -772,8 +785,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (next) {
         const normalized = withAdminFlags(normalizeGymFields(next) as AppUser)
         setUser(normalized)
-        saveJson(STORAGE_USER, normalized)
-        saveAccountProfile(normalized)
+        persistSessionUser(normalized)
         setAdminDirectory(loadDirectory())
         setBlockedUserIds(loadBlockedUserIds(normalized.id))
         hydrateAccountData(normalized.email)
@@ -1264,8 +1276,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const applyServerUser = useCallback((me: AppUser) => {
     const next = withAdminFlags(normalizeGymFields(me) as AppUser)
     setUser(next)
-    saveJson(STORAGE_USER, next)
-    saveAccountProfile(next)
+    persistSessionUser(next)
     return next
   }, [])
 
@@ -1293,8 +1304,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             }) as AppUser,
           )
           box.user = next
-          saveJson(STORAGE_USER, next)
-          saveAccountProfile(next)
+          persistSessionUser(next)
           return next
         })
       })
@@ -1344,8 +1354,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           if (rollback) {
             flushSync(() => {
               setUser(rollback)
-              saveJson(STORAGE_USER, rollback)
-              saveAccountProfile(rollback)
+              persistSessionUser(rollback)
             })
           }
           return {
@@ -1432,8 +1441,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const nextLocal = nameOrGenderChanged ? withSyncedAvatar(merged) : merged
       userRef.current = nextLocal
       setUser(nextLocal)
-      saveJson(STORAGE_USER, nextLocal)
-      saveAccountProfile(nextLocal)
+      persistSessionUser(nextLocal)
 
       if (!apiOnlineRef.current || isDemoAccount(nextLocal.email)) return
 
@@ -1504,8 +1512,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       userRef.current = next
       setUser(next)
-      saveJson(STORAGE_USER, next)
-      saveAccountProfile(next)
+      persistSessionUser(next)
       if (!apiOnlineRef.current || isDemoAccount(next.email)) return
       try {
         const me = await apiCheckIn(gymId)
@@ -1513,8 +1520,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       } catch (err) {
         userRef.current = snapshot
         setUser(snapshot)
-        saveJson(STORAGE_USER, snapshot)
-        saveAccountProfile(snapshot)
+        persistSessionUser(snapshot)
         throw err instanceof Error ? err : new Error('Не удалось отметиться')
       }
     },
@@ -1536,8 +1542,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     userRef.current = next
     setUser(next)
-    saveJson(STORAGE_USER, next)
-    saveAccountProfile(next)
+    persistSessionUser(next)
     if (!apiOnlineRef.current || isDemoAccount(next.email)) return
     try {
       const me = await apiCheckOut()
@@ -1545,8 +1550,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       userRef.current = snapshot
       setUser(snapshot)
-      saveJson(STORAGE_USER, snapshot)
-      saveAccountProfile(snapshot)
+      persistSessionUser(snapshot)
       throw err instanceof Error ? err : new Error('Не удалось снять статус')
     }
   }, [applyServerUser])
@@ -1579,8 +1583,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         lastSeenAt: new Date().toISOString(),
       }
       userRef.current = next
-      saveJson(STORAGE_USER, next)
-      saveAccountProfile(next)
+      persistSessionUser(next)
       return next
     })
   }, [applyServerUser])
@@ -1637,8 +1640,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       userRef.current = nextUser
       setUser(nextUser)
-      saveJson(STORAGE_USER, nextUser)
-      saveAccountProfile(nextUser)
+      persistSessionUser(nextUser)
       if (!apiOnlineRef.current || isDemoAccount(nextUser.email)) return
       try {
         const me = await apiJoinGym(gymId, makeHome)
@@ -1650,8 +1652,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       } catch (err) {
         userRef.current = snapshot
         setUser(snapshot)
-        saveJson(STORAGE_USER, snapshot)
-        saveAccountProfile(snapshot)
+        persistSessionUser(snapshot)
         throw err instanceof Error ? err : new Error('Не удалось добавить зал')
       }
     },
@@ -1668,8 +1669,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const nextUser = withGymMembership(snapshot, gymId, false)
       userRef.current = nextUser
       setUser(nextUser)
-      saveJson(STORAGE_USER, nextUser)
-      saveAccountProfile(nextUser)
+      persistSessionUser(nextUser)
       if (!apiOnlineRef.current || isDemoAccount(nextUser.email)) return
       try {
         const me = await apiLeaveGym(gymId)
@@ -1677,8 +1677,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       } catch (err) {
         userRef.current = snapshot
         setUser(snapshot)
-        saveJson(STORAGE_USER, snapshot)
-        saveAccountProfile(snapshot)
+        persistSessionUser(snapshot)
         throw err instanceof Error ? err : new Error('Не удалось убрать зал')
       }
     },
@@ -1698,8 +1697,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
       userRef.current = nextUser
       setUser(nextUser)
-      saveJson(STORAGE_USER, nextUser)
-      saveAccountProfile(nextUser)
+      persistSessionUser(nextUser)
       if (!apiOnlineRef.current || isDemoAccount(nextUser.email)) return
       try {
         const me = await apiPatchMe({ gymIds: nextUser.gymIds, homeGymId: gymId })
@@ -1707,8 +1705,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       } catch (err) {
         userRef.current = snapshot
         setUser(snapshot)
-        saveJson(STORAGE_USER, snapshot)
-        saveAccountProfile(snapshot)
+        persistSessionUser(snapshot)
         throw err instanceof Error ? err : new Error('Не удалось сменить домашний зал')
       }
     },

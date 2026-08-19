@@ -12,6 +12,13 @@ import { formatAdminDate } from '../lib/adminStats'
 import './FeedbackPage.css'
 import './AdminPlayersPage.css'
 
+function statusLabel(status: AdminBroadcast['status']) {
+  if (status === 'pending') return 'В очереди'
+  if (status === 'sending') return 'Отправляется'
+  if (status === 'failed') return 'Ошибка'
+  return 'Доставлено'
+}
+
 export function AdminBroadcastsPage() {
   const navigate = useNavigate()
   const { user, canMessageUsers } = useApp()
@@ -41,6 +48,17 @@ export function AdminBroadcastsPage() {
     void load()
   }, [load])
 
+  const hasActive = list.some((b) => b.status === 'pending' || b.status === 'sending')
+  useEffect(() => {
+    if (!hasActive || !canMessageUsers) return
+    const id = window.setInterval(() => {
+      void apiAdminFetchBroadcasts()
+        .then(setList)
+        .catch(() => undefined)
+    }, 2500)
+    return () => window.clearInterval(id)
+  }, [hasActive, canMessageUsers])
+
   if (!user?.isAdmin) return <Navigate to="/app/profile" replace />
   if (!canMessageUsers) return <Navigate to="/app/admin" replace />
 
@@ -65,7 +83,7 @@ export function AdminBroadcastsPage() {
       setTitle('')
       setBody('')
       setOk(
-        `Отправлено ${created.recipientCount} пользователям · прочитано пока ${created.readCount}`,
+        `В очереди для ${created.recipientCount} пользователей · статус: ${statusLabel(created.status)}`,
       )
       await load()
     } catch (err) {
@@ -84,7 +102,7 @@ export function AdminBroadcastsPage() {
       <header className="admin-players-head">
         <div>
           <h1 className="page-title">Рассылка</h1>
-          <p className="muted">Сообщение всем в колокольчик · доставка и прочтения</p>
+          <p className="muted">Сообщение всем в колокольчик · очередь и прочтения</p>
         </div>
         <button
           type="button"
@@ -138,10 +156,11 @@ export function AdminBroadcastsPage() {
           disabled={sending || !title.trim() || !body.trim()}
           onClick={() => void onSend()}
         >
-          <Megaphone size={16} /> {sending ? 'Отправляем…' : 'Отправить всем'}
+          <Megaphone size={16} /> {sending ? 'Ставим в очередь…' : 'Отправить всем'}
         </button>
         <p className="dim" style={{ margin: 0 }}>
-          Уйдёт в колокольчик и пуш (если включён). Лимит — до 10 рассылок в час.
+          Уйдёт в колокольчик и пуш (если включён). Доставка идёт фоном по частям. Лимит — до 10
+          рассылок в час.
         </p>
       </section>
 
@@ -151,12 +170,14 @@ export function AdminBroadcastsPage() {
         {!loading && !list.length ? (
           <p className="muted">Пока нет рассылок</p>
         ) : (
-          <ul className="workouts-list" style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 10 }}>
+          <ul
+            className="workouts-list"
+            style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 10 }}
+          >
             {list.map((item) => {
+              const delivered = item.deliveredCount || item.recipientCount
               const readPct =
-                item.recipientCount > 0
-                  ? Math.round((item.readCount / item.recipientCount) * 100)
-                  : 0
+                delivered > 0 ? Math.round((item.readCount / delivered) * 100) : 0
               return (
                 <li key={item.id} className="admin-broadcast-row">
                   <div className="workouts-row-copy" style={{ display: 'grid', gap: 4 }}>
@@ -165,13 +186,16 @@ export function AdminBroadcastsPage() {
                       {item.body}
                     </span>
                     <span className="dim">
-                      {formatAdminDate(item.createdAt)} · {item.createdByName}
+                      {formatAdminDate(item.createdAt)} · {item.createdByName} ·{' '}
+                      {statusLabel(item.status)}
                     </span>
                   </div>
                   <div className="admin-stat-grid" style={{ marginTop: 10 }}>
                     <article className="admin-stat-card">
-                      <span className="muted">Доставлено</span>
-                      <strong>{item.recipientCount}</strong>
+                      <span className="muted">План / доставлено</span>
+                      <strong>
+                        {item.recipientCount} / {item.deliveredCount}
+                      </strong>
                     </article>
                     <article className="admin-stat-card">
                       <span className="muted">Прочитали</span>

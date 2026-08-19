@@ -1,12 +1,14 @@
 import { SEED_CONVERSATIONS, SEED_MESSAGES, USERS } from '../data/mock'
 import type { AppUser, Conversation, Message, UserProfile } from '../types'
 import { normalizeEmail } from './adminConfig'
+import { localGenderAvatar } from './avatar'
 import { otherParticipantId } from './conversations'
 import { isDemoAccount } from './demoAccount'
 import { SEED_LIKES, normalizeLikesMap, type LikesMap } from './likes'
 import { normalizeMessages } from './messages'
 import { ensureDemoFeedbackTickets } from './feedback'
 import { loadNotificationPrefsForUser, loadNotificationsForUser } from './notifications'
+import { isInlinePhotoDataUrl, sanitizePhotosForCache } from './photos'
 import { loadJson, saveJson } from './storage'
 
 const accountProfileKey = (email: string) => `spotter.account:${normalizeEmail(email)}`
@@ -22,8 +24,23 @@ export type AccountBags = {
   contacts: UserProfile[]
 }
 
+/**
+ * Base64 photos must not land in localStorage (QuotaExceeded → red error on profile).
+ * Demo stays offline-capable with inline images; real accounts keep only `/api/media/...`.
+ */
+export function userForLocalStorage(user: AppUser): AppUser {
+  if (isDemoAccount(user.email)) return user
+  const photos = sanitizePhotosForCache(user.photos)
+  const avatarRaw = String(user.avatar || '')
+  const avatar = avatarRaw && !isInlinePhotoDataUrl(avatarRaw)
+    ? avatarRaw
+    : photos[0] || localGenderAvatar(user.gender)
+  if (photos === user.photos && avatar === user.avatar) return user
+  return { ...user, photos, avatar }
+}
+
 export function saveAccountProfile(user: AppUser) {
-  saveJson(accountProfileKey(user.email), user)
+  saveJson(accountProfileKey(user.email), userForLocalStorage(user))
 }
 
 export function loadAccountProfile(email: string): AppUser | null {
@@ -147,5 +164,20 @@ export function saveAccountLikes(email: string, likes: LikesMap) {
 }
 
 export function saveAccountContacts(email: string, contacts: UserProfile[]) {
-  saveJson(contactsKey(email), contacts)
+  if (isDemoAccount(email)) {
+    saveJson(contactsKey(email), contacts)
+    return
+  }
+  const slim = contacts.map((person) => {
+    const photos = sanitizePhotosForCache(person.photos)
+    const avatarRaw = String(person.avatar || '')
+    const avatar =
+      avatarRaw && !isInlinePhotoDataUrl(avatarRaw)
+        ? avatarRaw
+        : photos[0] || localGenderAvatar(person.gender)
+    return photos === person.photos && avatar === person.avatar
+      ? person
+      : { ...person, photos, avatar }
+  })
+  saveJson(contactsKey(email), slim)
 }

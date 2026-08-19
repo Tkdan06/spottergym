@@ -38,7 +38,7 @@ type Props = {
   errorFallbackSrc?: string
   name: string
   editable?: boolean
-  onChangePhotos?: (photos: string[]) => void
+  onChangePhotos?: (photos: string[]) => void | Promise<void>
   initialIndex?: number
 }
 
@@ -135,7 +135,7 @@ export function PhotoGalleryModal({
     try {
       const dataUrl = await optimizeImageFile(file)
       const next = clampPhotos([...list, dataUrl])
-      onChangePhotos(next)
+      await onChangePhotos(next)
       setIndex(next.length - 1)
       notify('Фото добавлено')
     } catch (err) {
@@ -145,19 +145,27 @@ export function PhotoGalleryModal({
     }
   }
 
-  const handleSetMain = () => {
+  const handleSetMain = async () => {
     if (!onChangePhotos || !hasPhotos || index === 0) return
-    onChangePhotos(setMainPhoto(list, index))
-    setIndex(0)
-    notify('Аватар обновлён')
+    try {
+      await onChangePhotos(setMainPhoto(list, index))
+      setIndex(0)
+      notify('Аватар обновлён')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось обновить')
+    }
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!onChangePhotos || !hasPhotos) return
-    const next = removePhotoAt(list, index)
-    onChangePhotos(next)
-    setIndex((i) => Math.min(i, Math.max(next.length - 1, 0)))
-    notify(next.length ? 'Фото удалено' : 'Галерея очищена')
+    try {
+      const next = removePhotoAt(list, index)
+      await onChangePhotos(next)
+      setIndex((i) => Math.min(i, Math.max(next.length - 1, 0)))
+      notify(next.length ? 'Фото удалено' : 'Галерея очищена')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось удалить')
+    }
   }
 
   const onDialogKeyDown = (e: ReactKeyboardEvent) => {

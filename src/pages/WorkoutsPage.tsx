@@ -25,6 +25,8 @@ export function WorkoutsPage() {
   const { user, apiOnline } = useApp()
   const [list, setList] = useState<WorkoutSessionSummary[]>([])
   const [hasMore, setHasMore] = useState(false)
+  const [totalCount, setTotalCount] = useState(0)
+  const [atRetentionCap, setAtRetentionCap] = useState(false)
   const [progress, setProgress] = useState<WorkoutProgress | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -44,11 +46,15 @@ export function WorkoutsPage() {
       ])
       setList(page.workouts)
       setHasMore(page.hasMore)
+      setTotalCount(page.totalCount)
+      setAtRetentionCap(page.atRetentionCap)
       setProgress(prog)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось загрузить тренировки')
       setList([])
       setHasMore(false)
+      setTotalCount(0)
+      setAtRetentionCap(false)
       setProgress(null)
     } finally {
       setLoading(false)
@@ -114,6 +120,14 @@ export function WorkoutsPage() {
       {error ? (
         <p className="feedback-error" role="alert">
           {error}
+        </p>
+      ) : null}
+
+      {atRetentionCap || totalCount >= 580 ? (
+        <p className="workouts-retention-banner" role="status">
+          {atRetentionCap
+            ? 'Достигнут лимит истории (600). Новые записи вытесняют самые старые.'
+            : `История почти заполнена (${totalCount} из 600). Скоро старые тренировки начнут удаляться.`}
         </p>
       ) : null}
 

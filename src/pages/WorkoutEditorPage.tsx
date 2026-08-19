@@ -39,14 +39,27 @@ import './WorkoutsPage.css'
 import './FeedbackPage.css'
 
 type DraftSet = { weightKg: string; reps: string }
-type DraftExercise = { name: string; sets: DraftSet[]; weightDelta?: number | null; repsDelta?: number | null }
+type DraftExercise = {
+  trackKey: string
+  name: string
+  sets: DraftSet[]
+  weightDelta?: number | null
+  repsDelta?: number | null
+}
+
+function newTrackKey() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID().replace(/-/g, '').slice(0, 24)
+  }
+  return `ex${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`
+}
 
 function emptySet(): DraftSet {
   return { weightKg: '', reps: '' }
 }
 
 function emptyExercise(): DraftExercise {
-  return { name: '', sets: [emptySet()] }
+  return { trackKey: newTrackKey(), name: '', sets: [emptySet()] }
 }
 
 function clampBodyWeight(raw: number | null | undefined): number | null {
@@ -71,6 +84,7 @@ function fromDetail(w: WorkoutSessionDetail): {
     when: toDatetimeLocalValue(w.performedAt),
     bodyWeightKg: clampBodyWeight(w.bodyWeightKg),
     exercises: w.exercises.slice(0, MAX_EXERCISES_PER_WORKOUT).map((ex) => ({
+      trackKey: ex.trackKey || newTrackKey(),
       name: ex.name.slice(0, EXERCISE_NAME_MAX),
       weightDelta: ex.weightDelta,
       repsDelta: ex.repsDelta,
@@ -95,6 +109,7 @@ function toPayload(
     exercises: exercises
       .slice(0, MAX_EXERCISES_PER_WORKOUT)
       .map((ex) => ({
+        trackKey: ex.trackKey || newTrackKey(),
         name: ex.name.trim().slice(0, EXERCISE_NAME_MAX),
         sets: ex.sets
           .slice(0, MAX_SETS_PER_EXERCISE)

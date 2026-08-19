@@ -251,6 +251,7 @@ export type WorkoutSetInput = { weightKg: number; reps: number }
 export type WorkoutExerciseDto = {
   id?: string
   name: string
+  trackKey?: string
   sortOrder: number
   sets: (WorkoutSetInput & { id?: string; setIndex: number })[]
   weightDelta?: number | null
@@ -262,7 +263,6 @@ export type WorkoutSessionSummary = {
   title: string
   performedAt: string
   bodyWeightKg: number | null
-  notes: string
   exerciseCount: number
   setCount: number
   createdAt: string
@@ -274,7 +274,6 @@ export type WorkoutSessionDetail = {
   title: string
   performedAt: string
   bodyWeightKg: number | null
-  notes: string
   exercises: WorkoutExerciseDto[]
   createdAt: string
   updatedAt: string
@@ -284,8 +283,7 @@ export type WorkoutSessionInput = {
   title: string
   performedAt: string
   bodyWeightKg?: number | null
-  notes?: string
-  exercises: { name: string; sets: WorkoutSetInput[] }[]
+  exercises: { name: string; trackKey?: string; sets: WorkoutSetInput[] }[]
 }
 
 export type WorkoutProgressRange = 7 | 30 | 90
@@ -324,12 +322,17 @@ export async function apiFetchWorkouts(opts?: {
   if (opts?.before) sp.set('before', opts.before)
   if (opts?.beforeId) sp.set('beforeId', opts.beforeId)
   const qs = sp.toString()
-  const data = await request<{ workouts: WorkoutSessionSummary[]; hasMore?: boolean }>(
-    `/me/workouts${qs ? `?${qs}` : ''}`,
-  )
+  const data = await request<{
+    workouts: WorkoutSessionSummary[]
+    hasMore?: boolean
+    totalCount?: number
+    atRetentionCap?: boolean
+  }>(`/me/workouts${qs ? `?${qs}` : ''}`)
   return {
     workouts: data.workouts,
     hasMore: Boolean(data.hasMore),
+    totalCount: typeof data.totalCount === 'number' ? data.totalCount : data.workouts.length,
+    atRetentionCap: Boolean(data.atRetentionCap),
   }
 }
 
@@ -849,9 +852,13 @@ export type AdminBroadcast = {
   title: string
   body: string
   createdAt: string
+  finishedAt?: string | null
   createdById: string
   createdByName: string
+  status: 'pending' | 'sending' | 'sent' | 'failed'
   recipientCount: number
+  deliveredCount: number
+  failedCount: number
   readCount: number
   unreadCount: number
 }

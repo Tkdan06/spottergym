@@ -38,7 +38,9 @@ export function ProfilePage() {
   const patch = (data: Parameters<typeof updateProfile>[0]) => {
     setSaveError('')
     return Promise.resolve(updateProfile(data)).catch((err: unknown) => {
-      setSaveError(err instanceof Error ? err.message : 'Не удалось сохранить')
+      const message = err instanceof Error ? err.message : 'Не удалось сохранить'
+      setSaveError(message)
+      throw err instanceof Error ? err : new Error(message)
     })
   }
 

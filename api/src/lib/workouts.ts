@@ -11,6 +11,8 @@ export type WorkoutSetDto = {
 export type WorkoutExerciseDto = {
   id?: string
   name: string
+  /** Stable across renames; empty on legacy rows → name matching. */
+  trackKey?: string
   sortOrder: number
   sets: WorkoutSetDto[]
   /** Filled on detail vs previous session with same title */
@@ -23,7 +25,6 @@ export type WorkoutSessionSummary = {
   title: string
   performedAt: string
   bodyWeightKg: number | null
-  notes: string
   exerciseCount: number
   setCount: number
   createdAt: string
@@ -35,7 +36,6 @@ export type WorkoutSessionDetail = {
   title: string
   performedAt: string
   bodyWeightKg: number | null
-  notes: string
   exercises: WorkoutExerciseDto[]
   createdAt: string
   updatedAt: string
@@ -143,6 +143,27 @@ function displayExerciseName(name: string) {
   return name.trim().replace(/\s+/g, ' ')
 }
 
+function normalizeTrackKey(raw: string | undefined | null) {
+  const t = String(raw || '')
+    .trim()
+    .slice(0, 64)
+  if (!t) return ''
+  if (!/^[a-zA-Z0-9_-]+$/.test(t)) return ''
+  return t
+}
+
+/** Match key for deltas/progress: prefer trackKey, else normalized name. */
+function exerciseIdentity(ex: { name: string; trackKey?: string | null }) {
+  const tk = normalizeTrackKey(ex.trackKey)
+  if (tk) return `k:${tk}`
+  const n = normalizeExerciseName(ex.name)
+  return n ? `n:${n}` : ''
+}
+
+function newTrackKey() {
+  return crypto.randomUUID().replace(/-/g, '').slice(0, 24)
+}
+
 export function serializeSessionSummary(row: SessionFull | SessionListRow): WorkoutSessionSummary {
   const setCount = row.exercises.reduce((n, e) => n + e.sets.length, 0)
   return {
@@ -150,7 +171,6 @@ export function serializeSessionSummary(row: SessionFull | SessionListRow): Work
     title: row.title,
     performedAt: row.performedAt.toISOString(),
     bodyWeightKg: bodyKg(row),
-    notes: row.notes || '',
     exerciseCount: row.exercises.length,
     setCount,
     createdAt: row.createdAt.toISOString(),
@@ -162,18 +182,18 @@ export function serializeSessionDetail(
   row: SessionFull,
   previous: SessionFull | null,
 ): WorkoutSessionDetail {
-  const prevByName = new Map<string, ReturnType<typeof bestSet>>()
+  const prevById = new Map<string, ReturnType<typeof bestSet>>()
   if (previous) {
     for (const ex of previous.exercises) {
-      const key = normalizeExerciseName(ex.name)
+      const key = exerciseIdentity(ex)
       if (!key) continue
-      prevByName.set(key, bestSet(ex.sets))
+      prevById.set(key, bestSet(ex.sets))
     }
   }
 
   const exercises: WorkoutExerciseDto[] = row.exercises.map((ex) => {
     const cur = bestSet(ex.sets)
-    const prev = prevByName.get(normalizeExerciseName(ex.name)) || null
+    const prev = prevById.get(exerciseIdentity(ex)) || null
     let weightDelta: number | null = null
     let repsDelta: number | null = null
     if (cur && prev) {
@@ -183,6 +203,7 @@ export function serializeSessionDetail(
     return {
       id: ex.id,
       name: ex.name,
+      trackKey: normalizeTrackKey(ex.trackKey) || undefined,
       sortOrder: ex.sortOrder,
       sets: ex.sets.map((s) => ({
         id: s.id,
@@ -200,7 +221,6 @@ export function serializeSessionDetail(
     title: row.title,
     performedAt: row.performedAt.toISOString(),
     bodyWeightKg: bodyKg(row),
-    notes: row.notes || '',
     exercises,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -210,7 +230,12 @@ export function serializeSessionDetail(
 export async function listWorkoutSessions(
   userId: string,
   opts?: { limit?: number; beforePerformedAt?: string; beforeId?: string },
-): Promise<{ workouts: WorkoutSessionSummary[]; hasMore: boolean }> {
+): Promise<{
+  workouts: WorkoutSessionSummary[]
+  hasMore: boolean
+  totalCount: number
+  atRetentionCap: boolean
+}> {
   const limit = Math.min(
     50,
     Math.max(1, opts?.limit ?? WORKOUT_LIST_PAGE_SIZE),
@@ -222,33 +247,38 @@ export async function listWorkoutSessions(
       ? { performedAt: beforeAt, id: beforeId }
       : null
 
-  const rows = await prisma.workoutSession.findMany({
-    where: {
-      userId,
-      ...(cursorOk
-        ? {
-            OR: [
-              { performedAt: { lt: cursorOk.performedAt } },
-              {
-                AND: [
-                  { performedAt: cursorOk.performedAt },
-                  { id: { lt: cursorOk.id } },
-                ],
-              },
-            ],
-          }
-        : {}),
-    },
-    orderBy: [{ performedAt: 'desc' }, { id: 'desc' }],
-    take: limit + 1,
-    include: listInclude,
-  })
+  const [rows, totalCount] = await Promise.all([
+    prisma.workoutSession.findMany({
+      where: {
+        userId,
+        ...(cursorOk
+          ? {
+              OR: [
+                { performedAt: { lt: cursorOk.performedAt } },
+                {
+                  AND: [
+                    { performedAt: cursorOk.performedAt },
+                    { id: { lt: cursorOk.id } },
+                  ],
+                },
+              ],
+            }
+          : {}),
+      },
+      orderBy: [{ performedAt: 'desc' }, { id: 'desc' }],
+      take: limit + 1,
+      include: listInclude,
+    }),
+    prisma.workoutSession.count({ where: { userId } }),
+  ])
 
   const hasMore = rows.length > limit
   const page = hasMore ? rows.slice(0, limit) : rows
   return {
     workouts: page.map(serializeSessionSummary),
     hasMore,
+    totalCount,
+    atRetentionCap: totalCount >= MAX_WORKOUT_SESSIONS,
   }
 }
 
@@ -321,14 +351,33 @@ export type WorkoutInput = {
   title: string
   performedAt: Date
   bodyWeightKg?: number | null
-  notes?: string
-  exercises: { name: string; sets: { weightKg: number; reps: number }[] }[]
+  exercises: {
+    name: string
+    trackKey?: string
+    sets: { weightKg: number; reps: number }[]
+  }[]
 }
 
 function normalizeBodyWeight(raw: number | null | undefined) {
   if (raw == null || Number.isNaN(raw)) return null
   if (raw < 30 || raw > 250) return null
+  // Whole kg only (product: no 0.5 body weight)
   return Math.round(raw)
+}
+
+function exerciseCreates(exercises: WorkoutInput['exercises']) {
+  return exercises.map((ex, i) => ({
+    name: ex.name.trim(),
+    trackKey: normalizeTrackKey(ex.trackKey) || newTrackKey(),
+    sortOrder: i,
+    sets: {
+      create: ex.sets.map((s, j) => ({
+        setIndex: j,
+        weightKg: s.weightKg,
+        reps: s.reps,
+      })),
+    },
+  }))
 }
 
 export async function createWorkoutSession(userId: string, input: WorkoutInput) {
@@ -339,19 +388,9 @@ export async function createWorkoutSession(userId: string, input: WorkoutInput) 
       title,
       performedAt: input.performedAt,
       bodyWeightKg: normalizeBodyWeight(input.bodyWeightKg),
-      notes: (input.notes || '').trim().slice(0, 500),
+      notes: '',
       exercises: {
-        create: input.exercises.map((ex, i) => ({
-          name: ex.name.trim(),
-          sortOrder: i,
-          sets: {
-            create: ex.sets.map((s, j) => ({
-              setIndex: j,
-              weightKg: s.weightKg,
-              reps: s.reps,
-            })),
-          },
-        })),
+        create: exerciseCreates(input.exercises),
       },
     },
     include: sessionInclude,
@@ -372,19 +411,9 @@ export async function replaceWorkoutSession(userId: string, id: string, input: W
         title: input.title.trim(),
         performedAt: input.performedAt,
         bodyWeightKg: normalizeBodyWeight(input.bodyWeightKg),
-        notes: (input.notes || '').trim().slice(0, 500),
+        notes: '',
         exercises: {
-          create: input.exercises.map((ex, i) => ({
-            name: ex.name.trim(),
-            sortOrder: i,
-            sets: {
-              create: ex.sets.map((s, j) => ({
-                setIndex: j,
-                weightKg: s.weightKg,
-                reps: s.reps,
-              })),
-            },
-          })),
+          create: exerciseCreates(input.exercises),
         },
       },
     })
@@ -426,20 +455,24 @@ export async function getWorkoutProgress(
       ? round1(bodyPoints[bodyPoints.length - 1].kg - bodyPoints[0].kg)
       : null
 
-  const exerciseStats = new Map<string, { name: string; sessionCount: number; lastAt: number }>()
+  const exerciseStats = new Map<
+    string,
+    { name: string; sessionCount: number; lastAt: number; identity: string }
+  >()
   for (const row of rows) {
     const seen = new Set<string>()
     for (const ex of row.exercises) {
-      const key = normalizeExerciseName(ex.name)
-      if (!key || seen.has(key)) continue
-      seen.add(key)
-      const prev = exerciseStats.get(key)
+      const identity = exerciseIdentity(ex)
+      if (!identity || seen.has(identity)) continue
+      seen.add(identity)
+      const prev = exerciseStats.get(identity)
       const display = displayExerciseName(ex.name)
       if (!prev) {
-        exerciseStats.set(key, {
+        exerciseStats.set(identity, {
           name: display,
           sessionCount: 1,
           lastAt: row.performedAt.getTime(),
+          identity,
         })
       } else {
         prev.sessionCount += 1
@@ -453,18 +486,21 @@ export async function getWorkoutProgress(
     (a, b) => b.sessionCount - a.sessionCount || b.lastAt - a.lastAt,
   )
 
-  const preferredKey = exerciseQuery ? normalizeExerciseName(exerciseQuery) : ''
+  const preferredName = exerciseQuery ? normalizeExerciseName(exerciseQuery) : ''
+  const preferredIdentity = exerciseQuery
+    ? [...exerciseStats.values()].find((e) => normalizeExerciseName(e.name) === preferredName)
+        ?.identity || ''
+    : ''
   const picked =
-    (preferredKey && exerciseStats.get(preferredKey)) ||
+    (preferredIdentity && exerciseStats.get(preferredIdentity)) ||
     exercises.find((e) => e.sessionCount >= 2) ||
     exercises[0] ||
     null
 
   const strengthPoints: { at: string; weightKg: number; reps: number }[] = []
   if (picked) {
-    const key = normalizeExerciseName(picked.name)
     for (const row of rows) {
-      const match = row.exercises.find((ex) => normalizeExerciseName(ex.name) === key)
+      const match = row.exercises.find((ex) => exerciseIdentity(ex) === picked.identity)
       if (!match) continue
       const best = bestSet(match.sets)
       if (!best) continue
@@ -490,10 +526,9 @@ export async function getWorkoutProgress(
   let liftDeltaWeightKg: number | null = null
   let liftDeltaReps: number | null = null
   for (const ex of exercises) {
-    const key = normalizeExerciseName(ex.name)
     const pts: { w: number; r: number }[] = []
     for (const row of rows) {
-      const match = row.exercises.find((e) => normalizeExerciseName(e.name) === key)
+      const match = row.exercises.find((e) => exerciseIdentity(e) === ex.identity)
       if (!match) continue
       const best = bestSet(match.sets)
       if (best) pts.push({ w: best.weightKg, r: best.reps })
