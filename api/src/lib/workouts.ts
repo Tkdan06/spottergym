@@ -1,5 +1,6 @@
 import type { Prisma } from '@prisma/client'
 import { prisma } from '../db.js'
+import { WORKOUT_NOTE_MAX } from './fieldLimits.js'
 
 export type WorkoutSetDto = {
   id?: string
@@ -25,6 +26,7 @@ export type WorkoutSessionSummary = {
   title: string
   performedAt: string
   bodyWeightKg: number | null
+  notes: string
   exerciseCount: number
   setCount: number
   createdAt: string
@@ -36,6 +38,7 @@ export type WorkoutSessionDetail = {
   title: string
   performedAt: string
   bodyWeightKg: number | null
+  notes: string
   exercises: WorkoutExerciseDto[]
   createdAt: string
   updatedAt: string
@@ -171,6 +174,7 @@ export function serializeSessionSummary(row: SessionFull | SessionListRow): Work
     title: row.title,
     performedAt: row.performedAt.toISOString(),
     bodyWeightKg: bodyKg(row),
+    notes: row.notes || '',
     exerciseCount: row.exercises.length,
     setCount,
     createdAt: row.createdAt.toISOString(),
@@ -221,6 +225,7 @@ export function serializeSessionDetail(
     title: row.title,
     performedAt: row.performedAt.toISOString(),
     bodyWeightKg: bodyKg(row),
+    notes: row.notes || '',
     exercises,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -351,6 +356,7 @@ export type WorkoutInput = {
   title: string
   performedAt: Date
   bodyWeightKg?: number | null
+  notes?: string
   exercises: {
     name: string
     trackKey?: string
@@ -363,6 +369,12 @@ function normalizeBodyWeight(raw: number | null | undefined) {
   if (raw < 30 || raw > 250) return null
   // Whole kg only (product: no 0.5 body weight)
   return Math.round(raw)
+}
+
+function normalizeNotes(raw: string | undefined | null) {
+  return String(raw || '')
+    .trim()
+    .slice(0, WORKOUT_NOTE_MAX)
 }
 
 function exerciseCreates(exercises: WorkoutInput['exercises']) {
@@ -388,7 +400,7 @@ export async function createWorkoutSession(userId: string, input: WorkoutInput) 
       title,
       performedAt: input.performedAt,
       bodyWeightKg: normalizeBodyWeight(input.bodyWeightKg),
-      notes: '',
+      notes: normalizeNotes(input.notes),
       exercises: {
         create: exerciseCreates(input.exercises),
       },
@@ -411,7 +423,7 @@ export async function replaceWorkoutSession(userId: string, id: string, input: W
         title: input.title.trim(),
         performedAt: input.performedAt,
         bodyWeightKg: normalizeBodyWeight(input.bodyWeightKg),
-        notes: '',
+        notes: normalizeNotes(input.notes),
         exercises: {
           create: exerciseCreates(input.exercises),
         },

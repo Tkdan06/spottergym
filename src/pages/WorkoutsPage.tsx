@@ -201,6 +201,9 @@ export function WorkoutsPage() {
                       {formatWorkoutWhen(w.performedAt)}
                       {w.bodyWeightKg != null ? ` · ${formatKg(w.bodyWeightKg)}` : ''}
                     </span>
+                    {w.notes?.trim() ? (
+                      <span className="dim workouts-row-note">{w.notes.trim()}</span>
+                    ) : null}
                   </div>
                   <span className="dim workouts-row-meta">
                     {w.exerciseCount} упр. · {w.setCount} подх.

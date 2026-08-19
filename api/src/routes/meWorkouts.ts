@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
+import { WORKOUT_NOTE_MAX } from '../lib/fieldLimits.js'
 import {
   createWorkoutSession,
   deleteWorkoutSession,
@@ -28,6 +29,7 @@ const bodySchema = z.object({
   performedAt: z.string().datetime({ offset: true }).or(z.string().datetime()),
   /** Whole kg only — fractions coerced server-side. */
   bodyWeightKg: z.number().min(30).max(250).nullable().optional(),
+  notes: z.string().max(WORKOUT_NOTE_MAX).optional(),
   exercises: z.array(exerciseSchema).min(1).max(10),
 })
 
@@ -99,6 +101,7 @@ workoutRoutes.post(
       title: parsed.data.title,
       performedAt,
       bodyWeightKg: parsed.data.bodyWeightKg,
+      notes: parsed.data.notes,
       exercises: parsed.data.exercises,
     })
     return c.json({ workout }, 201)
@@ -117,6 +120,7 @@ workoutRoutes.patch(
       title: parsed.data.title,
       performedAt,
       bodyWeightKg: parsed.data.bodyWeightKg,
+      notes: parsed.data.notes,
       exercises: parsed.data.exercises,
     })
     if (!workout) return c.json({ error: 'Тренировка не найдена' }, 404)

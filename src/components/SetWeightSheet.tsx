@@ -10,7 +10,7 @@ export const WORKOUT_TITLE_MAX = 40
 export const MAX_SETS_PER_EXERCISE = 6
 export const MAX_EXERCISES_PER_WORKOUT = 10
 
-const FRACS = [0, 0.1, 0.2, 0.3, 0.4, 0.5] as const
+const FRACS = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] as const
 const ITEM_H = 44
 const VISIBLE = 5
 
@@ -27,14 +27,13 @@ function round1(n: number) {
 
 function splitKg(raw: number | null): { whole: number; frac: number } {
   if (raw == null || !Number.isFinite(raw)) {
-    return { whole: 20, frac: 0.5 }
+    return { whole: 20, frac: 0 }
   }
   const clamped = Math.min(BAR_WEIGHT_MAX_KG, Math.max(BAR_WEIGHT_MIN_KG, raw))
   const whole = Math.min(BAR_WEIGHT_MAX_KG, Math.max(BAR_WEIGHT_MIN_KG, Math.floor(clamped)))
   let frac = round1(clamped - Math.floor(clamped))
-  if (frac > 0.5) {
-    // Snap odd decimals (e.g. 0.75 from old data) to nearest allowed
-    frac = 0.5
+  if (frac >= 1) {
+    frac = 0.9
   }
   const nearest = FRACS.reduce((best, f) => (Math.abs(f - frac) < Math.abs(best - frac) ? f : best), 0)
   return { whole, frac: nearest }
@@ -139,17 +138,16 @@ export function SetWeightSheet({ open, value, onClose, onConfirm }: Props) {
   const fracs = useMemo(() => [...FRACS], [])
   const panelRef = useRef<HTMLDivElement>(null)
   const [whole, setWhole] = useState(20)
-  const [frac, setFrac] = useState(0.5)
+  const [frac, setFrac] = useState(0)
 
   useSheetA11y(open, onClose, panelRef, undefined, { autoFocus: false })
 
   useEffect(() => {
     if (!open) return
     const split = splitKg(value)
-    // Default fraction to 0.5 when opening a fresh/empty set
     if (value == null) {
       setWhole(20)
-      setFrac(0.5)
+      setFrac(0)
     } else {
       setWhole(split.whole)
       setFrac(split.frac)
@@ -177,7 +175,6 @@ export function SetWeightSheet({ open, value, onClose, onConfirm }: Props) {
       >
         <div className="weight-kg-sheet-grab" aria-hidden />
         <h3>Вес</h3>
-        <p className="muted weight-kg-sheet-lead">Килограммы и доли — по умолчанию +0,5</p>
 
         <div className="set-weight-dual">
           <WheelColumn

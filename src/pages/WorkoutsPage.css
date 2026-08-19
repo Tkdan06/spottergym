@@ -90,6 +90,15 @@
   font-size: 0.86rem;
 }
 
+.workouts-row-note {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
 .workouts-row-meta {
   flex-shrink: 0;
   font-size: 0.82rem;
@@ -115,6 +124,48 @@
 
 .workout-checkin-hint {
   margin: 0;
+}
+
+.workout-note-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 2px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.workout-note-link span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workout-note-link .muted {
+  font-weight: 550;
+  color: var(--text-muted);
+}
+
+.workout-note-sheet textarea {
+  width: 100%;
+  min-height: 120px;
+  resize: vertical;
+}
+
+.workout-note-count {
+  margin: -4px 0 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .workout-weight-trigger {

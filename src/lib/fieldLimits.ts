@@ -24,6 +24,8 @@ export const FEEDBACK_MESSAGE_MIN = 10
 export const FEEDBACK_MESSAGE_MAX = 2000
 export const REPORT_NOTE_MAX = 1000
 export const ADMIN_MESSAGE_MAX = 2000
+/** Optional freeform note on a workout session */
+export const WORKOUT_NOTE_MAX = 1000
 
 export const CITY_MAX = 80
 export const SEARCH_QUERY_MAX = 80

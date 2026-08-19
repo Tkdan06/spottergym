@@ -263,6 +263,7 @@ export type WorkoutSessionSummary = {
   title: string
   performedAt: string
   bodyWeightKg: number | null
+  notes: string
   exerciseCount: number
   setCount: number
   createdAt: string
@@ -274,6 +275,7 @@ export type WorkoutSessionDetail = {
   title: string
   performedAt: string
   bodyWeightKg: number | null
+  notes: string
   exercises: WorkoutExerciseDto[]
   createdAt: string
   updatedAt: string
@@ -283,6 +285,7 @@ export type WorkoutSessionInput = {
   title: string
   performedAt: string
   bodyWeightKg?: number | null
+  notes?: string
   exercises: { name: string; trackKey?: string; sets: WorkoutSetInput[] }[]
 }
 
