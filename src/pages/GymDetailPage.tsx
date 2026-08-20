@@ -187,46 +187,48 @@ export function GymDetailPage() {
 
   return (
     <main className="page gym-detail">
-      <button type="button" className="back-link" onClick={goBack}>
-        <ArrowLeft size={18} /> Назад
-      </button>
+      <div className="subpage-top">
+        <button type="button" className="back-link" onClick={goBack}>
+          <ArrowLeft size={18} /> Назад
+        </button>
 
-      <section className="gym-hero">
-        <SmartImage
-          src={gym.image}
-          alt=""
-          size="hero"
-          priority
-          className="gym-hero-bg"
-          aria-hidden
-        />
-        <div className="gym-hero-content">
-          <div className="gym-hero-top">
-            <p className="gym-hero-network">{gym.network}</p>
-            <div className="gym-hero-badges">
-              {isMine ? <GymMineBadge surface="hero" /> : null}
-              <GymPresenceBadge activeNow={activeCount} surface="hero" />
+        <section className="gym-hero">
+          <SmartImage
+            src={gym.image}
+            alt=""
+            size="hero"
+            priority
+            className="gym-hero-bg"
+            aria-hidden
+          />
+          <div className="gym-hero-content">
+            <div className="gym-hero-top">
+              <p className="gym-hero-network">{gym.network}</p>
+              <div className="gym-hero-badges">
+                {isMine ? <GymMineBadge surface="hero" /> : null}
+                <GymPresenceBadge activeNow={activeCount} surface="hero" />
+              </div>
             </div>
-          </div>
-          <h1 className="gym-hero-title" aria-label={gym.name}>
-            {gymTitleLines(gym.name, gym.network).map((line, index) => (
-              <span key={`${index}-${line}`} className="gym-hero-title-line">
-                {line}
-              </span>
-            ))}
-          </h1>
-          <p className="gym-hero-address">
-            <MapPin size={18} strokeWidth={2.25} aria-hidden />
-            <span className="gym-hero-address-text">
-              {formatGymAddressLines(gym).map((line, index) => (
-                <span key={`${index}-${line}`} className="gym-hero-address-line">
+            <h1 className="gym-hero-title" aria-label={gym.name}>
+              {gymTitleLines(gym.name, gym.network).map((line, index) => (
+                <span key={`${index}-${line}`} className="gym-hero-title-line">
                   {line}
                 </span>
               ))}
-            </span>
-          </p>
-        </div>
-      </section>
+            </h1>
+            <p className="gym-hero-address">
+              <MapPin size={18} strokeWidth={2.25} aria-hidden />
+              <span className="gym-hero-address-text">
+                {formatGymAddressLines(gym).map((line, index) => (
+                  <span key={`${index}-${line}`} className="gym-hero-address-line">
+                    {line}
+                  </span>
+                ))}
+              </span>
+            </p>
+          </div>
+        </section>
+      </div>
 
       {hours ? (
         <section className="gym-hours surface">
@@ -392,7 +394,7 @@ export function GymDetailPage() {
                 <InviteFriendsButton
                   userId={user.id}
                   gymName={shortGymName(gym.name, gym.network) || gym.name}
-                  className="btn btn-soft btn-block"
+                  className="btn btn-soft btn-sm btn-block"
                 >
                   Поделиться ссылкой
                 </InviteFriendsButton>

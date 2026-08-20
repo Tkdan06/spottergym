@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect, useState } from 'react'
+import { SoftFlash } from './SoftFlash'
 import { buildInvitePayload, shareOrCopyInvite } from '../lib/inviteShare'
 import './InviteFriendsButton.css'
 
@@ -25,7 +26,7 @@ export function InviteFriendsButton({
 
   useEffect(() => {
     if (!status) return
-    const id = window.setTimeout(() => setStatus(''), 2500)
+    const id = window.setTimeout(() => setStatus(''), 2200)
     return () => window.clearTimeout(id)
   }, [status])
 
@@ -40,15 +41,13 @@ export function InviteFriendsButton({
   }
 
   return (
-    <div className="invite-friends-wrap">
-      <button type="button" className={className} onClick={onClick}>
-        {children}
-      </button>
-      {status ? (
-        <p className="invite-friends-status" role="status" aria-live="polite">
-          {status}
-        </p>
-      ) : null}
-    </div>
+    <>
+      <div className="invite-friends-wrap">
+        <button type="button" className={className} onClick={onClick}>
+          {children}
+        </button>
+      </div>
+      <SoftFlash message={status} />
+    </>
   )
 }

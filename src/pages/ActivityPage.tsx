@@ -179,29 +179,31 @@ export function ActivityPage() {
 
   return (
     <main className="page activity-page">
-      <button type="button" className="back-link" onClick={() => navigate(-1)}>
-        <ArrowLeft size={18} /> Назад
-      </button>
+      <div className="subpage-top">
+        <button type="button" className="back-link" onClick={() => navigate(-1)}>
+          <ArrowLeft size={18} /> Назад
+        </button>
 
-      <header className="activity-head">
-        <div className="activity-head-row">
-          <h1 className="page-title">Активность</h1>
-          {canReset ? (
-            <button
-              type="button"
-              className="icon-btn activity-more-btn"
-              aria-label="Ещё"
-              aria-haspopup="dialog"
-              aria-expanded={sheet !== 'closed'}
-              onClick={() => setSheet('menu')}
-              disabled={resetting}
-            >
-              <MoreHorizontal size={20} />
-            </button>
-          ) : null}
-        </div>
-        <p className="muted">Время в зале по отметкам</p>
-      </header>
+        <header className="activity-head">
+          <div className="activity-head-row">
+            <h1 className="page-title">Активность</h1>
+            {canReset ? (
+              <button
+                type="button"
+                className="icon-btn activity-more-btn"
+                aria-label="Ещё"
+                aria-haspopup="dialog"
+                aria-expanded={sheet !== 'closed'}
+                onClick={() => setSheet('menu')}
+                disabled={resetting}
+              >
+                <MoreHorizontal size={20} />
+              </button>
+            ) : null}
+          </div>
+          <p className="muted">Время в зале по отметкам</p>
+        </header>
+      </div>
 
       {!apiOnline ? (
         <p className="muted">Нужен онлайн, чтобы загрузить историю чекинов.</p>

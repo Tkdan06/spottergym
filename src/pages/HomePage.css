@@ -115,6 +115,54 @@
 }
 
 .home-log-workout {
+  font-size: 0.92rem;
+}
+
+.home-tools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  min-width: 0;
+}
+
+.home-tool-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg-card) 80%, transparent);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.home-tool-link span {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.home-tool-link svg:last-child {
+  flex-shrink: 0;
+  color: var(--text-dim);
+}
+
+.home-tool-link:hover,
+.home-tool-link:focus-visible {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+  color: var(--accent);
+}
+
+.home-tool-link:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  outline-offset: 1px;
+}
+
+.home-log-workout {
   display: inline-flex;
   align-items: center;
   justify-content: center;

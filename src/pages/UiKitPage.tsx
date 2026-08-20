@@ -34,20 +34,23 @@ export function UiKitPage() {
 
   return (
     <main className="page ui-kit-page">
-      <button type="button" className="back-link" onClick={() => navigate('/app/admin')}>
-        <ArrowLeft size={18} /> Админка
-      </button>
+      <div className="subpage-top">
+        <button type="button" className="back-link" onClick={() => navigate('/app/admin')}>
+          <ArrowLeft size={18} /> Админка
+        </button>
 
-      <header className="page-header">
-        <div className="page-header-text">
-          <h1 className="page-title">UI kit</h1>
-          <p className="muted ui-kit-lead">
-            Эталон для новых экранов. Заголовки блоков — только через{' '}
-            <code>SectionTitle</code> / <code>.section-title</code>. Не задавай локальный font-size
-            для той же роли.
-          </p>
-        </div>
-      </header>
+        <header className="page-header">
+          <div className="page-header-text">
+            <h1 className="page-title">UI kit</h1>
+            <p className="muted ui-kit-lead">
+              Эталон для новых экранов. Заголовки блоков — только через{' '}
+              <code>SectionTitle</code> / <code>.section-title</code>. Не задавай локальный font-size
+              для той же роли. Вторичные экраны: <code>.subpage-top</code> — 14px между «Назад» и
+              заголовком.
+            </p>
+          </div>
+        </header>
+      </div>
 
       <section className="surface ui-kit-block">
         <SectionTitle>Цвета</SectionTitle>
@@ -93,8 +96,8 @@ export function UiKitPage() {
       <section className="surface ui-kit-block">
         <SectionTitle>Кнопки</SectionTitle>
         <p className="muted" style={{ margin: '0 0 10px' }}>
-          Primary — главное действие. Soft — вторичное в блоке. Ghost — переход / «открыть
-          раздел» в профиле (круг, обращения, настройки).
+          Primary 48px — главное действие. Soft — вторичное. Ghost — тихий переход. btn-sm (40px) —
+          для второстепенных block-кнопок, чтобы не строить стену CTA.
         </p>
         <div className="stack">
           <button type="button" className="btn btn-primary btn-block">
@@ -103,8 +106,11 @@ export function UiKitPage() {
           <button type="button" className="btn btn-soft btn-block">
             Soft
           </button>
-          <button type="button" className="btn btn-ghost btn-block">
-            <Share2 size={16} /> Ghost
+          <button type="button" className="btn btn-soft btn-sm btn-block">
+            Soft · sm
+          </button>
+          <button type="button" className="btn btn-ghost btn-sm btn-block">
+            <Share2 size={16} /> Ghost · sm
           </button>
           <div className="row" style={{ flexWrap: 'wrap' }}>
             <button type="button" className="btn btn-primary">

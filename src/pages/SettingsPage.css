@@ -1,6 +1,5 @@
-.settings-page h1 {
-  font-size: 1.8rem;
-  margin: 8px 0 6px;
+.settings-page .page-title {
+  margin: 0;
 }
 
 .settings-gyms {

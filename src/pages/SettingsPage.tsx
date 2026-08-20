@@ -200,11 +200,15 @@ export function SettingsPage() {
 
   return (
     <main className="page settings-page">
-      <button type="button" className="back-link" onClick={() => navigate('/app/profile')}>
-        <ArrowLeft size={18} /> Профиль
-      </button>
-      <h1>Настройки</h1>
-      <p className="muted">Редактируй профиль и список своих залов.</p>
+      <div className="subpage-top">
+        <button type="button" className="back-link" onClick={() => navigate('/app/profile')}>
+          <ArrowLeft size={18} /> Профиль
+        </button>
+        <header>
+          <h1 className="page-title">Настройки</h1>
+          <p className="muted">Редактируй профиль и список своих залов.</p>
+        </header>
+      </div>
 
       {isDemoAccount(user.email) ? (
         <p className="demo-local-banner" role="status">

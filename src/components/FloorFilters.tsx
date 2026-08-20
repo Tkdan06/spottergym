@@ -163,16 +163,16 @@ export function FloorFilters({
 
       {open
         ? createPortal(
-            <div className="floor-sheet" role="presentation">
+            <div className="app-sheet floor-sheet" role="presentation">
               <button
                 type="button"
-                className="floor-sheet-backdrop"
+                className="app-sheet-backdrop floor-sheet-backdrop"
                 aria-label="Закрыть"
                 onClick={() => setOpen(false)}
               />
               <div
                 ref={panelRef}
-                className="floor-sheet-panel"
+                className="app-sheet-panel floor-sheet-panel"
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby={titleId}

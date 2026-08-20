@@ -295,25 +295,36 @@
   line-height: 1.4;
 }
 
-.profile-invite-block,
-.profile-nav-block {
+.profile-invite-block {
   display: grid;
   gap: 10px;
 }
 
-.profile-invite-block > .section-title,
-.profile-nav-block > .section-title {
+.profile-invite-block > .section-title {
   margin-bottom: 0;
 }
 
-.profile-nav-actions {
-  display: grid;
-  gap: 8px;
+.profile-quiet-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 0 0 8px;
+  padding: 0 2px;
 }
 
-.profile-edit-btn {
-  margin-top: 0;
-  margin-bottom: 0;
+.profile-quiet-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.profile-quiet-link:hover,
+.profile-quiet-link:focus-visible {
+  color: var(--accent);
 }
 
 .slots {

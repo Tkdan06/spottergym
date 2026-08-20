@@ -27,16 +27,16 @@ export function ScheduleSheet({ open, initialSlots, onClose, onSave }: Props) {
   if (!open) return null
 
   return (
-    <div className="schedule-sheet" role="presentation">
+    <div className="app-sheet schedule-sheet" role="presentation">
       <button
         type="button"
-        className="schedule-sheet-backdrop"
+        className="app-sheet-backdrop schedule-sheet-backdrop"
         aria-label="Закрыть"
         onClick={onClose}
       />
       <div
         ref={panelRef}
-        className="schedule-sheet-panel"
+        className="app-sheet-panel schedule-sheet-panel"
         role="dialog"
         aria-modal="true"
         aria-labelledby="schedule-sheet-title"

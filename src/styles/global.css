@@ -262,6 +262,25 @@ html.standalone {
   text-align: left;
 }
 
+/**
+ * Secondary screen chrome: back + title block.
+ * Gap is always 14px (same as .back-link margin-bottom). Prefer this wrapper
+ * on grid pages so page `gap` does not double the back→title distance.
+ */
+.subpage-top {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.subpage-top > .back-link {
+  margin-bottom: 0;
+}
+
+.subpage-top > .page-header {
+  margin-bottom: 0;
+}
+
 @keyframes fade-up {
   from {
     opacity: 0;
@@ -402,6 +421,15 @@ html.standalone {
   transition: transform 0.15s ease, background 0.2s ease, opacity 0.2s ease;
 }
 
+/* Secondary actions — quieter footprint (Sprint B) */
+.btn-sm {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 12px;
+  font-size: 0.92rem;
+  gap: 6px;
+}
+
 .btn:active {
   transform: scale(0.98);
 }
@@ -454,6 +482,16 @@ a.btn-danger {
 
 .btn-block {
   width: 100%;
+}
+
+.btn-danger-ghost {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--line));
+  color: var(--danger);
+}
+
+a.btn-danger-ghost {
+  color: var(--danger);
 }
 
 .icon-btn {
@@ -773,12 +811,18 @@ a.btn-danger {
 
 .empty-copy-actions {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   justify-items: stretch;
 }
 
 .empty-copy-actions .empty-copy {
   padding-bottom: 0;
+}
+
+/* Secondary empty CTA — quieter than the primary block button */
+.empty-copy-actions .btn-sm,
+.empty-copy-actions .btn.btn-ghost {
+  min-height: 40px;
 }
 
 .toggle-row {

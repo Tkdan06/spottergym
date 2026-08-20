@@ -138,21 +138,21 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
 
   const sheet =
     sheetOpen && multi ? (
-      <div className="checkin-sheet" role="presentation">
+      <div className="app-sheet checkin-sheet" role="presentation">
         <button
           type="button"
-          className="checkin-sheet-backdrop"
+          className="app-sheet-backdrop checkin-sheet-backdrop"
           aria-label="Закрыть"
           onClick={() => setSheetOpen(false)}
         />
         <div
           ref={panelRef}
-          className="checkin-sheet-panel"
+          className="app-sheet-panel checkin-sheet-panel"
           role="dialog"
           aria-modal="true"
           aria-label="Выбор зала"
         >
-          <div className="checkin-sheet-grab" aria-hidden />
+          <div className="app-sheet-grab checkin-sheet-grab" aria-hidden />
           <h3>Где отметиться?</h3>
           <p className="muted checkin-sheet-lead">Один тап — ты в этом зале · статус на 3 часа</p>
           <div className="checkin-sheet-list">

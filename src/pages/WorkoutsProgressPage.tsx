@@ -215,13 +215,15 @@ export function WorkoutsProgressPage() {
 
   return (
     <main className="page workouts-page workouts-progress-page">
-      <button type="button" className="back-link" onClick={() => navigate('/app/workouts')}>
-        <ArrowLeft size={18} /> Тренировки
-      </button>
+      <div className="subpage-top">
+        <button type="button" className="back-link" onClick={() => navigate('/app/workouts')}>
+          <ArrowLeft size={18} /> Тренировки
+        </button>
 
-      <header className="workouts-head">
-        <h1 className="page-title">Прогресс</h1>
-      </header>
+        <header className="workouts-head">
+          <h1 className="page-title">Прогресс</h1>
+        </header>
+      </div>
 
       <div className="workout-progress-toolbar">
         <div className="workout-progress-mode" role="tablist" aria-label="Что смотреть">

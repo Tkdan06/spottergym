@@ -112,29 +112,31 @@ export function AdminReferralsPage() {
 
   return (
     <main className="page admin-page admin-players-page admin-referrals-page">
-      <button type="button" className="back-link" onClick={() => navigate('/app/admin')}>
-        <ArrowLeft size={18} /> Админка
-      </button>
-
-      <header className="admin-players-head">
-        <div>
-          <h1>Рефералы</h1>
-          <p className="muted">
-            Кто кого пригласил · засчёт после онбординга
-            {loading ? ' · обновляем…' : ''}
-            {data ? ` · ${formatAdminDate(data.generatedAt)}` : ''}
-          </p>
-        </div>
-        <button
-          type="button"
-          className="btn-icon-refresh"
-          onClick={() => void load()}
-          aria-label="Обновить"
-          disabled={loading}
-        >
-          <RefreshCw size={22} strokeWidth={2.4} />
+      <div className="subpage-top">
+        <button type="button" className="back-link" onClick={() => navigate('/app/admin')}>
+          <ArrowLeft size={18} /> Админка
         </button>
-      </header>
+
+        <header className="admin-players-head">
+          <div>
+            <h1>Рефералы</h1>
+            <p className="muted">
+              Кто кого пригласил · засчёт после онбординга
+              {loading ? ' · обновляем…' : ''}
+              {data ? ` · ${formatAdminDate(data.generatedAt)}` : ''}
+            </p>
+          </div>
+          <button
+            type="button"
+            className="btn-icon-refresh"
+            onClick={() => void load()}
+            aria-label="Обновить"
+            disabled={loading}
+          >
+            <RefreshCw size={22} strokeWidth={2.4} />
+          </button>
+        </header>
+      </div>
 
       {error ? <p className="admin-inline-error">{error}</p> : null}
 

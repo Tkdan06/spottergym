@@ -86,12 +86,14 @@ export function AdminTicketsPage() {
     const closed = isTicketClosed(selected.status)
     return (
       <main className="page admin-page">
-        <button type="button" className="back-link" onClick={() => setSelectedId(null)}>
-          <ArrowLeft size={18} /> К списку
-        </button>
-        <div className="feedback-ticket-card-top">
-          <h1>#{selected.id.slice(-6)}</h1>
-          <span className={`feedback-status ${selected.status}`}>{statusLabel(selected.status)}</span>
+        <div className="subpage-top">
+          <button type="button" className="back-link" onClick={() => setSelectedId(null)}>
+            <ArrowLeft size={18} /> К списку
+          </button>
+          <div className="feedback-ticket-card-top">
+            <h1>#{selected.id.slice(-6)}</h1>
+            <span className={`feedback-status ${selected.status}`}>{statusLabel(selected.status)}</span>
+          </div>
         </div>
         <p className="muted">
           {selected.userName} · {selected.userEmail} · {categoryLabel(selected.category)}
@@ -178,10 +180,12 @@ export function AdminTicketsPage() {
 
   return (
     <main className="page admin-page">
-      <button type="button" className="back-link" onClick={() => navigate('/app/admin')}>
-        <ArrowLeft size={18} /> Админка
-      </button>
-      <h1>Обращения</h1>
+      <div className="subpage-top">
+        <button type="button" className="back-link" onClick={() => navigate('/app/admin')}>
+          <ArrowLeft size={18} /> Админка
+        </button>
+        <h1>Обращения</h1>
+      </div>
       <div className="admin-tabs">
         {(
           [

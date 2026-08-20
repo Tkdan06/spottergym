@@ -5,6 +5,7 @@ import { LikesRow } from '../components/LikesRow'
 import { ReferralBadge, referralChromeClass } from '../components/ReferralBadge'
 import { PhotoGalleryModal } from '../components/PhotoGalleryModal'
 import { ProfilePhotoCarousel } from '../components/ProfilePhotoCarousel'
+import { SoftFlash } from '../components/SoftFlash'
 import { ScheduleSheet } from '../components/ScheduleSheet'
 import { SectionTitle } from '../components/SectionTitle'
 import { useApp } from '../context/useApp'
@@ -140,11 +141,6 @@ export function ProfilePage() {
               </a>
             ) : null}
           </div>
-          {copyFlash ? (
-            <p className="dim profile-copy-flash" role="status" aria-live="polite">
-              {copyFlash}
-            </p>
-          ) : null}
           <p className="muted">
             {user.isCoach
               ? user.coachSports.length
@@ -212,7 +208,7 @@ export function ProfilePage() {
               <p className="empty-copy-title">Пока без описания</p>
               <p className="empty-copy-lead">Коротко о себе — так проще начать разговор</p>
             </div>
-            <Link to="/app/settings" className="btn btn-soft btn-block">
+            <Link to="/app/settings" className="btn btn-soft btn-sm btn-block">
               Добавить в настройках
             </Link>
           </div>
@@ -298,7 +294,7 @@ export function ProfilePage() {
             </div>
             <button
               type="button"
-              className="btn btn-soft btn-block"
+              className="btn btn-soft btn-sm btn-block"
               onClick={() => setScheduleOpen(true)}
             >
               Указать расписание
@@ -392,28 +388,23 @@ export function ProfilePage() {
             ? `${user.referralTitle} · ${user.referralCreditedCount || 0} в круге — приглашай друзей и открывай статусы`
             : 'Приглашай друзей и открывай статусы на аватаре'}
         </p>
-        <Link to="/app/invite" className="btn btn-ghost btn-block">
+        <Link to="/app/invite" className="btn btn-soft btn-block">
           <Share2 size={16} /> Открыть мой круг
         </Link>
       </section>
 
-      <section className="surface profile-block profile-nav-block">
-        <SectionTitle>Обратная связь</SectionTitle>
-        <div className="profile-nav-actions">
-          <Link to="/app/feedback" className="btn btn-ghost btn-block">
-            <MessageSquareText size={16} /> Мои обращения
+      <nav className="profile-quiet-nav" aria-label="Дополнительно">
+        <Link to="/app/feedback" className="profile-quiet-link">
+          <MessageSquareText size={16} aria-hidden /> Обратная связь
+        </Link>
+        {user.isAdmin ? (
+          <Link to="/app/admin" className="profile-quiet-link">
+            <Shield size={16} aria-hidden /> Админка
           </Link>
-          {user.isAdmin ? (
-            <Link to="/app/admin" className="btn btn-ghost btn-block">
-              <Shield size={16} /> Админка
-            </Link>
-          ) : null}
-        </div>
-      </section>
+        ) : null}
+      </nav>
 
-      <Link to="/app/settings" className="btn btn-ghost btn-block profile-edit-btn">
-        Редактировать профиль
-      </Link>
+      <SoftFlash message={copyFlash} />
     </main>
   )
 }

@@ -141,34 +141,42 @@ export function DiscoverPage() {
     setNetwork('Все сети')
   }
 
+  const pageHeader = (
+    <header className="page-header discover-header">
+      <div className="page-header-text">
+        <h1 className="page-title">
+          {fromSettings || fromHome ? 'Каталог залов' : 'Залы'}
+        </h1>
+        {fromSettings ? (
+          <p className="muted discover-settings-lead">
+            Выбери город и клуб — добавишь в «Мои залы», потом вернёшься в настройки.
+          </p>
+        ) : null}
+        {fromHome ? (
+          <p className="muted discover-settings-lead">
+            Выбери клуб — откроется страница зала, там можно сделать его своим.
+          </p>
+        ) : null}
+      </div>
+    </header>
+  )
+
   return (
     <main className="page discover-page">
       {fromSettings || fromHome ? (
-        <button
-          type="button"
-          className="back-link"
-          onClick={() => navigate(fromHome ? '/app' : '/app/settings')}
-        >
-          <ArrowLeft size={18} /> {fromHome ? 'Мой зал' : 'Настройки'}
-        </button>
-      ) : null}
-      <header className="page-header discover-header">
-        <div className="page-header-text">
-          <h1 className="page-title">
-            {fromSettings || fromHome ? 'Каталог залов' : 'Залы'}
-          </h1>
-          {fromSettings ? (
-            <p className="muted discover-settings-lead">
-              Выбери город и клуб — добавишь в «Мои залы», потом вернёшься в настройки.
-            </p>
-          ) : null}
-          {fromHome ? (
-            <p className="muted discover-settings-lead">
-              Выбери клуб — откроется страница зала, там можно сделать его своим.
-            </p>
-          ) : null}
+        <div className="subpage-top">
+          <button
+            type="button"
+            className="back-link"
+            onClick={() => navigate(fromHome ? '/app' : '/app/settings')}
+          >
+            <ArrowLeft size={18} /> {fromHome ? 'Мой зал' : 'Настройки'}
+          </button>
+          {pageHeader}
         </div>
-      </header>
+      ) : (
+        pageHeader
+      )}
 
       {/* 1 search → 2 city → 3 network — one job per row (Material / progressive disclosure) */}
       <div className="discover-toolbar">

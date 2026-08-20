@@ -5,6 +5,7 @@ import { LikesRow } from '../components/LikesRow'
 import { PhotoGalleryModal } from '../components/PhotoGalleryModal'
 import { ProfilePhotoCarousel } from '../components/ProfilePhotoCarousel'
 import { ReferralBadge, referralChromeClass } from '../components/ReferralBadge'
+import { SoftFlash } from '../components/SoftFlash'
 import { SafetyActions } from '../components/SafetyActions'
 import { SectionTitle } from '../components/SectionTitle'
 import { SmartImage } from '../components/SmartImage'
@@ -50,6 +51,7 @@ export function UserProfilePage() {
   const [loading, setLoading] = useState(false)
   const [loadError, setLoadError] = useState('')
   const [likeError, setLikeError] = useState('')
+  const [likeFlash, setLikeFlash] = useState('')
   const [adminRevealed, setAdminRevealed] = useState(false)
   const [revealBusy, setRevealBusy] = useState(false)
   const [revealError, setRevealError] = useState('')
@@ -396,9 +398,15 @@ export function UserProfilePage() {
                 className={`like-btn ${likesInfo.likedByMe ? 'liked' : ''}`}
                 onClick={() => {
                   setLikeError('')
-                  void Promise.resolve(toggleLike(person.id)).catch((err: unknown) => {
-                    setLikeError(err instanceof Error ? err.message : 'Не удалось поставить лайк')
-                  })
+                  const nextLiked = !likesInfo.likedByMe
+                  void Promise.resolve(toggleLike(person.id))
+                    .then(() => {
+                      setLikeFlash(nextLiked ? 'Лайк поставлен' : 'Лайк снят')
+                      window.setTimeout(() => setLikeFlash(''), 1800)
+                    })
+                    .catch((err: unknown) => {
+                      setLikeError(err instanceof Error ? err.message : 'Не удалось поставить лайк')
+                    })
                 }}
                 aria-pressed={likesInfo.likedByMe}
               >
@@ -533,6 +541,7 @@ export function UserProfilePage() {
           )}
         </div>
       ) : null}
+      <SoftFlash message={likeFlash} />
     </main>
   )
 }

@@ -308,25 +308,27 @@ export function WorkoutEditorPage() {
 
   return (
     <main className="page workouts-page workout-editor">
-      <div className="workout-editor-top">
-        <button type="button" className="back-link" onClick={() => navigate('/app/workouts')}>
-          <ArrowLeft size={18} /> Тренировки
-        </button>
-        {!isNew ? (
-          <button
-            type="button"
-            className="icon-btn"
-            aria-label="Ещё"
-            onClick={() => setMenuOpen(true)}
-          >
-            <MoreHorizontal size={20} />
+      <div className="subpage-top">
+        <div className="workout-editor-top">
+          <button type="button" className="back-link" onClick={() => navigate('/app/workouts')}>
+            <ArrowLeft size={18} /> Тренировки
           </button>
-        ) : null}
-      </div>
+          {!isNew ? (
+            <button
+              type="button"
+              className="icon-btn"
+              aria-label="Ещё"
+              onClick={() => setMenuOpen(true)}
+            >
+              <MoreHorizontal size={20} />
+            </button>
+          ) : null}
+        </div>
 
-      <header className="workouts-head">
-        <h1 className="page-title">{pageTitle}</h1>
-      </header>
+        <header className="workouts-head">
+          <h1 className="page-title">{pageTitle}</h1>
+        </header>
+      </div>
 
       {error ? (
         <p className="feedback-error" role="alert">

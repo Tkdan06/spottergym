@@ -82,51 +82,7 @@
   display: none;
 }
 
-/* Bottom sheet — только если явно «Другой зал» */
-.checkin-sheet {
-  position: fixed;
-  inset: 0;
-  z-index: 90;
-  display: grid;
-  align-items: end;
-}
-
-.checkin-sheet-backdrop {
-  position: absolute;
-  inset: 0;
-  border: 0;
-  padding: 0;
-  background: rgba(4, 8, 6, 0.72);
-}
-
-.checkin-sheet-panel {
-  position: relative;
-  z-index: 1;
-  width: min(100%, 520px);
-  margin: 0 auto;
-  padding: 10px 16px calc(16px + var(--safe-bottom));
-  border-radius: 22px 22px 0 0;
-  border: 1px solid var(--line);
-  border-bottom: 0;
-  background: #101614;
-  display: grid;
-  gap: 10px;
-  animation: fade-up 0.22s ease both;
-}
-
-.checkin-sheet-grab {
-  width: 36px;
-  height: 4px;
-  border-radius: 999px;
-  background: var(--line-strong);
-  margin: 2px auto 4px;
-}
-
-.checkin-sheet-panel h3 {
-  margin: 0;
-  font-size: 1.25rem;
-}
-
+/* Bottom sheet content — chrome via .app-sheet* (styles/sheets.css) */
 .checkin-sheet-lead {
   margin: 0;
   font-size: 0.88rem;

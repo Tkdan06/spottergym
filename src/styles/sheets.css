@@ -1,0 +1,66 @@
+/**
+ * Shared bottom-sheet chrome. Feature sheets keep their own content styles
+ * but compose these classes for backdrop / panel / grab.
+ */
+.app-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  align-items: end;
+}
+
+.app-sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: rgba(4, 8, 6, 0.72);
+  cursor: default;
+}
+
+.app-sheet-panel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 520px);
+  margin: 0 auto;
+  padding: 10px 16px calc(16px + var(--safe-bottom));
+  border-radius: 22px 22px 0 0;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  background: #101614;
+  display: grid;
+  gap: 10px;
+  animation: fade-up 0.22s ease both;
+  box-sizing: border-box;
+}
+
+.app-sheet-grab {
+  width: 36px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line-strong);
+  margin: 2px auto 4px;
+}
+
+.app-sheet-panel > h2,
+.app-sheet-panel > h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+@media (min-width: 900px) {
+  .app-sheet {
+    align-items: center;
+    padding: 24px;
+  }
+
+  .app-sheet-panel {
+    border-radius: 22px;
+    border-bottom: 1px solid var(--line);
+    max-height: min(86vh, 720px);
+    overflow: auto;
+  }
+}

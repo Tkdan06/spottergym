@@ -131,14 +131,18 @@ export function AdminUsersPage() {
 
   return (
     <main className="page admin-page admin-roles-page">
-      <button type="button" className="back-link" onClick={() => navigate('/app/admin')}>
-        <ArrowLeft size={18} /> Админка
-      </button>
-      <h1>Админы и права</h1>
-      <p className="muted">
-        Главный админ отмечен в списке. Можно выдать ограниченные права (только тикеты) или полные
-        (блок, удаление, назначение других админов).
-      </p>
+      <div className="subpage-top">
+        <button type="button" className="back-link" onClick={() => navigate('/app/admin')}>
+          <ArrowLeft size={18} /> Админка
+        </button>
+        <header>
+          <h1 className="page-title">Админы и права</h1>
+          <p className="muted">
+            Главный админ отмечен в списке. Можно выдать ограниченные права (только тикеты) или полные
+            (блок, удаление, назначение других админов).
+          </p>
+        </header>
+      </div>
 
       {canManageAdmins ? (
         <section className="admin-preset-help surface">

@@ -95,26 +95,28 @@ export function AdminBroadcastsPage() {
 
   return (
     <main className="page admin-page">
-      <button type="button" className="back-link" onClick={() => navigate('/app/admin')}>
-        <ArrowLeft size={18} /> Админка
-      </button>
-
-      <header className="admin-players-head">
-        <div>
-          <h1 className="page-title">Рассылка</h1>
-          <p className="muted">Сообщение всем в колокольчик · очередь и прочтения</p>
-        </div>
-        <button
-          type="button"
-          className="btn-icon-refresh"
-          onClick={() => void load()}
-          aria-label="Обновить"
-          title="Обновить"
-          disabled={loading || sending}
-        >
-          <RefreshCw size={22} strokeWidth={2.4} />
+      <div className="subpage-top">
+        <button type="button" className="back-link" onClick={() => navigate('/app/admin')}>
+          <ArrowLeft size={18} /> Админка
         </button>
-      </header>
+
+        <header className="admin-players-head">
+          <div>
+            <h1 className="page-title">Рассылка</h1>
+            <p className="muted">Сообщение всем в колокольчик · очередь и прочтения</p>
+          </div>
+          <button
+            type="button"
+            className="btn-icon-refresh"
+            onClick={() => void load()}
+            aria-label="Обновить"
+            title="Обновить"
+            disabled={loading || sending}
+          >
+            <RefreshCw size={22} strokeWidth={2.4} />
+          </button>
+        </header>
+      </div>
 
       {error ? (
         <p className="feedback-error" role="alert">

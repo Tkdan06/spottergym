@@ -134,14 +134,16 @@ export function WorkoutsPage() {
 
   return (
     <main className="page workouts-page">
-      <button type="button" className="back-link" onClick={() => navigate(-1)}>
-        <ArrowLeft size={18} /> Назад
-      </button>
+      <div className="subpage-top">
+        <button type="button" className="back-link" onClick={() => navigate(-1)}>
+          <ArrowLeft size={18} /> Назад
+        </button>
 
-      <header className="workouts-head">
-        <h1 className="page-title">Мои тренировки</h1>
-        <p className="muted">Дневник прогресса</p>
-      </header>
+        <header className="workouts-head">
+          <h1 className="page-title">Мои тренировки</h1>
+          <p className="muted">Дневник прогресса</p>
+        </header>
+      </div>
 
       {error ? (
         <p className="feedback-error" role="alert">
@@ -218,14 +220,14 @@ export function WorkoutsPage() {
             {list.map((w) => {
               const open = expandedId === w.id
               const exercises = Array.isArray(w.exercises) ? w.exercises : []
+              const metaLabel = `${w.exerciseCount} упр. · ${w.setCount} подх.`
               return (
                 <li key={w.id} className={`workouts-board ${open ? 'is-open' : ''}`}>
                   <div className="workouts-board-top">
-                    <button
-                      type="button"
-                      className="workouts-board-toggle"
-                      aria-expanded={open}
-                      onClick={() => toggleExpand(w.id)}
+                    <Link
+                      to={`/app/workouts/${w.id}`}
+                      className="workouts-board-main"
+                      aria-label={`Открыть «${w.title}»`}
                     >
                       <div className="workouts-row-copy">
                         <strong>{w.title}</strong>
@@ -237,25 +239,33 @@ export function WorkoutsPage() {
                           <span className="dim workouts-row-note">{w.notes.trim()}</span>
                         ) : null}
                       </div>
-                      <span className="dim workouts-row-meta">
-                        {w.exerciseCount} упр. · {w.setCount} подх.
-                      </span>
-                      <ChevronDown
-                        size={18}
-                        className={`workouts-board-chevron ${open ? 'is-open' : ''}`}
-                        aria-hidden
-                      />
-                    </button>
+                      <ChevronRight size={18} className="workouts-board-nav" aria-hidden />
+                    </Link>
                     <button
                       type="button"
-                      className="icon-btn workouts-row-copy-btn"
+                      className="workouts-row-copy-btn"
                       aria-label={`Скопировать «${w.title}» как новую`}
                       title="Скопировать как новую"
                       onClick={() => copyWorkout(w.id)}
                     >
-                      <Copy size={18} strokeWidth={2.2} />
+                      <Copy size={16} strokeWidth={2} />
                     </button>
                   </div>
+
+                  <button
+                    type="button"
+                    className="workouts-board-expand"
+                    aria-expanded={open}
+                    aria-label={open ? 'Свернуть упражнения' : `Показать упражнения · ${metaLabel}`}
+                    onClick={() => toggleExpand(w.id)}
+                  >
+                    <span className="dim workouts-row-meta">{metaLabel}</span>
+                    <ChevronDown
+                      size={16}
+                      className={`workouts-board-chevron ${open ? 'is-open' : ''}`}
+                      aria-hidden
+                    />
+                  </button>
 
                   {open ? (
                     <div className="workouts-board-body">
@@ -278,9 +288,6 @@ export function WorkoutsPage() {
                       ) : (
                         <p className="muted">Нет упражнений</p>
                       )}
-                      <Link to={`/app/workouts/${w.id}`} className="text-link muted workouts-board-open">
-                        Открыть тренировку
-                      </Link>
                     </div>
                   ) : null}
                 </li>

@@ -99,12 +99,6 @@ export function HomePage() {
       <header className="page-header home-top">
         <h1 className="page-title">Мой зал</h1>
         <div className="page-header-actions">
-          <Link to="/app/workouts" className="icon-btn" aria-label="Тренировки" title="Тренировки">
-            <ClipboardList size={20} />
-          </Link>
-          <Link to="/app/activity" className="icon-btn" aria-label="Активность" title="Активность">
-            <ChartNoAxesColumn size={20} />
-          </Link>
           <Link to="/app/notifications" className="icon-btn home-bell" aria-label="Уведомления">
             <Bell size={20} />
             {unreadNotifications > 0 ? <i className="nav-badge">{unreadNotifications}</i> : null}
@@ -125,9 +119,12 @@ export function HomePage() {
           <Link to="/app/discover?from=home" className="btn btn-primary btn-block">
             Выбрать зал
           </Link>
-          <Link to="/app/feedback?topic=gym" className="btn btn-soft btn-block">
+          <Link to="/app/feedback?topic=gym" className="btn btn-soft btn-sm btn-block">
             Запросить добавление зала
           </Link>
+          <InviteFriendsButton userId={user.id} className="btn btn-ghost btn-sm btn-block">
+            Пригласить друзей
+          </InviteFriendsButton>
         </section>
       ) : (
         <>
@@ -158,12 +155,25 @@ export function HomePage() {
               {youHere ? (
                 <Link
                   to="/app/workouts/new?fromCheckIn=1"
-                  className="btn btn-soft btn-block home-log-workout"
+                  className="btn btn-soft btn-sm btn-block home-log-workout"
                 >
                   <ClipboardList size={16} /> Записать тренировку
                 </Link>
               ) : null}
             </div>
+
+            <nav className="home-tools" aria-label="Дневник и активность">
+              <Link to="/app/workouts" className="home-tool-link">
+                <ClipboardList size={18} aria-hidden />
+                <span>Тренировки</span>
+                <ChevronRight size={16} aria-hidden />
+              </Link>
+              <Link to="/app/activity" className="home-tool-link">
+                <ChartNoAxesColumn size={18} aria-hidden />
+                <span>Активность</span>
+                <ChevronRight size={16} aria-hidden />
+              </Link>
+            </nav>
 
             {multi ? (
               <div className="floor-gym-switch-wrap">
@@ -244,7 +254,7 @@ export function HomePage() {
                   <InviteFriendsButton
                     userId={user.id}
                     gymName={gymLabel}
-                    className="btn btn-soft btn-block"
+                    className="btn btn-soft btn-sm btn-block"
                   >
                     Поделиться ссылкой
                   </InviteFriendsButton>

@@ -81,27 +81,99 @@
 }
 
 .workouts-board-top {
-  display: flex;
-  align-items: stretch;
-  gap: 2px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0;
   min-width: 0;
 }
 
-.workouts-board-toggle {
-  flex: 1 1 auto;
+/* Primary: open workout (Material — left / main target) */
+.workouts-board-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 12px 4px 8px 14px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.workouts-board-main:hover strong,
+.workouts-board-main:focus-visible strong {
+  color: var(--accent);
+}
+
+.workouts-board-main:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  outline-offset: -2px;
+}
+
+.workouts-board-nav {
+  flex-shrink: 0;
+  color: var(--text-dim);
+  opacity: 0.85;
+}
+
+/* Secondary copy — quiet glyph, not a bordered icon tile */
+.workouts-row-copy-btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin: 0 8px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.workouts-row-copy-btn:hover,
+.workouts-row-copy-btn:focus-visible {
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.workouts-row-copy-btn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  outline-offset: 0;
+}
+
+/* Dedicated expand strip — only this opens the exercise preview */
+.workouts-board-expand {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
+  width: 100%;
   margin: 0;
-  padding: 12px 10px 12px 14px;
+  padding: 8px 14px 10px;
   border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
   background: transparent;
   color: inherit;
   font: inherit;
   text-align: left;
   cursor: pointer;
-  min-width: 0;
+}
+
+.workouts-board-expand:hover,
+.workouts-board-expand:focus-visible {
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+}
+
+.workouts-board-expand:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  outline-offset: -2px;
+}
+
+.workouts-board.is-open .workouts-board-expand {
+  color: var(--text-muted);
 }
 
 .workouts-board-chevron {
@@ -114,25 +186,12 @@
   transform: rotate(180deg);
 }
 
-.workouts-row-copy-btn {
-  flex: 0 0 auto;
-  align-self: center;
-  width: 42px;
-  height: 42px;
-  margin-right: 4px;
-  border-radius: 12px;
-}
-
 .workouts-board-body {
   display: grid;
   gap: 12px;
   padding: 0 14px 14px;
   border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
   padding-top: 12px;
-}
-
-.workouts-board-open {
-  justify-self: start;
 }
 
 .workouts-page .text-link {
@@ -207,8 +266,7 @@
 }
 
 .workouts-row-meta {
-  flex-shrink: 0;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   white-space: nowrap;
 }
 

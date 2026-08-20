@@ -104,32 +104,34 @@ export function InviteCirclePage() {
 
   return (
     <main className="page invite-circle-page">
-      <button type="button" className="back-link" onClick={() => navigate('/app/profile')}>
-        <ArrowLeft size={18} /> Профиль
-      </button>
+      <div className="subpage-top">
+        <button type="button" className="back-link" onClick={() => navigate('/app/profile')}>
+          <ArrowLeft size={18} /> Профиль
+        </button>
 
-      <header className="invite-circle-head">
-        <h1 className="page-title">Мой круг</h1>
-        <div className="invite-circle-lead">
-          <p className="muted">Приглашай друзей — расти в статусе</p>
-          <div className="ui-hint invite-circle-hint" ref={hintRef}>
-            <button
-              type="button"
-              className="ui-hint-trigger"
-              aria-label="Как засчитываются друзья"
-              aria-expanded={hintOpen}
-              onClick={() => setHintOpen((v) => !v)}
-            >
-              <Info size={14} strokeWidth={2.25} />
-            </button>
-            {hintOpen ? (
-              <div className="ui-hint-pop" role="tooltip">
-                Засчитываются друзья, которые зарегистрировались по твоей ссылке и прошли онбординг.
-              </div>
-            ) : null}
+        <header className="invite-circle-head">
+          <h1 className="page-title">Мой круг</h1>
+          <div className="invite-circle-lead">
+            <p className="muted">Приглашай друзей — расти в статусе</p>
+            <div className="ui-hint invite-circle-hint" ref={hintRef}>
+              <button
+                type="button"
+                className="ui-hint-trigger"
+                aria-label="Как засчитываются друзья"
+                aria-expanded={hintOpen}
+                onClick={() => setHintOpen((v) => !v)}
+              >
+                <Info size={14} strokeWidth={2.25} />
+              </button>
+              {hintOpen ? (
+                <div className="ui-hint-pop" role="tooltip">
+                  Засчитываются друзья, которые зарегистрировались по твоей ссылке и прошли онбординг.
+                </div>
+              ) : null}
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      </div>
 
       {error ? <p className="admin-inline-error">{error}</p> : null}
 

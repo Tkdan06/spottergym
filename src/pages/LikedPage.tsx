@@ -159,40 +159,42 @@ export function LikedPage({ mode = 'received' }: { mode?: LikesMode }) {
 
   return (
     <main className="page liked-page">
-      <button type="button" className="back-link" onClick={() => navigate('/app/profile')}>
-        <ArrowLeft size={18} /> Профиль
-      </button>
+      <div className="subpage-top">
+        <button type="button" className="back-link" onClick={() => navigate('/app/profile')}>
+          <ArrowLeft size={18} /> Профиль
+        </button>
 
-      <header className="page-header liked-header">
-        <div className="page-header-text">
-          <h1 className="page-title">Лайки</h1>
-          <div className="liked-tabs" role="tablist" aria-label="Лайки">
-            <Link
-              to="/app/likes"
-              role="tab"
-              aria-selected={mode === 'received'}
-              className={`liked-tab ${mode === 'received' ? 'active' : ''}`}
-            >
-              Кто лайкнул
-            </Link>
-            <Link
-              to="/app/likes/sent"
-              role="tab"
-              aria-selected={mode === 'sent'}
-              className={`liked-tab ${mode === 'sent' ? 'active' : ''}`}
-            >
-              Кого я лайкнул
-            </Link>
+        <header className="page-header liked-header">
+          <div className="page-header-text">
+            <h1 className="page-title">Лайки</h1>
+            <div className="liked-tabs" role="tablist" aria-label="Лайки">
+              <Link
+                to="/app/likes"
+                role="tab"
+                aria-selected={mode === 'received'}
+                className={`liked-tab ${mode === 'received' ? 'active' : ''}`}
+              >
+                Кто лайкнул
+              </Link>
+              <Link
+                to="/app/likes/sent"
+                role="tab"
+                aria-selected={mode === 'sent'}
+                className={`liked-tab ${mode === 'sent' ? 'active' : ''}`}
+              >
+                Кого я лайкнул
+              </Link>
+            </div>
+            <p className="liked-count">
+              {people.length
+                ? `${people.length} ${
+                    people.length === 1 ? 'человек' : people.length < 5 ? 'человека' : 'человек'
+                  }`
+                : 'Пока пусто'}
+            </p>
           </div>
-          <p className="liked-count">
-            {people.length
-              ? `${people.length} ${
-                  people.length === 1 ? 'человек' : people.length < 5 ? 'человека' : 'человек'
-                }`
-              : 'Пока пусто'}
-          </p>
-        </div>
-      </header>
+        </header>
+      </div>
 
       {people.length ? (
         <div className="liked-list">

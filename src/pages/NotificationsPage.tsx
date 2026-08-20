@@ -127,7 +127,7 @@ export function NotificationsPage() {
 
   return (
     <main className="page notifications-page">
-      <header className="notifications-top">
+      <header className="subpage-top notifications-top">
         <button
           type="button"
           className="back-link"
@@ -139,7 +139,7 @@ export function NotificationsPage() {
           <ArrowLeft size={18} /> Назад
         </button>
         <div className="notifications-title-row">
-          <h1>Уведомления</h1>
+          <h1 className="page-title">Уведомления</h1>
           {unreadNotifications > 0 ? (
             <button
               type="button"

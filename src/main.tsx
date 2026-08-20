@@ -17,6 +17,7 @@ import { EmergencyOfflineGate } from './components/EmergencyOfflineGate'
 import { SiteLockGate } from './components/SiteLockGate'
 import { registerSpotterServiceWorker } from './lib/push'
 import './styles/global.css'
+import './styles/sheets.css'
 
 /** iOS “Add to Home Screen” sets navigator.standalone; CSS media covers Android PWAs. */
 function markStandaloneLaunch() {
