@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { ThumbsUp } from 'lucide-react'
+import { Dumbbell, ThumbsUp } from 'lucide-react'
 import { useApp } from '../context/useApp'
 import type { Gender } from '../types'
 import './MomentFX.css'
@@ -75,17 +75,30 @@ function prefersReducedMotion() {
 
 type Particle = { id: number; left: number; delay: number; duration: number; drift: number; hue: number }
 
+/** Sparks around the toast card only — not a second mid-screen show. */
 function buildParticles(kind: MomentKind): Particle[] {
   if (prefersReducedMotion()) return []
-  const count = kind === 'checkin' ? 10 : kind === 'checkout' ? 22 : 14
+  const count = kind === 'checkout' ? 12 : 8
   return Array.from({ length: count }, (_, i) => ({
     id: i,
-    left: 8 + Math.random() * 84,
-    delay: Math.random() * 0.25,
-    duration: 0.85 + Math.random() * 0.55,
-    drift: -40 + Math.random() * 80,
+    left: 12 + Math.random() * 76,
+    delay: Math.random() * 0.18,
+    duration: 0.7 + Math.random() * 0.4,
+    drift: -28 + Math.random() * 56,
     hue: kind === 'checkin' ? 72 + Math.random() * 40 : 35 + Math.random() * 90,
   }))
+}
+
+function MomentIcon({ kind }: { kind: MomentKind }) {
+  if (kind === 'checkin') return <Dumbbell size={22} strokeWidth={2.4} aria-hidden />
+  return <ThumbsUp size={22} strokeWidth={2.4} aria-hidden />
+}
+
+/** Frequent actions stay short; long dark overlays add friction on the 40th visit. */
+function momentDurationMs(kind: MomentKind) {
+  if (prefersReducedMotion()) return 1200
+  if (kind === 'checkout') return 1800
+  return 1600
 }
 
 export function MomentProvider({ children }: { children: ReactNode }) {
@@ -113,18 +126,20 @@ export function MomentProvider({ children }: { children: ReactNode }) {
         subtitle: copy.subtitle,
         particles: buildParticles(kind),
       })
-      const ms = prefersReducedMotion() ? 1400 : kind === 'checkout' ? 2200 : 1700
       timerRef.current = window.setTimeout(() => {
         setMoment(null)
         timerRef.current = null
-      }, ms)
+      }, momentDurationMs(kind))
     },
     [gender],
   )
 
-  useEffect(() => () => {
-    if (timerRef.current) window.clearTimeout(timerRef.current)
-  }, [])
+  useEffect(
+    () => () => {
+      if (timerRef.current) window.clearTimeout(timerRef.current)
+    },
+    [],
+  )
 
   const api = useMemo(() => ({ celebrate }), [celebrate])
 
@@ -139,35 +154,38 @@ export function MomentProvider({ children }: { children: ReactNode }) {
               role="status"
               aria-live="polite"
             >
-              <div className="moment-fx-burst" aria-hidden>
-                {moment.particles.map((p) => (
-                  <i
-                    key={p.id}
-                    className="moment-fx-particle"
-                    style={
-                      {
-                        left: `${p.left}%`,
-                        '--drift': `${p.drift}px`,
-                        '--delay': `${p.delay}s`,
-                        '--dur': `${p.duration}s`,
-                        '--hue': String(p.hue),
-                      } as CSSProperties
-                    }
-                  />
-                ))}
-                {moment.kind === 'workout' || moment.kind === 'checkout' ? (
-                  <span className="moment-fx-thumb">
-                    <ThumbsUp size={28} strokeWidth={2.4} />
-                  </span>
-                ) : (
-                  <span className="moment-fx-pulse" />
-                )}
+              <button
+                type="button"
+                className="moment-fx-scrim"
+                aria-label="Закрыть"
+                onClick={clear}
+              />
+              <div className="moment-fx-card">
+                <div className="moment-fx-sparks" aria-hidden>
+                  {moment.particles.map((p) => (
+                    <i
+                      key={p.id}
+                      className="moment-fx-particle"
+                      style={
+                        {
+                          left: `${p.left}%`,
+                          '--drift': `${p.drift}px`,
+                          '--delay': `${p.delay}s`,
+                          '--dur': `${p.duration}s`,
+                          '--hue': String(p.hue),
+                        } as CSSProperties
+                      }
+                    />
+                  ))}
+                </div>
+                <span className="moment-fx-icon">
+                  <MomentIcon kind={moment.kind} />
+                </span>
+                <div className="moment-fx-copy">
+                  <strong>{moment.title}</strong>
+                  {moment.subtitle ? <span>{moment.subtitle}</span> : null}
+                </div>
               </div>
-              <div className="moment-fx-toast">
-                <strong>{moment.title}</strong>
-                {moment.subtitle ? <span>{moment.subtitle}</span> : null}
-              </div>
-              <button type="button" className="moment-fx-dismiss" aria-label="Закрыть" onClick={clear} />
             </div>,
             document.body,
           )

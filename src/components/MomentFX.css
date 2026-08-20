@@ -1,26 +1,47 @@
+/* Check-in / out / workout: one focal card near the action (top), not mid + bottom. */
 .moment-fx {
   position: fixed;
   inset: 0;
   z-index: 120;
-  pointer-events: none;
   display: grid;
-  align-items: end;
+  align-content: start;
   justify-items: center;
-  padding: 0 16px calc(28px + var(--safe-bottom) + 64px);
+  padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 16px;
+  pointer-events: none;
 }
 
-.moment-fx-dismiss {
+.moment-fx-scrim {
   position: absolute;
   inset: 0;
   border: 0;
   padding: 0;
   margin: 0;
-  background: transparent;
-  pointer-events: auto;
   cursor: default;
+  pointer-events: auto;
+  background: rgba(6, 10, 9, 0.48);
+  animation: moment-scrim-in 0.28s ease-out both;
 }
 
-.moment-fx-burst {
+.moment-fx-card {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px 14px;
+  width: min(100%, 360px);
+  margin-top: 64px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--line));
+  background: color-mix(in srgb, #101614 92%, var(--accent));
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.42);
+  animation: moment-card-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.moment-fx-sparks {
   position: absolute;
   inset: 0;
   overflow: hidden;
@@ -29,133 +50,67 @@
 
 .moment-fx-particle {
   position: absolute;
-  bottom: 28%;
-  width: 8px;
-  height: 10px;
-  border-radius: 2px;
-  background: hsl(var(--hue, 80) 85% 62%);
-  opacity: 0;
-  animation: moment-particle var(--dur, 1s) cubic-bezier(0.15, 0.85, 0.25, 1) var(--delay, 0s) both;
-}
-
-.moment-fx--checkin .moment-fx-particle {
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  bottom: 42%;
-}
-
-.moment-fx--workout .moment-fx-particle:nth-child(odd) {
-  border-radius: 999px;
+  bottom: 18%;
   width: 6px;
   height: 6px;
-}
-
-.moment-fx-thumb {
-  position: absolute;
-  left: 50%;
-  bottom: 38%;
-  color: var(--accent);
-  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.35));
-  animation: moment-thumb 1.15s cubic-bezier(0.2, 0.9, 0.25, 1) both;
-  pointer-events: none;
-}
-
-.moment-fx-pulse {
-  position: absolute;
-  left: 50%;
-  top: 42%;
-  width: 18px;
-  height: 18px;
-  margin: -9px 0 0 -9px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--accent) 80%, white);
-  box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent);
-  animation: moment-pulse-ring 1s ease-out both;
-  pointer-events: none;
+  background: hsl(var(--hue, 80) 85% 62%);
+  opacity: 0;
+  animation: moment-particle var(--dur, 0.9s) cubic-bezier(0.15, 0.85, 0.25, 1) var(--delay, 0s)
+    both;
 }
 
-.moment-fx-toast {
-  position: relative;
-  z-index: 1;
+.moment-fx--checkout .moment-fx-particle,
+.moment-fx--workout .moment-fx-particle {
+  border-radius: 2px;
+  width: 5px;
+  height: 7px;
+}
+
+.moment-fx-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  color: var(--accent-ink);
+  background: var(--accent);
+  flex-shrink: 0;
+  animation: moment-icon-pop 0.55s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
+
+.moment-fx-copy {
   display: grid;
   gap: 2px;
-  justify-items: center;
-  text-align: center;
-  min-width: min(100%, 280px);
-  max-width: 360px;
-  padding: 14px 18px;
-  border-radius: 18px;
-  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
-  background: color-mix(in srgb, #101614 88%, var(--accent));
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
-  animation: moment-toast-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-  pointer-events: none;
+  min-width: 0;
 }
 
-.moment-fx-toast strong {
+.moment-fx-copy strong {
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   letter-spacing: var(--letter-tight);
-  line-height: 1.15;
+  line-height: 1.2;
 }
 
-.moment-fx-toast span {
-  font-size: 0.9rem;
+.moment-fx-copy span {
+  font-size: 0.88rem;
   color: var(--text-muted);
+  line-height: 1.3;
 }
 
-@keyframes moment-particle {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 12px, 0) rotate(0deg) scale(0.6);
-  }
-  12% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translate3d(var(--drift, 20px), -220px, 0) rotate(220deg) scale(1);
-  }
-}
-
-@keyframes moment-thumb {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, 24px) scale(0.4) rotate(-12deg);
-  }
-  35% {
-    opacity: 1;
-    transform: translate(-50%, -8px) scale(1.12) rotate(4deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -72px) scale(0.9) rotate(0deg);
-  }
-}
-
-@keyframes moment-pulse-ring {
-  0% {
-    opacity: 0.9;
-    transform: scale(0.4);
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 50%, transparent);
-  }
-  70% {
-    opacity: 0.35;
-    transform: scale(2.4);
-    box-shadow: 0 0 0 28px transparent;
-  }
-  100% {
-    opacity: 0;
-    transform: scale(2.8);
-    box-shadow: 0 0 0 0 transparent;
-  }
-}
-
-@keyframes moment-toast-in {
+@keyframes moment-scrim-in {
   from {
     opacity: 0;
-    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes moment-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.96);
   }
   to {
     opacity: 1;
@@ -163,14 +118,40 @@
   }
 }
 
+@keyframes moment-icon-pop {
+  0% {
+    transform: scale(0.6) rotate(-8deg);
+  }
+  55% {
+    transform: scale(1.08) rotate(3deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes moment-particle {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0) scale(0.5);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--drift, 12px), -64px, 0) scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .moment-fx-particle,
-  .moment-fx-thumb,
-  .moment-fx-pulse {
+  .moment-fx-particle {
     display: none;
   }
 
-  .moment-fx-toast {
+  .moment-fx-scrim,
+  .moment-fx-card,
+  .moment-fx-icon {
     animation: none;
   }
 }

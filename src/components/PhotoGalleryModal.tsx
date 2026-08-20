@@ -341,13 +341,9 @@ export function PhotoGalleryModal({
               onChange={handleUpload}
             />
           </footer>
-        ) : (
-          <p className="photo-modal-hint muted">
-            {hasPhotos
-              ? `${index + 1} из ${list.length} · листай влево или вправо`
-              : 'Фото скрыто или ещё не загружено'}
-          </p>
-        )}
+        ) : !hasPhotos ? (
+          <p className="photo-modal-hint muted">Фото скрыто или ещё не загружено</p>
+        ) : null}
       </div>
     </div>,
     document.body,
