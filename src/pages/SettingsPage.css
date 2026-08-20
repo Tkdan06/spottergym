@@ -147,6 +147,12 @@
   max-width: 100%;
 }
 
+.settings-coach-fields {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
 .settings-break-fields .field {
   min-width: 0;
   max-width: 100%;
@@ -204,10 +210,18 @@
   flex-shrink: 0;
 }
 
-.settings-links {
-  display: grid;
-  gap: 10px;
+.settings-support {
+  padding: 16px;
   margin: 0 0 16px;
+}
+
+.settings-support .section-title {
+  margin-bottom: 8px;
+}
+
+.settings-support-lead {
+  margin: 0 0 12px;
+  line-height: 1.4;
 }
 
 .safety {

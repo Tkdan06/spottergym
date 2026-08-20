@@ -149,12 +149,6 @@
   font-size: 0.8rem;
 }
 
-.profile-coach-hint {
-  display: inline-block;
-  margin: -4px 0 8px;
-  font-size: 0.85rem;
-}
-
 .profile-username {
   display: inline-flex;
   align-items: center;
@@ -263,29 +257,6 @@
   border: 1px solid rgba(255, 184, 77, 0.22);
 }
 
-.text-link {
-  display: inline;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  font-weight: 650;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  cursor: pointer;
-}
-
-.text-link.muted {
-  text-decoration: none;
-  color: var(--text-muted);
-}
-
-.text-link.muted:hover {
-  color: var(--text);
-}
-
 .profile-block p {
   line-height: 1.45;
 }
@@ -302,29 +273,6 @@
 
 .profile-invite-block > .section-title {
   margin-bottom: 0;
-}
-
-.profile-quiet-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-  margin: 0 0 8px;
-  padding: 0 2px;
-}
-
-.profile-quiet-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--text-muted);
-  font-size: 0.88rem;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.profile-quiet-link:hover,
-.profile-quiet-link:focus-visible {
-  color: var(--accent);
 }
 
 .slots {

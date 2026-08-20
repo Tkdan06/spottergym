@@ -162,13 +162,13 @@ export function HomePage() {
               ) : null}
             </div>
 
-            <nav className="home-tools" aria-label="Дневник и активность">
-              <Link to="/app/workouts" className="home-tool-link">
+            <nav className="entry-tools entry-tools--2" aria-label="Дневник и активность">
+              <Link to="/app/workouts" className="entry-link">
                 <ClipboardList size={18} aria-hidden />
                 <span>Тренировки</span>
                 <ChevronRight size={16} aria-hidden />
               </Link>
-              <Link to="/app/activity" className="home-tool-link">
+              <Link to="/app/activity" className="entry-link">
                 <ChartNoAxesColumn size={18} aria-hidden />
                 <span>Активность</span>
                 <ChevronRight size={16} aria-hidden />

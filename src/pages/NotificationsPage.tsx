@@ -250,15 +250,6 @@ export function NotificationsPage() {
               </button>
             ))}
           </div>
-
-          <Link to="/app/feedback" className="btn btn-primary btn-block">
-            Обратная связь / тикеты
-          </Link>
-          {user?.isAdmin ? (
-            <Link to="/app/admin" className="btn btn-soft btn-block">
-              Админка
-            </Link>
-          ) : null}
         </section>
       ) : (
         <section className="card-list">

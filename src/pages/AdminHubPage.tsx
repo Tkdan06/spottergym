@@ -159,7 +159,7 @@ export function AdminHubPage() {
           <section className="surface admin-rr-panel">
             <SectionTitle
               action={
-                <Link to="/app/admin/analytics" className="muted">
+                <Link to="/app/admin/analytics" className="section-action">
                   Подробнее
                 </Link>
               }

@@ -119,6 +119,7 @@
 }
 
 .home-tools {
+  /* alias: prefer .entry-tools.entry-tools--2 in new code */
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
@@ -126,6 +127,7 @@
 }
 
 .home-tool-link {
+  /* alias of .entry-link — keep until call sites migrate */
   display: flex;
   align-items: center;
   gap: 8px;

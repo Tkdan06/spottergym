@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Bell, Copy, MessageSquareText, Settings, Share2, Shield } from 'lucide-react'
+import { Bell, Copy, Settings, Share2 } from 'lucide-react'
 import { Link, Navigate } from 'react-router-dom'
 import { LikesRow } from '../components/LikesRow'
 import { ReferralBadge, referralChromeClass } from '../components/ReferralBadge'
@@ -9,7 +9,7 @@ import { SoftFlash } from '../components/SoftFlash'
 import { ScheduleSheet } from '../components/ScheduleSheet'
 import { SectionTitle } from '../components/SectionTitle'
 import { useApp } from '../context/useApp'
-import { COACH_DIRECTIONS, experienceLabel, getUserGyms, intentLabel } from '../data/mock'
+import { experienceLabel, getUserGyms, intentLabel } from '../data/mock'
 import { isDemoAccount } from '../lib/demoAccount'
 import { localGenderAvatar, profileImage } from '../lib/avatar'
 import { clampPhotos } from '../lib/photos'
@@ -183,7 +183,7 @@ export function ProfilePage() {
       <section className="surface profile-block likes-block">
         <SectionTitle
           action={
-            <Link to="/app/likes/sent" className="muted">
+            <Link to="/app/likes/sent" className="section-action">
               {myLiked.length ? `Кого я лайкнул · ${myLiked.length}` : 'Кого я лайкнул'}
             </Link>
           }
@@ -232,7 +232,7 @@ export function ProfilePage() {
       <section className="surface profile-block">
         <SectionTitle
           action={
-            <Link to="/app/discover" className="muted">
+            <Link to="/app/discover" className="section-action">
               Добавить
             </Link>
           }
@@ -263,7 +263,11 @@ export function ProfilePage() {
       <section className="surface profile-block">
         <SectionTitle
           action={
-            <button type="button" className="text-link muted" onClick={() => setScheduleOpen(true)}>
+            <button
+              type="button"
+              className="section-action"
+              onClick={() => setScheduleOpen(true)}
+            >
               Изменить
             </button>
           }
@@ -331,39 +335,6 @@ export function ProfilePage() {
           type="button"
           className="toggle-row"
           role="switch"
-          aria-checked={user.isCoach}
-          onClick={() =>
-            void patch({
-              isCoach: !user.isCoach,
-              coachSports: !user.isCoach
-                ? user.coachSports.length
-                  ? user.coachSports
-                  : COACH_DIRECTIONS.filter((d) => user.sports.includes(d)).slice(0, 2)
-                : [],
-            })
-          }
-        >
-          <div>
-            <strong>Я тренер</strong>
-            <p className="muted">
-              {user.isCoach
-                ? user.coachSports.length
-                  ? `Направления: ${user.coachSports.join(', ')}`
-                  : 'Укажи направления в настройках'
-                : 'Показать на карточке, что ты тренер'}
-            </p>
-          </div>
-          <span className={`toggle ${user.isCoach ? 'on' : ''}`} />
-        </button>
-        {user.isCoach && !user.coachSports.length ? (
-          <Link to="/app/settings" className="muted profile-coach-hint">
-            Выбрать направления тренера →
-          </Link>
-        ) : null}
-        <button
-          type="button"
-          className="toggle-row"
-          role="switch"
           aria-checked={user.privacy === 'anonymous'}
           onClick={() =>
             void patch({ privacy: user.privacy === 'open' ? 'anonymous' : 'open' })
@@ -392,17 +363,6 @@ export function ProfilePage() {
           <Share2 size={16} /> Открыть мой круг
         </Link>
       </section>
-
-      <nav className="profile-quiet-nav" aria-label="Дополнительно">
-        <Link to="/app/feedback" className="profile-quiet-link">
-          <MessageSquareText size={16} aria-hidden /> Обратная связь
-        </Link>
-        {user.isAdmin ? (
-          <Link to="/app/admin" className="profile-quiet-link">
-            <Shield size={16} aria-hidden /> Админка
-          </Link>
-        ) : null}
-      </nav>
 
       <SoftFlash message={copyFlash} />
     </main>

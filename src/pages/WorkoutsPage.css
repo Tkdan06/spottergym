@@ -88,11 +88,9 @@
   min-width: 0;
 }
 
-/* Primary: open workout (Material — left / main target) */
+/* Primary: open workout (title / meta — whole left target) */
 .workouts-board-main {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  display: block;
   min-width: 0;
   margin: 0;
   padding: 12px 4px 8px 14px;
@@ -108,12 +106,6 @@
 .workouts-board-main:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--accent) 55%, transparent);
   outline-offset: -2px;
-}
-
-.workouts-board-nav {
-  flex-shrink: 0;
-  color: var(--text-dim);
-  opacity: 0.85;
 }
 
 /* Secondary copy — quiet glyph, not a bordered icon tile */
@@ -194,29 +186,6 @@
   padding-top: 12px;
 }
 
-.workouts-page .text-link {
-  display: inline;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  font-weight: 650;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  cursor: pointer;
-}
-
-.workouts-page .text-link.muted {
-  text-decoration: none;
-  color: var(--text-muted);
-}
-
-.workouts-page a.text-link.muted {
-  color: var(--text-muted);
-}
-
 .workout-readonly-list {
   list-style: none;
   margin: 0;
@@ -283,17 +252,6 @@
 
 .workout-view-note {
   white-space: pre-wrap;
-}
-
-.workout-editor-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.workout-editor-top .back-link {
-  margin-bottom: 0;
 }
 
 .workouts-form-block {
@@ -694,15 +652,86 @@
   }
 }
 
-.workout-exercise-picker select {
+.workout-exercise-picker {
+  min-width: 0;
   width: 100%;
+}
+
+.workout-exercise-picker > span {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.workout-exercise-picker-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
   margin: 0;
-  padding: 10px 12px;
-  border-radius: 12px;
+  padding: 12px 14px;
+  min-height: 48px;
+  border-radius: 14px;
   border: 1px solid var(--line);
   background: var(--bg-elevated);
   color: inherit;
   font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.workout-exercise-picker-trigger > span {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: inherit;
+  font-weight: 650;
+  color: inherit;
+}
+
+.workout-exercise-picker-trigger svg {
+  flex-shrink: 0;
+  color: var(--text-dim);
+}
+
+.workout-exercise-picker-sheet {
+  max-height: min(72vh, 560px);
+  overflow: auto;
+}
+
+.workout-exercise-picker-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.workout-exercise-picker-item {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+  color: var(--text);
+  font: inherit;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.workout-exercise-picker-item.is-active {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
 }
 
 .workout-progress-chart-block {
@@ -714,31 +743,20 @@
 
 .workout-line-chart {
   display: grid;
-  grid-template-columns: 36px minmax(0, 1fr);
-  gap: 8px;
+  gap: 4px;
   min-width: 0;
 }
 
-.workout-line-y {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-end;
-  padding: 12px 0;
-  font-size: 0.72rem;
-  color: var(--text-dim);
-  font-variant-numeric: tabular-nums;
-}
-
-.workout-line-plot {
-  display: grid;
-  gap: 6px;
-  min-width: 0;
+.workout-line-unit {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.2;
 }
 
 .workout-line-svg {
   width: 100%;
-  height: 168px;
+  height: auto;
+  aspect-ratio: 320 / 200;
   display: block;
   overflow: visible;
 }
@@ -748,6 +766,17 @@
   stroke-width: 1;
 }
 
+.workout-line-y-label,
+.workout-line-x-label {
+  fill: var(--text-dim);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.workout-line-y-label {
+  text-anchor: end;
+}
+
 .workout-line-path {
   stroke: var(--accent);
   stroke-width: 2.5;
@@ -755,28 +784,22 @@
   stroke-linejoin: round;
 }
 
+.workout-line-hit {
+  fill: transparent;
+  stroke: none;
+  cursor: pointer;
+}
+
 .workout-line-dot {
   fill: var(--bg-elevated);
   stroke: var(--accent);
   stroke-width: 2;
   cursor: pointer;
+  pointer-events: none;
 }
 
 .workout-line-dot.is-selected {
   fill: var(--accent);
-}
-
-.workout-line-axis {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 0.78rem;
-  color: var(--text-dim);
-}
-
-.workout-line-unit {
-  margin: 0;
-  font-size: 0.78rem;
 }
 
 .workout-progress-point {

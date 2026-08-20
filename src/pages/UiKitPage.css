@@ -10,8 +10,47 @@
   line-height: 1.4;
 }
 
+.ui-kit-section-lead {
+  margin: 0 0 12px;
+  max-width: 46ch;
+  line-height: 1.4;
+}
+
 .ui-kit-block {
   padding: 16px;
+}
+
+.ui-kit-rules {
+  margin: 0;
+  padding-left: 1.15rem;
+  display: grid;
+  gap: 10px;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.ui-kit-rules strong {
+  color: var(--text);
+  font-weight: 650;
+}
+
+.ui-kit-code {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.ui-kit-list-demo {
+  pointer-events: none;
 }
 
 .ui-kit-swatches {
@@ -38,8 +77,10 @@
 
 .ui-kit-swatch code,
 .ui-kit-lead code,
+.ui-kit-section-lead code,
 .ui-kit-block code,
-.ui-kit-note code {
+.ui-kit-note code,
+.ui-kit-rules code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.78em;
   color: var(--accent);

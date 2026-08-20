@@ -309,24 +309,26 @@ export function WorkoutEditorPage() {
   return (
     <main className="page workouts-page workout-editor">
       <div className="subpage-top">
-        <div className="workout-editor-top">
-          <button type="button" className="back-link" onClick={() => navigate('/app/workouts')}>
-            <ArrowLeft size={18} /> Тренировки
-          </button>
-          {!isNew ? (
-            <button
-              type="button"
-              className="icon-btn"
-              aria-label="Ещё"
-              onClick={() => setMenuOpen(true)}
-            >
-              <MoreHorizontal size={20} />
-            </button>
-          ) : null}
-        </div>
+        <button type="button" className="back-link" onClick={() => navigate('/app/workouts')}>
+          <ArrowLeft size={18} /> Тренировки
+        </button>
 
-        <header className="workouts-head">
-          <h1 className="page-title">{pageTitle}</h1>
+        <header className="page-header">
+          <div className="page-header-text">
+            <h1 className="page-title">{pageTitle}</h1>
+          </div>
+          {!isNew ? (
+            <div className="page-header-actions">
+              <button
+                type="button"
+                className="icon-btn"
+                aria-label="Ещё"
+                onClick={() => setMenuOpen(true)}
+              >
+                <MoreHorizontal size={20} />
+              </button>
+            </div>
+          ) : null}
         </header>
       </div>
 
@@ -458,7 +460,7 @@ export function WorkoutEditorPage() {
                     {exercises.length > 1 ? (
                       <button
                         type="button"
-                        className="text-link muted"
+                        className="section-action"
                         onClick={() => setExercises((prev) => prev.filter((_, i) => i !== ei))}
                       >
                         Удалить

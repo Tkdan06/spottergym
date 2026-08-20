@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ArrowLeft } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { ArrowLeft, ChevronDown } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/useApp'
 import {
@@ -7,6 +7,7 @@ import {
   type WorkoutProgress,
   type WorkoutProgressRange,
 } from '../lib/apiClient'
+import { useSheetA11y } from '../lib/sheetA11y'
 import { formatBodyDelta, formatDeltaLabel, formatKg } from '../lib/workouts'
 import './WorkoutsPage.css'
 import './ActivityPage.css'
@@ -86,19 +87,21 @@ function LineChart({
   const ySpan = Math.max(0.001, yMax - yMin)
 
   const w = 320
-  const h = 160
-  const padL = 8
-  const padR = 8
-  const padT = 12
-  const padB = 12
+  const h = 200
+  /** Room for Y numbers — keep plot clear of labels */
+  const padL = 44
+  const padR = 10
+  const padT = 14
+  /** Room for X dates under the plot */
+  const padB = 28
   const plotW = w - padL - padR
   const plotH = h - padT - padB
 
+  const formatTick = (t: number) => (Number.isInteger(t) ? String(t) : t.toFixed(1))
+
   const coords = points.map((p, i) => {
     const x =
-      points.length === 1
-        ? padL + plotW / 2
-        : padL + (i / (points.length - 1)) * plotW
+      points.length === 1 ? padL + plotW / 2 : padL + (i / (points.length - 1)) * plotW
     const y = padT + (1 - (p.value - yMin) / ySpan) * plotH
     return { x, y, p, i }
   })
@@ -107,44 +110,49 @@ function LineChart({
 
   return (
     <div className="workout-line-chart">
-      <div className="workout-line-y" aria-hidden>
-        {ticks.map((t) => (
-          <span key={t}>{Number.isInteger(t) ? t : t.toFixed(1)}</span>
-        ))}
-      </div>
-      <div className="workout-line-plot">
-        <svg viewBox={`0 0 ${w} ${h}`} className="workout-line-svg" role="img" aria-label="График">
-          {ticks.map((t) => {
-            const y = padT + (1 - (t - yMin) / ySpan) * plotH
-            return (
-              <line
-                key={t}
-                x1={padL}
-                x2={w - padR}
-                y1={y}
-                y2={y}
-                className="workout-line-grid"
-              />
-            )
-          })}
-          <path d={path} className="workout-line-path" fill="none" />
-          {coords.map((c) => (
+      <p className="dim workout-line-unit" aria-hidden>
+        {unit}
+      </p>
+      <svg viewBox={`0 0 ${w} ${h}`} className="workout-line-svg" role="img" aria-label={`График, ${unit}`}>
+        {ticks.map((t) => {
+          const y = padT + (1 - (t - yMin) / ySpan) * plotH
+          return (
+            <g key={t}>
+              <line x1={padL} x2={w - padR} y1={y} y2={y} className="workout-line-grid" />
+              <text x={padL - 8} y={y} className="workout-line-y-label" dominantBaseline="middle">
+                {formatTick(t)}
+              </text>
+            </g>
+          )
+        })}
+        <path d={path} className="workout-line-path" fill="none" />
+        {coords.map((c) => (
+          <g key={c.i}>
             <circle
-              key={c.i}
+              cx={c.x}
+              cy={c.y}
+              r={14}
+              className="workout-line-hit"
+              onClick={() => onSelect(c.i)}
+            />
+            <circle
               cx={c.x}
               cy={c.y}
               r={selectedIndex === c.i ? 5.5 : 4}
               className={`workout-line-dot ${selectedIndex === c.i ? 'is-selected' : ''}`}
               onClick={() => onSelect(c.i)}
             />
-          ))}
-        </svg>
-        <div className="workout-line-axis">
-          <span>{formatAxisDay(points[0].at)}</span>
-          {points.length > 1 ? <span>{formatAxisDay(points[points.length - 1].at)}</span> : null}
-        </div>
-        <p className="dim workout-line-unit">{unit}</p>
-      </div>
+          </g>
+        ))}
+        <text x={padL} y={h - 6} className="workout-line-x-label" textAnchor="start">
+          {formatAxisDay(points[0].at)}
+        </text>
+        {points.length > 1 ? (
+          <text x={w - padR} y={h - 6} className="workout-line-x-label" textAnchor="end">
+            {formatAxisDay(points[points.length - 1].at)}
+          </text>
+        ) : null}
+      </svg>
     </div>
   )
 }
@@ -155,10 +163,14 @@ export function WorkoutsProgressPage() {
   const [tab, setTab] = useState<Tab>('strength')
   const [range, setRange] = useState<WorkoutProgressRange>(30)
   const [pickedExercise, setPickedExercise] = useState<string | undefined>()
+  const [pickerOpen, setPickerOpen] = useState(false)
   const [progress, setProgress] = useState<WorkoutProgress | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [selected, setSelected] = useState(0)
+  const pickerRef = useRef<HTMLDivElement>(null)
+
+  useSheetA11y(pickerOpen, () => setPickerOpen(false), pickerRef)
 
   const load = useCallback(async () => {
     if (!apiOnline) {
@@ -220,8 +232,10 @@ export function WorkoutsProgressPage() {
           <ArrowLeft size={18} /> Тренировки
         </button>
 
-        <header className="workouts-head">
-          <h1 className="page-title">Прогресс</h1>
+        <header className="page-header">
+          <div className="page-header-text">
+            <h1 className="page-title">Прогресс</h1>
+          </div>
         </header>
       </div>
 
@@ -241,7 +255,10 @@ export function WorkoutsProgressPage() {
             role="tab"
             aria-selected={tab === 'body'}
             className={tab === 'body' ? 'is-active' : ''}
-            onClick={() => setTab('body')}
+            onClick={() => {
+              setPickerOpen(false)
+              setTab('body')
+            }}
           >
             Мой вес
           </button>
@@ -264,19 +281,19 @@ export function WorkoutsProgressPage() {
       </div>
 
       {tab === 'strength' && progress && progress.exercises.length > 0 ? (
-        <label className="field workout-exercise-picker">
+        <div className="field workout-exercise-picker">
           <span>Упражнение</span>
-          <select
-            value={exerciseValue}
-            onChange={(e) => setPickedExercise(e.target.value || undefined)}
+          <button
+            type="button"
+            className="workout-exercise-picker-trigger"
+            aria-haspopup="dialog"
+            aria-expanded={pickerOpen}
+            onClick={() => setPickerOpen(true)}
           >
-            {progress.exercises.map((ex) => (
-              <option key={ex.name} value={ex.name}>
-                {ex.name}
-              </option>
-            ))}
-          </select>
-        </label>
+            <span>{exerciseValue || 'Выбрать'}</span>
+            <ChevronDown size={18} aria-hidden />
+          </button>
+        </div>
       ) : null}
 
       {error ? (
@@ -350,6 +367,41 @@ export function WorkoutsProgressPage() {
             </section>
           )}
         </>
+      ) : null}
+
+      {pickerOpen && progress ? (
+        <div className="app-sheet" role="dialog" aria-modal="true" aria-labelledby="workout-ex-picker-title">
+          <button
+            type="button"
+            className="app-sheet-backdrop"
+            aria-label="Закрыть"
+            onClick={() => setPickerOpen(false)}
+          />
+          <div className="app-sheet-panel workout-exercise-picker-sheet" ref={pickerRef}>
+            <div className="app-sheet-grab" aria-hidden />
+            <h3 id="workout-ex-picker-title">Упражнение</h3>
+            <ul className="workout-exercise-picker-list">
+              {progress.exercises.map((ex) => {
+                const active = ex.name === exerciseValue
+                return (
+                  <li key={ex.name}>
+                    <button
+                      type="button"
+                      className={`workout-exercise-picker-item${active ? ' is-active' : ''}`}
+                      aria-current={active ? 'true' : undefined}
+                      onClick={() => {
+                        setPickedExercise(ex.name)
+                        setPickerOpen(false)
+                      }}
+                    >
+                      {ex.name}
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        </div>
       ) : null}
     </main>
   )

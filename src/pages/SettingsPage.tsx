@@ -1,5 +1,5 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, Plus, X } from 'lucide-react'
+import { ArrowLeft, ChevronRight, MessageSquareText, Plus, Shield, X } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { ChangePasswordForm } from '../components/ChangePasswordForm'
 import { SectionTitle } from '../components/SectionTitle'
@@ -437,46 +437,6 @@ export function SettingsPage() {
           </div>
         </div>
 
-        <button
-          type="button"
-          className="toggle-row"
-          role="switch"
-          aria-checked={isCoach}
-          onClick={() => {
-            setIsCoach((v) => {
-              if (v) setCoachSports([])
-              return !v
-            })
-          }}
-        >
-          <div>
-            <strong>Я тренер</strong>
-            <p className="muted">Метка на карточке и фильтр «Тренеры» в зале</p>
-          </div>
-          <span className={`toggle ${isCoach ? 'on' : ''}`} />
-        </button>
-
-        {isCoach ? (
-          <div>
-            <p className="field-label">Чему тренирую</p>
-            <p className="muted" style={{ marginBottom: 8 }}>
-              Групповые, персональные и другие направления
-            </p>
-            <div className="chip-grid">
-              {COACH_DIRECTIONS.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  className={`chip ${coachSports.includes(s) ? 'coach' : ''}`}
-                  onClick={() => toggle(coachSports, s, setCoachSports)}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
         <div>
           <p className="field-label">Интересы</p>
           <div className="chip-grid">
@@ -552,6 +512,48 @@ export function SettingsPage() {
           ) : null}
         </section>
 
+        <section className="settings-panel">
+          <button
+            type="button"
+            className="toggle-row"
+            role="switch"
+            aria-checked={isCoach}
+            onClick={() => {
+              setIsCoach((v) => {
+                if (v) setCoachSports([])
+                return !v
+              })
+            }}
+          >
+            <div>
+              <strong>Я тренер</strong>
+              <p className="muted">Метка на карточке и фильтр «Тренеры» в зале</p>
+            </div>
+            <span className={`toggle ${isCoach ? 'on' : ''}`} />
+          </button>
+
+          {isCoach ? (
+            <div className="settings-coach-fields">
+              <p className="field-label">Чему тренирую</p>
+              <p className="muted" style={{ marginBottom: 8 }}>
+                Групповые, персональные и другие направления
+              </p>
+              <div className="chip-grid">
+                {COACH_DIRECTIONS.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    className={`chip ${coachSports.includes(s) ? 'coach' : ''}`}
+                    onClick={() => toggle(coachSports, s, setCoachSports)}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </section>
+
         {saveError ? (
           <p className="feedback-error" role="alert">
             {saveError}
@@ -562,14 +564,26 @@ export function SettingsPage() {
         </button>
       </form>
 
-      <div className="settings-links">
-        <Link to="/app/feedback" className="btn btn-ghost btn-block">
-          Обратная связь
-        </Link>
-        <Link to="/app/notifications" className="btn btn-ghost btn-block">
-          Уведомления
-        </Link>
-      </div>
+      <section className="surface settings-support">
+        <SectionTitle>Поддержка</SectionTitle>
+        <p className="muted settings-support-lead">
+          Баг, идея или вопрос — ответим в тикете. Аккаунт и профиль правятся выше.
+        </p>
+        <nav className="entry-tools" aria-label="Поддержка">
+          <Link to="/app/feedback" className="entry-link">
+            <MessageSquareText size={18} aria-hidden />
+            <span>Обратная связь</span>
+            <ChevronRight size={16} aria-hidden />
+          </Link>
+          {user.isAdmin ? (
+            <Link to="/app/admin" className="entry-link">
+              <Shield size={18} aria-hidden />
+              <span>Админка</span>
+              <ChevronRight size={16} aria-hidden />
+            </Link>
+          ) : null}
+        </nav>
+      </section>
 
       <ChangePasswordForm />
 

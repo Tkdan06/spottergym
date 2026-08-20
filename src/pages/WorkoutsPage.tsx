@@ -139,9 +139,11 @@ export function WorkoutsPage() {
           <ArrowLeft size={18} /> Назад
         </button>
 
-        <header className="workouts-head">
-          <h1 className="page-title">Мои тренировки</h1>
-          <p className="muted">Дневник прогресса</p>
+        <header className="page-header">
+          <div className="page-header-text workouts-head">
+            <h1 className="page-title">Мои тренировки</h1>
+            <p className="muted">Дневник прогресса</p>
+          </div>
         </header>
       </div>
 
@@ -239,7 +241,6 @@ export function WorkoutsPage() {
                           <span className="dim workouts-row-note">{w.notes.trim()}</span>
                         ) : null}
                       </div>
-                      <ChevronRight size={18} className="workouts-board-nav" aria-hidden />
                     </Link>
                     <button
                       type="button"

@@ -273,7 +273,7 @@ html.standalone {
   min-width: 0;
 }
 
-.subpage-top > .back-link {
+.subpage-top .back-link {
   margin-bottom: 0;
 }
 
@@ -710,10 +710,133 @@ a.btn-danger-ghost {
   min-width: 0;
 }
 
-.section-title .muted,
-.section-title .text-link {
+/**
+ * SectionTitle right action — same look for Link and <button>
+ * (“Кого я лайкнул”, “Добавить”, “Изменить”). Body font, muted, no underline.
+ */
+.section-action,
+.section-title > a.muted,
+.section-title > button.section-action,
+.section-title > .text-link.muted,
+.section-title > button.text-link {
+  flex-shrink: 0;
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-body);
+  font-size: var(--text-muted-size);
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: normal;
+  color: var(--text-muted);
+  text-decoration: none;
+  cursor: pointer;
+  text-align: inherit;
+}
+
+.section-action:hover,
+.section-action:focus-visible,
+.section-title > a.muted:hover,
+.section-title > a.muted:focus-visible,
+.section-title > button.section-action:hover,
+.section-title > button.section-action:focus-visible,
+.section-title > .text-link.muted:hover,
+.section-title > .text-link.muted:focus-visible,
+.section-title > button.text-link:hover,
+.section-title > button.text-link:focus-visible {
+  color: var(--text);
+}
+
+/* Non-interactive meta in SectionTitle action (counts, loading) */
+.section-title > .muted,
+.section-title > .dim {
   flex-shrink: 0;
   font-size: var(--text-muted-size);
+}
+
+/* Inline quiet action outside SectionTitle (e.g. “Удалить” у упражнения) */
+.text-link {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-body);
+  font-size: inherit;
+  font-weight: 500;
+  line-height: inherit;
+  letter-spacing: normal;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.text-link.muted {
+  text-decoration: none;
+  color: var(--text-muted);
+  font-size: var(--text-muted-size);
+}
+
+.text-link.muted:hover,
+.text-link.muted:focus-visible {
+  color: var(--text);
+}
+
+/**
+ * Entry links into secondary sections (not bottom-nav).
+ * A — product tools (Home: workouts/activity) → .entry-tools--2
+ * B — account/support meta (Settings: feedback/admin) → single column
+ * Do not put type B on Profile; do not use btn-primary for support.
+ */
+.entry-tools {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.entry-tools--2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.entry-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg-card) 80%, transparent);
+  color: var(--text);
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.entry-link span {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.entry-link svg:last-child {
+  flex-shrink: 0;
+  color: var(--text-dim);
+}
+
+.entry-link:hover,
+.entry-link:focus-visible {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+  color: var(--accent);
+}
+
+.entry-link:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  outline-offset: 1px;
 }
 
 .card-list {
