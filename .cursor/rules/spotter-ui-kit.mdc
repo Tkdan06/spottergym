@@ -22,12 +22,10 @@ Before adding or redesigning UI in `src/pages` / `src/components`, follow the li
    “Добавить”, “Изменить”). Same Manrope muted look — no `.text-link` / font-weight 650 in the
    action slot. Non-click meta → `.muted` / `.dim`. Admin accent nav links may keep `.text-link`
    outside SectionTitle.
-5. **Section entry links:** use `.entry-tools` + `.entry-link` for destinations outside bottom-nav.
-   - **A · Product tools** (frequent): Home grid `.entry-tools--2` (workouts, activity).
-   - **B · Account / support meta** (rare): Settings section “Поддержка” (feedback, admin) —
-     single column. Never Profile footer orphans / `.profile-quiet-link`.
-   - **C · Contextual help:** soft/ghost `btn-sm` next to the empty task (e.g. request gym).
-   Do not use `btn-primary` for support.
+5. **Section entry links:** use `.entry-tools` + `.entry-link` for frequent product tools outside
+   bottom-nav (Home: workouts, activity). Support feedback → Settings “Поддержка” as
+   `btn btn-ghost btn-block` (not entry-link). Admin → Profile bottom `btn-ghost` (admins only).
+   Contextual help (request gym) → soft/ghost `btn-sm` next to the empty task.
 6. **Feedback:** `MomentFX` only for check-in / check-out / rare celebration. Routine success
    (like, copy, share) → `SoftFlash`.
 7. **Bottom sheets:** compose `.app-sheet`, `.app-sheet-backdrop`, `.app-sheet-panel`,
@@ -37,7 +35,7 @@ Before adding or redesigning UI in `src/pages` / `src/components`, follow the li
 9. **List rows with multiple actions:** primary navigation on the left; secondary (copy/expand)
    as separate targets — see workout history pattern on UiKit page.
 10. **Profile edit:** Settings via header gear; do not add a second full-width “Редактировать
-    профиль” CTA wall. Extra account/support links live in Settings, not Profile.
+    профиль” CTA wall. Feedback lives in Settings; admin contour button only for `isAdmin`.
 
 ## Sources of truth
 

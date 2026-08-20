@@ -1,5 +1,5 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, ChevronRight, MessageSquareText, Plus, Shield, X } from 'lucide-react'
+import { ArrowLeft, Plus, X } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { ChangePasswordForm } from '../components/ChangePasswordForm'
 import { SectionTitle } from '../components/SectionTitle'
@@ -566,23 +566,9 @@ export function SettingsPage() {
 
       <section className="surface settings-support">
         <SectionTitle>Поддержка</SectionTitle>
-        <p className="muted settings-support-lead">
-          Баг, идея или вопрос — ответим в тикете. Аккаунт и профиль правятся выше.
-        </p>
-        <nav className="entry-tools" aria-label="Поддержка">
-          <Link to="/app/feedback" className="entry-link">
-            <MessageSquareText size={18} aria-hidden />
-            <span>Обратная связь</span>
-            <ChevronRight size={16} aria-hidden />
-          </Link>
-          {user.isAdmin ? (
-            <Link to="/app/admin" className="entry-link">
-              <Shield size={18} aria-hidden />
-              <span>Админка</span>
-              <ChevronRight size={16} aria-hidden />
-            </Link>
-          ) : null}
-        </nav>
+        <Link to="/app/feedback" className="btn btn-ghost btn-block">
+          Обратная связь
+        </Link>
       </section>
 
       <ChangePasswordForm />

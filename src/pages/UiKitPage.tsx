@@ -8,7 +8,6 @@ import {
   ClipboardList,
   Copy,
   Info,
-  MessageSquareText,
   Share2,
 } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
@@ -104,8 +103,9 @@ export function UiKitPage() {
             button) — muted Manrope, без underline и без <code>text-link</code> с жирным весом.
           </li>
           <li>
-            <strong>Входы в разделы:</strong> <code>.entry-link</code> — product tools (Home) и
-            support (Settings). Support не на Profile и не <code>btn-primary</code>.
+            <strong>Входы в разделы:</strong> <code>.entry-link</code> — product tools на Home.
+            Обратная связь — Settings <code>btn-ghost</code>. Админка — ghost внизу профиля (только
+            isAdmin).
           </li>
         </ul>
       </section>
@@ -215,17 +215,18 @@ export function UiKitPage() {
         </div>
         <p className="dim" style={{ margin: '12px 0 0' }}>
           В профиле настройки — только шестерёнка в шапке. Не дублируй «Редактировать профиль»
-          огромной кнопкой внизу. Support/meta (обратная связь, админка) — в Настройках через{' '}
-          <code>.entry-link</code>, не quiet-footer профиля.
+          огромной кнопкой внизу. Обратная связь — Настройки → Поддержка (
+          <code>btn-ghost btn-block</code>). Админка — только у админов, контурная кнопка внизу
+          профиля.
         </p>
       </section>
 
       <section className="surface ui-kit-block">
         <SectionTitle>Входы в разделы (.entry-link)</SectionTitle>
         <p className="muted ui-kit-section-lead">
-          Три типа: <strong>A</strong> product tools (Home, 2 колонки) · <strong>B</strong>{' '}
-          account/support (Settings, 1 колонка) · <strong>C</strong> contextual help у empty (
-          <code>btn-soft btn-sm</code>). Не ставить support primary и не вешать type B на Profile.
+          Product tools вне bottom-nav (Home): <code>.entry-tools--2</code> +{' '}
+          <code>.entry-link</code>. Support в настройках — обычная <code>btn-ghost</code>, не
+          entry-link. Контекст «нет зала» — <code>btn-soft btn-sm</code>.
         </p>
         <nav className="entry-tools entry-tools--2" aria-label="Пример A" style={{ marginBottom: 12 }}>
           <Link to="/app/workouts" className="entry-link">
@@ -239,13 +240,9 @@ export function UiKitPage() {
             <ChevronRight size={16} aria-hidden />
           </Link>
         </nav>
-        <nav className="entry-tools" aria-label="Пример B">
-          <Link to="/app/feedback" className="entry-link">
-            <MessageSquareText size={18} aria-hidden />
-            <span>Обратная связь</span>
-            <ChevronRight size={16} aria-hidden />
-          </Link>
-        </nav>
+        <Link to="/app/feedback" className="btn btn-ghost btn-block">
+          Обратная связь
+        </Link>
       </section>
 
       <section className="surface ui-kit-block">

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Bell, Copy, Settings, Share2 } from 'lucide-react'
+import { Bell, Copy, Settings, Share2, Shield } from 'lucide-react'
 import { Link, Navigate } from 'react-router-dom'
 import { LikesRow } from '../components/LikesRow'
 import { ReferralBadge, referralChromeClass } from '../components/ReferralBadge'
@@ -363,6 +363,12 @@ export function ProfilePage() {
           <Share2 size={16} /> Открыть мой круг
         </Link>
       </section>
+
+      {user.isAdmin ? (
+        <Link to="/app/admin" className="btn btn-ghost btn-block">
+          <Shield size={16} /> Админка
+        </Link>
+      ) : null}
 
       <SoftFlash message={copyFlash} />
     </main>
