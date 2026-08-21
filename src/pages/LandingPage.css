@@ -47,7 +47,7 @@
   text-transform: uppercase;
 }
 
-/* Hierarchy: brand (Syne) > headline (Onest) > lead (Manrope) */
+/* Hierarchy: brand (Syne) > headline (Unbounded) > lead (Manrope) */
 .lp-brand {
   display: block;
   margin: 0 0 10px;

@@ -1,9 +1,9 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-/* Display: Onest — современная кириллица, без плакатной жирности Unbounded */
-import '@fontsource/onest/500.css'
-import '@fontsource/onest/600.css'
-import '@fontsource/onest/700.css'
+/* Display: Unbounded — спортивный, «молодой», полная кириллица */
+import '@fontsource/unbounded/600.css'
+import '@fontsource/unbounded/700.css'
+import '@fontsource/unbounded/800.css'
 /* Brand: Syne — вытянутая латиница для Spotter */
 import '@fontsource/syne/700.css'
 import '@fontsource/syne/800.css'

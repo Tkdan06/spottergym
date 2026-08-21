@@ -14,8 +14,8 @@
   <rect width="1200" height="630" fill="url(#glow)"/>
 
   <!-- Brand mark matches Instagram Stories: SPOT white, TER lime -->
-  <text x="392" y="300" font-family="Syne, Onest, Arial Black, Helvetica Neue, Arial, sans-serif" font-size="118" font-weight="800" letter-spacing="-4" fill="#FFFFFF">SPOT</text>
-  <text x="678" y="300" font-family="Syne, Onest, Arial Black, Helvetica Neue, Arial, sans-serif" font-size="118" font-weight="800" letter-spacing="-4" fill="#C8F542">TER</text>
+  <text x="392" y="300" font-family="Syne, Unbounded, Arial Black, Helvetica Neue, Arial, sans-serif" font-size="118" font-weight="800" letter-spacing="-4" fill="#FFFFFF">SPOT</text>
+  <text x="678" y="300" font-family="Syne, Unbounded, Arial Black, Helvetica Neue, Arial, sans-serif" font-size="118" font-weight="800" letter-spacing="-4" fill="#C8F542">TER</text>
 
   <line x1="310" y1="340" x2="890" y2="340" stroke="#C8F542" stroke-width="4" stroke-linecap="round"/>
   <circle cx="310" cy="340" r="5" fill="#C8F542"/>
