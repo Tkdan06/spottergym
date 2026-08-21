@@ -1,3 +1,35 @@
+import { existsSync, readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+
+/** Fill process.env from api/.env if the process was started without --env-file. */
+function loadLocalEnv() {
+  const path = fileURLToPath(new URL('../.env', import.meta.url))
+  if (!existsSync(path)) return
+  let text = ''
+  try {
+    text = readFileSync(path, 'utf8')
+  } catch {
+    return
+  }
+  for (const raw of text.split('\n')) {
+    const line = raw.trim()
+    if (!line || line.startsWith('#')) continue
+    const eq = line.indexOf('=')
+    if (eq < 1) continue
+    const key = line.slice(0, eq).trim()
+    let val = line.slice(eq + 1).trim()
+    if (
+      (val.startsWith('"') && val.endsWith('"')) ||
+      (val.startsWith("'") && val.endsWith("'"))
+    ) {
+      val = val.slice(1, -1)
+    }
+    if (process.env[key] === undefined) process.env[key] = val
+  }
+}
+
+loadLocalEnv()
+
 const WEAK_JWT_SECRETS = new Set([
   'dev-spotter-jwt-secret',
   'change-me-in-production-spotter-jwt',
@@ -62,6 +94,31 @@ export const env = {
   appPublicUrl: String(process.env.APP_PUBLIC_URL || 'http://localhost:5173')
     .trim()
     .replace(/\/$/, ''),
+  /** Authorization Key from GigaChat studio (Base64 client_id:client_secret). Alias: GIGACHAT_AUTH_KEY */
+  gigachatCredentials: String(
+    process.env.GIGACHAT_CREDENTIALS || process.env.GIGACHAT_AUTH_KEY || '',
+  ).trim(),
+  gigachatScope: String(process.env.GIGACHAT_SCOPE || 'GIGACHAT_API_PERS').trim() ||
+    'GIGACHAT_API_PERS',
+  gigachatBaseUrl: String(
+    process.env.GIGACHAT_BASE_URL || 'https://gigachat.devices.sberbank.ru/api/',
+  )
+    .trim()
+    .replace(/\/?$/, '/'),
+  gigachatOauthUrl: String(
+    process.env.GIGACHAT_OAUTH_URL ||
+      'https://ngw.devices.sberbank.ru:9443/api/v2/oauth',
+  ).trim(),
+  gigachatModel: String(process.env.GIGACHAT_MODEL || 'GigaChat').trim() || 'GigaChat',
+  gigachatCoachPeriodDays: (() => {
+    const n = Number(process.env.GIGACHAT_COACH_PERIOD_DAYS || 7)
+    if (!Number.isFinite(n)) return 7
+    return Math.min(14, Math.max(1, Math.round(n)))
+  })(),
+}
+
+export function isGigachatConfigured() {
+  return Boolean(env.gigachatCredentials)
 }
 
 export function normalizeEmail(email: string) {

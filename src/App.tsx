@@ -7,6 +7,7 @@ import { ActivityPage } from './pages/ActivityPage'
 import { WorkoutEditorPage } from './pages/WorkoutEditorPage'
 import { WorkoutsPage } from './pages/WorkoutsPage'
 import { WorkoutsProgressPage } from './pages/WorkoutsProgressPage'
+import { WorkoutsCoachPage } from './pages/WorkoutsCoachPage'
 import { AdminBroadcastsPage } from './pages/AdminBroadcastsPage'
 import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage'
 import { AdminGeographyPage } from './pages/AdminGeographyPage'
@@ -77,6 +78,7 @@ export default function App() {
               <Route path="activity" element={<ActivityPage />} />
               <Route path="workouts" element={<WorkoutsPage />} />
               <Route path="workouts/progress" element={<WorkoutsProgressPage />} />
+              <Route path="workouts/coach" element={<WorkoutsCoachPage />} />
               <Route path="workouts/new" element={<WorkoutEditorPage />} />
               <Route path="workouts/:id/edit" element={<WorkoutEditorPage />} />
               <Route path="workouts/:id" element={<WorkoutEditorPage />} />

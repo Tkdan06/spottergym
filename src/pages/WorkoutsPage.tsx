@@ -5,6 +5,7 @@ import {
   ChevronRight,
   ClipboardList,
   Copy,
+  ListChecks,
   Plus,
   TrendingUp,
 } from 'lucide-react'
@@ -164,6 +165,9 @@ export function WorkoutsPage() {
       <div className="workouts-actions">
         <Link to="/app/workouts/new" className="btn btn-primary btn-block">
           <Plus size={16} /> Записать тренировку
+        </Link>
+        <Link to="/app/workouts/coach" className="btn btn-soft btn-block">
+          <ListChecks size={16} /> Разбор недели
         </Link>
       </div>
 

@@ -71,7 +71,7 @@ export type WorkoutProgress = {
   }
 }
 
-const sessionInclude = {
+export const sessionInclude = {
   exercises: {
     orderBy: { sortOrder: 'asc' as const },
     include: {
@@ -112,7 +112,7 @@ export type WorkoutExercisePreview = {
   sets: WorkoutSetPreview[]
 }
 
-function num(d: unknown) {
+export function num(d: unknown) {
   if (typeof d === 'number') return d
   if (typeof d === 'string') return Number(d)
   if (
@@ -126,7 +126,7 @@ function num(d: unknown) {
   return Number(d)
 }
 
-function round1(n: number) {
+export function round1(n: number) {
   return Math.round(n * 10) / 10
 }
 
@@ -136,7 +136,7 @@ function bodyKg(row: { bodyWeightKg: unknown }) {
   return Number.isFinite(n) ? round1(n) : null
 }
 
-function bestSet(sets: { weightKg: unknown; reps: number }[]) {
+export function bestSet(sets: { weightKg: unknown; reps: number }[]) {
   if (!sets.length) return null
   let best = sets[0]
   let bestW = num(best.weightKg)
@@ -158,11 +158,11 @@ function normalizeExerciseName(name: string) {
   return name.trim().toLowerCase().replace(/\s+/g, ' ')
 }
 
-function displayExerciseName(name: string) {
+export function displayExerciseName(name: string) {
   return name.trim().replace(/\s+/g, ' ')
 }
 
-function normalizeTrackKey(raw: string | undefined | null) {
+export function normalizeTrackKey(raw: string | undefined | null) {
   const t = String(raw || '')
     .trim()
     .slice(0, 64)
@@ -172,7 +172,7 @@ function normalizeTrackKey(raw: string | undefined | null) {
 }
 
 /** Match key for deltas/progress: prefer trackKey, else normalized name. */
-function exerciseIdentity(ex: { name: string; trackKey?: string | null }) {
+export function exerciseIdentity(ex: { name: string; trackKey?: string | null }) {
   const tk = normalizeTrackKey(ex.trackKey)
   if (tk) return `k:${tk}`
   const n = normalizeExerciseName(ex.name)

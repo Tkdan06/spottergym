@@ -814,3 +814,85 @@
   font-size: 1rem;
 }
 
+.workout-coach-block {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.workout-coach-h {
+  margin: 0;
+  font-size: 1.02rem;
+}
+
+.workout-coach-focus {
+  margin: 0;
+}
+
+.workout-coach-wins,
+.workout-coach-steps {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.workout-coach-wins {
+  list-style: none;
+}
+
+.workout-coach-wins li {
+  display: grid;
+  gap: 2px;
+}
+
+.workout-coach-wins p,
+.workout-coach-block p {
+  margin: 0;
+}
+
+.workout-coach-steps {
+  padding-left: 1.2em;
+}
+
+.workout-coach-steps li {
+  padding-left: 4px;
+}
+
+.workout-coach-next {
+  gap: 12px;
+}
+
+.workout-coach-distance {
+  opacity: 0.95;
+}
+
+.workout-coach-d90,
+.workout-coach-foot {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.workout-coach-chips {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.workout-coach-chips li {
+  font-size: 0.86rem;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--bg, transparent);
+}
+
+.workout-coach-verdict.is-hit .activity-summary-total {
+  color: var(--accent);
+}
+
+

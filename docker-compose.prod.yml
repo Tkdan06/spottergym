@@ -41,6 +41,12 @@ services:
       SENDSAY_FROM_EMAIL: ${SENDSAY_FROM_EMAIL:-noreply@spottergym.ru}
       SENDSAY_FROM_NAME: ${SENDSAY_FROM_NAME:-Spotter}
       APP_PUBLIC_URL: ${APP_PUBLIC_URL:-https://spottergym.ru}
+      GIGACHAT_CREDENTIALS: ${GIGACHAT_CREDENTIALS:-}
+      GIGACHAT_AUTH_KEY: ${GIGACHAT_AUTH_KEY:-}
+      GIGACHAT_SCOPE: ${GIGACHAT_SCOPE:-GIGACHAT_API_PERS}
+      GIGACHAT_BASE_URL: ${GIGACHAT_BASE_URL:-https://gigachat.devices.sberbank.ru/api/}
+      GIGACHAT_MODEL: ${GIGACHAT_MODEL:-GigaChat}
+      GIGACHAT_COACH_PERIOD_DAYS: ${GIGACHAT_COACH_PERIOD_DAYS:-7}
     ports:
       - '127.0.0.1:3001:3001'
     volumes:

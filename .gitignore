@@ -29,3 +29,6 @@ api/data/media/
 *.njsproj
 *.sln
 *.sw?
+
+# Local creative export (not part of Spotter app)
+video advertising/

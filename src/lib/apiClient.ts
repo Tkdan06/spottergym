@@ -379,6 +379,58 @@ export async function apiDeleteWorkout(id: string) {
   return request<{ ok: true }>(`/me/workouts/${encodeURIComponent(id)}`, { method: 'DELETE' })
 }
 
+export type CoachSplit = {
+  upper: number
+  lower: number
+  push: number
+  pull: number
+  unknown: number
+}
+
+export type CoachLetter = {
+  headline: string
+  weekVerdict: { tone: 'hit' | 'almost' | 'missed'; text: string }
+  wins: { title: string; text: string }[]
+  nextSession: { title: string; focus: string; steps: string[] }
+  distance30: { text: string; change: string } | null
+  distance90: { text: string } | null
+}
+
+export type WorkoutCoachState = {
+  status: 'locked' | 'ready' | 'cached' | 'offline'
+  configured: boolean
+  eligible: boolean
+  canGenerate: boolean
+  demo?: boolean
+  sessionsIn21d: number
+  sessionsNeeded: number
+  periodStart: string
+  periodEnd: string
+  periodLabel: string
+  nextAt: string
+  facts: {
+    weekSessions: number
+    weekPrevSessions: number
+    weekSplit: CoachSplit
+    verdictHint: 'hit' | 'almost' | 'missed' | null
+    d30Ready: boolean
+    d90Ready: boolean
+  }
+  letter: CoachLetter | null
+}
+
+export async function apiFetchWorkoutCoach() {
+  const data = await request<{ coach: WorkoutCoachState }>('/me/workouts/coach')
+  return data.coach
+}
+
+export async function apiGenerateWorkoutCoach() {
+  const data = await request<{ coach: WorkoutCoachState }>('/me/workouts/coach/generate', {
+    method: 'POST',
+  })
+  return data.coach
+}
+
 export async function apiJoinGym(gymId: string, makeHome = false) {
   const data = await request<{ user: AppUser }>(
     `/me/gyms/${encodeURIComponent(gymId)}${makeHome ? '?home=1' : ''}`,

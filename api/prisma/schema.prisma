@@ -118,8 +118,9 @@ model User {
   blocksReceived     UserBlock[]         @relation("BlocksReceived")
   invitesSent        Invite[]            @relation("InvitesSent")
   passwordResetTokens PasswordResetToken[]
-  workoutSessions    WorkoutSession[]
-  broadcastsCreated  AdminBroadcast[]
+  workoutSessions     WorkoutSession[]
+  workoutCoachReports WorkoutCoachReport[]
+  broadcastsCreated   AdminBroadcast[]
 
   @@index([email])
   @@index([city])
@@ -509,4 +510,23 @@ model WorkoutSet {
   exercise WorkoutExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 
   @@index([exerciseId, setIndex])
+}
+
+/** Cached weekly GigaChat letter — one row per user per quota window. */
+model WorkoutCoachReport {
+  id               String   @id @default(cuid())
+  userId           String
+  periodStart      DateTime
+  periodEnd        DateTime
+  factsJson        Json
+  letterJson       Json
+  model            String   @default("")
+  promptTokens     Int      @default(0)
+  completionTokens Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, periodStart])
+  @@index([userId, createdAt])
 }

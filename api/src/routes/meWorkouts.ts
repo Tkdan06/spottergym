@@ -10,6 +10,7 @@ import {
   replaceWorkoutSession,
   type WorkoutProgressRange,
 } from '../lib/workouts.js'
+import { CoachGenerateError, generateCoachLetter, getCoachState } from '../lib/workoutCoach.js'
 import type { AuthedEnv } from '../middleware/auth.js'
 import { rateLimit } from '../middleware/rateLimit.js'
 
@@ -76,6 +77,39 @@ workoutRoutes.get(
     const exercise = c.req.query('exercise')?.trim() || undefined
     const progress = await getWorkoutProgress(c.get('userId'), range, exercise)
     return c.json({ progress })
+  },
+)
+
+workoutRoutes.get(
+  '/workouts/coach',
+  rateLimit({ windowMs: 60_000, max: 60, route: 'me-workouts-coach' }),
+  async (c) => {
+    try {
+      const coach = await getCoachState(c.get('userId'), c.get('userEmail'))
+      return c.json({ coach })
+    } catch (err) {
+      if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 404) {
+        return c.json({ error: 'Не найдено' }, 404)
+      }
+      throw err
+    }
+  },
+)
+
+workoutRoutes.post(
+  '/workouts/coach/generate',
+  rateLimit({ windowMs: 60_000, max: 1, route: 'me-workouts-coach-gen' }),
+  async (c) => {
+    try {
+      const result = await generateCoachLetter(c.get('userId'), c.get('userEmail'))
+      const coach = await getCoachState(c.get('userId'), c.get('userEmail'))
+      return c.json({ coach, letter: result.letter })
+    } catch (err) {
+      if (err instanceof CoachGenerateError) {
+        return c.json({ error: err.message }, err.status as 422 | 429 | 503 | 404)
+      }
+      throw err
+    }
   },
 )
 
