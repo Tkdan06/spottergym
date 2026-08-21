@@ -5,7 +5,7 @@ import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { z } from 'zod'
 import { prisma } from './db.js'
-import { env, isMasterAdminEmail, normalizeEmail } from './env.js'
+import { env, isMasterAdminEmail, isGigachatConfigured, normalizeEmail } from './env.js'
 import {
   disableEmergencyShutdown,
   isEmergencyShutdown,
@@ -148,6 +148,9 @@ app.onError((err, c) => {
 serve({ fetch: app.fetch, port: env.port }, (info) => {
   console.log(`Spotter API http://localhost:${info.port}`)
   console.log(`[push] ${isPushConfigured() ? 'VAPID ready' : 'disabled (set VAPID_* keys)'}`)
+  console.log(
+    `[gigachat] ${isGigachatConfigured() ? 'ready' : 'disabled (set GIGACHAT_CREDENTIALS)'}`,
+  )
   void isEmergencyShutdown().then((on) => {
     if (on) console.error('[emergency] API started in SHUTDOWN mode — only /health and recover')
   })

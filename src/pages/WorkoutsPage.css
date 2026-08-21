@@ -895,4 +895,21 @@
   color: var(--accent);
 }
 
+.workout-week-recap {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  padding-top: 6px;
+}
+
+.workout-week-recap-head {
+  display: grid;
+  gap: 2px;
+}
+
+.workout-week-recap-head .muted {
+  margin: 0;
+}
+
+
 

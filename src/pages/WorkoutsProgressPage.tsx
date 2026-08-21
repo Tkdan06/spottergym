@@ -9,6 +9,7 @@ import {
 } from '../lib/apiClient'
 import { useSheetA11y } from '../lib/sheetA11y'
 import { formatBodyDelta, formatDeltaLabel, formatKg } from '../lib/workouts'
+import { WorkoutWeekRecap } from '../components/WorkoutWeekRecap'
 import './WorkoutsPage.css'
 import './ActivityPage.css'
 import './FeedbackPage.css'
@@ -215,6 +216,12 @@ export function WorkoutsProgressPage() {
     setSelected(activePoints.length ? activePoints.length - 1 : 0)
   }, [activePoints, tab, range, pickedExercise])
 
+  useEffect(() => {
+    if (loading) return
+    if (window.location.hash !== '#week-recap') return
+    document.getElementById('week-recap')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [loading])
+
   if (!user) return <Navigate to="/login" replace />
 
   const selectedPoint = activePoints[selected] || null
@@ -368,6 +375,8 @@ export function WorkoutsProgressPage() {
           )}
         </>
       ) : null}
+
+      {!loading ? <WorkoutWeekRecap /> : null}
 
       {pickerOpen && progress ? (
         <div className="app-sheet" role="dialog" aria-modal="true" aria-labelledby="workout-ex-picker-title">
