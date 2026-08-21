@@ -10,6 +10,7 @@ import {
 import { useSheetA11y } from '../lib/sheetA11y'
 import { formatBodyDelta, formatDeltaLabel, formatKg } from '../lib/workouts'
 import { WorkoutWeekRecap } from '../components/WorkoutWeekRecap'
+import { WORKOUT_RECAP_ADMIN_ONLY } from '../lib/workoutRecap'
 import './WorkoutsPage.css'
 import './ActivityPage.css'
 import './FeedbackPage.css'
@@ -376,7 +377,7 @@ export function WorkoutsProgressPage() {
         </>
       ) : null}
 
-      {!loading ? <WorkoutWeekRecap /> : null}
+      {!loading && (!WORKOUT_RECAP_ADMIN_ONLY || user.isAdmin) ? <WorkoutWeekRecap /> : null}
 
       {pickerOpen && progress ? (
         <div className="app-sheet" role="dialog" aria-modal="true" aria-labelledby="workout-ex-picker-title">

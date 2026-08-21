@@ -10,6 +10,7 @@ import {
   formatPeriodLabel,
   type CoachFacts,
 } from './workoutCoachFacts.js'
+import { userCanUseWorkoutRecap } from './workoutRecapAccess.js'
 
 const DEMO_EMAIL = 'demo@demo.ru'
 
@@ -275,6 +276,9 @@ export class CoachGenerateError extends Error {
 }
 
 export async function generateCoachLetter(userId: string, userEmail: string) {
+  if (!(await userCanUseWorkoutRecap(userId))) {
+    throw new CoachGenerateError('Недостаточно прав', 403)
+  }
   const { start, end } = coachPeriodBounds(new Date(), env.gigachatCoachPeriodDays)
   const existing = await prisma.workoutCoachReport.findUnique({
     where: { userId_periodStart: { userId, periodStart: start } },

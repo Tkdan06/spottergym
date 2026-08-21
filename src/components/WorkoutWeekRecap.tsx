@@ -7,6 +7,7 @@ import {
   apiGenerateWorkoutCoach,
   type WorkoutCoachState,
 } from '../lib/apiClient'
+import { WORKOUT_RECAP_ADMIN_ONLY } from '../lib/workoutRecap'
 
 function nextMondayLabel(iso: string) {
   return new Date(iso).toLocaleDateString('ru-RU', {
@@ -50,14 +51,15 @@ function FactChips({ coach }: { coach: WorkoutCoachState }) {
 }
 
 export function WorkoutWeekRecap() {
-  const { apiOnline } = useApp()
+  const { user, apiOnline } = useApp()
   const [coach, setCoach] = useState<WorkoutCoachState | null>(null)
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState('')
+  const allowed = !WORKOUT_RECAP_ADMIN_ONLY || Boolean(user?.isAdmin)
 
   const load = useCallback(async () => {
-    if (!apiOnline) {
+    if (!allowed || !apiOnline) {
       setLoading(false)
       return
     }
@@ -71,14 +73,16 @@ export function WorkoutWeekRecap() {
     } finally {
       setLoading(false)
     }
-  }, [apiOnline])
+  }, [allowed, apiOnline])
 
   useEffect(() => {
     void load()
   }, [load])
 
+  if (!allowed) return null
+
   const generate = async () => {
-    if (!apiOnline || generating) return
+    if (!allowed || !apiOnline || generating) return
     setGenerating(true)
     setError('')
     try {
