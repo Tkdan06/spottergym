@@ -25,16 +25,16 @@
   --standalone-top: 0px;
   --app-max: 480px;
   --desktop-max: 1120px;
-  /* Unbounded = заголовки (кириллица + спорт-вайб), Syne = бренд Spotter, Manrope = UI */
-  --font-display: 'Unbounded', 'Manrope', sans-serif;
-  --font-brand: 'Syne', 'Unbounded', sans-serif;
-  --font-body: 'Manrope', 'Unbounded', sans-serif;
+  /* Onest = заголовки (кириллица, легче Unbounded), Syne = бренд Spotter, Manrope = UI */
+  --font-display: 'Onest', 'Manrope', sans-serif;
+  --font-brand: 'Syne', 'Onest', sans-serif;
+  --font-body: 'Manrope', 'Onest', sans-serif;
   /* Typography scale — use these, don’t invent local sizes for the same role */
   --text-page-size: 1.75rem;
-  --text-page-weight: 800;
+  --text-page-weight: 700;
   --text-page-line: 1.15;
   --text-section-size: 1.15rem;
-  --text-section-weight: 700;
+  --text-section-weight: 600;
   --text-section-line: 1.25;
   --text-body-size: 1rem;
   --text-body-line: 1.45;
