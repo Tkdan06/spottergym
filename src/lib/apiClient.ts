@@ -258,9 +258,12 @@ export type WorkoutExerciseDto = {
   name: string
   trackKey?: string
   sortOrder: number
-  sets: (WorkoutSetInput & { id?: string; setIndex: number })[]
-  weightDelta?: number | null
-  repsDelta?: number | null
+  sets: (WorkoutSetInput & {
+    id?: string
+    setIndex: number
+    weightDelta?: number | null
+    repsDelta?: number | null
+  })[]
 }
 
 export type WorkoutSessionSummary = {

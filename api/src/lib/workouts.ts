@@ -7,6 +7,9 @@ export type WorkoutSetDto = {
   setIndex: number
   weightKg: number
   reps: number
+  /** Vs the same set index in the previous matching session */
+  weightDelta?: number | null
+  repsDelta?: number | null
 }
 
 export type WorkoutExerciseDto = {
@@ -16,9 +19,6 @@ export type WorkoutExerciseDto = {
   trackKey?: string
   sortOrder: number
   sets: WorkoutSetDto[]
-  /** Filled on detail vs previous session with same title */
-  weightDelta?: number | null
-  repsDelta?: number | null
 }
 
 export type WorkoutSessionSummary = {
@@ -210,37 +210,37 @@ export function serializeSessionDetail(
   row: SessionFull,
   previous: SessionFull | null,
 ): WorkoutSessionDetail {
-  const prevById = new Map<string, ReturnType<typeof bestSet>>()
+  const prevSetsByEx = new Map<string, Map<number, { weightKg: number; reps: number }>>()
   if (previous) {
     for (const ex of previous.exercises) {
       const key = exerciseIdentity(ex)
       if (!key) continue
-      prevById.set(key, bestSet(ex.sets))
+      const byIndex = new Map<number, { weightKg: number; reps: number }>()
+      for (const s of ex.sets) {
+        byIndex.set(s.setIndex, { weightKg: num(s.weightKg), reps: s.reps })
+      }
+      prevSetsByEx.set(key, byIndex)
     }
   }
 
   const exercises: WorkoutExerciseDto[] = row.exercises.map((ex) => {
-    const cur = bestSet(ex.sets)
-    const prev = prevById.get(exerciseIdentity(ex)) || null
-    let weightDelta: number | null = null
-    let repsDelta: number | null = null
-    if (cur && prev) {
-      weightDelta = Math.round((cur.weightKg - prev.weightKg) * 100) / 100
-      repsDelta = cur.reps - prev.reps
-    }
+    const prevSets = prevSetsByEx.get(exerciseIdentity(ex))
     return {
       id: ex.id,
       name: ex.name,
       trackKey: normalizeTrackKey(ex.trackKey) || undefined,
       sortOrder: ex.sortOrder,
-      sets: ex.sets.map((s) => ({
-        id: s.id,
-        setIndex: s.setIndex,
-        weightKg: num(s.weightKg),
-        reps: s.reps,
-      })),
-      weightDelta,
-      repsDelta,
+      sets: ex.sets.map((s) => {
+        const prev = prevSets?.get(s.setIndex)
+        return {
+          id: s.id,
+          setIndex: s.setIndex,
+          weightKg: num(s.weightKg),
+          reps: s.reps,
+          weightDelta: prev ? Math.round((num(s.weightKg) - prev.weightKg) * 100) / 100 : null,
+          repsDelta: prev ? s.reps - prev.reps : null,
+        }
+      }),
     }
   })
 

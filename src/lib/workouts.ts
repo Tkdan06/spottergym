@@ -22,11 +22,18 @@ export function formatWorkoutWhen(iso: string) {
   })
 }
 
-export function formatDeltaLabel(weightDelta: number | null | undefined, repsDelta: number | null | undefined) {
+export function formatDeltaLabel(
+  weightDelta: number | null | undefined,
+  repsDelta: number | null | undefined,
+  opts?: { hideFlat?: boolean },
+) {
   if (weightDelta == null && repsDelta == null) return null
   const w = weightDelta ?? 0
   const r = repsDelta ?? 0
-  if (w === 0 && r === 0) return { tone: 'flat' as const, text: 'как в прошлый раз' }
+  if (w === 0 && r === 0) {
+    if (opts?.hideFlat) return null
+    return { tone: 'flat' as const, text: 'как в прошлый раз' }
+  }
   const parts: string[] = []
   if (w !== 0) {
     const sign = w > 0 ? '+' : ''

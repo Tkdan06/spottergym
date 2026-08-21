@@ -42,13 +42,16 @@ import {
 import './WorkoutsPage.css'
 import './FeedbackPage.css'
 
-type DraftSet = { weightKg: string; reps: string }
+type DraftSet = {
+  weightKg: string
+  reps: string
+  weightDelta?: number | null
+  repsDelta?: number | null
+}
 type DraftExercise = {
   trackKey: string
   name: string
   sets: DraftSet[]
-  weightDelta?: number | null
-  repsDelta?: number | null
 }
 
 function newTrackKey() {
@@ -92,11 +95,11 @@ function fromDetail(w: WorkoutSessionDetail): {
     exercises: w.exercises.slice(0, MAX_EXERCISES_PER_WORKOUT).map((ex) => ({
       trackKey: ex.trackKey || newTrackKey(),
       name: ex.name.slice(0, EXERCISE_NAME_MAX),
-      weightDelta: ex.weightDelta,
-      repsDelta: ex.repsDelta,
       sets: ex.sets.slice(0, MAX_SETS_PER_EXERCISE).map((s) => ({
         weightKg: String(clampBarWeight(s.weightKg)),
         reps: String(s.reps),
+        weightDelta: s.weightDelta,
+        repsDelta: s.repsDelta,
       })),
     })),
   }
@@ -214,8 +217,7 @@ export function WorkoutEditorPage() {
           isNew
             ? draft.exercises.map((ex) => ({
                 ...ex,
-                weightDelta: null,
-                repsDelta: null,
+                sets: ex.sets.map((s) => ({ ...s, weightDelta: null, repsDelta: null })),
               }))
             : draft.exercises,
         )
@@ -348,33 +350,30 @@ export function WorkoutEditorPage() {
           <section className="surface workouts-form-block">
             {exercises.length ? (
               <ul className="workout-readonly-list">
-                {exercises.map((ex, i) => {
-                  const delta = formatDeltaLabel(ex.weightDelta, ex.repsDelta)
-                  return (
-                    <li key={ex.trackKey || i} className="workout-readonly-ex">
-                      <div className="workout-exercise-head">
-                        <strong>{ex.name || 'Упражнение'}</strong>
-                        {delta ? (
-                          <span className={`workout-delta is-${delta.tone}`}>
-                            {delta.tone === 'up' ? '↑ ' : delta.tone === 'down' ? '↓ ' : ''}
-                            {delta.text}
-                          </span>
-                        ) : null}
-                      </div>
-                      <ul className="workout-readonly-sets">
-                        {ex.sets.map((s, si) => (
+                {exercises.map((ex, i) => (
+                  <li key={ex.trackKey || i} className="workout-readonly-ex">
+                    <strong>{ex.name || 'Упражнение'}</strong>
+                    <ul className="workout-readonly-sets">
+                      {ex.sets.map((s, si) => {
+                        const delta = formatDeltaLabel(s.weightDelta, s.repsDelta, { hideFlat: true })
+                        return (
                           <li key={si}>
-                            <span className="dim">{si + 1}.</span>{' '}
-                            {formatSetPair(
-                              Number(String(s.weightKg).replace(',', '.')) || 0,
-                              Math.max(0, Math.floor(Number(s.reps) || 0)),
-                            )}
+                            <span>
+                              <span className="dim">{si + 1}.</span>{' '}
+                              {formatSetPair(
+                                Number(String(s.weightKg).replace(',', '.')) || 0,
+                                Math.max(0, Math.floor(Number(s.reps) || 0)),
+                              )}
+                            </span>
+                            {delta ? (
+                              <span className={`workout-delta is-${delta.tone}`}>{delta.text}</span>
+                            ) : null}
                           </li>
-                        ))}
-                      </ul>
-                    </li>
-                  )
-                })}
+                        )
+                      })}
+                    </ul>
+                  </li>
+                ))}
               </ul>
             ) : (
               <p className="muted">Нет упражнений</p>
@@ -436,9 +435,7 @@ export function WorkoutEditorPage() {
           </section>
 
           <section className="workouts-exercises">
-            {exercises.map((ex, ei) => {
-              const delta = formatDeltaLabel(ex.weightDelta, ex.repsDelta)
-              return (
+            {exercises.map((ex, ei) => (
                 <article key={ex.trackKey || ei} className="surface workout-exercise-card">
                   <div className="workout-exercise-head">
                     <input
@@ -448,15 +445,6 @@ export function WorkoutEditorPage() {
                       placeholder="Упражнение"
                       maxLength={EXERCISE_NAME_MAX}
                     />
-                    {delta ? (
-                      <span
-                        className={`workout-delta is-${delta.tone}`}
-                        title="Относительно прошлой такой тренировки"
-                      >
-                        {delta.tone === 'up' ? '↑ ' : delta.tone === 'down' ? '↓ ' : ''}
-                        {delta.text}
-                      </span>
-                    ) : null}
                     {exercises.length > 1 ? (
                       <button
                         type="button"
@@ -531,8 +519,7 @@ export function WorkoutEditorPage() {
                       : ''}
                   </button>
                 </article>
-              )
-            })}
+            ))}
 
             <button
               type="button"
