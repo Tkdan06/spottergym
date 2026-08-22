@@ -174,10 +174,9 @@
 
 .floor-sheet-kicker {
   margin: 0 0 2px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: var(--text-label-size);
+  font-weight: var(--text-label-weight);
+  letter-spacing: normal;
   color: var(--accent);
 }
 

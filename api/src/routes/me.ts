@@ -155,7 +155,7 @@ meRoutes.get(
     const range: ActivityRange =
       rangeNum === 7 || rangeNum === 90 || rangeNum === 30 ? (rangeNum as ActivityRange) : 30
 
-    await expireStaleCheckIns()
+    void expireStaleCheckIns()
     const stats = await buildMyActivityStats(c.get('userId'), range)
     return c.json({ activity: stats })
   },

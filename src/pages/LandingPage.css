@@ -41,10 +41,9 @@
 .lp-kicker {
   margin: 0 0 10px;
   color: var(--accent);
-  font-weight: 700;
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-weight: var(--text-label-weight);
+  font-size: var(--text-label-size);
+  letter-spacing: normal;
 }
 
 /* Hierarchy: brand (Syne) > headline (Unbounded) > lead (Manrope) */
@@ -469,10 +468,9 @@
 }
 
 .lp-fix-label {
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: var(--text-label-size);
+  font-weight: var(--text-label-weight);
+  letter-spacing: normal;
   color: var(--accent);
 }
 

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, MoreHorizontal, RotateCcw } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { SOFT_LOADER_DELAY_MS, SoftLoader } from '../components/SoftLoader'
 import { useApp } from '../context/useApp'
 import {
   apiFetchMyActivity,
@@ -95,7 +96,7 @@ export function ActivityPage() {
   const { user, apiOnline } = useApp()
   const [range, setRange] = useState<ActivityRange>(30)
   const [stats, setStats] = useState<ActivityStats | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [resetting, setResetting] = useState(false)
   const [error, setError] = useState('')
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
@@ -104,6 +105,7 @@ export function ActivityPage() {
   const menuPanelRef = useRef<HTMLDivElement>(null)
   const confirmPanelRef = useRef<HTMLDivElement>(null)
   const confirmActionRef = useRef<HTMLButtonElement>(null)
+  const loadGen = useRef(0)
 
   useSheetA11y(sheet === 'menu', () => setSheet('closed'), menuPanelRef)
   useSheetA11y(
@@ -114,10 +116,12 @@ export function ActivityPage() {
   )
 
   const load = useCallback(async (nextRange: ActivityRange) => {
+    const gen = ++loadGen.current
     setLoading(true)
     setError('')
     try {
       const next = await apiFetchMyActivity(nextRange)
+      if (gen !== loadGen.current) return
       setStats(next)
       setSelectedDate((prev) => {
         if (prev && next.days.some((d) => d.date === prev && d.minutes > 0)) return prev
@@ -125,15 +129,19 @@ export function ActivityPage() {
         return lastActive?.date ?? null
       })
     } catch (err) {
+      if (gen !== loadGen.current) return
       setError(err instanceof Error ? err.message : 'Не удалось загрузить статистику')
       setStats(null)
     } finally {
-      setLoading(false)
+      if (gen === loadGen.current) setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    if (!user || !apiOnline) return
+    if (!user || !apiOnline) {
+      setLoading(false)
+      return
+    }
     void load(range)
   }, [user, apiOnline, range, load])
 
@@ -187,19 +195,19 @@ export function ActivityPage() {
         <header className="activity-head">
           <div className="activity-head-row">
             <h1 className="page-title">Активность</h1>
-            {canReset ? (
-              <button
-                type="button"
-                className="icon-btn activity-more-btn"
-                aria-label="Ещё"
-                aria-haspopup="dialog"
-                aria-expanded={sheet !== 'closed'}
-                onClick={() => setSheet('menu')}
-                disabled={resetting}
-              >
-                <MoreHorizontal size={20} />
-              </button>
-            ) : null}
+            <button
+              type="button"
+              className={`icon-btn activity-more-btn ${canReset ? '' : 'is-reserved'}`.trim()}
+              aria-label="Ещё"
+              aria-haspopup="dialog"
+              aria-expanded={sheet !== 'closed'}
+              aria-hidden={!canReset}
+              tabIndex={canReset ? 0 : -1}
+              onClick={() => setSheet('menu')}
+              disabled={resetting || !canReset}
+            >
+              <MoreHorizontal size={20} />
+            </button>
           </div>
           <p className="muted">Время в зале по отметкам</p>
         </header>
@@ -218,7 +226,7 @@ export function ActivityPage() {
             aria-selected={range === r.id}
             className={`activity-range-btn ${range === r.id ? 'is-active' : ''}`}
             onClick={() => setRange(r.id)}
-            disabled={loading || resetting}
+            disabled={resetting}
           >
             {r.label}
           </button>
@@ -231,9 +239,15 @@ export function ActivityPage() {
         </p>
       ) : null}
 
-      {loading && !stats ? <p className="muted">Загружаем…</p> : null}
+      <div
+        className={`activity-feed ${loading && stats ? 'is-refreshing' : ''}`.trim()}
+        aria-busy={loading}
+      >
+        {loading && !stats ? (
+          <SoftLoader delayMs={SOFT_LOADER_DELAY_MS} label="Загружаем активность…" />
+        ) : null}
 
-      {stats ? (
+        {stats ? (
         <>
           <section className="activity-summary" aria-label="Сводка">
             <span className="activity-summary-label">Всего за период</span>
@@ -328,23 +342,25 @@ export function ActivityPage() {
                   </span>
                 </div>
 
-                {selectedDay ? (
-                  <div key={selectedDay.date} className="activity-day-detail" aria-live="polite">
-                    <div className="activity-day-detail-copy">
-                      <strong>{formatDayLabel(selectedDay.date)}</strong>
-                      <span>
-                        {selectedDay.minutes > 0
-                          ? formatMinutes(selectedDay.minutes)
-                          : 'В этот день отметок не было'}
-                      </span>
-                    </div>
-                    {selectedDay.minutes > 0 && selectedDay.intervals?.length ? (
-                      <div className="activity-day-detail-range">
-                        {formatLocalTrainingWindow(selectedDay.intervals)}
+                <div className="activity-day-detail" aria-live="polite">
+                  {selectedDay ? (
+                    <>
+                      <div className="activity-day-detail-copy">
+                        <strong>{formatDayLabel(selectedDay.date)}</strong>
+                        <span>
+                          {selectedDay.minutes > 0
+                            ? formatMinutes(selectedDay.minutes)
+                            : 'В этот день отметок не было'}
+                        </span>
                       </div>
-                    ) : null}
-                  </div>
-                ) : null}
+                      {selectedDay.minutes > 0 && selectedDay.intervals?.length ? (
+                        <div className="activity-day-detail-range">
+                          {formatLocalTrainingWindow(selectedDay.intervals)}
+                        </div>
+                      ) : null}
+                    </>
+                  ) : null}
+                </div>
               </section>
 
               {stats.busiestDay || stats.quietestDay ? (
@@ -379,7 +395,8 @@ export function ActivityPage() {
             </>
           )}
         </>
-      ) : null}
+        ) : null}
+      </div>
 
       {sheet === 'menu' ? (
         <div className="activity-sheet" role="dialog" aria-modal="true" aria-label="Действия">

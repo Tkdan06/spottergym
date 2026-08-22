@@ -1,9 +1,15 @@
 .soft-loader {
   display: grid;
   justify-items: center;
+  align-content: center;
   gap: 12px;
+  min-height: 120px;
   padding: 28px 16px;
   text-align: center;
+}
+
+.soft-loader.is-waiting {
+  padding: 0;
 }
 
 .soft-loader-ring {

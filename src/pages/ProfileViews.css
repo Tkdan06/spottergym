@@ -134,7 +134,7 @@
 .profile-hero-meta .profile-hero-name {
   margin: 10px 0 6px;
   max-width: 100%;
-  font-size: 1.75rem;
+  font-size: var(--text-page-size);
   line-height: 1.2;
   overflow-wrap: anywhere;
   word-break: break-word;

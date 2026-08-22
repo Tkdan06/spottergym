@@ -16,9 +16,14 @@ Before adding or redesigning UI in `src/pages` / `src/components`, follow the li
    `.btn-sm` (40px) and/or `.btn-soft` / `.btn-ghost`. Do not stack many full-size ghost blocks.
 2. **Secondary screens:** wrap back + title in `.subpage-top` (14px gap). Do not combine
    `.back-link { margin-bottom: 14px }` with an extra page grid gap between the same elements.
+   Workouts IA: list is the hub (`goWorkoutsHub` / replace). Hub exits to Home (`exitWorkoutsSection`
+   / replace, label «Мой зал»). Never `navigate(-1)` from the list and never push `/app/workouts`
+   on top of progress or a session.
 3. **Section headings:** only `SectionTitle` / `.section-title` — no one-off `h2` font sizes for
-   the same role. Fonts: Unbounded = headlines, Syne = SPOTTER wordmark only, Manrope = UI/body.
-   Full specimen (sizes, weights, tracking, roles) lives on the UI kit «Типографика» block.
+   the same role. Fonts: Unbounded = headlines (page 1.4375rem / 800, section 1.05rem / 700),
+   Syne = SPOTTER wordmark only, Manrope = UI/body. Kickers and labels are sentence case —
+   no `uppercase` and no letter-spacing 0.04–0.10em. Full specimen lives on the UI kit
+   «Типографика» block.
 4. **SectionTitle actions:** use `.section-action` for Link and `<button>` (“Кого я лайкнул”,
    “Добавить”, “Изменить”). Same Manrope muted look — no `.text-link` / font-weight 650 in the
    action slot. Non-click meta → `.muted` / `.dim`. Admin accent nav links may keep `.text-link`
@@ -32,15 +37,22 @@ Before adding or redesigning UI in `src/pages` / `src/components`, follow the li
 7. **Bottom sheets:** compose `.app-sheet`, `.app-sheet-backdrop`, `.app-sheet-panel`,
    `.app-sheet-grab` + `useSheetA11y`. Do not invent another backdrop/panel copy-paste.
 8. **Empty states:** `.empty-copy` + `.empty-copy-title` + `.empty-copy-lead` + one primary CTA;
-   extra CTA → `btn-sm`.
-9. **List rows with multiple actions:** primary navigation on the left; secondary (copy/expand)
+   extra CTA → `btn-sm`. Never show empty while the region is still loading.
+9. **Loaders:** before adding a spinner anywhere, follow the UI kit «Лоадер» block. Use only
+   `SoftLoader` in the content slot that will be filled (min-height ~120px). Keep header, tabs,
+   and the primary CTA mounted and still. Delay the ring 280–400ms unless the parent already
+   waited (`useGymPeople` 1s → `delayMs={0}`). Use `SOFT_LOADER_DELAY_MS` (320). One loader per
+   region. Button busy = label («Сохраняем…»), not a second spinner. Do not invent CSS rings or
+   skeletons.
+10. **List rows with multiple actions:** primary navigation on the left; secondary (copy/expand)
    as separate targets — see workout history pattern on UiKit page.
-10. **Profile edit:** Settings via header gear; do not add a second full-width “Редактировать
+11. **Profile edit:** Settings via header gear; do not add a second full-width “Редактировать
     профиль” CTA wall. Feedback lives in Settings; admin contour button only for `isAdmin`.
 
 ## Sources of truth
 
 - Live demo: `/app/admin/ui`
-- Code: `src/pages/UiKitPage.tsx`, `src/components/SectionTitle.tsx`, `src/components/SoftFlash.tsx`
+- Code: `src/pages/UiKitPage.tsx`, `src/components/SectionTitle.tsx`, `src/components/SoftFlash.tsx`,
+  `src/components/SoftLoader.tsx`
 - CSS: `src/styles/global.css`, `src/styles/sheets.css`
 - Entry IA canvas: `feedback-entry-ia` (where feedback/admin belong)

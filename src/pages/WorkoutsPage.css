@@ -24,6 +24,12 @@
   gap: 8px;
 }
 
+.workouts-feed {
+  display: grid;
+  gap: 14px;
+  min-height: 120px;
+}
+
 .workouts-retention-banner {
   margin: 0;
   padding: 10px 12px;
@@ -412,10 +418,9 @@
 }
 
 .workout-sets-head {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: var(--text-label-size);
+  font-weight: var(--text-label-weight);
+  letter-spacing: normal;
   color: var(--text-dim);
 }
 
@@ -788,8 +793,8 @@
 }
 
 .workout-line-grid {
-  stroke: var(--line);
-  stroke-width: 1;
+  stroke: color-mix(in srgb, var(--line) 70%, transparent);
+  stroke-width: 0.6;
 }
 
 .workout-line-y-label,
@@ -803,11 +808,30 @@
   text-anchor: end;
 }
 
+.workout-line-fill-top {
+  stop-color: var(--accent);
+  stop-opacity: 0.28;
+}
+
+.workout-line-fill-bottom {
+  stop-color: var(--accent);
+  stop-opacity: 0;
+}
+
+.workout-line-area {
+  pointer-events: none;
+}
+
 .workout-line-path {
   stroke: var(--accent);
-  stroke-width: 2.5;
+  stroke-width: 1.35;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.workout-line-cursor {
+  stroke: color-mix(in srgb, var(--accent) 35%, transparent);
+  stroke-width: 0.75;
 }
 
 .workout-line-hit {
@@ -816,16 +840,13 @@
   cursor: pointer;
 }
 
-.workout-line-dot {
-  fill: var(--bg-elevated);
-  stroke: var(--accent);
-  stroke-width: 2;
-  cursor: pointer;
-  pointer-events: none;
+.workout-line-halo {
+  fill: color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
 .workout-line-dot.is-selected {
   fill: var(--accent);
+  stroke: none;
 }
 
 .workout-progress-point {

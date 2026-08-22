@@ -29,8 +29,9 @@
 
 .install-guide-section-head h2 {
   margin: 0;
-  font-size: 1.15rem;
-  line-height: 1.2;
+  font-size: var(--text-section-size);
+  font-weight: var(--text-section-weight);
+  line-height: var(--text-section-line);
 }
 
 .install-guide-section > .muted {

@@ -30,17 +30,20 @@
   --font-brand: 'Syne', 'Unbounded', sans-serif;
   --font-body: 'Manrope', 'Unbounded', sans-serif;
   /* Typography scale — use these, don’t invent local sizes for the same role */
-  --text-page-size: 1.75rem;
+  --text-page-size: 1.4375rem;
   --text-page-weight: 800;
   --text-page-line: 1.15;
-  --text-section-size: 1.15rem;
+  --text-section-size: 1.05rem;
   --text-section-weight: 700;
   --text-section-line: 1.25;
+  --text-gym-min: 1.25rem;
+  --text-gym-max: 1.375rem;
   --text-body-size: 1rem;
   --text-body-line: 1.45;
   --text-muted-size: 0.9rem;
   --text-dim-size: 0.84rem;
-  --text-label-size: 0.72rem;
+  --text-label-size: 0.8125rem;
+  --text-label-weight: 600;
   --letter-tight: -0.03em;
   color-scheme: dark;
 }
@@ -201,13 +204,12 @@ html.standalone {
   flex: 1;
 }
 
-/* Real eyebrow only (e.g. network on Зал) — never an empty spacer */
+/* Real eyebrow only (e.g. network on Зал) — sentence case, no wide tracking */
 .page-kicker {
   margin: 0;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: var(--text-label-size);
+  font-weight: var(--text-label-weight);
+  letter-spacing: normal;
   line-height: 1.2;
   color: var(--text-muted);
 }
@@ -908,8 +910,9 @@ a.btn-danger-ghost {
 .empty-copy-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.1rem;
-  font-weight: 750;
+  font-size: var(--text-section-size);
+  font-weight: var(--text-section-weight);
+  letter-spacing: var(--letter-tight);
   color: var(--text);
 }
 

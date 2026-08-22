@@ -50,7 +50,7 @@
   color: #111;
   font-size: 0.7rem;
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: normal;
   line-height: 1.35;
   border: 1px solid rgba(17, 17, 17, 0.12);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);

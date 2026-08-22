@@ -13,9 +13,22 @@ import {
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { SectionTitle } from '../components/SectionTitle'
 import { SoftFlash } from '../components/SoftFlash'
+import { SoftLoader } from '../components/SoftLoader'
 import { useApp } from '../context/useApp'
+import './ActivityPage.css'
 import './UiKitPage.css'
 import './WorkoutsPage.css'
+
+const TYPE_TOKENS = [
+  ['--font-display', 'Unbounded', 'Заголовки'],
+  ['--font-brand', 'Syne', 'SPOTTER, только латиница'],
+  ['--font-body', 'Manrope', 'Текст и UI'],
+  ['--text-page-size', '1.4375rem', 'Заголовок страницы · 800'],
+  ['--text-section-size', '1.05rem', 'Секция / empty · 700'],
+  ['--text-gym-min / max', '1.25–1.375rem', 'Имя зала над CTA · 800'],
+  ['--text-label-size', '0.8125rem', 'Кикер и label · 600'],
+  ['--letter-tight', '−0.03em', 'Только Unbounded, не кикеры'],
+] as const
 
 const COLOR_TOKENS = [
   ['--bg', 'Фон'],
@@ -80,7 +93,10 @@ export function UiKitPage() {
           </li>
           <li>
             <strong>Назад:</strong> всегда <code>.subpage-top</code> → gap 14px до заголовка. Не
-            дублируй margin <code>.back-link</code> с grid-gap страницы.
+            дублируй margin <code>.back-link</code> с grid-gap страницы. Секция тренировок: хаб{' '}
+            <code>/app/workouts</code>, вложенные экраны возвращаются туда с <code>replace</code>, с
+            хаба выход — <code>/app</code> («Мой зал»), тоже <code>replace</code>. Не{' '}
+            <code>navigate(-1)</code> и не пушить хаб поверх прогресса/записи.
           </li>
           <li>
             <strong>Фидбек:</strong> MomentFX — только чекин/выход/редкий момент. Рутина (лайк,
@@ -107,6 +123,20 @@ export function UiKitPage() {
             Обратная связь — Settings <code>btn-ghost</code>. Админка — ghost внизу профиля (только
             isAdmin).
           </li>
+          <li>
+            <strong>Заголовки:</strong> только Unbounded и токены{' '}
+            <code>--text-page-size</code> (1.4375rem / 800), <code>--text-section-size</code>{' '}
+            (1.05rem / 700). Не ставь 1.75rem и не выдумывай локальный кегль. Полная шкала — блок
+            «Типографика».
+          </li>
+          <li>
+            <strong>Кикер / label:</strong> как обычный текст — <code>--text-label-size</code> · 600,
+            без <code>uppercase</code> и без letter-spacing 0.04–0.10em.
+          </li>
+          <li>
+            <strong>Лоадер:</strong> только <code>SoftLoader</code> в слоте будущего контента. Chrome
+            и primary CTA не двигаются. Полное правило — блок «Лоадер» ниже.
+          </li>
         </ul>
       </section>
 
@@ -130,9 +160,21 @@ export function UiKitPage() {
       <section className="surface ui-kit-block">
         <SectionTitle>Типографика</SectionTitle>
         <p className="muted ui-kit-section-lead">
-          Три семейства. Не подключай четвёртое. Веса бери из загруженных файлов — 650/750 браузер
-          синтезирует, для нового UI не используй.
+          Три семейства — не подключай четвёртое. Unbounded меньше, чем раньше (страница 23px, не
+          28px), жирность та же. Кикеры без капса и широкого трекинга. Веса только из файлов: 650/750
+          браузер синтезирует, для нового UI не используй.
         </p>
+
+        <h3 className="ui-kit-type-sub">Токены — сверяйся сюда</h3>
+        <div className="ui-kit-type-tokens">
+          {TYPE_TOKENS.map(([token, value, role]) => (
+            <div key={token} className="ui-kit-type-token">
+              <code>{token}</code>
+              <strong>{value}</strong>
+              <span className="dim">{role}</span>
+            </div>
+          ))}
+        </div>
 
         <h3 className="ui-kit-type-sub">Семейства</h3>
         <div className="ui-kit-font-cards">
@@ -142,8 +184,8 @@ export function UiKitPage() {
             </p>
             <p className="ui-kit-font-card-role">Заголовки</p>
             <p className="muted">
-              <code>--font-display</code> · кириллица, спорт. Страницы, блоки, empty, цифры
-              активности, имя зала, карточки людей.
+              <code>--font-display</code> · кириллица, спорт. Страницы 1.4375rem / 800, секции
+              1.05rem / 700, empty, цифры активности 1.5–1.75rem, имя зала, карточки людей.
             </p>
             <p className="dim">Загружено: 600 · 700 · 800</p>
           </article>
@@ -165,7 +207,7 @@ export function UiKitPage() {
             <p className="ui-kit-font-card-role">Текст и UI</p>
             <p className="muted">
               <code>--font-body</code> · абзацы, кнопки, поля, muted/dim, section-action, чипы,
-              навигация.
+              навигация. Кикер и label — 600, как обычный текст, без капса.
             </p>
             <p className="dim">Загружено: 400 · 500 · 600 · 700</p>
           </article>
@@ -213,10 +255,10 @@ export function UiKitPage() {
             500 Medium — кнопки, section-action, поля
           </p>
           <p className="ui-kit-weight-line" style={{ fontWeight: 600 }}>
-            600 Semibold — акцент в UI, чипы
+            600 Semibold — кикер, label, чипы
           </p>
           <p className="ui-kit-weight-line" style={{ fontWeight: 700 }}>
-            700 Bold — kicker, счётчики, сильный label
+            700 Bold — счётчики, сильный акцент
           </p>
         </div>
 
@@ -224,14 +266,14 @@ export function UiKitPage() {
         <div className="ui-kit-type-table" role="table">
           {(
             [
-              ['Страница', '.page-title', 'Unbounded 800', '1.75rem', 'lh 1.15', '−0.03em'],
-              ['Зал над CTA', '.home-gym-title', 'Unbounded 800', '1.35–1.75', 'lh 1.15', '−0.03em'],
-              ['Секция', '.section-heading', 'Unbounded 700', '1.15rem', 'lh 1.25', '−0.03em'],
-              ['Empty title', '.empty-copy-title', 'Unbounded 750*', '1.1rem', 'lh inherit', '—'],
-              ['Цифра / пик', '.activity-summary-total', 'Unbounded 700', '1.85–2.35', 'lh 1.05', 'tight'],
+              ['Страница', '.page-title', 'Unbounded 800', '1.4375rem', 'lh 1.15', '−0.03em'],
+              ['Зал над CTA', '.home-gym-title', 'Unbounded 800', '1.25–1.375', 'lh 1.15', '−0.03em'],
+              ['Секция', '.section-heading', 'Unbounded 700', '1.05rem', 'lh 1.25', '−0.03em'],
+              ['Empty title', '.empty-copy-title', 'Unbounded 700', '1.05rem', 'lh inherit', '−0.03em'],
+              ['Цифра / пик', '.activity-summary-total', 'Unbounded 700', '1.5–1.75', 'lh 1.05', 'tight'],
               ['Бренд', '.brand-mark', 'Syne 800', '1.75–2.4', 'lh inherit', '−0.04em'],
-              ['Kicker', '.page-kicker', 'Manrope 700', '0.72rem', 'lh 1.2', '+0.06em caps'],
-              ['Label', 'token --text-label', 'Manrope 700', '0.72rem', 'lh inherit', '+0.04em caps'],
+              ['Kicker', '.page-kicker', 'Manrope 600', '0.8125rem', 'lh 1.2', 'без капса'],
+              ['Label', 'token --text-label', 'Manrope 600', '0.8125rem', 'lh inherit', '0'],
               ['Тело', 'body / p', 'Manrope 400', '1rem', 'lh 1.45', '0'],
               ['Muted', '.muted', 'Manrope 400', '0.9rem', 'lh 1.45', '0'],
               ['Dim', '.dim', 'Manrope 400', '0.84rem', 'lh inherit', '0'],
@@ -251,8 +293,8 @@ export function UiKitPage() {
           ))}
         </div>
         <p className="dim" style={{ margin: '10px 0 0' }}>
-          * 650 и 750 нет в файлах — браузер рисует между 600/700 и 700/800. Новые роли: 500 / 600 /
-          700 / 800.
+          * 650 нет в файлах — браузер рисует между 600/700. Новые роли: 500 / 600 / 700 / 800.
+          Кикеры и лейблы — как обычный текст, без uppercase и без трекинга 0.04–0.10em.
         </p>
 
         <h3 className="ui-kit-type-sub">Живые образцы</h3>
@@ -264,19 +306,25 @@ export function UiKitPage() {
             </p>
           </div>
           <div>
-            <p className="dim ui-kit-meta">.page-kicker · Manrope 700 · caps +0.06em</p>
+            <p className="dim ui-kit-meta">.page-kicker · Manrope 600 · без капса</p>
             <p className="page-kicker">DDX Fitness</p>
           </div>
           <div>
-            <p className="dim ui-kit-meta">.page-title · Unbounded 800 · 1.75rem · −0.03em</p>
+            <p className="dim ui-kit-meta">.page-title · Unbounded 800 · 1.4375rem · −0.03em</p>
             <h1 className="page-title">Мой зал</h1>
           </div>
           <div>
-            <p className="dim ui-kit-meta">.home-gym-title · Unbounded 800</p>
+            <p className="dim ui-kit-meta">.home-gym-title · Unbounded 800 · 1.25–1.375rem</p>
             <h2 className="ui-kit-gym-title">Рязанский проспект</h2>
           </div>
           <div>
-            <p className="dim ui-kit-meta">SectionTitle · Unbounded 700 + action Manrope 500</p>
+            <p className="dim ui-kit-meta">
+              .activity-summary-total · Unbounded 700 · 1.5–1.75rem
+            </p>
+            <strong className="activity-summary-total">12 ч 40 мин</strong>
+          </div>
+          <div>
+            <p className="dim ui-kit-meta">SectionTitle · Unbounded 700 · 1.05rem + action Manrope 500</p>
             <SectionTitle
               action={
                 <Link to="/app/profile" className="section-action">
@@ -288,7 +336,7 @@ export function UiKitPage() {
             </SectionTitle>
           </div>
           <div>
-            <p className="dim ui-kit-meta">.empty-copy-title · Unbounded</p>
+            <p className="dim ui-kit-meta">.empty-copy-title · Unbounded 700 · 1.05rem</p>
             <p className="empty-copy-title">Пока пусто</p>
           </div>
           <div>
@@ -300,7 +348,7 @@ export function UiKitPage() {
           <div>
             <p className="dim ui-kit-meta">Трекинг</p>
             <p className="ui-kit-track-tight">Заголовок −0.03em · Unbounded</p>
-            <p className="ui-kit-track-wide">KICKER +0.06EM · MANROPE</p>
+            <p className="ui-kit-track-wide">Кикер как предложение · Manrope 600</p>
             <p className="ui-kit-track-none">Текст без трекинга · Manrope</p>
           </div>
         </div>
@@ -433,6 +481,56 @@ export function UiKitPage() {
           <button type="button" className="btn btn-ghost btn-sm btn-block">
             Второстепенное
           </button>
+        </div>
+      </section>
+
+      <section className="surface ui-kit-block">
+        <SectionTitle>Лоадер</SectionTitle>
+        <p className="muted ui-kit-section-lead">
+          Перед любым спиннером на странице сверься с этим блоком. Один компонент:{' '}
+          <code>SoftLoader</code>. Не рисуй свои кольца, скелетоны и «три точки».
+        </p>
+        <ul className="ui-kit-rules">
+          <li>
+            <strong>Слот, не шапка.</strong> Хедер, табы и primary CTA уже на месте и не двигаются.
+            Лоадер живёт только в области, куда придёт контент (история, лента, список людей).
+          </li>
+          <li>
+            <strong>Резерв высоты.</strong> Слот держит ~120px (<code>.soft-loader</code>), чтобы
+            кольцо не схлопывало экран и контент не выпрыгивал из-под кнопки.
+          </li>
+          <li>
+            <strong>Задержка кольца 280–400ms.</strong> Быстрый ответ — без вспышки спиннера.{' '}
+            <code>SOFT_LOADER_DELAY_MS</code> (320) на самом <code>SoftLoader</code>. Если родитель
+            уже ждал (зал: 1с в <code>useGymPeople</code>) — <code>{'delayMs={0}'}</code>.
+          </li>
+          <li>
+            <strong>Не путать с empty.</strong> Пока грузимся — только лоадер. «Пока пусто» только
+            после ответа, когда список реально пуст.
+          </li>
+          <li>
+            <strong>Один индикатор на регион.</strong> Кнопка в процессе — меняет подпись
+            («Сохраняем…», «Загружаем…»), без второго кольца рядом.
+          </li>
+          <li>
+            <strong>Не блокируй главное действие.</strong> «Записать тренировку» доступна, пока
+            грузится история. Пользователь не ждёт спиннер, чтобы начать работу.
+          </li>
+          <li>
+            <strong>Баннеры и стрипы</strong> не всплывают над CTA во время загрузки — иначе кнопка
+            прыгает. Вторичный контент рисуй в том же слоте, что и список, и только после{' '}
+            <code>!loading</code>.
+          </li>
+          <li>
+            <strong>Доступность.</strong> Регион — <code>aria-busy</code>. Лоадер —{' '}
+            <code>role="status"</code> и короткая фраза («Загружаем тренировки…»).
+          </li>
+        </ul>
+        <div className="ui-kit-loader-demo" aria-hidden>
+          <button type="button" className="btn btn-primary btn-block" tabIndex={-1}>
+            Главное действие остаётся
+          </button>
+          <SoftLoader delayMs={0} label="Загружаем список…" />
         </div>
       </section>
 

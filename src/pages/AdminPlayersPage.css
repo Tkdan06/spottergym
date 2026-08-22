@@ -24,7 +24,7 @@
 
 .admin-players-head h1 {
   margin: 0 0 4px;
-  font-size: clamp(1.25rem, 5vw, 1.75rem);
+  font-size: var(--text-page-size);
   line-height: 1.15;
   overflow-wrap: anywhere;
 }
@@ -376,10 +376,9 @@
 
 .admin-ip-flag {
   color: var(--danger);
-  font-size: 0.72rem;
+  font-size: var(--text-label-size);
   font-weight: 800;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  letter-spacing: normal;
 }
 
 .admin-detail-ip-warn {
@@ -438,10 +437,10 @@
 }
 
 .admin-detail-grid dt {
-  font-size: 0.72rem;
+  font-size: var(--text-label-size);
+  font-weight: var(--text-label-weight);
   color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: normal;
 }
 
 .admin-detail-grid dd {

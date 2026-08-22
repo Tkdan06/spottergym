@@ -98,6 +98,36 @@
   margin-top: 4px;
 }
 
+.ui-kit-type-tokens {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.ui-kit-type-token {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  min-width: 0;
+}
+
+.ui-kit-type-token code {
+  overflow-wrap: anywhere;
+}
+
+.ui-kit-type-token strong {
+  font-size: 0.95rem;
+}
+
+@media (min-width: 480px) {
+  .ui-kit-type-tokens {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .ui-kit-font-cards {
   display: grid;
   gap: 10px;
@@ -123,9 +153,8 @@
 .ui-kit-font-card-role {
   margin: 0;
   font-size: var(--text-label-size);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-weight: var(--text-label-weight);
+  letter-spacing: normal;
   color: var(--accent);
 }
 
@@ -177,7 +206,7 @@
 .ui-kit-gym-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.35rem, 5.5vw, 1.75rem);
+  font-size: clamp(var(--text-gym-min), 5vw, var(--text-gym-max));
   font-weight: 800;
   line-height: 1.15;
   letter-spacing: var(--letter-tight);
@@ -193,9 +222,8 @@
 .ui-kit-track-wide {
   margin: 4px 0 0;
   font-size: var(--text-label-size);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-weight: var(--text-label-weight);
+  letter-spacing: normal;
   color: var(--text-muted);
 }
 
@@ -224,6 +252,17 @@
   align-items: flex-end;
   gap: 6px;
   min-width: 0;
+}
+
+.ui-kit-loader-demo {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px dashed var(--line);
+  background: var(--bg-elevated);
+  pointer-events: none;
 }
 
 @media (min-width: 480px) {

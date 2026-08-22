@@ -17,6 +17,7 @@ import {
   type WorkoutSessionDetail,
 } from '../lib/apiClient'
 import { WORKOUT_NOTE_MAX } from '../lib/fieldLimits'
+import { goWorkoutsHub } from '../lib/workoutsNav'
 import { getCheckInStartedAt } from '../lib/presence'
 import { useSheetA11y } from '../lib/sheetA11y'
 import { useMoment } from '../components/MomentFX'
@@ -290,7 +291,7 @@ export function WorkoutEditorPage() {
     setError('')
     try {
       await apiDeleteWorkout(id)
-      navigate('/app/workouts', { replace: true })
+      goWorkoutsHub(navigate)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось удалить')
       setConfirmOpen(false)
@@ -310,7 +311,7 @@ export function WorkoutEditorPage() {
   return (
     <main className="page workouts-page workout-editor">
       <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => navigate('/app/workouts')}>
+        <button type="button" className="back-link" onClick={() => goWorkoutsHub(navigate)}>
           <ArrowLeft size={18} /> Тренировки
         </button>
 

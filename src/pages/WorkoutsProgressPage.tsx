@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, ChevronDown } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/useApp'
@@ -9,6 +9,7 @@ import {
 } from '../lib/apiClient'
 import { useSheetA11y } from '../lib/sheetA11y'
 import { formatBodyDelta, formatDeltaLabel, formatKg } from '../lib/workouts'
+import { goWorkoutsHub } from '../lib/workoutsNav'
 import { WorkoutWeekRecap } from '../components/WorkoutWeekRecap'
 import { WORKOUT_RECAP_ADMIN_ONLY } from '../lib/workoutRecap'
 import './WorkoutsPage.css'
@@ -68,6 +69,29 @@ function roundNice(n: number) {
 }
 
 type ChartPoint = { at: string; value: number; meta?: string }
+type ChartCoord = { x: number; y: number; i: number }
+
+function smoothLine(coords: ChartCoord[]) {
+  if (!coords.length) return ''
+  if (coords.length === 1) return `M ${coords[0].x.toFixed(1)} ${coords[0].y.toFixed(1)}`
+  if (coords.length === 2) {
+    return `M ${coords[0].x.toFixed(1)} ${coords[0].y.toFixed(1)} L ${coords[1].x.toFixed(1)} ${coords[1].y.toFixed(1)}`
+  }
+  const t = 0.18
+  let d = `M ${coords[0].x.toFixed(1)} ${coords[0].y.toFixed(1)}`
+  for (let i = 0; i < coords.length - 1; i++) {
+    const p0 = coords[i - 1] ?? coords[i]
+    const p1 = coords[i]
+    const p2 = coords[i + 1]
+    const p3 = coords[i + 2] ?? p2
+    const c1x = p1.x + (p2.x - p0.x) * t
+    const c1y = p1.y + (p2.y - p0.y) * t
+    const c2x = p2.x - (p3.x - p1.x) * t
+    const c2y = p2.y - (p3.y - p1.y) * t
+    d += ` C ${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`
+  }
+  return d
+}
 
 function LineChart({
   points,
@@ -80,6 +104,9 @@ function LineChart({
   selectedIndex: number
   onSelect: (index: number) => void
 }) {
+  const uid = useId().replace(/:/g, '')
+  const fillId = `wp-fill-${uid}`
+  const clipId = `wp-clip-${uid}`
   const values = points.map((p) => p.value)
   const minV = Math.min(...values)
   const maxV = Math.max(...values)
@@ -90,14 +117,13 @@ function LineChart({
 
   const w = 320
   const h = 200
-  /** Room for Y numbers — keep plot clear of labels */
   const padL = 44
   const padR = 10
   const padT = 14
-  /** Room for X dates under the plot */
   const padB = 28
   const plotW = w - padL - padR
   const plotH = h - padT - padB
+  const plotBottom = padT + plotH
 
   const formatTick = (t: number) => (Number.isInteger(t) ? String(t) : t.toFixed(1))
 
@@ -105,10 +131,15 @@ function LineChart({
     const x =
       points.length === 1 ? padL + plotW / 2 : padL + (i / (points.length - 1)) * plotW
     const y = padT + (1 - (p.value - yMin) / ySpan) * plotH
-    return { x, y, p, i }
+    return { x, y, i }
   })
 
-  const path = coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`).join(' ')
+  const line = smoothLine(coords)
+  const area =
+    coords.length > 1
+      ? `${line} L ${coords[coords.length - 1].x.toFixed(1)} ${plotBottom} L ${coords[0].x.toFixed(1)} ${plotBottom} Z`
+      : ''
+  const selected = coords[selectedIndex] ?? coords[coords.length - 1]
 
   return (
     <div className="workout-line-chart">
@@ -116,6 +147,15 @@ function LineChart({
         {unit}
       </p>
       <svg viewBox={`0 0 ${w} ${h}`} className="workout-line-svg" role="img" aria-label={`График, ${unit}`}>
+        <defs>
+          <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" className="workout-line-fill-top" />
+            <stop offset="100%" className="workout-line-fill-bottom" />
+          </linearGradient>
+          <clipPath id={clipId}>
+            <rect x={padL} y={padT} width={plotW} height={plotH} />
+          </clipPath>
+        </defs>
         {ticks.map((t) => {
           const y = padT + (1 - (t - yMin) / ySpan) * plotH
           return (
@@ -127,25 +167,35 @@ function LineChart({
             </g>
           )
         })}
-        <path d={path} className="workout-line-path" fill="none" />
+        <g clipPath={`url(#${clipId})`}>
+          {area ? <path d={area} fill={`url(#${fillId})`} className="workout-line-area" /> : null}
+          <path d={line} className="workout-line-path" fill="none" />
+        </g>
+        {selected ? (
+          <line
+            x1={selected.x}
+            x2={selected.x}
+            y1={padT}
+            y2={plotBottom}
+            className="workout-line-cursor"
+          />
+        ) : null}
         {coords.map((c) => (
-          <g key={c.i}>
-            <circle
-              cx={c.x}
-              cy={c.y}
-              r={14}
-              className="workout-line-hit"
-              onClick={() => onSelect(c.i)}
-            />
-            <circle
-              cx={c.x}
-              cy={c.y}
-              r={selectedIndex === c.i ? 5.5 : 4}
-              className={`workout-line-dot ${selectedIndex === c.i ? 'is-selected' : ''}`}
-              onClick={() => onSelect(c.i)}
-            />
-          </g>
+          <circle
+            key={c.i}
+            cx={c.x}
+            cy={c.y}
+            r={16}
+            className="workout-line-hit"
+            onClick={() => onSelect(c.i)}
+          />
         ))}
+        {selected ? (
+          <g className="workout-line-focus" pointerEvents="none">
+            <circle cx={selected.x} cy={selected.y} r={7} className="workout-line-halo" />
+            <circle cx={selected.x} cy={selected.y} r={2.6} className="workout-line-dot is-selected" />
+          </g>
+        ) : null}
         <text x={padL} y={h - 6} className="workout-line-x-label" textAnchor="start">
           {formatAxisDay(points[0].at)}
         </text>
@@ -236,7 +286,7 @@ export function WorkoutsProgressPage() {
   return (
     <main className="page workouts-page workouts-progress-page">
       <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => navigate('/app/workouts')}>
+        <button type="button" className="back-link" onClick={() => goWorkoutsHub(navigate)}>
           <ArrowLeft size={18} /> Тренировки
         </button>
 

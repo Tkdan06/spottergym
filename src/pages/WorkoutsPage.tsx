@@ -9,8 +9,9 @@ import {
   TrendingUp,
 } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { exitWorkoutsSection } from '../lib/workoutsNav'
 import { SectionTitle } from '../components/SectionTitle'
-import { SoftLoader } from '../components/SoftLoader'
+import { SOFT_LOADER_DELAY_MS, SoftLoader } from '../components/SoftLoader'
 import { WorkoutReadonlySets } from '../components/WorkoutReadonlySets'
 import { useApp } from '../context/useApp'
 import {
@@ -136,8 +137,8 @@ export function WorkoutsPage() {
   return (
     <main className="page workouts-page">
       <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => navigate(-1)}>
-          <ArrowLeft size={18} /> Назад
+        <button type="button" className="back-link" onClick={() => exitWorkoutsSection(navigate)}>
+          <ArrowLeft size={18} /> Мой зал
         </button>
 
         <header className="page-header">
@@ -154,64 +155,67 @@ export function WorkoutsPage() {
         </p>
       ) : null}
 
-      {loading && !list.length ? <SoftLoader label="Загружаем тренировки…" /> : null}
-
-      {atRetentionCap || totalCount >= 580 ? (
-        <p className="workouts-retention-banner" role="status">
-          {atRetentionCap
-            ? 'Достигнут лимит истории (600). Новые записи вытесняют самые старые.'
-            : `История почти заполнена (${totalCount} из 600). Скоро старые тренировки начнут удаляться.`}
-        </p>
-      ) : null}
-
       <div className="workouts-actions">
         <Link to="/app/workouts/new" className="btn btn-primary btn-block">
           <Plus size={16} /> Записать тренировку
         </Link>
       </div>
 
-      {showStrip && progress ? (
-        <Link to="/app/workouts/progress" className="workouts-progress-strip">
-          <div className="workouts-progress-strip-icon" aria-hidden>
-            <TrendingUp size={18} />
-          </div>
-          <div className="workouts-progress-strip-copy">
-            <strong>Прогресс</strong>
-            <span className="muted">
-              {progress.highlight.bodyLatestKg != null ? (
-                <>
-                  {formatKg(progress.highlight.bodyLatestKg)}
-                  {bodyDeltaText ? ` · ${bodyDeltaText} за 30д` : ''}
-                </>
-              ) : null}
-              {progress.highlight.bodyLatestKg != null && liftDelta && progress.highlight.liftName
-                ? ' · '
-                : null}
-              {liftDelta && progress.highlight.liftName ? (
-                <>
-                  {progress.highlight.liftName}
-                  {liftDelta.tone === 'up' ? ' ↑ ' : liftDelta.tone === 'down' ? ' ↓ ' : ' · '}
-                  {liftDelta.text}
-                </>
-              ) : null}
-            </span>
-          </div>
-          <ChevronRight size={18} className="workouts-progress-strip-chevron" aria-hidden />
-        </Link>
-      ) : null}
+      <div className="workouts-feed" aria-busy={loading && !list.length}>
+        {loading && !list.length ? (
+          <SoftLoader delayMs={SOFT_LOADER_DELAY_MS} label="Загружаем тренировки…" />
+        ) : null}
 
-      {!loading && !list.length ? (
-        <section className="surface workouts-empty">
-          <ClipboardList size={28} aria-hidden />
-          <p className="empty-copy-title">Пока пусто</p>
-          <p className="muted">
-            Запиши первую тренировку — так появится история, и ты сможешь следить за прогрессом.
+        {!loading && (atRetentionCap || totalCount >= 580) ? (
+          <p className="workouts-retention-banner" role="status">
+            {atRetentionCap
+              ? 'Достигнут лимит истории (600). Новые записи вытесняют самые старые.'
+              : `История почти заполнена (${totalCount} из 600). Скоро старые тренировки начнут удаляться.`}
           </p>
-        </section>
-      ) : null}
+        ) : null}
 
-      {list.length ? (
-        <section className="surface workouts-list-block">
+        {!loading && showStrip && progress ? (
+          <Link to="/app/workouts/progress" className="workouts-progress-strip">
+            <div className="workouts-progress-strip-icon" aria-hidden>
+              <TrendingUp size={18} />
+            </div>
+            <div className="workouts-progress-strip-copy">
+              <strong>Прогресс</strong>
+              <span className="muted">
+                {progress.highlight.bodyLatestKg != null ? (
+                  <>
+                    {formatKg(progress.highlight.bodyLatestKg)}
+                    {bodyDeltaText ? ` · ${bodyDeltaText} за 30д` : ''}
+                  </>
+                ) : null}
+                {progress.highlight.bodyLatestKg != null && liftDelta && progress.highlight.liftName
+                  ? ' · '
+                  : null}
+                {liftDelta && progress.highlight.liftName ? (
+                  <>
+                    {progress.highlight.liftName}
+                    {liftDelta.tone === 'up' ? ' ↑ ' : liftDelta.tone === 'down' ? ' ↓ ' : ' · '}
+                    {liftDelta.text}
+                  </>
+                ) : null}
+              </span>
+            </div>
+            <ChevronRight size={18} className="workouts-progress-strip-chevron" aria-hidden />
+          </Link>
+        ) : null}
+
+        {!loading && !list.length ? (
+          <section className="surface workouts-empty">
+            <ClipboardList size={28} aria-hidden />
+            <p className="empty-copy-title">Пока пусто</p>
+            <p className="muted">
+              Запиши первую тренировку — так появится история, и ты сможешь следить за прогрессом.
+            </p>
+          </section>
+        ) : null}
+
+        {list.length ? (
+          <section className="surface workouts-list-block">
           <SectionTitle
             action={
               totalCount > 0 ? (
@@ -295,7 +299,8 @@ export function WorkoutsPage() {
             </button>
           ) : null}
         </section>
-      ) : null}
+        ) : null}
+      </div>
     </main>
   )
 }

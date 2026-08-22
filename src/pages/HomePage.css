@@ -50,10 +50,9 @@
   margin: 0;
   min-width: 0;
   flex: 1;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: var(--text-label-size);
+  font-weight: var(--text-label-weight);
+  letter-spacing: normal;
   line-height: 1.2;
   color: var(--text-muted);
   overflow: hidden;
@@ -63,7 +62,7 @@
 
 .home-gym-title {
   margin: 0;
-  font-size: clamp(1.35rem, 5.5vw, 1.75rem);
+  font-size: clamp(var(--text-gym-min), 5vw, var(--text-gym-max));
   line-height: 1.15;
   letter-spacing: -0.03em;
   font-weight: 800;
