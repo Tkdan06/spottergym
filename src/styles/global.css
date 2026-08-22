@@ -21,6 +21,8 @@
   --nav-h: 68px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* PWA first-paint: pin fixed bottom chrome to the visual viewport (see pwaViewport.ts) */
+  --vv-bottom: 0px;
   /* Non-zero only for home-screen / PWA (see html.standalone + display-mode) */
   --standalone-top: 0px;
   --app-max: 480px;

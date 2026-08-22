@@ -15,6 +15,7 @@ import '@fontsource/manrope/700.css'
 import App from './App'
 import { EmergencyOfflineGate } from './components/EmergencyOfflineGate'
 import { SiteLockGate } from './components/SiteLockGate'
+import { startPwaViewportSync } from './lib/pwaViewport'
 import { registerSpotterServiceWorker } from './lib/push'
 import './styles/global.css'
 import './styles/sheets.css'
@@ -32,6 +33,7 @@ function markStandaloneLaunch() {
 }
 
 markStandaloneLaunch()
+startPwaViewportSync()
 void registerSpotterServiceWorker()
 
 createRoot(document.getElementById('root')!).render(
