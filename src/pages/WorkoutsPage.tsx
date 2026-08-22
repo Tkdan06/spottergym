@@ -10,6 +10,8 @@ import {
 } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { SectionTitle } from '../components/SectionTitle'
+import { SoftLoader } from '../components/SoftLoader'
+import { WorkoutReadonlySets } from '../components/WorkoutReadonlySets'
 import { useApp } from '../context/useApp'
 import {
   apiFetchWorkoutProgress,
@@ -21,7 +23,6 @@ import {
   formatBodyDelta,
   formatDeltaLabel,
   formatKg,
-  formatSetPair,
   formatWorkoutWhen,
 } from '../lib/workouts'
 import './WorkoutsPage.css'
@@ -58,16 +59,15 @@ export function WorkoutsPage() {
     }
     setLoading(true)
     setError('')
+    const progressP = apiFetchWorkoutProgress(30)
+      .then((prog) => setProgress(prog))
+      .catch(() => setProgress(null))
     try {
-      const [page, prog] = await Promise.all([
-        apiFetchWorkouts({ limit: PAGE_SIZE }),
-        apiFetchWorkoutProgress(30),
-      ])
+      const page = await apiFetchWorkouts({ limit: PAGE_SIZE })
       setList(page.workouts)
       setHasMore(page.hasMore)
       setTotalCount(page.totalCount)
       setAtRetentionCap(page.atRetentionCap)
-      setProgress(prog)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось загрузить тренировки')
       setList([])
@@ -78,6 +78,7 @@ export function WorkoutsPage() {
     } finally {
       setLoading(false)
     }
+    void progressP
   }, [apiOnline])
 
   useEffect(() => {
@@ -152,6 +153,8 @@ export function WorkoutsPage() {
           {error}
         </p>
       ) : null}
+
+      {loading && !list.length ? <SoftLoader label="Загружаем тренировки…" /> : null}
 
       {atRetentionCap || totalCount >= 580 ? (
         <p className="workouts-retention-banner" role="status">
@@ -271,21 +274,7 @@ export function WorkoutsPage() {
                   {open ? (
                     <div className="workouts-board-body">
                       {exercises.length ? (
-                        <ul className="workout-readonly-list">
-                          {exercises.map((ex, i) => (
-                            <li key={`${w.id}-${i}`} className="workout-readonly-ex">
-                              <strong>{ex.name}</strong>
-                              <ul className="workout-readonly-sets">
-                                {ex.sets.map((s, si) => (
-                                  <li key={si}>
-                                    <span className="dim">{si + 1}.</span>{' '}
-                                    {formatSetPair(s.weightKg, s.reps)}
-                                  </li>
-                                ))}
-                              </ul>
-                            </li>
-                          ))}
-                        </ul>
+                        <WorkoutReadonlySets exercises={exercises} />
                       ) : (
                         <p className="muted">Нет упражнений</p>
                       )}

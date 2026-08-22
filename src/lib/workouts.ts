@@ -22,32 +22,47 @@ export function formatWorkoutWhen(iso: string) {
   })
 }
 
-export function formatDeltaLabel(
+export type DeltaTone = 'up' | 'down' | 'flat'
+
+export type DeltaPart = { tone: DeltaTone; text: string }
+
+function signedAmount(n: number, suffix: string) {
+  const sign = n > 0 ? '+' : ''
+  const value = Number.isInteger(n) ? String(n) : n.toFixed(1)
+  return `${sign}${value} ${suffix}`
+}
+
+export function formatDeltaParts(
   weightDelta: number | null | undefined,
   repsDelta: number | null | undefined,
   opts?: { hideFlat?: boolean },
-) {
+): DeltaPart[] | null {
   if (weightDelta == null && repsDelta == null) return null
   const w = weightDelta ?? 0
   const r = repsDelta ?? 0
   if (w === 0 && r === 0) {
     if (opts?.hideFlat) return null
-    return { tone: 'flat' as const, text: 'как в прошлый раз' }
+    return [{ tone: 'flat', text: 'как в прошлый раз' }]
   }
-  const parts: string[] = []
-  if (w !== 0) {
-    const sign = w > 0 ? '+' : ''
-    parts.push(`${sign}${Number.isInteger(w) ? w : w.toFixed(1)} кг`)
-  }
-  if (r !== 0) {
-    const sign = r > 0 ? '+' : ''
-    parts.push(`${sign}${r} повт.`)
-  }
-  const up = w > 0 || (w === 0 && r > 0)
-  const down = w < 0 || (w === 0 && r < 0)
+  const parts: DeltaPart[] = []
+  if (w !== 0) parts.push({ tone: w > 0 ? 'up' : 'down', text: signedAmount(w, 'кг') })
+  if (r !== 0) parts.push({ tone: r > 0 ? 'up' : 'down', text: signedAmount(r, 'повт.') })
+  return parts.length ? parts : null
+}
+
+export function formatDeltaLabel(
+  weightDelta: number | null | undefined,
+  repsDelta: number | null | undefined,
+  opts?: { hideFlat?: boolean },
+) {
+  const parts = formatDeltaParts(weightDelta, repsDelta, opts)
+  if (!parts?.length) return null
+  const up = parts.some((p) => p.tone === 'up')
+  const down = parts.some((p) => p.tone === 'down')
   return {
-    tone: up ? ('up' as const) : down ? ('down' as const) : ('flat' as const),
-    text: parts.join(' · '),
+    tone: (up && !down ? 'up' : down && !up ? 'down' : 'flat') as DeltaTone,
+    text: parts.map((p) => p.text).join(' · '),
+    parts,
   }
 }
 

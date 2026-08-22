@@ -12,19 +12,14 @@ export const likesRoutes = new Hono<AuthedEnv>()
 
 likesRoutes.use('*', requireAuth)
 
-const userInclude = {
-  gyms: true,
-  checkIns: { where: { checkedOutAt: null }, take: 1 },
-} as const
-
 /**
  * Privacy-scoped likes for the viewer:
  * - full liker ids only for likes *received* by the viewer
  * - for outgoing targets: only the viewer's id (so likedByMe works)
- * - counts for everyone (hall ranking) without exposing other people's liker graphs
+ * - counts only for those actors (hall ranking uses per-gym counts on /gyms/:id/people)
  */
 async function buildViewerLikesPayload(viewerId: string) {
-  const [incoming, outgoing, countRows] = await Promise.all([
+  const [incoming, outgoing] = await Promise.all([
     prisma.like.findMany({
       where: { toUserId: viewerId },
       select: { fromUserId: true },
@@ -32,10 +27,6 @@ async function buildViewerLikesPayload(viewerId: string) {
     prisma.like.findMany({
       where: { fromUserId: viewerId },
       select: { toUserId: true },
-    }),
-    prisma.like.groupBy({
-      by: ['toUserId'],
-      _count: { _all: true },
     }),
   ])
 
@@ -49,23 +40,28 @@ async function buildViewerLikesPayload(viewerId: string) {
     likes[targetId] = arr
   }
 
+  const actorIds = [...new Set([...likes[viewerId], ...outgoingIds])]
+  const countIds = [...new Set([...actorIds, viewerId])]
+  const [countRows, actorUsers] = await Promise.all([
+    prisma.like.groupBy({
+      by: ['toUserId'],
+      where: { toUserId: { in: countIds } },
+      _count: { _all: true },
+    }),
+    actorIds.length
+      ? prisma.user.findMany({
+          where: { id: { in: actorIds }, deletedAt: null },
+        })
+      : Promise.resolve([]),
+  ])
+
   const counts: Record<string, number> = {}
   for (const row of countRows) {
     counts[row.toUserId] = row._count._all
   }
   if (counts[viewerId] == null) counts[viewerId] = incoming.length
 
-  const actorIds = [...new Set([...likes[viewerId], ...outgoingIds])]
-  const actors = actorIds.length
-    ? (
-        await prisma.user.findMany({
-          where: { id: { in: actorIds }, deletedAt: null },
-          include: userInclude,
-        })
-      ).map((u) => serializePublicUser(u))
-    : []
-
-  return { likes, counts, actors }
+  return { likes, counts, actors: actorUsers.map((u) => serializePublicUser(u)) }
 }
 
 likesRoutes.get('/', async (c) => {

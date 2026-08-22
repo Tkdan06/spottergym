@@ -17,7 +17,8 @@ Before adding or redesigning UI in `src/pages` / `src/components`, follow the li
 2. **Secondary screens:** wrap back + title in `.subpage-top` (14px gap). Do not combine
    `.back-link { margin-bottom: 14px }` with an extra page grid gap between the same elements.
 3. **Section headings:** only `SectionTitle` / `.section-title` — no one-off `h2` font sizes for
-   the same role.
+   the same role. Fonts: Unbounded = headlines, Syne = SPOTTER wordmark only, Manrope = UI/body.
+   Full specimen (sizes, weights, tracking, roles) lives on the UI kit «Типографика» block.
 4. **SectionTitle actions:** use `.section-action` for Link and `<button>` (“Кого я лайкнул”,
    “Добавить”, “Изменить”). Same Manrope muted look — no `.text-link` / font-weight 650 in the
    action slot. Non-click meta → `.muted` / `.dim`. Admin accent nav links may keep `.text-link`

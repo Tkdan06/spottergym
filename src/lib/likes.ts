@@ -123,6 +123,12 @@ type HallSortable = {
   id: string
   isActive?: boolean
   lastSeenAt?: string
+  likeCount?: number
+}
+
+function hallLikeCount(person: HallSortable, likes: LikesMap, counts?: LikeCounts) {
+  if (person.likeCount != null) return person.likeCount
+  return getLikeCount(likes, person.id, counts)
 }
 
 function lastSeenMs(user: HallSortable) {
@@ -144,8 +150,8 @@ export function sortByLikes<T extends HallSortable>(
   counts?: LikeCounts,
 ) {
   return [...list].sort((a, b) => {
-    const likesA = getLikeCount(likes, a.id, counts)
-    const likesB = getLikeCount(likes, b.id, counts)
+    const likesA = hallLikeCount(a, likes, counts)
+    const likesB = hallLikeCount(b, likes, counts)
     if (likesB !== likesA) return likesB - likesA
 
     const activeDiff = Number(Boolean(b.isActive)) - Number(Boolean(a.isActive))
@@ -162,10 +168,11 @@ export function getHallRank(
   likes: LikesMap,
   counts?: LikeCounts,
 ) {
-  if (getLikeCount(likes, userId, counts) <= 0) return undefined
+  const target = sorted.find((p) => p.id === userId)
+  if (hallLikeCount(target || { id: userId }, likes, counts) <= 0) return undefined
   let rank = 0
   for (const person of sorted) {
-    if (getLikeCount(likes, person.id, counts) <= 0) break
+    if (hallLikeCount(person, likes, counts) <= 0) break
     rank += 1
     if (person.id === userId) return rank
   }

@@ -14,6 +14,11 @@
   opacity: 0.35;
 }
 
+.smart-image.is-instant {
+  opacity: 1;
+  transition: none;
+}
+
 .smart-image--empty {
   display: block;
   background: var(--bg-soft);

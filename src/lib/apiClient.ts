@@ -250,7 +250,10 @@ export type WorkoutSetInput = { weightKg: number; reps: number }
 
 export type WorkoutExercisePreview = {
   name: string
-  sets: WorkoutSetInput[]
+  sets: (WorkoutSetInput & {
+    weightDelta?: number | null
+    repsDelta?: number | null
+  })[]
 }
 
 export type WorkoutExerciseDto = {

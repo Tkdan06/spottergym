@@ -91,6 +91,7 @@ const listInclude = {
     orderBy: { sortOrder: 'asc' as const },
     select: {
       name: true,
+      trackKey: true,
       sortOrder: true,
       sets: {
         orderBy: { setIndex: 'asc' as const },
@@ -105,6 +106,8 @@ type SessionListRow = Prisma.WorkoutSessionGetPayload<{ include: typeof listIncl
 export type WorkoutSetPreview = {
   weightKg: number
   reps: number
+  weightDelta?: number | null
+  repsDelta?: number | null
 }
 
 export type WorkoutExercisePreview = {
@@ -183,14 +186,80 @@ function newTrackKey() {
   return crypto.randomUUID().replace(/-/g, '').slice(0, 24)
 }
 
-export function serializeSessionSummary(row: SessionFull | SessionListRow): WorkoutSessionSummary {
-  const exercises: WorkoutExercisePreview[] = row.exercises.map((ex) => ({
-    name: ex.name,
-    sets: ex.sets.map((s) => ({
-      weightKg: round1(num(s.weightKg)),
-      reps: s.reps,
-    })),
-  }))
+type PrevSetMap = Map<string, Map<number, { weightKg: number; reps: number }>>
+
+function prevSetsByExercise(
+  previous:
+    | {
+        exercises: {
+          name: string
+          trackKey?: string | null
+          sets: { setIndex: number; weightKg: unknown; reps: number }[]
+        }[]
+      }
+    | null
+    | undefined,
+): PrevSetMap {
+  const map: PrevSetMap = new Map()
+  if (!previous) return map
+  for (const ex of previous.exercises) {
+    const key = exerciseIdentity(ex)
+    if (!key) continue
+    const byIndex = new Map<number, { weightKg: number; reps: number }>()
+    for (const s of ex.sets) {
+      byIndex.set(s.setIndex, { weightKg: num(s.weightKg), reps: s.reps })
+    }
+    map.set(key, byIndex)
+  }
+  return map
+}
+
+function sessionIsOlder(
+  a: { performedAt: Date; id: string },
+  b: { performedAt: Date; id: string },
+) {
+  const da = a.performedAt.getTime()
+  const db = b.performedAt.getTime()
+  if (da !== db) return da < db
+  return a.id < b.id
+}
+
+function findPreviousSameTitle<T extends { id: string; title: string; performedAt: Date }>(
+  row: T,
+  pool: T[],
+): T | null {
+  const title = normalizeTitle(row.title)
+  let best: T | null = null
+  for (const cand of pool) {
+    if (cand.id === row.id) continue
+    if (normalizeTitle(cand.title) !== title) continue
+    if (!sessionIsOlder(cand, row)) continue
+    if (!best || sessionIsOlder(best, cand)) best = cand
+  }
+  return best
+}
+
+export function serializeSessionSummary(
+  row: SessionFull | SessionListRow,
+  previous?: SessionFull | SessionListRow | null,
+): WorkoutSessionSummary {
+  const prevSets = prevSetsByExercise(previous)
+  const exercises: WorkoutExercisePreview[] = row.exercises.map((ex) => {
+    const prev = prevSets.get(exerciseIdentity(ex))
+    return {
+      name: ex.name,
+      sets: ex.sets.map((s) => {
+        const last = prev?.get(s.setIndex)
+        const weightKg = round1(num(s.weightKg))
+        return {
+          weightKg,
+          reps: s.reps,
+          weightDelta: last ? Math.round((weightKg - last.weightKg) * 100) / 100 : null,
+          repsDelta: last ? s.reps - last.reps : null,
+        }
+      }),
+    }
+  })
   const setCount = exercises.reduce((n, e) => n + e.sets.length, 0)
   return {
     id: row.id,
@@ -210,18 +279,7 @@ export function serializeSessionDetail(
   row: SessionFull,
   previous: SessionFull | null,
 ): WorkoutSessionDetail {
-  const prevSetsByEx = new Map<string, Map<number, { weightKg: number; reps: number }>>()
-  if (previous) {
-    for (const ex of previous.exercises) {
-      const key = exerciseIdentity(ex)
-      if (!key) continue
-      const byIndex = new Map<number, { weightKg: number; reps: number }>()
-      for (const s of ex.sets) {
-        byIndex.set(s.setIndex, { weightKg: num(s.weightKg), reps: s.reps })
-      }
-      prevSetsByEx.set(key, byIndex)
-    }
-  }
+  const prevSetsByEx = prevSetsByExercise(previous)
 
   const exercises: WorkoutExerciseDto[] = row.exercises.map((ex) => {
     const prevSets = prevSetsByEx.get(exerciseIdentity(ex))
@@ -303,8 +361,23 @@ export async function listWorkoutSessions(
 
   const hasMore = rows.length > limit
   const page = hasMore ? rows.slice(0, limit) : rows
+  const titles = [...new Set(page.map((r) => r.title.trim()).filter(Boolean))]
+  const extra =
+    page.length && titles.length
+      ? await prisma.workoutSession.findMany({
+          where: {
+            userId,
+            id: { notIn: page.map((r) => r.id) },
+            OR: titles.map((title) => ({ title: { equals: title, mode: 'insensitive' } })),
+          },
+          orderBy: [{ performedAt: 'desc' }, { id: 'desc' }],
+          take: Math.min(80, Math.max(20, titles.length * 4)),
+          include: listInclude,
+        })
+      : []
+  const pool = [...page, ...extra]
   return {
-    workouts: page.map(serializeSessionSummary),
+    workouts: page.map((row) => serializeSessionSummary(row, findPreviousSameTitle(row, pool))),
     hasMore,
     totalCount,
     atRetentionCap: totalCount >= MAX_WORKOUT_SESSIONS,
@@ -474,7 +547,17 @@ export async function getWorkoutProgress(
     orderBy: { performedAt: 'asc' },
     // Cap matches retention: user never has more than MAX_WORKOUT_SESSIONS total.
     take: MAX_WORKOUT_SESSIONS,
-    include: sessionInclude,
+    select: {
+      performedAt: true,
+      bodyWeightKg: true,
+      exercises: {
+        select: {
+          name: true,
+          trackKey: true,
+          sets: { select: { weightKg: true, reps: true } },
+        },
+      },
+    },
   })
 
   const bodyPoints = rows

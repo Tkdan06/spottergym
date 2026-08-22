@@ -86,6 +86,123 @@
   color: var(--accent);
 }
 
+.ui-kit-type-sub {
+  margin: 20px 0 10px;
+  font-family: var(--font-display);
+  font-size: var(--text-section-size);
+  font-weight: var(--text-section-weight);
+  letter-spacing: var(--letter-tight);
+}
+
+.ui-kit-type-sub:first-of-type {
+  margin-top: 4px;
+}
+
+.ui-kit-font-cards {
+  display: grid;
+  gap: 10px;
+}
+
+.ui-kit-font-card {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+}
+
+.ui-kit-font-card-name {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: var(--letter-tight);
+  line-height: 1.15;
+}
+
+.ui-kit-font-card-role {
+  margin: 0;
+  font-size: var(--text-label-size);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.ui-kit-font-card .muted,
+.ui-kit-font-card .dim {
+  margin: 0;
+}
+
+.ui-kit-weight-block {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.ui-kit-weight-line {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.3;
+}
+
+.ui-kit-w-display {
+  font-family: var(--font-display);
+  letter-spacing: var(--letter-tight);
+}
+
+.ui-kit-w-brand {
+  font-family: var(--font-brand);
+  letter-spacing: -0.04em;
+}
+
+.ui-kit-type-table {
+  display: grid;
+  gap: 8px;
+}
+
+.ui-kit-type-row {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+}
+
+.ui-kit-type-row strong {
+  font-size: 0.9rem;
+}
+
+.ui-kit-gym-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 5.5vw, 1.75rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: var(--letter-tight);
+}
+
+.ui-kit-track-tight {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: var(--letter-tight);
+}
+
+.ui-kit-track-wide {
+  margin: 4px 0 0;
+  font-size: var(--text-label-size);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.ui-kit-track-none {
+  margin: 6px 0 0;
+}
+
 .ui-kit-type-stack {
   display: grid;
   gap: 18px;

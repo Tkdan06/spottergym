@@ -79,7 +79,7 @@ import {
   setStoredToken,
 } from '../lib/apiClient'
 import { DEMO_ACCOUNT_EMAIL, DEMO_ACCOUNT_NAME, isDemoAccount } from '../lib/demoAccount'
-import { ensureWebPushSubscription, syncAppBadge } from '../lib/push'
+import { ensureWebPushSubscription, getActiveChatId, syncAppBadge } from '../lib/push'
 import {
   buildCheckInSessionFields,
   canExtendCheckInLocal,
@@ -119,7 +119,7 @@ import {
   normalizeAdminPermissions,
 } from '../lib/adminPermissions'
 import { normalizeEmail } from '../lib/adminConfig'
-import { localGenderAvatar, withSyncedAvatar } from '../lib/avatar'
+import { localGenderAvatar, preloadProfileImages, withSyncedAvatar } from '../lib/avatar'
 import {
   BIO_MAX,
   CHAT_MESSAGE_MAX,
@@ -838,24 +838,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return { hasMore }
   }, [])
 
-  /** Light poll: chats + notifications + likes so badges and likes stay fresh while the app is open */
+  /** Light poll: chats + notifications so badges stay fresh while the app is open */
   const refreshInbox = useCallback(async () => {
     if (!apiOnlineRef.current || !getStoredToken()) return
     try {
-      const [notifs, listPayload, likesPayload] = await Promise.all([
+      const inChat = Boolean(getActiveChatId())
+      const [notifs, listPayload] = await Promise.all([
         apiFetchNotifications(),
-        apiFetchConversations({ limit: 50 }),
-        apiFetchLikes(),
+        inChat ? Promise.resolve(null) : apiFetchConversations({ limit: 50 }),
       ])
-      const list = listPayload.conversations
       const email = userEmailRef.current
       setNotifications(notifs)
       if (email) saveNotificationsForUser(email, notifs)
+      if (!listPayload) return
+      const list = listPayload.conversations
       const contacts: UserProfile[] = []
       for (const row of list) {
         if (row.other) contacts.push(row.other)
       }
-      for (const actor of likesPayload.actors) contacts.push(actor)
       rememberUsersRef.current(contacts)
       const fresh = list.map(({ other: _o, ...c }) => c)
       setConversations((prev) => {
@@ -868,6 +868,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (email) saveAccountConversations(email, next)
         return next
       })
+    } catch {
+      /* keep cache */
+    }
+  }, [])
+
+  const refreshLikes = useCallback(async () => {
+    if (!apiOnlineRef.current || !getStoredToken()) return
+    try {
+      const likesPayload = await apiFetchLikes()
+      const email = userEmailRef.current
+      rememberUsersRef.current(likesPayload.actors)
       const likesMap = normalizeLikesMap(likesPayload.likes)
       const counts = normalizeLikeCounts(likesPayload.counts)
       setLikes(likesMap)
@@ -1073,32 +1084,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
     void hydrateSocialFromApi()
   }, [apiOnline, user?.id, hydrateSocialFromApi])
 
-  // Keep chats, likes, and notification badges fresh while the app is open
+  // Keep chats and notification badges fresh; likes are heavier and poll slower
   useEffect(() => {
     if (!apiOnline || !user || !getStoredToken()) return
 
     let cancelled = false
-    const tick = () => {
+    const tickInbox = () => {
       if (cancelled || document.visibilityState === 'hidden') return
       void refreshInbox()
       void ensureWebPushSubscription()
     }
+    const tickLikes = () => {
+      if (cancelled || document.visibilityState === 'hidden') return
+      void refreshLikes()
+    }
 
-    const id = window.setInterval(tick, 5000)
+    const inboxId = window.setInterval(tickInbox, 12_000)
+    const likesId = window.setInterval(tickLikes, 45_000)
     const onVis = () => {
-      if (document.visibilityState === 'visible') tick()
+      if (document.visibilityState === 'visible') {
+        tickInbox()
+        tickLikes()
+      }
     }
     document.addEventListener('visibilitychange', onVis)
-    // First tick shortly after mount so badges/likes catch up without waiting a full interval
-    const warm = window.setTimeout(tick, 800)
+    const warmInbox = window.setTimeout(tickInbox, 800)
 
     return () => {
       cancelled = true
-      window.clearInterval(id)
-      window.clearTimeout(warm)
+      window.clearInterval(inboxId)
+      window.clearInterval(likesId)
+      window.clearTimeout(warmInbox)
       document.removeEventListener('visibilitychange', onVis)
     }
-  }, [apiOnline, user?.id, refreshInbox])
+  }, [apiOnline, user?.id, refreshInbox, refreshLikes])
 
   // Админ-реестр с сервера
   useEffect(() => {
@@ -1715,6 +1734,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const rememberUsers = useCallback((people: UserProfile[]) => {
     const incoming = people.filter((p) => p?.id)
     if (!incoming.length) return
+    preloadProfileImages(incoming)
     setKnownUsers((prev) => {
       let changed = false
       const map = new Map(prev.map((u) => [u.id, u]))

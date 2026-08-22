@@ -117,32 +117,43 @@ gymRoutes.get('/:gymId/people', requireAuth, async (c) => {
 
   const viewerId = c.get('userId')
   await expireStaleCheckIns()
-  const hidden = await listHiddenUserIds(viewerId)
-
-  const members = await prisma.userGym.findMany({
-    where: {
-      gymId,
-      userId: hidden.length ? { notIn: hidden } : undefined,
-      user: { deletedAt: null },
-    },
-    include: {
-      user: {
-        include: {
-          gyms: true,
-          checkIns: { where: { checkedOutAt: null }, take: 1 },
+  const [hidden, members] = await Promise.all([
+    listHiddenUserIds(viewerId),
+    prisma.userGym.findMany({
+      where: { gymId, user: { deletedAt: null } },
+      include: {
+        user: {
+          include: {
+            gyms: true,
+            checkIns: { where: { checkedOutAt: null }, take: 1 },
+          },
         },
       },
-    },
-  })
+    }),
+  ])
+  const hiddenSet = new Set(hidden)
+  const visible = hiddenSet.size ? members.filter((m) => !hiddenSet.has(m.userId)) : members
+  const memberIds = visible.map((m) => m.userId)
 
-  const tierMap = await getReferralStatsMap(members.map((m) => m.userId))
+  const [tierMap, likeRows] = await Promise.all([
+    getReferralStatsMap(memberIds),
+    memberIds.length
+      ? prisma.like.groupBy({
+          by: ['toUserId'],
+          where: { toUserId: { in: memberIds } },
+          _count: { _all: true },
+        })
+      : Promise.resolve([]),
+  ])
+  const likeMap = new Map(likeRows.map((r) => [r.toUserId, r._count._all]))
 
   return c.json({
-    people: members.map((m) => {
+    people: visible.map((m) => {
       const person = serializePublicUser(m.user, { referral: tierMap.get(m.userId) })
       // «В зале» только если открытый чек-ин именно в этом клубе (не во всех клубах профиля)
       return {
         ...person,
+        likeCount: likeMap.get(m.userId) || 0,
         isActive: Boolean(person.isActive && person.checkedInGymId === gymId),
       }
     }),

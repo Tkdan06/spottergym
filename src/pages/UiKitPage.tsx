@@ -129,13 +129,154 @@ export function UiKitPage() {
 
       <section className="surface ui-kit-block">
         <SectionTitle>Типографика</SectionTitle>
+        <p className="muted ui-kit-section-lead">
+          Три семейства. Не подключай четвёртое. Веса бери из загруженных файлов — 650/750 браузер
+          синтезирует, для нового UI не используй.
+        </p>
+
+        <h3 className="ui-kit-type-sub">Семейства</h3>
+        <div className="ui-kit-font-cards">
+          <article className="ui-kit-font-card">
+            <p className="ui-kit-font-card-name" style={{ fontFamily: 'var(--font-display)' }}>
+              Unbounded
+            </p>
+            <p className="ui-kit-font-card-role">Заголовки</p>
+            <p className="muted">
+              <code>--font-display</code> · кириллица, спорт. Страницы, блоки, empty, цифры
+              активности, имя зала, карточки людей.
+            </p>
+            <p className="dim">Загружено: 600 · 700 · 800</p>
+          </article>
+          <article className="ui-kit-font-card">
+            <p className="ui-kit-font-card-name" style={{ fontFamily: 'var(--font-brand)' }}>
+              Syne
+            </p>
+            <p className="ui-kit-font-card-role">Бренд</p>
+            <p className="muted">
+              <code>--font-brand</code> · только латиница SPOTTER. Логотип, лендинг, lock/emergency.
+              Не для русских заголовков.
+            </p>
+            <p className="dim">Загружено: 700 · 800</p>
+          </article>
+          <article className="ui-kit-font-card">
+            <p className="ui-kit-font-card-name" style={{ fontFamily: 'var(--font-body)' }}>
+              Manrope
+            </p>
+            <p className="ui-kit-font-card-role">Текст и UI</p>
+            <p className="muted">
+              <code>--font-body</code> · абзацы, кнопки, поля, muted/dim, section-action, чипы,
+              навигация.
+            </p>
+            <p className="dim">Загружено: 400 · 500 · 600 · 700</p>
+          </article>
+          <article className="ui-kit-font-card">
+            <p
+              className="ui-kit-font-card-name"
+              style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}
+            >
+              System mono
+            </p>
+            <p className="ui-kit-font-card-role">Код</p>
+            <p className="muted">Только UI kit и отладка. В продуктовых экранах не ставить.</p>
+            <p className="dim">Системный стек, не пакет</p>
+          </article>
+        </div>
+
+        <h3 className="ui-kit-type-sub">Веса</h3>
+        <div className="ui-kit-weight-block">
+          <p className="dim ui-kit-meta">Unbounded</p>
+          <p className="ui-kit-weight-line ui-kit-w-display" style={{ fontWeight: 600 }}>
+            600 Полужирный — запас, редко
+          </p>
+          <p className="ui-kit-weight-line ui-kit-w-display" style={{ fontWeight: 700 }}>
+            700 Жирный — секции, empty, активность
+          </p>
+          <p className="ui-kit-weight-line ui-kit-w-display" style={{ fontWeight: 800 }}>
+            800 Extra — заголовок страницы, имя зала
+          </p>
+        </div>
+        <div className="ui-kit-weight-block">
+          <p className="dim ui-kit-meta">Syne</p>
+          <p className="ui-kit-weight-line ui-kit-w-brand" style={{ fontWeight: 700 }}>
+            700 SPOTTER
+          </p>
+          <p className="ui-kit-weight-line ui-kit-w-brand" style={{ fontWeight: 800 }}>
+            800 SPOTTER · .brand-mark
+          </p>
+        </div>
+        <div className="ui-kit-weight-block">
+          <p className="dim ui-kit-meta">Manrope</p>
+          <p className="ui-kit-weight-line" style={{ fontWeight: 400 }}>
+            400 Regular — длинный текст
+          </p>
+          <p className="ui-kit-weight-line" style={{ fontWeight: 500 }}>
+            500 Medium — кнопки, section-action, поля
+          </p>
+          <p className="ui-kit-weight-line" style={{ fontWeight: 600 }}>
+            600 Semibold — акцент в UI, чипы
+          </p>
+          <p className="ui-kit-weight-line" style={{ fontWeight: 700 }}>
+            700 Bold — kicker, счётчики, сильный label
+          </p>
+        </div>
+
+        <h3 className="ui-kit-type-sub">Шкала ролей</h3>
+        <div className="ui-kit-type-table" role="table">
+          {(
+            [
+              ['Страница', '.page-title', 'Unbounded 800', '1.75rem', 'lh 1.15', '−0.03em'],
+              ['Зал над CTA', '.home-gym-title', 'Unbounded 800', '1.35–1.75', 'lh 1.15', '−0.03em'],
+              ['Секция', '.section-heading', 'Unbounded 700', '1.15rem', 'lh 1.25', '−0.03em'],
+              ['Empty title', '.empty-copy-title', 'Unbounded 750*', '1.1rem', 'lh inherit', '—'],
+              ['Цифра / пик', '.activity-summary-total', 'Unbounded 700', '1.85–2.35', 'lh 1.05', 'tight'],
+              ['Бренд', '.brand-mark', 'Syne 800', '1.75–2.4', 'lh inherit', '−0.04em'],
+              ['Kicker', '.page-kicker', 'Manrope 700', '0.72rem', 'lh 1.2', '+0.06em caps'],
+              ['Label', 'token --text-label', 'Manrope 700', '0.72rem', 'lh inherit', '+0.04em caps'],
+              ['Тело', 'body / p', 'Manrope 400', '1rem', 'lh 1.45', '0'],
+              ['Muted', '.muted', 'Manrope 400', '0.9rem', 'lh 1.45', '0'],
+              ['Dim', '.dim', 'Manrope 400', '0.84rem', 'lh inherit', '0'],
+              ['Section action', '.section-action', 'Manrope 500', '0.9rem', 'lh 1.35', '0'],
+              ['Кнопка', '.btn', 'Manrope 650*', 'inherit', 'lh inherit', '0'],
+              ['Empty lead', '.empty-copy-lead', 'Manrope 400', '0.92rem', 'lh 1.4', '0'],
+            ] as const
+          ).map(([role, token, face, size, line, track]) => (
+            <div key={role} className="ui-kit-type-row" role="row">
+              <strong>{role}</strong>
+              <code>{token}</code>
+              <span className="muted">{face}</span>
+              <span className="dim">
+                {size} · {line} · {track}
+              </span>
+            </div>
+          ))}
+        </div>
+        <p className="dim" style={{ margin: '10px 0 0' }}>
+          * 650 и 750 нет в файлах — браузер рисует между 600/700 и 700/800. Новые роли: 500 / 600 /
+          700 / 800.
+        </p>
+
+        <h3 className="ui-kit-type-sub">Живые образцы</h3>
         <div className="ui-kit-type-stack">
           <div>
-            <p className="dim ui-kit-meta">.page-title · --text-page-*</p>
-            <h1 className="page-title">Заголовок страницы</h1>
+            <p className="dim ui-kit-meta">.brand-mark · Syne 800 · −0.04em</p>
+            <p className="brand-mark">
+              SPOT<span>TER</span>
+            </p>
           </div>
           <div>
-            <p className="dim ui-kit-meta">SectionTitle · --text-section-*</p>
+            <p className="dim ui-kit-meta">.page-kicker · Manrope 700 · caps +0.06em</p>
+            <p className="page-kicker">DDX Fitness</p>
+          </div>
+          <div>
+            <p className="dim ui-kit-meta">.page-title · Unbounded 800 · 1.75rem · −0.03em</p>
+            <h1 className="page-title">Мой зал</h1>
+          </div>
+          <div>
+            <p className="dim ui-kit-meta">.home-gym-title · Unbounded 800</p>
+            <h2 className="ui-kit-gym-title">Рязанский проспект</h2>
+          </div>
+          <div>
+            <p className="dim ui-kit-meta">SectionTitle · Unbounded 700 + action Manrope 500</p>
             <SectionTitle
               action={
                 <Link to="/app/profile" className="section-action">
@@ -143,20 +284,24 @@ export function UiKitPage() {
                 </Link>
               }
             >
-              Заголовок блока
+              Люди в зале
             </SectionTitle>
           </div>
           <div>
-            <p className="dim ui-kit-meta">body / .muted / .dim</p>
-            <p>Обычный текст — Manrope.</p>
-            <p className="muted">Muted — пояснения и подписи.</p>
-            <p className="dim">Dim — метаданные, счётчики, quiet-иконки.</p>
+            <p className="dim ui-kit-meta">.empty-copy-title · Unbounded</p>
+            <p className="empty-copy-title">Пока пусто</p>
           </div>
           <div>
-            <p className="dim ui-kit-meta">.brand-mark</p>
-            <p className="brand-mark">
-              SPOT<span>TER</span>
-            </p>
+            <p className="dim ui-kit-meta">body / .muted / .dim · Manrope</p>
+            <p>Обычный текст. Съешь ещё этих мягких французских булок.</p>
+            <p className="muted">Muted — пояснения и подписи.</p>
+            <p className="dim">Dim — мета, счётчики, quiet-иконки.</p>
+          </div>
+          <div>
+            <p className="dim ui-kit-meta">Трекинг</p>
+            <p className="ui-kit-track-tight">Заголовок −0.03em · Unbounded</p>
+            <p className="ui-kit-track-wide">KICKER +0.06EM · MANROPE</p>
+            <p className="ui-kit-track-none">Текст без трекинга · Manrope</p>
           </div>
         </div>
       </section>

@@ -44,6 +44,21 @@ export function profileImageFallback(
   return localGenderAvatar(user.gender)
 }
 
+/** Warm browser cache so likes faces paint without a gray plug. */
+export function preloadProfileImages(
+  users: Pick<UserProfile, 'photos' | 'avatar' | 'privacy' | 'name' | 'gender' | 'isDeleted'>[],
+  limit = 8,
+) {
+  if (typeof window === 'undefined') return
+  for (const user of users.slice(0, limit)) {
+    const src = profileImage(user)
+    if (!src || src.startsWith('data:')) continue
+    const img = new Image()
+    img.decoding = 'async'
+    img.src = src
+  }
+}
+
 export function withSyncedAvatar<T extends UserProfile>(user: T): T {
   const photos = Array.isArray(user.photos) ? user.photos : []
   const base = photos === user.photos ? user : { ...user, photos }

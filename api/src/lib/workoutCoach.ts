@@ -229,20 +229,51 @@ function letterFromJson(raw: unknown): CoachLetter | null {
   }
 }
 
+function publicFactsFromStored(raw: unknown): { facts: CoachPublicFacts; sessions21d: number; need: number } | null {
+  if (!raw || typeof raw !== 'object') return null
+  const f = raw as CoachFacts
+  if (!f.week || !f.d30 || !f.d90 || !f.dataGate) return null
+  return {
+    facts: publicFacts(f),
+    sessions21d: f.dataGate.sessions21d,
+    need: f.dataGate.need,
+  }
+}
+
 export async function getCoachState(userId: string, userEmail: string): Promise<CoachState> {
   const { start, end } = coachPeriodBounds(new Date(), env.gigachatCoachPeriodDays)
+  const report = await prisma.workoutCoachReport.findUnique({
+    where: { userId_periodStart: { userId, periodStart: start } },
+  })
+  const letter = report ? letterFromJson(report.letterJson) : null
+  const stored = report ? publicFactsFromStored(report.factsJson) : null
+  const demo = normalizeEmail(userEmail) === DEMO_EMAIL
+  const configured = isGigachatConfigured()
+
+  if (letter && stored) {
+    return {
+      status: 'cached',
+      configured,
+      eligible: true,
+      canGenerate: false,
+      demo,
+      sessionsIn21d: stored.sessions21d,
+      sessionsNeeded: stored.need,
+      periodStart: start.toISOString(),
+      periodEnd: end.toISOString(),
+      periodLabel: formatPeriodLabel(start, end),
+      nextAt: end.toISOString(),
+      facts: stored.facts,
+      letter,
+    }
+  }
+
   const facts = await buildCoachFacts(userId)
   if (!facts) {
     throw Object.assign(new Error('not_found'), { status: 404 })
   }
 
-  const demo = normalizeEmail(userEmail) === DEMO_EMAIL
-  const configured = isGigachatConfigured()
   const eligible = facts.dataGate.eligible
-  const report = await prisma.workoutCoachReport.findUnique({
-    where: { userId_periodStart: { userId, periodStart: start } },
-  })
-  const letter = report ? letterFromJson(report.letterJson) : null
 
   let status: CoachStatus = 'locked'
   if (letter) status = 'cached'

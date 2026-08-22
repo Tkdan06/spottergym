@@ -17,6 +17,8 @@ type Props = Omit<ImgHTMLAttributes<HTMLImageElement>, 'src' | 'loading' | 'deco
   size?: ImageSize
   /** LCP / above-the-fold: без lazy, высокий приоритет */
   priority?: boolean
+  /** No fade — paint as soon as the bytes are there */
+  instant?: boolean
 }
 
 const SIZES_ATTR: Record<ImageSize, string> = {
@@ -36,6 +38,7 @@ export function SmartImage({
   fallbackSrc,
   size = 'card',
   priority = false,
+  instant = false,
   className = '',
   onLoad,
   onError,
@@ -82,10 +85,10 @@ export function SmartImage({
       ref={imgRef}
       src={activeSrc}
       alt={alt}
-      className={`smart-image ${loaded ? 'is-loaded' : ''} ${priority ? 'is-priority' : ''} ${className}`.trim()}
-      loading={priority ? 'eager' : 'lazy'}
+      className={`smart-image ${loaded ? 'is-loaded' : ''} ${priority ? 'is-priority' : ''} ${instant ? 'is-instant' : ''} ${className}`.trim()}
+      loading={priority || instant ? 'eager' : 'lazy'}
       decoding="async"
-      fetchPriority={priority ? 'high' : 'auto'}
+      fetchPriority={priority || instant ? 'high' : 'auto'}
       sizes={sizes ?? SIZES_ATTR[size]}
       onLoad={(e) => {
         setLoaded(true)

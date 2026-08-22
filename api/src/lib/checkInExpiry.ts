@@ -21,9 +21,15 @@ export function canExtendCheckIn(extendCount: number, expiresAt: Date, now = new
   return extendCount < CHECK_IN_MAX_EXTENDS && expiresAt.getTime() > now.getTime()
 }
 
+let lastExpireAt = 0
+const EXPIRE_MIN_INTERVAL_MS = 15_000
+
 /** Close every open check-in past its expiry (legacy rows use checkedInAt + 3h). */
 export async function expireStaleCheckIns(now = new Date()) {
-  const legacyCutoff = new Date(now.getTime() - CHECK_IN_TTL_MS)
+  const ts = now.getTime()
+  if (ts - lastExpireAt < EXPIRE_MIN_INTERVAL_MS) return 0
+  lastExpireAt = ts
+  const legacyCutoff = new Date(ts - CHECK_IN_TTL_MS)
   const result = await prisma.checkIn.updateMany({
     where: {
       checkedOutAt: null,

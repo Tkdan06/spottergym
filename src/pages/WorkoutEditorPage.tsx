@@ -31,10 +31,9 @@ import {
   MAX_EXERCISES_PER_WORKOUT,
   formatBarWeight,
 } from '../components/SetWeightSheet'
+import { WorkoutReadonlySets } from '../components/WorkoutReadonlySets'
 import {
-  formatDeltaLabel,
   formatKg,
-  formatSetPair,
   formatWorkoutWhen,
   fromDatetimeLocalValue,
   toDatetimeLocalValue,
@@ -349,32 +348,7 @@ export function WorkoutEditorPage() {
           </section>
           <section className="surface workouts-form-block">
             {exercises.length ? (
-              <ul className="workout-readonly-list">
-                {exercises.map((ex, i) => (
-                  <li key={ex.trackKey || i} className="workout-readonly-ex">
-                    <strong>{ex.name || 'Упражнение'}</strong>
-                    <ul className="workout-readonly-sets">
-                      {ex.sets.map((s, si) => {
-                        const delta = formatDeltaLabel(s.weightDelta, s.repsDelta, { hideFlat: true })
-                        return (
-                          <li key={si}>
-                            <span>
-                              <span className="dim">{si + 1}.</span>{' '}
-                              {formatSetPair(
-                                Number(String(s.weightKg).replace(',', '.')) || 0,
-                                Math.max(0, Math.floor(Number(s.reps) || 0)),
-                              )}
-                            </span>
-                            {delta ? (
-                              <span className={`workout-delta is-${delta.tone}`}>{delta.text}</span>
-                            ) : null}
-                          </li>
-                        )
-                      })}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
+              <WorkoutReadonlySets exercises={exercises} />
             ) : (
               <p className="muted">Нет упражнений</p>
             )}

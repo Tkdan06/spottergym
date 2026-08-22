@@ -58,6 +58,8 @@ export interface UserProfile {
   breakUntil?: string | null
   privacy: PrivacyMode
   lookingToMeet: boolean
+  /** Total likes received — set on gym floor payload for ranking */
+  likeCount?: number
   /** Сейчас в каком-то зале */
   isActive: boolean
   /** В каком зале сейчас (пусто, если не отметился) */

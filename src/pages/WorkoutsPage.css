@@ -222,6 +222,10 @@
   min-width: 0;
 }
 
+.workout-readonly-set-main {
+  min-width: 0;
+}
+
 .workout-readonly-sets .workout-delta {
   flex-shrink: 0;
   text-align: right;
@@ -370,6 +374,15 @@
   color: inherit;
   font: inherit;
   font-weight: 650;
+}
+
+.workout-delta-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0 0.4em;
+  flex-shrink: 0;
+  max-width: 52%;
 }
 
 .workout-delta {

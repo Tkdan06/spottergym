@@ -65,6 +65,7 @@ export function LikesRow({ count, likers, maxAvatars = 5, compact, to }: Props) 
                   title={name}
                   className="likes-avatar"
                   size="avatar"
+                  instant
                 />
               )
             })}
