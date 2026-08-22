@@ -124,9 +124,10 @@ export function UiKitPage() {
             каждый ряд.
           </li>
           <li>
-            <strong>Сегмент:</strong> взаимоисключающий вид — только <code>.seg seg--fit</code> +{' '}
-            <code>.seg-item.is-active</code>. Обнимает текст, не тянется. Не чипы и не{' '}
-            <code>.toggle</code>. Живые: Прогресс, Лайки, Активность, Уведомления.
+            <strong>Сегмент:</strong> взаимоисключающий вид — только <code>.seg</code> +{' '}
+            <code>.seg-item.is-active</code>. Компакт — <code>.seg--fit</code> (Прогресс,
+            Активность). На всю ширину — <code>.seg--fill</code>, текст по центру (Лайки,
+            Уведомления). Не чипы и не <code>.toggle</code>.
           </li>
           <li>
             <strong>Действие у SectionTitle:</strong> только <code>.section-action</code> (Link или
@@ -422,9 +423,9 @@ export function UiKitPage() {
         </div>
         <p className="dim" style={{ margin: '12px 0 0' }}>
           В профиле настройки — только шестерёнка в шапке. Не дублируй «Редактировать профиль»
-          огромной кнопкой внизу. Обратная связь — Настройки → Поддержка (
-          <code>btn-ghost btn-block</code>). Админка — только у админов, контурная кнопка внизу
-          профиля.
+          огромной кнопкой внизу. Обратная связь — Настройки → Поддержка. Админка — только у
+          админов, <code>btn-ghost btn-block</code> внизу профиля. Выход — та же ghost-кнопка
+          внизу Настроек. Удаление аккаунта — тихая текстовая ссылка под выходом, не 48px CTA.
         </p>
       </section>
 
@@ -662,23 +663,22 @@ export function UiKitPage() {
         <SectionTitle>Сегмент</SectionTitle>
         <p className="muted ui-kit-section-lead">
           Единственный рецепт взаимоисключающего вида (2–4 пункта). Не чип (фильтр, можно несколько)
-          и не <code>.toggle</code> (вкл/выкл). Трек обнимает текст — на сетке страницы не растягивать.
-          Пункт — <code>button</code> или <code>Link</code> с классом <code>.seg-item</code>.
+          и не <code>.toggle</code> (вкл/выкл). Пункт — <code>button</code> или <code>Link</code> с
+          классом <code>.seg-item</code>.
         </p>
         <ul className="ui-kit-rules">
           <li>
-            Chrome: <code>.seg seg--fit</code> + <code>.seg-item</code>, активный —{' '}
-            <code>.is-active</code>. Роль <code>tablist</code> / <code>tab</code>.
+            Chrome: <code>.seg</code> + <code>.seg-item</code>, активный — <code>.is-active</code>.
+            Роль <code>tablist</code> / <code>tab</code>.
           </li>
           <li>
-            Размер: трек <code>width: max-content</code>, пункт <code>min-height: 32px</code>,{' '}
-            <code>padding: 6px 12px</code>, Manrope 600 · 0.82rem. Активный —{' '}
-            <code>--bg-elevated</code>.
+            Компактный: <code>.seg--fit</code> — трек обнимает текст (Прогресс, Активность). На
+            всю страницу: <code>.seg--fill</code> — равные половины, текст по центру (Лайки,
+            Уведомления).
           </li>
           <li>
-            Не <code>.seg--fill</code>, не чипы, не локальные табы (
-            <code>liked-tabs</code> только margin). На grid-странице —{' '}
-            <code>justify-self: start</code>, если трек всё равно тянется.
+            Размер пункта: <code>min-height: 32px</code>, <code>padding: 6px 12px</code>, Manrope
+            600 · 0.82rem. Активный — <code>--bg-elevated</code>. Не чипы и не локальные табы.
           </li>
         </ul>
         <div className="ui-kit-type-stack" style={{ marginTop: 16 }}>
@@ -723,8 +723,8 @@ export function UiKitPage() {
             </div>
           </div>
           <div>
-            <p className="dim ui-kit-meta">Лайки / Уведомления · длинные подписи, тот же трек</p>
-            <div className="seg seg--fit" role="tablist" aria-label="Лайки">
+            <p className="dim ui-kit-meta">Лайки / Уведомления · на всю ширину, текст по центру</p>
+            <div className="seg seg--fill" role="tablist" aria-label="Лайки">
               <button
                 type="button"
                 role="tab"

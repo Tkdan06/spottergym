@@ -246,6 +246,14 @@ export async function apiResetMyActivity() {
   return request<{ ok: true; deleted: number }>('/me/activity', { method: 'DELETE' })
 }
 
+/** Removes one MSK day from personal activity (including an open check-in that day). */
+export async function apiDeleteMyActivityDay(date: string) {
+  return request<{ ok: true; deleted: number; date: string; clearedPresence: boolean }>(
+    `/me/activity/day/${encodeURIComponent(date)}`,
+    { method: 'DELETE' },
+  )
+}
+
 export type WorkoutSetInput = { weightKg: number; reps: number }
 
 export type WorkoutExercisePreview = {

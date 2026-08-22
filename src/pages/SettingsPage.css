@@ -272,32 +272,42 @@
   font-size: 0.9rem;
 }
 
-.settings-session {
-  margin-top: 16px;
-}
-
-.settings-delete {
+.settings-account-end {
   display: grid;
-  gap: 12px;
-  margin-top: 28px;
-  margin-bottom: 8px;
-  padding: 16px;
-  border-color: color-mix(in srgb, var(--danger, #c23b3b) 35%, var(--line));
-  background: color-mix(in srgb, var(--danger, #c23b3b) 6%, var(--bg-card));
+  gap: 14px;
+  margin-top: 8px;
+  justify-items: stretch;
 }
 
-.settings-delete .section-title {
-  margin: 0;
+.settings-delete-trigger {
+  margin: 4px auto 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 500;
+  line-height: 1.3;
+  cursor: pointer;
 }
 
-.settings-delete-lead {
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.4;
+.settings-delete-trigger:hover,
+.settings-delete-trigger:focus-visible {
+  color: var(--danger);
 }
 
 .settings-delete-confirm {
+  display: grid;
   gap: 10px;
+  justify-items: stretch;
+}
+
+.settings-delete-confirm .muted {
+  margin: 0;
+  text-align: center;
+  font-size: 0.86rem;
+  line-height: 1.4;
 }
 
 .blocked-list {

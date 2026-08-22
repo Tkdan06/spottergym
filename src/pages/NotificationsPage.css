@@ -41,7 +41,6 @@
 .notifications-page .seg {
   position: relative;
   z-index: 2;
-  justify-self: start;
 }
 
 .notif-setting-icon {

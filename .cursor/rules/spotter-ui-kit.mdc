@@ -47,13 +47,16 @@ Before adding or redesigning UI in `src/pages` / `src/components`, follow the li
 10. **List rows with multiple actions:** primary navigation on the left; secondary (copy/expand)
    as separate targets — see workout history pattern on UiKit page.
 11. **Profile edit:** Settings via header gear; do not add a second full-width “Редактировать
-   профиль” CTA wall. Feedback lives in Settings; admin contour button only for `isAdmin`.
-12. **Segmented control:** exclusive view switch (2–4 options) uses `.seg.seg--fit` +
-    `.seg-item` + `.is-active`. Track hugs text (`width: max-content`), items are ~32px
-    (`padding: 6px 12px`). Button or `Link` as `.seg-item`. Do not stretch full width
-    (`.seg--fill` is last resort). Do not invent a local tab recipe. Not chips (multi-filter /
-    labels) and not `.toggle` / `.toggle-row` (on/off). Live: Progress, Likes, Activity period,
-    Notifications. Specimen: UI kit «Сегмент».
+    профиль” CTA wall. Feedback lives in Settings; admin contour button only for `isAdmin`.
+    Log out is a routine `btn btn-ghost btn-block` at the bottom of Settings (same weight as
+    Profile admin). Delete account is a quiet text control under it — never a 48px CTA or
+    danger card. Confirm step may use `btn-danger btn-sm`. Do not invert those weights.
+12. **Segmented control:** exclusive view switch (2–4 options) uses `.seg` + `.seg-item` +
+    `.is-active`. Compact period/view (Progress, Activity) adds `.seg--fit` (hug text).
+    Page-level two-way tabs (Likes, Notifications) use `.seg--fill`: full width, equal
+    halves, text centered. Items ~32px (`padding: 6px 12px`). Button or `Link` as
+    `.seg-item`. Do not invent a local tab recipe. Not chips (multi-filter / labels) and
+    not `.toggle` / `.toggle-row` (on/off). Specimen: UI kit «Сегмент».
 13. **Lists after flatten:** People / gyms = `UserCard` / `GymCard`. Likes = divider rows
     (`.liked-list` / `.liked-row`). Workouts history = one grouped `.workouts-list`. Chats =
     conversation rows, not a card per chat. Notifications feed = `.card-list` with explicit

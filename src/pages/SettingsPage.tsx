@@ -598,10 +598,10 @@ export function SettingsPage() {
         )}
       </section>
 
-      <section className="settings-session">
+      <section className="settings-account-end" aria-label="Сессия">
         <button
           type="button"
-          className="section-action"
+          className="btn btn-ghost btn-block"
           onClick={() => {
             void (async () => {
               await logout()
@@ -611,26 +611,22 @@ export function SettingsPage() {
         >
           Выйти
         </button>
-      </section>
-
-      <section className="surface settings-delete">
-        <SectionTitle>Удалить аккаунт</SectionTitle>
-        <p className="muted settings-delete-lead">
-          Переписка останется как «Удалённый пользователь». Это необратимо.
-        </p>
         {deleteStep === 'idle' ? (
           <button
             type="button"
-            className="btn btn-ghost btn-block"
+            className="settings-delete-trigger"
             onClick={() => {
               setDeleteError('')
               setDeleteStep('confirm')
             }}
           >
-            Удалить аккаунт…
+            Удалить аккаунт
           </button>
         ) : (
-          <div className="empty-copy-actions settings-delete-confirm">
+          <div className="settings-delete-confirm">
+            <p className="muted">
+              Переписка останется как «Удалённый пользователь». Это необратимо.
+            </p>
             {deleteError ? (
               <p className="feedback-error" role="alert">
                 {deleteError}
@@ -638,7 +634,7 @@ export function SettingsPage() {
             ) : null}
             <button
               type="button"
-              className="btn btn-danger btn-block"
+              className="btn btn-danger btn-sm btn-block"
               disabled={deleteBusy}
               onClick={() => {
                 setDeleteBusy(true)
@@ -658,7 +654,7 @@ export function SettingsPage() {
             </button>
             <button
               type="button"
-              className="btn btn-soft btn-block"
+              className="btn btn-ghost btn-sm btn-block"
               disabled={deleteBusy}
               onClick={() => setDeleteStep('idle')}
             >

@@ -167,7 +167,7 @@ export function LikedPage({ mode = 'received' }: { mode?: LikesMode }) {
         <header className="page-header liked-header">
           <div className="page-header-text">
             <h1 className="page-title">Лайки</h1>
-            <div className="seg seg--fit liked-tabs" role="tablist" aria-label="Лайки">
+            <div className="seg seg--fill liked-tabs" role="tablist" aria-label="Лайки">
               <Link
                 to="/app/likes"
                 role="tab"

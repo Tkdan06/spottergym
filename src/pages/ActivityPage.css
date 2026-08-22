@@ -201,6 +201,9 @@
   cursor: pointer;
   display: flex;
   align-items: stretch;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -280,6 +283,11 @@
 .activity-day-detail-copy span {
   color: var(--text-muted);
   font-size: 0.9rem;
+}
+
+.activity-day-hint {
+  margin: 0;
+  font-size: var(--text-dim-size);
 }
 
 .activity-day-detail-range {

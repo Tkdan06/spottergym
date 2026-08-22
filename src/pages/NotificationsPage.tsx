@@ -154,7 +154,7 @@ export function NotificationsPage() {
         </div>
       </header>
 
-      <div className="seg seg--fit" role="tablist" aria-label="Уведомления">
+      <div className="seg seg--fill" role="tablist" aria-label="Уведомления">
         <button
           type="button"
           role="tab"

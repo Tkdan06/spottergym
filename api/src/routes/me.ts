@@ -29,6 +29,7 @@ import {
   expireStaleCheckIns,
   resolveExpiresAt,
 } from '../lib/checkInExpiry.js'
+import { moscowDayKey, moscowDayStartUtc } from '../lib/adminAnalytics.js'
 import { buildMyActivityStats, type ActivityRange } from '../lib/activityStats.js'
 import { notifyGymMembers } from '../lib/gymNotify.js'
 import {
@@ -178,6 +179,54 @@ meRoutes.delete(
       },
     })
     return c.json({ ok: true, deleted: result.count })
+  },
+)
+
+const MSK_DAY_RE = /^\d{4}-\d{2}-\d{2}$/
+
+/**
+ * Remove check-ins that started on one MSK day (including an open “Я в зале”).
+ * Separate path so an older server cannot treat this as a full history wipe.
+ */
+meRoutes.delete(
+  '/activity/day/:date',
+  rateLimit({ windowMs: 60_000, max: 12, route: 'me-activity-day' }),
+  async (c) => {
+    const raw = (c.req.param('date') || '').trim()
+    if (!MSK_DAY_RE.test(raw)) {
+      return c.json({ error: 'Некорректная дата' }, 400)
+    }
+    const start = moscowDayStartUtc(raw)
+    if (Number.isNaN(start.getTime()) || moscowDayKey(start) !== raw) {
+      return c.json({ error: 'Некорректная дата' }, 400)
+    }
+    const todayKey = moscowDayKey(new Date())
+    if (raw > todayKey) {
+      return c.json({ error: 'Нельзя удалить будущий день' }, 400)
+    }
+
+    const userId = c.get('userId')
+    const end = new Date(start.getTime() + 24 * 60 * 60 * 1000)
+    await expireStaleCheckIns()
+
+    const dayFilter = {
+      userId,
+      checkedInAt: { gte: start, lt: end },
+    }
+    const openCount = await prisma.checkIn.count({
+      where: { ...dayFilter, checkedOutAt: null },
+    })
+    const result = await prisma.checkIn.deleteMany({ where: dayFilter })
+    if (result.count === 0) {
+      return c.json({ error: 'В этот день отметок не было' }, 404)
+    }
+
+    return c.json({
+      ok: true,
+      deleted: result.count,
+      date: raw,
+      clearedPresence: openCount > 0,
+    })
   },
 )
 

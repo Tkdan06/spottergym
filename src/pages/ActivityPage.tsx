@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, MoreHorizontal, RotateCcw } from 'lucide-react'
+import { ArrowLeft, MoreHorizontal, RotateCcw, Trash2 } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { SOFT_LOADER_DELAY_MS, SoftLoader } from '../components/SoftLoader'
 import { useApp } from '../context/useApp'
 import {
+  apiDeleteMyActivityDay,
   apiFetchMyActivity,
   apiResetMyActivity,
   type ActivityRange,
@@ -89,11 +90,13 @@ function sessionsLabel(count: number) {
   return `${count} тренировок`
 }
 
-type SheetMode = 'closed' | 'menu' | 'confirm'
+type SheetMode = 'closed' | 'menu' | 'confirm' | 'day'
+
+const LONG_PRESS_MS = 480
 
 export function ActivityPage() {
   const navigate = useNavigate()
-  const { user, apiOnline } = useApp()
+  const { user, apiOnline, checkOut } = useApp()
   const [range, setRange] = useState<ActivityRange>(30)
   const [stats, setStats] = useState<ActivityStats | null>(null)
   const [loading, setLoading] = useState(true)
@@ -105,7 +108,11 @@ export function ActivityPage() {
   const menuPanelRef = useRef<HTMLDivElement>(null)
   const confirmPanelRef = useRef<HTMLDivElement>(null)
   const confirmActionRef = useRef<HTMLButtonElement>(null)
+  const dayPanelRef = useRef<HTMLDivElement>(null)
+  const dayActionRef = useRef<HTMLButtonElement>(null)
   const loadGen = useRef(0)
+  const longTimer = useRef<number | null>(null)
+  const longFired = useRef(false)
 
   useSheetA11y(sheet === 'menu', () => setSheet('closed'), menuPanelRef)
   useSheetA11y(
@@ -114,6 +121,14 @@ export function ActivityPage() {
     confirmPanelRef,
     confirmActionRef,
   )
+  useSheetA11y(sheet === 'day', () => setSheet('closed'), dayPanelRef, dayActionRef)
+
+  const clearLongPress = () => {
+    if (longTimer.current != null) {
+      window.clearTimeout(longTimer.current)
+      longTimer.current = null
+    }
+  }
 
   const load = useCallback(async (nextRange: ActivityRange) => {
     const gen = ++loadGen.current
@@ -145,6 +160,8 @@ export function ActivityPage() {
     void load(range)
   }, [user, apiOnline, range, load])
 
+  useEffect(() => () => clearLongPress(), [])
+
   const maxMinutes = useMemo(() => {
     if (!stats?.days.length) return 0
     return Math.max(0, ...stats.days.map((d) => d.minutes))
@@ -175,6 +192,44 @@ export function ActivityPage() {
       await load(range)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось сбросить активность')
+    } finally {
+      setResetting(false)
+    }
+  }
+
+  const askDeleteDay = (date: string) => {
+    const day = stats?.days.find((d) => d.date === date)
+    if (!day || day.minutes <= 0 || resetting || !apiOnline) return
+    setSelectedDate(date)
+    setSheet('day')
+  }
+
+  const startBarLongPress = (date: string, hasTime: boolean) => {
+    clearLongPress()
+    longFired.current = false
+    if (!hasTime || resetting || !apiOnline) return
+    longTimer.current = window.setTimeout(() => {
+      longFired.current = true
+      longTimer.current = null
+      if (navigator.vibrate) navigator.vibrate(12)
+      askDeleteDay(date)
+    }, LONG_PRESS_MS)
+  }
+
+  const onDeleteDay = async () => {
+    if (resetting || !apiOnline || !selectedDate) return
+    const date = selectedDate
+    setResetting(true)
+    setError('')
+    try {
+      const result = await apiDeleteMyActivityDay(date)
+      setSheet('closed')
+      if (result.clearedPresence && user?.isActive) {
+        await Promise.resolve(checkOut()).catch(() => undefined)
+      }
+      await load(range)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось удалить день')
     } finally {
       setResetting(false)
     }
@@ -318,7 +373,21 @@ export function ActivityPage() {
                             } ${day.minutes <= 0 ? 'is-empty' : ''}`}
                             aria-pressed={isSelected}
                             aria-label={`${formatDayLabel(day.date)} · ${formatMinutes(day.minutes)}`}
-                            onClick={() => setSelectedDate(day.date)}
+                            onPointerDown={() => startBarLongPress(day.date, day.minutes > 0)}
+                            onPointerUp={clearLongPress}
+                            onPointerCancel={clearLongPress}
+                            onPointerLeave={clearLongPress}
+                            onContextMenu={(e) => {
+                              e.preventDefault()
+                              askDeleteDay(day.date)
+                            }}
+                            onClick={() => {
+                              if (longFired.current) {
+                                longFired.current = false
+                                return
+                              }
+                              setSelectedDate(day.date)
+                            }}
                           >
                             <span className="activity-bar-track">
                               <span
@@ -361,6 +430,9 @@ export function ActivityPage() {
                     </>
                   ) : null}
                 </div>
+                {selectedDay && selectedDay.minutes > 0 ? (
+                  <p className="dim activity-day-hint">Зажми столбец, чтобы убрать день из статистики</p>
+                ) : null}
               </section>
 
               {stats.busiestDay || stats.quietestDay ? (
@@ -408,6 +480,17 @@ export function ActivityPage() {
           />
           <div className="app-sheet-panel" ref={menuPanelRef}>
             <div className="app-sheet-grab" aria-hidden />
+            {selectedDay && selectedDay.minutes > 0 ? (
+              <button
+                type="button"
+                className="sheet-action is-danger"
+                disabled={resetting || !apiOnline}
+                onClick={() => setSheet('day')}
+              >
+                <Trash2 size={18} aria-hidden />
+                Удалить {formatDayLabel(selectedDay.date, true)}
+              </button>
+            ) : null}
             <button
               type="button"
               className="sheet-action is-danger"
@@ -449,6 +532,48 @@ export function ActivityPage() {
               onClick={() => void onReset()}
             >
               {resetting ? 'Сбрасываем…' : 'Сбросить'}
+            </button>
+            <button
+              type="button"
+              className="sheet-action"
+              disabled={resetting}
+              onClick={() => setSheet('closed')}
+            >
+              Отмена
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {sheet === 'day' && selectedDay && selectedDay.minutes > 0 ? (
+        <div
+          className="app-sheet"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="activity-day-title"
+        >
+          <button
+            type="button"
+            className="app-sheet-backdrop"
+            aria-label="Закрыть"
+            onClick={() => setSheet('closed')}
+          />
+          <div className="app-sheet-panel" ref={dayPanelRef}>
+            <div className="app-sheet-grab" aria-hidden />
+            <h3 id="activity-day-title">Убрать этот день?</h3>
+            <p className="muted">
+              {formatDayLabel(selectedDay.date)} · {formatMinutes(selectedDay.minutes)}. Отметки за
+              этот день пропадут из графика. Если среди них открытый «Я в зале» — статус тоже
+              снимется.
+            </p>
+            <button
+              type="button"
+              ref={dayActionRef}
+              className="btn btn-danger btn-block"
+              disabled={resetting || !apiOnline}
+              onClick={() => void onDeleteDay()}
+            >
+              {resetting ? 'Удаляем…' : 'Удалить день'}
             </button>
             <button
               type="button"

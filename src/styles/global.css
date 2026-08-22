@@ -671,6 +671,7 @@ a.btn-danger-ghost {
 
 .seg--fill {
   display: flex;
+  align-self: stretch;
   width: 100%;
 }
 
@@ -698,6 +699,10 @@ a.btn-danger-ghost {
 
 .seg--fill .seg-item {
   flex: 1 1 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .seg-item.is-active {
