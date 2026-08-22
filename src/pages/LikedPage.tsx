@@ -167,12 +167,12 @@ export function LikedPage({ mode = 'received' }: { mode?: LikesMode }) {
         <header className="page-header liked-header">
           <div className="page-header-text">
             <h1 className="page-title">Лайки</h1>
-            <div className="liked-tabs" role="tablist" aria-label="Лайки">
+            <div className="seg liked-tabs" role="tablist" aria-label="Лайки">
               <Link
                 to="/app/likes"
                 role="tab"
                 aria-selected={mode === 'received'}
-                className={`liked-tab ${mode === 'received' ? 'active' : ''}`}
+                className={`seg-item${mode === 'received' ? ' is-active' : ''}`}
               >
                 Кто лайкнул
               </Link>
@@ -180,7 +180,7 @@ export function LikedPage({ mode = 'received' }: { mode?: LikesMode }) {
                 to="/app/likes/sent"
                 role="tab"
                 aria-selected={mode === 'sent'}
-                className={`liked-tab ${mode === 'sent' ? 'active' : ''}`}
+                className={`seg-item${mode === 'sent' ? ' is-active' : ''}`}
               >
                 Кого я лайкнул
               </Link>

@@ -47,7 +47,12 @@ Before adding or redesigning UI in `src/pages` / `src/components`, follow the li
 10. **List rows with multiple actions:** primary navigation on the left; secondary (copy/expand)
    as separate targets — see workout history pattern on UiKit page.
 11. **Profile edit:** Settings via header gear; do not add a second full-width “Редактировать
-    профиль” CTA wall. Feedback lives in Settings; admin contour button only for `isAdmin`.
+   профиль” CTA wall. Feedback lives in Settings; admin contour button only for `isAdmin`.
+12. **Segmented control:** exclusive view switch (2–4 options) uses `.seg` + `.seg-item` +
+    `.is-active`. Compact period row adds `.seg--fit`. Do not invent a local tab recipe
+    (liked-tabs, activity-range-btn, workout-progress-mode). Not chips (multi-filter) and not
+    `.toggle` / `.toggle-row` (on/off). Live: Progress, Likes, Activity period. Specimen: UI kit
+    «Сегмент».
 
 ## Sources of truth
 

@@ -333,37 +333,37 @@ export function WorkoutsProgressPage() {
       </div>
 
       <div className="workout-progress-toolbar">
-        <div className="workout-progress-mode" role="tablist" aria-label="Что смотреть">
+        <div className="seg workout-progress-mode" role="tablist" aria-label="Что смотреть">
           <button
             type="button"
             role="tab"
             aria-selected={tab === 'strength'}
-            className={tab === 'strength' ? 'is-active' : ''}
+            className={`seg-item${tab === 'strength' ? ' is-active' : ''}`}
             onClick={() => setTab('strength')}
           >
-            Упражнение
+            Упражнения
           </button>
           <button
             type="button"
             role="tab"
             aria-selected={tab === 'body'}
-            className={tab === 'body' ? 'is-active' : ''}
+            className={`seg-item${tab === 'body' ? ' is-active' : ''}`}
             onClick={() => {
               setPickerOpen(false)
               setTab('body')
             }}
           >
-            Вес
+            Мой вес
           </button>
         </div>
-        <div className="workout-progress-period" role="tablist" aria-label="Период">
+        <div className="seg seg--fit workout-progress-period" role="tablist" aria-label="Период">
           {RANGES.map((r) => (
             <button
               key={r.id}
               type="button"
               role="tab"
               aria-selected={range === r.id}
-              className={range === r.id ? 'is-active' : ''}
+              className={`seg-item${range === r.id ? ' is-active' : ''}`}
               onClick={() => setRange(r.id)}
             >
               {r.label}

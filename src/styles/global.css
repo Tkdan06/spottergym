@@ -647,6 +647,59 @@ a.btn-danger-ghost {
   gap: 8px;
 }
 
+/**
+ * Segmented control — exclusive view switch (2–4 options).
+ * Not chips (filters) and not .toggle (on/off).
+ */
+.seg {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--bg-soft);
+  min-width: 0;
+}
+
+.seg--fit {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.seg-item {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-family: var(--font-body);
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.seg--fit .seg-item {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+}
+
+.seg-item.is-active {
+  background: var(--bg-elevated);
+  color: var(--text);
+}
+
+.seg-item:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
 .chip {
   display: inline-flex;
   align-items: center;

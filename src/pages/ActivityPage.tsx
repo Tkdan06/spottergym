@@ -217,14 +217,14 @@ export function ActivityPage() {
         <p className="muted">Нужен онлайн, чтобы загрузить историю чекинов.</p>
       ) : null}
 
-      <div className="activity-range" role="tablist" aria-label="Период">
+      <div className="seg seg--fit activity-range" role="tablist" aria-label="Период">
         {RANGES.map((r) => (
           <button
             key={r.id}
             type="button"
             role="tab"
             aria-selected={range === r.id}
-            className={`activity-range-btn ${range === r.id ? 'is-active' : ''}`}
+            className={`seg-item${range === r.id ? ' is-active' : ''}`}
             onClick={() => setRange(r.id)}
             disabled={resetting}
           >

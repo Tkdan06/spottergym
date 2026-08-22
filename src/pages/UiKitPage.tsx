@@ -52,6 +52,8 @@ export function UiKitPage() {
   const navigate = useNavigate()
   const { user, canViewUsers, canManageAdmins } = useApp()
   const [toggleOn, setToggleOn] = useState(true)
+  const [segDemo, setSegDemo] = useState<'ex' | 'body'>('ex')
+  const [segPeriod, setSegPeriod] = useState<7 | 30 | 90>(30)
   const [hintOpen, setHintOpen] = useState(false)
   const [flashDemo, setFlashDemo] = useState('')
 
@@ -113,6 +115,11 @@ export function UiKitPage() {
           <li>
             <strong>Списки с несколькими действиями:</strong> primary слева (навигация), secondary
             справа/отдельной полосой (expand, copy). Не вешать всё на одну кнопку.
+          </li>
+          <li>
+            <strong>Сегмент:</strong> взаимоисключающий вид — только <code>.seg</code> +{' '}
+            <code>.seg-item.is-active</code> (Прогресс, Лайки, период на Активности). Не чипы и не
+            <code>.toggle</code>.
           </li>
           <li>
             <strong>Действие у SectionTitle:</strong> только <code>.section-action</code> (Link или
@@ -563,6 +570,52 @@ export function UiKitPage() {
     …
   </div>
 </div>`}</pre>
+      </section>
+
+      <section className="surface ui-kit-block">
+        <SectionTitle>Сегмент</SectionTitle>
+        <p className="muted ui-kit-section-lead">
+          Переключатель вида: 2–4 взаимно исключающих пункта. Не чип (фильтр, можно несколько) и не{' '}
+          <code>.toggle</code> (вкл/выкл). Chrome: <code>.seg</code> + пункты <code>.seg-item</code>,
+          активный — <code>.is-active</code>. Короткий ряд (7д / 30д) — ещё <code>.seg--fit</code>.
+          Живые экраны: Прогресс, Лайки, Активность.
+        </p>
+        <div className="ui-kit-type-stack" style={{ marginTop: 12 }}>
+          <div className="seg" role="tablist" aria-label="Пример вида">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={segDemo === 'ex'}
+              className={`seg-item${segDemo === 'ex' ? ' is-active' : ''}`}
+              onClick={() => setSegDemo('ex')}
+            >
+              Упражнения
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={segDemo === 'body'}
+              className={`seg-item${segDemo === 'body' ? ' is-active' : ''}`}
+              onClick={() => setSegDemo('body')}
+            >
+              Мой вес
+            </button>
+          </div>
+          <div className="seg seg--fit" role="tablist" aria-label="Пример периода">
+            {([7, 30, 90] as const).map((id) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={segPeriod === id}
+                className={`seg-item${segPeriod === id ? ' is-active' : ''}`}
+                onClick={() => setSegPeriod(id)}
+              >
+                {id}д
+              </button>
+            ))}
+          </div>
+        </div>
       </section>
 
       <section className="surface ui-kit-block">

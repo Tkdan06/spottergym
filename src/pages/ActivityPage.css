@@ -48,33 +48,7 @@
 }
 
 .activity-range {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.activity-range-btn {
-  min-width: 52px;
-  padding: 8px 12px;
-  border-radius: 12px;
-  border: 1px solid var(--line);
-  background: var(--bg-elevated);
-  color: inherit;
-  font: inherit;
-  font-weight: 650;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.activity-range-btn.is-active {
-  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
-  color: var(--accent);
-}
-
-.activity-range-btn:disabled {
-  opacity: 0.55;
-  cursor: default;
+  margin: 0;
 }
 
 .activity-summary {

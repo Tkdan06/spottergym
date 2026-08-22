@@ -31,7 +31,6 @@ export function ProfilePage() {
   const gyms = getUserGyms(user)
   const likesInfo = getLikesFor(user.id)
   const myLiked = getMyLikedUsers()
-  const photoCount = user.photos.length
   const heroSrc = profileImage(user)
   const onBreak = isOnBreak(user.breakUntil)
   const breakText = breakLabel(user.breakUntil)
@@ -153,16 +152,6 @@ export function ProfilePage() {
               ? `${gyms.length} ${gyms.length === 1 ? 'зал' : gyms.length < 5 ? 'зала' : 'залов'}`
               : 'Зал не выбран'}
           </p>
-          <button
-            type="button"
-            className="profile-photo-link"
-            onClick={() => {
-              setGalleryIndex(0)
-              setGalleryOpen(true)
-            }}
-          >
-            {photoCount ? 'Управлять фото' : 'Загрузить фото профиля'}
-          </button>
         </div>
       </div>
 

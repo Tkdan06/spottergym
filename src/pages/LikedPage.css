@@ -8,31 +8,8 @@
 }
 
 .liked-tabs {
-  display: flex;
-  gap: 6px;
   margin-top: 12px;
-  padding: 4px;
-  border-radius: 14px;
-  background: var(--bg-soft);
   max-width: 100%;
-}
-
-.liked-tab {
-  flex: 1;
-  min-width: 0;
-  text-align: center;
-  padding: 8px 10px;
-  border-radius: 11px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-decoration: none;
-}
-
-.liked-tab.active {
-  background: var(--bg-elevated);
-  color: var(--text);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
 }
 
 .liked-count {
