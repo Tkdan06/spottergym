@@ -22,7 +22,6 @@ import {
 } from '../lib/apiClient'
 import {
   formatBodyDelta,
-  formatDeltaLabel,
   formatKg,
   formatWorkoutWhen,
 } from '../lib/workouts'
@@ -121,10 +120,6 @@ export function WorkoutsPage() {
   if (!user) return <Navigate to="/login" replace />
 
   const bodyDeltaText = formatBodyDelta(progress?.highlight.bodyDeltaKg)
-  const liftDelta = formatDeltaLabel(
-    progress?.highlight.liftDeltaWeightKg,
-    progress?.highlight.liftDeltaReps,
-  )
 
   const copyWorkout = (id: string) => {
     navigate('/app/workouts/new', { state: { copyFromId: id } })
@@ -181,24 +176,12 @@ export function WorkoutsPage() {
             </div>
             <div className="workouts-progress-strip-copy">
               <strong>Прогресс</strong>
-              <span className="muted">
-                {progress.highlight.bodyLatestKg != null ? (
-                  <>
-                    {formatKg(progress.highlight.bodyLatestKg)}
-                    {bodyDeltaText ? ` · ${bodyDeltaText} за 30д` : ''}
-                  </>
-                ) : null}
-                {progress.highlight.bodyLatestKg != null && liftDelta && progress.highlight.liftName
-                  ? ' · '
-                  : null}
-                {liftDelta && progress.highlight.liftName ? (
-                  <>
-                    {progress.highlight.liftName}
-                    {liftDelta.tone === 'up' ? ' ↑ ' : liftDelta.tone === 'down' ? ' ↓ ' : ' · '}
-                    {liftDelta.text}
-                  </>
-                ) : null}
-              </span>
+              {progress.highlight.bodyLatestKg != null ? (
+                <span className="muted">
+                  {formatKg(progress.highlight.bodyLatestKg)}
+                  {bodyDeltaText ? ` · ${bodyDeltaText} за 30д` : ''}
+                </span>
+              ) : null}
             </div>
             <ChevronRight size={18} className="workouts-progress-strip-chevron" aria-hidden />
           </Link>

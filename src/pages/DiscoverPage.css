@@ -18,6 +18,10 @@
   padding-top: 2px;
 }
 
+.discover-page .card-list {
+  gap: 10px;
+}
+
 @media (min-width: 900px) {
   .discover-page .card-list {
     display: grid;

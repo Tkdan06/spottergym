@@ -256,6 +256,10 @@
   margin-bottom: 14px;
 }
 
+.home-people .card-list {
+  gap: 10px;
+}
+
 .home-empty-floor {
   display: flex;
   flex-direction: column;
@@ -307,7 +311,7 @@
 
 @media (min-width: 900px) {
   .home-page .card-list {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

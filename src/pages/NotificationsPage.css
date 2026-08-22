@@ -117,6 +117,7 @@
 .notifications-page .stack {
   position: relative;
   z-index: 1;
+  gap: 10px;
 }
 
 .notification-card {

@@ -1,57 +1,59 @@
 .user-card {
   position: relative;
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr);
+  grid-template-columns: 88px minmax(0, 1fr);
   align-items: start;
   gap: 12px;
-  padding: 10px 0;
-  border-radius: 0;
-  background: transparent;
-  border: 0;
-  border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  border: 1px solid var(--line);
   cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+  animation: fade-up 0.4s ease both;
   /* no content-visibility: me-tab sits at top:-9px and would be paint-clipped */
 }
 
-.user-card:first-child {
-  border-top: 0;
-}
-
 .user-card:hover {
-  color: inherit;
+  border-color: rgba(200, 245, 66, 0.28);
+  transform: translateY(-1px);
 }
 
 .user-card.is-me {
-  margin: 0 -8px;
-  padding-left: 8px;
-  padding-right: 8px;
-  border-radius: 12px;
-  border-top-color: transparent;
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-color: rgba(200, 245, 66, 0.55);
+  background:
+    linear-gradient(135deg, rgba(200, 245, 66, 0.1), transparent 55%),
+    var(--bg-card);
+  box-shadow: inset 0 0 0 1px rgba(200, 245, 66, 0.12);
 }
 
-.user-card.is-me + .user-card,
-.user-card + .user-card.is-me {
-  border-top-color: transparent;
+.user-card.is-me:hover {
+  border-color: rgba(200, 245, 66, 0.75);
+}
+
+.user-card.is-coach {
+  border-color: rgba(200, 245, 66, 0.32);
 }
 
 .user-card.compact {
-  grid-template-columns: 56px minmax(0, 1fr);
+  grid-template-columns: 72px minmax(0, 1fr);
 }
 
 .me-tab {
   position: absolute;
-  top: 8px;
-  right: 0;
+  top: -9px;
+  right: 14px;
   z-index: 2;
-  padding: 2px 8px;
+  padding: 2px 10px;
   border-radius: 999px;
   background: var(--accent);
   color: #111;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: normal;
   line-height: 1.35;
+  border: 1px solid rgba(17, 17, 17, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   pointer-events: none;
 }
 
@@ -63,7 +65,7 @@
 }
 
 .user-card-media {
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
   aspect-ratio: 1;
   background: var(--bg-soft);

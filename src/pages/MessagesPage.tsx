@@ -312,7 +312,7 @@ export function MessagesPage() {
     }
     if (page) {
       for (const child of Array.from(page.children)) {
-        if (!child.classList.contains('chat-pin-sheet')) {
+        if (!child.classList.contains('app-sheet') && !child.classList.contains('chat-pin-sheet')) {
           child.setAttribute('inert', '')
           inertNodes.push(child)
         }

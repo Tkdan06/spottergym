@@ -76,18 +76,22 @@
   padding: 0;
   display: grid;
   gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-card);
 }
 
 .workouts-board {
   border-radius: 0;
   border: 0;
-  border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  border-top: 1px solid var(--line);
   background: transparent;
   min-width: 0;
   overflow: hidden;
 }
 
-.workouts-list > li:first-child .workouts-board {
+.workouts-list > .workouts-board:first-child {
   border-top: 0;
 }
 
@@ -104,7 +108,7 @@
   display: block;
   min-width: 0;
   margin: 0;
-  padding: 12px 4px 8px 14px;
+  padding: 14px 4px 6px 14px;
   color: inherit;
   text-decoration: none;
 }
@@ -155,9 +159,8 @@
   gap: 8px;
   width: 100%;
   margin: 0;
-  padding: 8px 14px 10px;
+  padding: 4px 14px 12px;
   border: 0;
-  border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
   background: transparent;
   color: inherit;
   font: inherit;

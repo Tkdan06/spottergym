@@ -104,7 +104,7 @@ export function useSheetA11y(
       }
       const sheetRoot =
         panel.closest(
-          '.schedule-sheet, .checkin-sheet, .chat-pin-sheet, .safety-sheet, .floor-sheet, .city-sheet, .photo-modal, [data-sheet-root]',
+          '.app-sheet, .schedule-sheet, .checkin-sheet, .chat-pin-sheet, .safety-sheet, .floor-sheet, .city-sheet, .photo-modal, [data-sheet-root]',
         ) || panel
       applyInertTree(sheetRoot)
 
