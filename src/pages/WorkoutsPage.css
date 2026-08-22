@@ -617,14 +617,14 @@
 
 .workout-progress-mode button {
   margin: 0;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border: 0;
   border-radius: 11px;
   background: transparent;
   color: var(--text-muted);
   font: inherit;
-  font-size: 0.9rem;
-  font-weight: 650;
+  font-size: 0.84rem;
+  font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
 }
@@ -642,16 +642,16 @@
 }
 
 .workout-progress-period button {
-  min-width: 44px;
+  min-width: 40px;
   margin: 0;
-  padding: 8px 10px;
-  border-radius: 12px;
+  padding: 6px 8px;
+  border-radius: 10px;
   border: 1px solid transparent;
   background: transparent;
   color: var(--text-muted);
   font: inherit;
-  font-size: 0.88rem;
-  font-weight: 650;
+  font-size: 0.82rem;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -683,18 +683,13 @@
   }
 }
 
-.workout-exercise-picker {
+.workout-progress-feed {
+  display: grid;
+  gap: 14px;
   min-width: 0;
-  width: 100%;
 }
 
-.workout-exercise-picker > span {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.workout-exercise-picker-trigger {
+.workout-progress-title-btn {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -702,32 +697,48 @@
   width: 100%;
   min-width: 0;
   margin: 0;
-  padding: 12px 14px;
-  min-height: 48px;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  background: var(--bg-elevated);
+  padding: 0;
+  border: 0;
+  background: none;
   color: inherit;
-  font: inherit;
   text-align: left;
   cursor: pointer;
-  box-sizing: border-box;
 }
 
-.workout-exercise-picker-trigger > span {
-  flex: 1 1 auto;
-  min-width: 0;
+.workout-progress-title-btn .section-heading {
+  margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: inherit;
-  font-weight: 650;
-  color: inherit;
 }
 
-.workout-exercise-picker-trigger svg {
+.workout-progress-title-btn svg {
   flex-shrink: 0;
   color: var(--text-dim);
+}
+
+.workout-progress-hero {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.workout-progress-hero-value {
+  font-family: var(--font-display);
+  font-size: var(--text-page-size);
+  font-weight: var(--text-page-weight);
+  letter-spacing: var(--letter-tight);
+  line-height: var(--text-page-line);
+  font-variant-numeric: tabular-nums;
+}
+
+.workout-progress-hero-delta,
+.workout-progress-caption {
+  margin: 0;
+}
+
+.workout-progress-caption {
+  font-size: var(--text-muted-size);
 }
 
 .workout-exercise-picker-sheet {
@@ -774,14 +785,7 @@
 
 .workout-line-chart {
   display: grid;
-  gap: 4px;
   min-width: 0;
-}
-
-.workout-line-unit {
-  margin: 0;
-  font-size: 0.78rem;
-  line-height: 1.2;
 }
 
 .workout-line-svg {
@@ -849,31 +853,26 @@
   stroke: none;
 }
 
-.workout-progress-point {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  min-width: 0;
-}
-
-.workout-progress-point strong {
-  font-size: 1rem;
-}
-
 .workout-coach-block {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   padding: 16px;
 }
 
-.workout-coach-h {
+.workout-coach-headline {
   margin: 0;
-  font-size: 1.02rem;
+  font-family: var(--font-display);
+  font-size: var(--text-section-size);
+  font-weight: var(--text-section-weight);
+  letter-spacing: var(--letter-tight);
+  line-height: var(--text-section-line);
 }
 
-.workout-coach-focus {
+.workout-coach-next-label {
   margin: 0;
+  font-size: var(--text-label-size);
+  font-weight: var(--text-label-weight);
+  color: var(--text-muted);
 }
 
 .workout-coach-wins,
@@ -907,18 +906,10 @@
 }
 
 .workout-coach-next {
-  gap: 12px;
-}
-
-.workout-coach-distance {
-  opacity: 0.95;
-}
-
-.workout-coach-d90,
-.workout-coach-foot {
-  margin: 0;
-  font-size: 0.88rem;
-  line-height: 1.4;
+  display: grid;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
 }
 
 .workout-coach-chips {
@@ -938,24 +929,11 @@
   background: var(--bg, transparent);
 }
 
-.workout-coach-verdict.is-hit .activity-summary-total {
-  color: var(--accent);
-}
-
 .workout-week-recap {
   display: grid;
-  gap: 14px;
+  gap: 10px;
   min-width: 0;
-  padding-top: 6px;
-}
-
-.workout-week-recap-head {
-  display: grid;
-  gap: 2px;
-}
-
-.workout-week-recap-head .muted {
-  margin: 0;
+  padding-top: 8px;
 }
 
 

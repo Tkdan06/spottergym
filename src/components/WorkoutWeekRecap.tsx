@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ListChecks, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { SectionTitle } from './SectionTitle'
+import { SoftLoader } from './SoftLoader'
 import { useApp } from '../context/useApp'
 import {
   apiFetchWorkoutCoach,
@@ -8,15 +10,6 @@ import {
   type WorkoutCoachState,
 } from '../lib/apiClient'
 import { WORKOUT_RECAP_ADMIN_ONLY } from '../lib/workoutRecap'
-
-function nextMondayLabel(iso: string) {
-  return new Date(iso).toLocaleDateString('ru-RU', {
-    timeZone: 'Europe/Moscow',
-    weekday: 'long',
-    day: 'numeric',
-    month: 'short',
-  })
-}
 
 function sessionsWord(n: number) {
   const abs = Math.abs(n) % 100
@@ -95,14 +88,12 @@ export function WorkoutWeekRecap() {
   }
 
   const letter = coach?.letter
-  const nextLabel = coach ? nextMondayLabel(coach.nextAt) : ''
 
   return (
     <div id="week-recap" className="workout-week-recap">
-      <header className="workout-week-recap-head">
-        <h2 className="workout-coach-h">Разбор недели</h2>
-        {coach ? <p className="muted">{coach.periodLabel}</p> : null}
-      </header>
+      <SectionTitle action={coach ? <span className="muted">{coach.periodLabel}</span> : null}>
+        Разбор недели
+      </SectionTitle>
 
       {error ? (
         <p className="feedback-error" role="alert">
@@ -110,78 +101,51 @@ export function WorkoutWeekRecap() {
         </p>
       ) : null}
 
-      {loading ? <p className="muted">Загружаем…</p> : null}
+      {loading ? <SoftLoader label="Загружаем разбор…" /> : null}
 
       {!loading && coach && letter ? (
-        <>
-          <section
-            className={`activity-summary workout-coach-verdict is-${letter.weekVerdict.tone}`}
-            aria-label="Вердикт недели"
-          >
-            <span className="activity-summary-label">Неделя</span>
-            <strong className="activity-summary-total">{letter.headline}</strong>
-            {letter.weekVerdict.text ? (
-              <p className="activity-summary-sessions muted">{letter.weekVerdict.text}</p>
-            ) : null}
-          </section>
+        <section className="surface workout-coach-block">
+          <p className="workout-coach-headline">{letter.headline}</p>
+          {letter.weekVerdict.text ? <p className="muted">{letter.weekVerdict.text}</p> : null}
 
           {letter.wins.length ? (
-            <section className="surface workout-coach-block">
-              <h2 className="workout-coach-h">Что получилось</h2>
-              <ul className="workout-coach-wins">
-                {letter.wins.map((w, i) => (
-                  <li key={`${w.title}-${i}`}>
-                    {w.title ? <strong>{w.title}</strong> : null}
-                    {w.text ? <p className="muted">{w.text}</p> : null}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-
-          <section className="surface workout-coach-block workout-coach-next">
-            <h2 className="workout-coach-h">{letter.nextSession.title || 'Следующая тренировка'}</h2>
-            {letter.nextSession.focus ? (
-              <p className="muted workout-coach-focus">{letter.nextSession.focus}</p>
-            ) : null}
-            <ol className="workout-coach-steps">
-              {letter.nextSession.steps.map((step, i) => (
-                <li key={i}>{step}</li>
+            <ul className="workout-coach-wins">
+              {letter.wins.map((w, i) => (
+                <li key={`${w.title}-${i}`}>
+                  {w.title ? <strong>{w.title}</strong> : null}
+                  {w.text ? <p className="muted">{w.text}</p> : null}
+                </li>
               ))}
-            </ol>
-            <Link to="/app/workouts/new" className="btn btn-primary btn-block">
-              <Plus size={16} /> Записать тренировку
-            </Link>
-          </section>
+            </ul>
+          ) : null}
 
-          {letter.distance30 && (letter.distance30.text || letter.distance30.change) ? (
-            <section className="surface workout-coach-block workout-coach-distance">
-              <h2 className="workout-coach-h">На дистанции</h2>
-              {letter.distance30.text ? <p>{letter.distance30.text}</p> : null}
-              {letter.distance30.change ? (
-                <p className="muted">{letter.distance30.change}</p>
+          {letter.nextSession.steps.length || letter.nextSession.focus ? (
+            <div className="workout-coach-next">
+              <p className="workout-coach-next-label">Дальше</p>
+              {letter.nextSession.focus ? (
+                <p className="muted">{letter.nextSession.focus}</p>
               ) : null}
-            </section>
+              {letter.nextSession.steps.length ? (
+                <ol className="workout-coach-steps">
+                  {letter.nextSession.steps.map((step, i) => (
+                    <li key={i}>{step}</li>
+                  ))}
+                </ol>
+              ) : null}
+            </div>
           ) : null}
 
-          {letter.distance90?.text ? (
-            <p className="dim workout-coach-d90">{letter.distance90.text}</p>
-          ) : null}
-
-          <p className="dim workout-coach-foot">
-            По твоим записям, не консультация врача.
-            {nextLabel ? ` Следующий разбор — с ${nextLabel}.` : ''}
-          </p>
-        </>
+          <Link to="/app/workouts/new" className="btn btn-primary btn-block">
+            <Plus size={16} /> Записать тренировку
+          </Link>
+        </section>
       ) : null}
 
       {!loading && coach && !letter && coach.canGenerate ? (
         <section className="surface workouts-empty">
           <ListChecks size={28} aria-hidden />
-          <p className="empty-copy-title">Собрать разбор за неделю</p>
-          <p className="muted">
-            По дневнику: засчиталась ли неделя и что делать в следующий заход.
-          </p>
+          <p className="empty-copy-title">Собрать разбор</p>
+          <p className="muted">Коротко по дневнику: что вышло за неделю и что делать дальше.</p>
           <FactChips coach={coach} />
           <button
             type="button"
@@ -208,8 +172,8 @@ export function WorkoutWeekRecap() {
             {coach.status === 'locked'
               ? needCopy(coach.sessionsNeeded)
               : !coach.configured
-                ? 'На сервере нет ключа GigaChat. Запрос к модели не отправлялся.'
-                : 'Разбор сейчас недоступен. Цифры из дневника — на графике выше.'}
+                ? 'На сервере нет ключа GigaChat.'
+                : 'Цифры — на графике выше.'}
           </p>
           <FactChips coach={coach} />
         </section>

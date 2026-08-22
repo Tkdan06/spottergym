@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { ArrowLeft, ChevronDown } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { SOFT_LOADER_DELAY_MS, SoftLoader } from '../components/SoftLoader'
 import { useApp } from '../context/useApp'
 import {
   apiFetchWorkoutProgress,
@@ -13,7 +14,6 @@ import { goWorkoutsHub } from '../lib/workoutsNav'
 import { WorkoutWeekRecap } from '../components/WorkoutWeekRecap'
 import { WORKOUT_RECAP_ADMIN_ONLY } from '../lib/workoutRecap'
 import './WorkoutsPage.css'
-import './ActivityPage.css'
 import './FeedbackPage.css'
 
 const RANGES: { id: WorkoutProgressRange; label: string }[] = [
@@ -28,13 +28,8 @@ function formatAxisDay(iso: string) {
   return new Date(iso).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
 }
 
-function formatPointDay(iso: string) {
-  return new Date(iso).toLocaleDateString('ru-RU', {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+function formatCaptionDay(iso: string) {
+  return new Date(iso).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
 }
 
 function yTicks(min: number, max: number) {
@@ -71,26 +66,12 @@ function roundNice(n: number) {
 type ChartPoint = { at: string; value: number; meta?: string }
 type ChartCoord = { x: number; y: number; i: number }
 
-function smoothLine(coords: ChartCoord[]) {
+/** Straight segments — a spline overshoots and fakes extra kg ups/downs. */
+function linePath(coords: ChartCoord[]) {
   if (!coords.length) return ''
-  if (coords.length === 1) return `M ${coords[0].x.toFixed(1)} ${coords[0].y.toFixed(1)}`
-  if (coords.length === 2) {
-    return `M ${coords[0].x.toFixed(1)} ${coords[0].y.toFixed(1)} L ${coords[1].x.toFixed(1)} ${coords[1].y.toFixed(1)}`
-  }
-  const t = 0.18
-  let d = `M ${coords[0].x.toFixed(1)} ${coords[0].y.toFixed(1)}`
-  for (let i = 0; i < coords.length - 1; i++) {
-    const p0 = coords[i - 1] ?? coords[i]
-    const p1 = coords[i]
-    const p2 = coords[i + 1]
-    const p3 = coords[i + 2] ?? p2
-    const c1x = p1.x + (p2.x - p0.x) * t
-    const c1y = p1.y + (p2.y - p0.y) * t
-    const c2x = p2.x - (p3.x - p1.x) * t
-    const c2y = p2.y - (p3.y - p1.y) * t
-    d += ` C ${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`
-  }
-  return d
+  return coords
+    .map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`)
+    .join(' ')
 }
 
 function LineChart({
@@ -134,7 +115,7 @@ function LineChart({
     return { x, y, i }
   })
 
-  const line = smoothLine(coords)
+  const line = linePath(coords)
   const area =
     coords.length > 1
       ? `${line} L ${coords[coords.length - 1].x.toFixed(1)} ${plotBottom} L ${coords[0].x.toFixed(1)} ${plotBottom} Z`
@@ -143,9 +124,6 @@ function LineChart({
 
   return (
     <div className="workout-line-chart">
-      <p className="dim workout-line-unit" aria-hidden>
-        {unit}
-      </p>
       <svg viewBox={`0 0 ${w} ${h}`} className="workout-line-svg" role="img" aria-label={`График, ${unit}`}>
         <defs>
           <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
@@ -282,6 +260,24 @@ export function WorkoutsProgressPage() {
     progress?.strength.deltaReps,
   )
   const exerciseValue = pickedExercise || progress?.strength.exercise || ''
+  const heroKg =
+    selectedPoint != null
+      ? formatKg(selectedPoint.value)
+      : tab === 'body'
+        ? formatKg(progress?.body.latestKg)
+        : formatKg(progress?.strength.latestWeightKg)
+  const periodDelta =
+    tab === 'body'
+      ? bodyDelta
+        ? `${bodyDelta} за период`
+        : progress && progress.body.points.length < 2
+          ? 'Нужна ещё одна точка'
+          : null
+      : strengthDelta
+        ? `${strengthDelta.text} за период`
+        : progress && progress.strength.points.length < 2
+          ? 'Нужна ещё одна тренировка'
+          : null
 
   return (
     <main className="page workouts-page workouts-progress-page">
@@ -306,7 +302,7 @@ export function WorkoutsProgressPage() {
             className={tab === 'strength' ? 'is-active' : ''}
             onClick={() => setTab('strength')}
           >
-            Упражнения
+            Упражнение
           </button>
           <button
             type="button"
@@ -318,7 +314,7 @@ export function WorkoutsProgressPage() {
               setTab('body')
             }}
           >
-            Мой вес
+            Вес
           </button>
         </div>
         <div className="workout-progress-period" role="tablist" aria-label="Период">
@@ -330,7 +326,6 @@ export function WorkoutsProgressPage() {
               aria-selected={range === r.id}
               className={range === r.id ? 'is-active' : ''}
               onClick={() => setRange(r.id)}
-              disabled={loading}
             >
               {r.label}
             </button>
@@ -338,57 +333,33 @@ export function WorkoutsProgressPage() {
         </div>
       </div>
 
-      {tab === 'strength' && progress && progress.exercises.length > 0 ? (
-        <div className="field workout-exercise-picker">
-          <span>Упражнение</span>
-          <button
-            type="button"
-            className="workout-exercise-picker-trigger"
-            aria-haspopup="dialog"
-            aria-expanded={pickerOpen}
-            onClick={() => setPickerOpen(true)}
-          >
-            <span>{exerciseValue || 'Выбрать'}</span>
-            <ChevronDown size={18} aria-hidden />
-          </button>
-        </div>
-      ) : null}
-
       {error ? (
         <p className="feedback-error" role="alert">
           {error}
         </p>
       ) : null}
 
-      {progress && !loading ? (
-        <>
-          <section className="activity-summary" aria-label="Сводка">
-            <span className="activity-summary-label">
-              {tab === 'body' ? 'Твой вес' : progress.strength.exercise || 'Упражнение'}
-            </span>
-            <strong className="activity-summary-total">
-              {tab === 'body'
-                ? formatKg(progress.body.latestKg) || '—'
-                : progress.strength.latestWeightKg != null
-                  ? `${formatKg(progress.strength.latestWeightKg)}`
-                  : '—'}
-            </strong>
-            <p className="activity-summary-sessions muted">
-              {tab === 'body'
-                ? bodyDelta
-                  ? `${bodyDelta} за период`
-                  : progress.body.points.length < 2
-                    ? 'Нужно ещё одно взвешивание'
-                    : 'Без изменений за период'
-                : strengthDelta
-                  ? `${strengthDelta.tone === 'up' ? '↑ ' : strengthDelta.tone === 'down' ? '↓ ' : ''}${strengthDelta.text} за период`
-                  : progress.strength.points.length < 2
-                    ? 'Нужна ещё одна такая тренировка'
-                    : 'Без изменений за период'}
-            </p>
-          </section>
+      <div className="workout-progress-feed" aria-busy={loading}>
+        {loading && !progress ? (
+          <SoftLoader delayMs={SOFT_LOADER_DELAY_MS} label="Загружаем прогресс…" />
+        ) : null}
 
-          {activePoints.length === 0 ? (
+        {tab === 'strength' && progress && progress.exercises.length > 0 ? (
+          <button
+            type="button"
+            className="workout-progress-title-btn"
+            aria-haspopup="dialog"
+            aria-expanded={pickerOpen}
+            aria-label={`Упражнение: ${exerciseValue || 'выбрать'}`}
+            onClick={() => setPickerOpen(true)}
+          >
+            <span className="section-heading">{exerciseValue || 'Выбрать упражнение'}</span>
+            <ChevronDown size={18} aria-hidden />
+          </button>
+        ) : null}
+
+        {progress && !loading ? (
+          activePoints.length === 0 ? (
             <section className="surface workouts-empty">
               <p className="empty-copy-title">Пока пусто</p>
               <p className="muted">
@@ -401,33 +372,32 @@ export function WorkoutsProgressPage() {
               </Link>
             </section>
           ) : (
-            <section className="surface workout-progress-chart-block">
-              <LineChart
-                points={activePoints}
-                unit={tab === 'body' ? 'кг' : 'кг'}
-                selectedIndex={selected}
-                onSelect={setSelected}
-              />
-              {selectedPoint ? (
-                <div className="workout-progress-point">
-                  <strong>
-                    {Number.isInteger(selectedPoint.value)
-                      ? selectedPoint.value
-                      : selectedPoint.value.toFixed(1)}{' '}
-                    кг
-                    {selectedPoint.meta ? (
-                      <span className="muted"> · {selectedPoint.meta}</span>
-                    ) : null}
-                  </strong>
-                  <span className="muted">{formatPointDay(selectedPoint.at)}</span>
-                </div>
-              ) : null}
-            </section>
-          )}
-        </>
-      ) : null}
+            <>
+              <section className="workout-progress-hero" aria-label="Значение">
+                <strong className="workout-progress-hero-value">{heroKg || '—'}</strong>
+                {periodDelta ? <p className="muted workout-progress-hero-delta">{periodDelta}</p> : null}
+              </section>
 
-      {!loading && (!WORKOUT_RECAP_ADMIN_ONLY || user.isAdmin) ? <WorkoutWeekRecap /> : null}
+              <section className="surface workout-progress-chart-block">
+                <LineChart
+                  points={activePoints}
+                  unit="кг"
+                  selectedIndex={selected}
+                  onSelect={setSelected}
+                />
+                {selectedPoint ? (
+                  <p className="workout-progress-caption muted">
+                    {formatCaptionDay(selectedPoint.at)}
+                    {selectedPoint.meta ? ` · ${selectedPoint.meta}` : ''}
+                  </p>
+                ) : null}
+              </section>
+            </>
+          )
+        ) : null}
+
+        {!loading && (!WORKOUT_RECAP_ADMIN_ONLY || user.isAdmin) ? <WorkoutWeekRecap /> : null}
+      </div>
 
       {pickerOpen && progress ? (
         <div className="app-sheet" role="dialog" aria-modal="true" aria-labelledby="workout-ex-picker-title">
