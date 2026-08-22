@@ -167,6 +167,15 @@
           var n = window.navigator
           var standalone = n.standalone === true || window.matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches
           if (standalone) document.documentElement.classList.add('standalone')
+          var ios = /iP(hone|ad|od)/.test(n.userAgent) || (n.platform === 'MacIntel' && n.maxTouchPoints > 1)
+          if (standalone && ios) {
+            var portrait = window.innerHeight >= window.innerWidth
+            var screenH = portrait ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height)
+            var delta = Math.round(screenH - window.innerHeight)
+            if (delta >= 12 && delta <= 64) {
+              document.documentElement.style.setProperty('--pwa-bottom-shift', delta + 'px')
+            }
+          }
         } catch (e) {}
       })()
     </script>

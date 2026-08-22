@@ -21,8 +21,8 @@
   --nav-h: 68px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  /* PWA first-paint: pin fixed bottom chrome to the visual viewport (see pwaViewport.ts) */
-  --vv-bottom: 0px;
+  /* iOS PWA: extra px to pull fixed bottom chrome into the first-paint gap */
+  --pwa-bottom-shift: 0px;
   /* Non-zero only for home-screen / PWA (see html.standalone + display-mode) */
   --standalone-top: 0px;
   --app-max: 480px;
@@ -67,6 +67,7 @@ body,
 
 html {
   font-size: 16px;
+  background-color: var(--bg);
 }
 
 body {
@@ -179,6 +180,22 @@ p {
 
 html.standalone {
   --standalone-top: var(--safe-top);
+}
+
+/*
+  Installed PWA: 100dvh excludes the home indicator (WebKit). 100vh includes it,
+  so the shell fills the black gap under the bottom nav on first launch.
+*/
+html.standalone,
+html.standalone body,
+html.standalone #root {
+  min-height: 100%;
+  min-height: 100vh;
+}
+
+html.standalone .app-shell,
+html.standalone .page {
+  min-height: 100vh;
 }
 
 /* Root tab chrome — same top “hat” on Зал / Залы / Чаты / Профиль */

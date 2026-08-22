@@ -4,7 +4,8 @@
   position: fixed;
   left: 0;
   right: 0;
-  bottom: var(--vv-bottom, 0px);
+  /* iOS PWA first paint can exclude the home-indicator; shift fills that hole */
+  bottom: calc(-1 * var(--pwa-bottom-shift, 0px));
   width: min(100%, var(--app-max));
   max-width: 100%;
   margin-inline: auto;
@@ -18,6 +19,11 @@
   backdrop-filter: blur(16px);
   z-index: 40;
   box-sizing: border-box;
+}
+
+html.standalone .bottom-nav {
+  /* Paint the first-launch hole the same as the bar, even before the shift applies */
+  box-shadow: 0 64px 0 0 #0b0f0e;
 }
 
 .nav-item {
@@ -77,6 +83,7 @@
     border-top: 0;
     border-right: 1px solid var(--line);
     background: rgba(11, 15, 14, 0.95);
+    box-shadow: none;
   }
 
   .nav-item {
