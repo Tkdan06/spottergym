@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, ChevronDown } from 'lucide-react'
+import { ArrowLeft, Check, ChevronDown } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { SectionTitle } from '../components/SectionTitle'
 import { SOFT_LOADER_DELAY_MS, SoftLoader } from '../components/SoftLoader'
 import { useApp } from '../context/useApp'
 import {
@@ -66,12 +67,50 @@ function roundNice(n: number) {
 type ChartPoint = { at: string; value: number; meta?: string }
 type ChartCoord = { x: number; y: number; i: number }
 
-/** Straight segments — a spline overshoots and fakes extra kg ups/downs. */
+function dist(a: { x: number; y: number }, b: { x: number; y: number }) {
+  return Math.hypot(b.x - a.x, b.y - a.y)
+}
+
+function toward(
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+  distance: number,
+) {
+  const d = dist(from, to)
+  if (d === 0) return { x: from.x, y: from.y }
+  const t = Math.min(1, distance / d)
+  return { x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t }
+}
+
+/**
+ * Straight segments with a small inside fillet.
+ * A spline overshoots and fakes extra kg; this only cuts the sharp corner.
+ */
 function linePath(coords: ChartCoord[]) {
   if (!coords.length) return ''
-  return coords
-    .map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)} ${c.y.toFixed(1)}`)
-    .join(' ')
+  if (coords.length === 1) return `M ${coords[0].x.toFixed(1)} ${coords[0].y.toFixed(1)}`
+  const parts = [`M ${coords[0].x.toFixed(1)} ${coords[0].y.toFixed(1)}`]
+  if (coords.length === 2) {
+    parts.push(`L ${coords[1].x.toFixed(1)} ${coords[1].y.toFixed(1)}`)
+    return parts.join(' ')
+  }
+  for (let i = 1; i < coords.length - 1; i++) {
+    const prev = coords[i - 1]
+    const curr = coords[i]
+    const next = coords[i + 1]
+    const radius = Math.min(8, dist(prev, curr) * 0.2, dist(curr, next) * 0.2)
+    if (radius < 1.6) {
+      parts.push(`L ${curr.x.toFixed(1)} ${curr.y.toFixed(1)}`)
+      continue
+    }
+    const start = toward(curr, prev, radius)
+    const end = toward(curr, next, radius)
+    parts.push(`L ${start.x.toFixed(1)} ${start.y.toFixed(1)}`)
+    parts.push(`Q ${curr.x.toFixed(1)} ${curr.y.toFixed(1)} ${end.x.toFixed(1)} ${end.y.toFixed(1)}`)
+  }
+  const last = coords[coords.length - 1]
+  parts.push(`L ${last.x.toFixed(1)} ${last.y.toFixed(1)}`)
+  return parts.join(' ')
 }
 
 function LineChart({
@@ -409,7 +448,9 @@ export function WorkoutsProgressPage() {
           />
           <div className="app-sheet-panel workout-exercise-picker-sheet" ref={pickerRef}>
             <div className="app-sheet-grab" aria-hidden />
-            <h3 id="workout-ex-picker-title">Упражнение</h3>
+            <SectionTitle as="h3" id="workout-ex-picker-title">
+              Упражнение
+            </SectionTitle>
             <ul className="workout-exercise-picker-list">
               {progress.exercises.map((ex) => {
                 const active = ex.name === exerciseValue
@@ -424,7 +465,11 @@ export function WorkoutsProgressPage() {
                         setPickerOpen(false)
                       }}
                     >
-                      {ex.name}
+                      <span className="workout-exercise-picker-name">{ex.name}</span>
+                      <span className="workout-exercise-picker-meta">
+                        <span>{ex.sessionCount}</span>
+                        {active ? <Check size={16} strokeWidth={2.25} aria-hidden /> : null}
+                      </span>
                     </button>
                   </li>
                 )

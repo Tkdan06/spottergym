@@ -11,7 +11,10 @@
 }
 
 .auth-page h1 {
-  font-size: 2rem;
+  font-size: var(--text-page-size);
+  font-weight: var(--text-page-weight);
+  letter-spacing: var(--letter-tight);
+  line-height: var(--text-page-line);
 }
 
 .auth-form {

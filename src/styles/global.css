@@ -810,8 +810,8 @@ a.btn-danger-ghost {
   min-width: 0;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid var(--line);
-  background: color-mix(in srgb, var(--bg-card) 80%, transparent);
+  border: 0;
+  background: var(--bg-soft);
   color: var(--text);
   text-decoration: none;
   font-family: var(--font-body);
@@ -844,7 +844,7 @@ a.btn-danger-ghost {
 .card-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 0;
 }
 
 .surface {
@@ -939,6 +939,10 @@ a.btn-danger-ghost {
   display: grid;
   gap: 12px;
   justify-items: stretch;
+}
+
+.empty-copy-actions .section-action {
+  justify-self: start;
 }
 
 .empty-copy-actions .empty-copy {

@@ -134,7 +134,8 @@
 .profile-hero-meta .profile-hero-name {
   margin: 10px 0 6px;
   max-width: 100%;
-  font-size: var(--text-page-size);
+  font-size: clamp(var(--text-gym-min), 5vw, var(--text-gym-max));
+  font-weight: 800;
   line-height: 1.2;
   overflow-wrap: anywhere;
   word-break: break-word;
@@ -229,8 +230,10 @@
 }
 
 .profile-block {
-  padding: 16px;
-  margin-bottom: 14px; /* match UIKit page block gap */
+  padding: 16px 0;
+  margin-bottom: 0;
+  border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  background: none;
 }
 
 /* Bare h2 in block → same as .section-heading (UI kit) */

@@ -119,16 +119,18 @@ export function HomePage() {
           <Link to="/app/discover?from=home" className="btn btn-primary btn-block">
             Выбрать зал
           </Link>
-          <Link to="/app/feedback?topic=gym" className="btn btn-soft btn-sm btn-block">
-            Запросить добавление зала
-          </Link>
-          <InviteFriendsButton userId={user.id} className="btn btn-ghost btn-sm btn-block">
-            Пригласить друзей
-          </InviteFriendsButton>
+          <div className="home-empty-more">
+            <Link to="/app/feedback?topic=gym" className="section-action">
+              Запросить добавление зала
+            </Link>
+            <InviteFriendsButton userId={user.id} className="section-action">
+              Пригласить друзей
+            </InviteFriendsButton>
+          </div>
         </section>
       ) : (
         <>
-          <section className="home-gym-block surface" aria-label="Текущий зал">
+          <section className="home-gym-block" aria-label="Текущий зал">
             <div className="home-gym-block-head">
               <div className="home-gym-network-row">
                 <p className="home-gym-network">{gym!.network}</p>

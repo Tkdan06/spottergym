@@ -44,7 +44,7 @@
 
 .liked-list {
   display: grid;
-  gap: 10px;
+  gap: 0;
 }
 
 .liked-row {
@@ -52,16 +52,20 @@
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
-  padding: 12px;
-  border-radius: var(--radius);
-  background: var(--bg-card);
-  border: 1px solid var(--line);
-  animation: slide-in 0.35s ease both;
+  padding: 10px 0;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+}
+
+.liked-row:first-child {
+  border-top: 0;
 }
 
 .liked-main {
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr);
+  grid-template-columns: 48px minmax(0, 1fr);
   gap: 12px;
   align-items: center;
   min-width: 0;
@@ -69,8 +73,8 @@
 
 .liked-page .avatar-wrap {
   position: relative;
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
 }
 
 .liked-page .avatar-wrap img,
@@ -144,13 +148,13 @@
 }
 
 .liked-action {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  background: var(--bg-elevated);
+  border-radius: 999px;
+  border: 0;
+  background: var(--bg-soft);
   color: var(--text-muted);
 }
 

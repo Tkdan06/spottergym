@@ -447,14 +447,8 @@ export function MessagesPage() {
       <header className="page-header messages-top">
         <div className="page-header-text page-header-title-row">
           <h1 className="page-title">Чаты</h1>
-          {user ? (
-            <span className={`messages-presence-label ${user.isActive ? 'on' : ''}`}>
-              {user.isActive
-                ? shortGym
-                  ? `Статус: в зале · ${shortGym}`
-                  : 'Статус: в зале'
-                : 'Статус: не в зале'}
-            </span>
+          {user?.isActive ? (
+            <span className="messages-presence-label on">{shortGym ? `В зале · ${shortGym}` : 'В зале'}</span>
           ) : null}
         </div>
       </header>
@@ -519,7 +513,7 @@ export function MessagesPage() {
             </Link>
             <button
               type="button"
-              className="btn btn-soft btn-block"
+              className="section-action"
               onClick={() => searchInputRef.current?.focus()}
             >
               Найти по @нику
@@ -529,31 +523,29 @@ export function MessagesPage() {
       </div>
 
       {sheetConv ? (
-        <div className="chat-pin-sheet" role="dialog" aria-modal="true" aria-label="Действия с чатом">
+        <div className="app-sheet" role="dialog" aria-modal="true" aria-label="Действия с чатом">
           <button
             type="button"
-            className="chat-pin-sheet-backdrop"
+            className="app-sheet-backdrop"
             aria-label="Закрыть"
             onClick={() => setSheetConv(null)}
           />
-          <div className="chat-pin-sheet-panel" ref={pinPanelRef}>
-            <div className="chat-pin-sheet-grab" aria-hidden />
+          <div className="app-sheet-panel" ref={pinPanelRef}>
+            <div className="app-sheet-grab" aria-hidden />
             <div className="chat-pin-sheet-actions" role="group" aria-label="Действия">
               <button
                 type="button"
                 ref={pinActionRef}
-                className="chat-pin-sheet-action"
+                className="sheet-action"
                 disabled={actionBusy}
                 onClick={() => void onTogglePin()}
               >
-                <span className="chat-pin-sheet-icon" aria-hidden>
-                  {sheetConv.pinned ? <PinOff size={22} /> : <Pin size={22} />}
-                </span>
-                <span>{sheetConv.pinned ? 'Открепить' : 'Закрепить'}</span>
+                {sheetConv.pinned ? <PinOff size={18} aria-hidden /> : <Pin size={18} aria-hidden />}
+                {sheetConv.pinned ? 'Открепить' : 'Закрепить'}
               </button>
               <button
                 type="button"
-                className="chat-pin-sheet-action"
+                className="sheet-action"
                 disabled={actionBusy}
                 onClick={() => {
                   const id = sheetConv.id
@@ -561,21 +553,17 @@ export function MessagesPage() {
                   navigate(`/app/messages/${id}`)
                 }}
               >
-                <span className="chat-pin-sheet-icon" aria-hidden>
-                  <MessageCircle size={22} />
-                </span>
-                <span>Открыть</span>
+                <MessageCircle size={18} aria-hidden />
+                Открыть
               </button>
               <button
                 type="button"
-                className="chat-pin-sheet-action is-danger"
+                className="sheet-action is-danger"
                 disabled={actionBusy}
                 onClick={() => void onDeleteChat()}
               >
-                <span className="chat-pin-sheet-icon" aria-hidden>
-                  <Trash2 size={22} />
-                </span>
-                <span>Удалить</span>
+                <Trash2 size={18} aria-hidden />
+                Удалить
               </button>
             </div>
           </div>

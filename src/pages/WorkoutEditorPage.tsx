@@ -524,19 +524,19 @@ export function WorkoutEditorPage() {
       ) : null}
 
       {menuOpen ? (
-        <div className="activity-sheet" role="dialog" aria-modal="true" aria-label="Действия">
+        <div className="app-sheet" role="dialog" aria-modal="true" aria-label="Действия">
           <button
             type="button"
-            className="activity-sheet-backdrop"
+            className="app-sheet-backdrop"
             aria-label="Закрыть"
             onClick={() => setMenuOpen(false)}
           />
-          <div className="activity-sheet-panel" ref={menuRef}>
-            <div className="activity-sheet-grab" aria-hidden />
+          <div className="app-sheet-panel" ref={menuRef}>
+            <div className="app-sheet-grab" aria-hidden />
             {isViewing ? (
               <button
                 type="button"
-                className="activity-sheet-item"
+                className="sheet-action"
                 onClick={() => {
                   setMenuOpen(false)
                   navigate(`/app/workouts/${id}/edit`)
@@ -547,7 +547,7 @@ export function WorkoutEditorPage() {
             ) : null}
             <button
               type="button"
-              className="activity-sheet-item"
+              className="sheet-action"
               onClick={() => {
                 setMenuOpen(false)
                 navigate('/app/workouts/new', { state: { copyFromId: id } })
@@ -557,7 +557,7 @@ export function WorkoutEditorPage() {
             </button>
             <button
               type="button"
-              className="activity-sheet-item is-danger"
+              className="sheet-action is-danger"
               onClick={() => {
                 setMenuOpen(false)
                 setConfirmOpen(true)
@@ -565,7 +565,7 @@ export function WorkoutEditorPage() {
             >
               <Trash2 size={18} /> Удалить
             </button>
-            <button type="button" className="btn btn-ghost btn-block" onClick={() => setMenuOpen(false)}>
+            <button type="button" className="sheet-action" onClick={() => setMenuOpen(false)}>
               Отмена
             </button>
           </div>
@@ -573,15 +573,15 @@ export function WorkoutEditorPage() {
       ) : null}
 
       {confirmOpen ? (
-        <div className="activity-sheet" role="dialog" aria-modal="true" aria-labelledby="workout-del-title">
+        <div className="app-sheet" role="dialog" aria-modal="true" aria-labelledby="workout-del-title">
           <button
             type="button"
-            className="activity-sheet-backdrop"
+            className="app-sheet-backdrop"
             aria-label="Закрыть"
             onClick={() => setConfirmOpen(false)}
           />
-          <div className="activity-sheet-panel" ref={confirmRef}>
-            <div className="activity-sheet-grab" aria-hidden />
+          <div className="app-sheet-panel" ref={confirmRef}>
+            <div className="app-sheet-grab" aria-hidden />
             <h3 id="workout-del-title">Удалить тренировку?</h3>
             <p className="muted">Запись исчезнет из истории.</p>
             <button
@@ -594,7 +594,7 @@ export function WorkoutEditorPage() {
             </button>
             <button
               type="button"
-              className="btn btn-ghost btn-block"
+              className="sheet-action"
               disabled={deleting}
               onClick={() => setConfirmOpen(false)}
             >
@@ -606,19 +606,19 @@ export function WorkoutEditorPage() {
 
       {noteSheetOpen ? (
         <div
-          className="activity-sheet"
+          className="app-sheet"
           role="dialog"
           aria-modal="true"
           aria-labelledby="workout-note-title"
         >
           <button
             type="button"
-            className="activity-sheet-backdrop"
+            className="app-sheet-backdrop"
             aria-label="Закрыть"
             onClick={() => setNoteSheetOpen(false)}
           />
-          <div className="activity-sheet-panel workout-note-sheet" ref={noteSheetRef}>
-            <div className="activity-sheet-grab" aria-hidden />
+          <div className="app-sheet-panel workout-note-sheet" ref={noteSheetRef}>
+            <div className="app-sheet-grab" aria-hidden />
             <h3 id="workout-note-title">Заметка</h3>
             <label className="field">
               <textarea
@@ -646,7 +646,7 @@ export function WorkoutEditorPage() {
             {noteDraft.trim() || notes.trim() ? (
               <button
                 type="button"
-                className="btn btn-ghost btn-block"
+                className="sheet-action"
                 onClick={() => {
                   setNoteDraft('')
                   setNotes('')
@@ -656,11 +656,7 @@ export function WorkoutEditorPage() {
                 Убрать заметку
               </button>
             ) : (
-              <button
-                type="button"
-                className="btn btn-ghost btn-block"
-                onClick={() => setNoteSheetOpen(false)}
-              >
+              <button type="button" className="sheet-action" onClick={() => setNoteSheetOpen(false)}>
                 Отмена
               </button>
             )}

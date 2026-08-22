@@ -47,8 +47,38 @@
 .app-sheet-panel > h2,
 .app-sheet-panel > h3 {
   margin: 0;
-  font-size: 1.25rem;
-  line-height: 1.2;
+  font-family: var(--font-display);
+  font-size: var(--text-section-size);
+  font-weight: var(--text-section-weight);
+  letter-spacing: var(--letter-tight);
+  line-height: var(--text-section-line);
+}
+
+.sheet-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px 2px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sheet-action.is-danger {
+  color: #ffb4b4;
+}
+
+.sheet-action:disabled {
+  opacity: 0.55;
 }
 
 @media (min-width: 900px) {

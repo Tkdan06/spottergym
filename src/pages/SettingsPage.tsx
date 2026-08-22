@@ -368,7 +368,7 @@ export function SettingsPage() {
             <Plus size={18} aria-hidden /> Добавить зал в каталоге
           </Link>
           {!selectedGyms.length ? (
-            <Link to="/app/feedback?topic=gym" className="btn btn-ghost btn-block">
+            <Link to="/app/feedback?topic=gym" className="section-action">
               Запросить добавление зала
             </Link>
           ) : null}
@@ -416,8 +416,8 @@ export function SettingsPage() {
           </div>
         </div>
 
-        <div>
-          <p className="field-label">Активности</p>
+        <details className="settings-chip-fold">
+          <summary>Активности{sports.length ? ` · ${sports.length}` : ''}</summary>
           <div className="chip-grid">
             {SPORTS.map((s) => (
               <button
@@ -435,10 +435,10 @@ export function SettingsPage() {
               </button>
             ))}
           </div>
-        </div>
+        </details>
 
-        <div>
-          <p className="field-label">Интересы</p>
+        <details className="settings-chip-fold">
+          <summary>Интересы{interests.length ? ` · ${interests.length}` : ''}</summary>
           <div className="chip-grid">
             {INTERESTS.map((s) => (
               <button
@@ -451,7 +451,7 @@ export function SettingsPage() {
               </button>
             ))}
           </div>
-        </div>
+        </details>
 
         <section className="settings-panel">
           <div className="settings-panel-head">
@@ -533,11 +533,9 @@ export function SettingsPage() {
           </button>
 
           {isCoach ? (
-            <div className="settings-coach-fields">
-              <p className="field-label">Чему тренирую</p>
-              <p className="muted" style={{ marginBottom: 8 }}>
-                Групповые, персональные и другие направления
-              </p>
+            <details className="settings-chip-fold settings-coach-fields" open>
+              <summary>Чему тренирую{coachSports.length ? ` · ${coachSports.length}` : ''}</summary>
+              <p className="muted">Групповые, персональные и другие направления</p>
               <div className="chip-grid">
                 {COACH_DIRECTIONS.map((s) => (
                   <button
@@ -550,7 +548,7 @@ export function SettingsPage() {
                   </button>
                 ))}
               </div>
-            </div>
+            </details>
           ) : null}
         </section>
 
@@ -564,10 +562,10 @@ export function SettingsPage() {
         </button>
       </form>
 
-      <section className="surface settings-support">
+      <section className="settings-support">
         <SectionTitle>Поддержка</SectionTitle>
-        <Link to="/app/feedback" className="btn btn-ghost btn-block">
-          Обратная связь
+        <Link to="/app/feedback" className="entry-link">
+          <span>Обратная связь</span>
         </Link>
       </section>
 
@@ -603,7 +601,7 @@ export function SettingsPage() {
       <section className="settings-session">
         <button
           type="button"
-          className="btn btn-soft btn-block"
+          className="section-action"
           onClick={() => {
             void (async () => {
               await logout()

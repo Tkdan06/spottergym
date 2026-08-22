@@ -205,7 +205,7 @@ export function WorkoutsPage() {
         ) : null}
 
         {!loading && !list.length ? (
-          <section className="surface workouts-empty">
+          <section className="workouts-empty">
             <ClipboardList size={28} aria-hidden />
             <p className="empty-copy-title">Пока пусто</p>
             <p className="muted">
@@ -215,7 +215,7 @@ export function WorkoutsPage() {
         ) : null}
 
         {list.length ? (
-          <section className="surface workouts-list-block">
+          <section className="workouts-list-block">
           <SectionTitle
             action={
               totalCount > 0 ? (

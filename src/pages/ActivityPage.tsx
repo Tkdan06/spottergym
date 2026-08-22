@@ -269,7 +269,7 @@ export function ActivityPage() {
             </section>
           ) : (
             <>
-              <section className="surface activity-chart-block">
+              <section className="activity-chart-block">
                 <div
                   className={`activity-chart-frame range-${stats.range}`}
                   role="img"
@@ -399,29 +399,25 @@ export function ActivityPage() {
       </div>
 
       {sheet === 'menu' ? (
-        <div className="activity-sheet" role="dialog" aria-modal="true" aria-label="Действия">
+        <div className="app-sheet" role="dialog" aria-modal="true" aria-label="Действия">
           <button
             type="button"
-            className="activity-sheet-backdrop"
+            className="app-sheet-backdrop"
             aria-label="Закрыть"
             onClick={() => setSheet('closed')}
           />
-          <div className="activity-sheet-panel" ref={menuPanelRef}>
-            <div className="activity-sheet-grab" aria-hidden />
+          <div className="app-sheet-panel" ref={menuPanelRef}>
+            <div className="app-sheet-grab" aria-hidden />
             <button
               type="button"
-              className="activity-sheet-item is-danger"
+              className="sheet-action is-danger"
               disabled={resetting}
               onClick={() => setSheet('confirm')}
             >
               <RotateCcw size={18} aria-hidden />
               Сбросить историю
             </button>
-            <button
-              type="button"
-              className="btn btn-ghost btn-block"
-              onClick={() => setSheet('closed')}
-            >
+            <button type="button" className="sheet-action" onClick={() => setSheet('closed')}>
               Отмена
             </button>
           </div>
@@ -430,19 +426,19 @@ export function ActivityPage() {
 
       {sheet === 'confirm' ? (
         <div
-          className="activity-sheet"
+          className="app-sheet"
           role="dialog"
           aria-modal="true"
           aria-labelledby="activity-reset-title"
         >
           <button
             type="button"
-            className="activity-sheet-backdrop"
+            className="app-sheet-backdrop"
             aria-label="Закрыть"
             onClick={() => setSheet('closed')}
           />
-          <div className="activity-sheet-panel" ref={confirmPanelRef}>
-            <div className="activity-sheet-grab" aria-hidden />
+          <div className="app-sheet-panel" ref={confirmPanelRef}>
+            <div className="app-sheet-grab" aria-hidden />
             <h3 id="activity-reset-title">Сбросить историю?</h3>
             <p className="muted">График и история отметок очистятся.</p>
             <button
@@ -456,7 +452,7 @@ export function ActivityPage() {
             </button>
             <button
               type="button"
-              className="btn btn-ghost btn-block"
+              className="sheet-action"
               disabled={resetting}
               onClick={() => setSheet('closed')}
             >

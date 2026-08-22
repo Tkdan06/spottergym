@@ -45,7 +45,7 @@
   display: grid;
   gap: 10px;
   justify-items: start;
-  padding: 16px;
+  padding: 8px 0 4px;
   color: var(--text-muted);
 }
 
@@ -57,7 +57,7 @@
 .workouts-list-block {
   display: grid;
   gap: 10px;
-  padding: 16px;
+  padding: 0;
 }
 
 .workouts-list-block > .section-title {
@@ -75,15 +75,20 @@
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 8px;
+  gap: 0;
 }
 
 .workouts-board {
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  background: var(--bg-elevated);
+  border-radius: 0;
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  background: transparent;
   min-width: 0;
   overflow: hidden;
+}
+
+.workouts-list > li:first-child .workouts-board {
+  border-top: 0;
 }
 
 .workouts-board-top {
@@ -553,10 +558,10 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 16px;
-  border-radius: 16px;
-  border: 1px solid var(--line);
-  background: var(--bg-elevated);
+  padding: 8px 0;
+  border-radius: 0;
+  border: 0;
+  background: transparent;
   color: inherit;
   text-decoration: none;
   min-width: 0;
@@ -746,33 +751,74 @@
   overflow: auto;
 }
 
+.workout-exercise-picker-sheet .section-title {
+  margin: 2px 0 4px;
+}
+
 .workout-exercise-picker-list {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  gap: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-card);
 }
 
 .workout-exercise-picker-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   width: 100%;
+  min-height: 44px;
   margin: 0;
-  padding: 14px;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  background: var(--bg-card);
+  padding: 10px 14px;
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--line) 85%, transparent);
+  border-radius: 0;
+  background: transparent;
   color: var(--text);
   font: inherit;
-  font-weight: 650;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.3;
   text-align: left;
   cursor: pointer;
   box-sizing: border-box;
 }
 
+.workout-exercise-picker-list > li:first-child .workout-exercise-picker-item {
+  border-top: 0;
+}
+
+.workout-exercise-picker-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workout-exercise-picker-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
 .workout-exercise-picker-item.is-active {
-  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.workout-exercise-picker-item.is-active .workout-exercise-picker-name {
+  font-weight: 600;
+}
+
+.workout-exercise-picker-item.is-active .workout-exercise-picker-meta {
   color: var(--accent);
 }
 

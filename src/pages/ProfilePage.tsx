@@ -180,7 +180,7 @@ export function ProfilePage() {
         }}
       />
 
-      <section className="surface profile-block likes-block">
+      <section className="profile-block likes-block">
         <SectionTitle
           action={
             <Link to="/app/likes/sent" className="section-action">
@@ -198,7 +198,7 @@ export function ProfilePage() {
         />
       </section>
 
-      <section className="surface profile-block">
+      <section className="profile-block">
         <SectionTitle>О себе</SectionTitle>
         {user.bio ? (
           <p>{user.bio}</p>
@@ -229,7 +229,7 @@ export function ProfilePage() {
         </div>
       </section>
 
-      <section className="surface profile-block">
+      <section className="profile-block">
         <SectionTitle
           action={
             <Link to="/app/discover" className="section-action">
@@ -260,7 +260,7 @@ export function ProfilePage() {
         )}
       </section>
 
-      <section className="surface profile-block">
+      <section className="profile-block">
         <SectionTitle
           action={
             <button
@@ -316,7 +316,7 @@ export function ProfilePage() {
         }}
       />
 
-      <section className="surface profile-block status-panel">
+      <section className="profile-block status-panel">
         <SectionTitle>Общение и видимость</SectionTitle>
         <button
           type="button"
@@ -352,7 +352,7 @@ export function ProfilePage() {
         </button>
       </section>
 
-      <section className="surface profile-block profile-invite-block">
+      <section className="profile-block profile-invite-block">
         <SectionTitle>Мой круг</SectionTitle>
         <p className="muted profile-invite-hint">
           {user.referralTitle

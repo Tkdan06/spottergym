@@ -95,13 +95,21 @@
 .settings-panel {
   display: grid;
   gap: 12px;
-  padding: 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--line);
-  background: var(--bg-card);
+  padding: 12px 0;
+  border-radius: 0;
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  background: none;
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
+}
+
+.settings-panel .toggle-row {
+  padding: 4px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .settings-panel-head h2 {
@@ -210,9 +218,35 @@
   flex-shrink: 0;
 }
 
+.settings-chip-fold {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.settings-chip-fold > summary {
+  cursor: pointer;
+  font-size: var(--text-label-size);
+  font-weight: var(--text-label-weight);
+  color: var(--text-muted);
+  list-style: none;
+}
+
+.settings-chip-fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+.settings-chip-fold[open] > summary {
+  margin-bottom: 10px;
+}
+
+.settings-chip-fold .chip-grid {
+  margin-top: 0;
+}
+
 .settings-support {
-  padding: 16px;
-  margin: 0 0 16px;
+  padding: 4px 0 16px;
+  margin: 0;
 }
 
 .settings-support .section-title {

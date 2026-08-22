@@ -389,7 +389,7 @@ export function UserProfilePage() {
         initialIndex={galleryIndex}
       />
 
-      <section className="surface profile-block likes-block">
+      <section className="profile-block likes-block">
         <SectionTitle
           action={
             !isSelf ? (
@@ -427,7 +427,7 @@ export function UserProfilePage() {
       </section>
 
       {isAnon ? (
-        <section className="surface profile-block">
+        <section className="profile-block">
           <SectionTitle>Анонимный профиль</SectionTitle>
           <p className="muted">
             Имя и фото скрыты. Если человек открыт к общению — можно написать запрос; он сам решит,
@@ -435,13 +435,13 @@ export function UserProfilePage() {
           </p>
         </section>
       ) : person.bio ? (
-        <section className="surface profile-block">
+        <section className="profile-block">
           <SectionTitle>О себе</SectionTitle>
           <p>{person.bio}</p>
         </section>
       ) : null}
 
-      <section className="surface profile-block">
+      <section className="profile-block">
         <SectionTitle>
           {!isAnon && person.isCoach ? 'Направления и активности' : 'Активности'}
         </SectionTitle>
@@ -468,7 +468,7 @@ export function UserProfilePage() {
       </section>
 
       {!isAnon ? (
-        <section className="surface profile-block">
+        <section className="profile-block">
           <SectionTitle>
             <span className="row">
               <Clock3 size={18} aria-hidden /> Обычно в зале
