@@ -577,11 +577,13 @@ export function UiKitPage() {
         <p className="muted ui-kit-section-lead">
           Переключатель вида: 2–4 взаимно исключающих пункта. Не чип (фильтр, можно несколько) и не{' '}
           <code>.toggle</code> (вкл/выкл). Chrome: <code>.seg</code> + пункты <code>.seg-item</code>,
-          активный — <code>.is-active</code>. Короткий ряд (7д / 30д) — ещё <code>.seg--fit</code>.
+          активный — <code>.is-active</code>. По умолчанию обнимает текст (
+          <code>.seg--fit</code>), не тянется на всю ширину. На всю строку — только{' '}
+          <code>.seg--fill</code> (Лайки).
           Живые экраны: Прогресс, Лайки, Активность.
         </p>
         <div className="ui-kit-type-stack" style={{ marginTop: 12 }}>
-          <div className="seg" role="tablist" aria-label="Пример вида">
+          <div className="seg seg--fit" role="tablist" aria-label="Пример вида">
             <button
               type="button"
               role="tab"

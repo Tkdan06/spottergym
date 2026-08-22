@@ -613,24 +613,8 @@
   min-width: 0;
 }
 
-.workout-progress-mode {
-  flex: 1 1 12rem;
-}
-
 .workout-progress-period {
   margin-left: auto;
-}
-
-@media (max-width: 420px) {
-  .workout-progress-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .workout-progress-period {
-    margin-left: 0;
-    align-self: flex-end;
-  }
 }
 
 .workout-progress-feed {

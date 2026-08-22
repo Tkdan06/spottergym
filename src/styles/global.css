@@ -652,31 +652,40 @@ a.btn-danger-ghost {
  * Not chips (filters) and not .toggle (on/off).
  */
 .seg {
-  display: flex;
-  gap: 3px;
-  padding: 3px;
-  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 10px;
   background: var(--bg-soft);
   min-width: 0;
+  min-height: 0;
 }
 
 .seg--fit {
-  display: inline-flex;
   flex: 0 0 auto;
 }
 
+.seg--fill {
+  display: flex;
+  width: 100%;
+}
+
 .seg-item {
-  flex: 1 1 0;
+  flex: 0 0 auto;
   min-width: 0;
+  min-height: 0;
+  height: auto;
   margin: 0;
-  padding: 8px 12px;
+  padding: 5px 10px;
   border: 0;
-  border-radius: 9px;
+  border-radius: 8px;
   background: transparent;
   color: var(--text-muted);
   font: inherit;
   font-family: var(--font-body);
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 600;
   line-height: 1.2;
   text-align: center;
@@ -685,9 +694,8 @@ a.btn-danger-ghost {
   white-space: nowrap;
 }
 
-.seg--fit .seg-item {
-  flex: 0 0 auto;
-  padding: 7px 10px;
+.seg--fill .seg-item {
+  flex: 1 1 0;
 }
 
 .seg-item.is-active {

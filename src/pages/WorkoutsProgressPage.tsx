@@ -333,7 +333,7 @@ export function WorkoutsProgressPage() {
       </div>
 
       <div className="workout-progress-toolbar">
-        <div className="seg workout-progress-mode" role="tablist" aria-label="Что смотреть">
+        <div className="seg seg--fit workout-progress-mode" role="tablist" aria-label="Что смотреть">
           <button
             type="button"
             role="tab"
