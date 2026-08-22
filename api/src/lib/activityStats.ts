@@ -3,6 +3,11 @@ import { moscowDayKey, moscowDayStartUtc } from './adminAnalytics.js'
 
 export type ActivityRange = 7 | 30 | 90
 
+export function parseActivityRange(raw: string | undefined): ActivityRange {
+  const n = Number(raw)
+  return n === 7 || n === 30 || n === 90 ? n : 30
+}
+
 export type ActivityDay = {
   date: string
   minutes: number

@@ -550,9 +550,10 @@ export function UiKitPage() {
             </div>
           </div>
           <p className="dim" style={{ margin: 0 }}>
-            Люди в зале — <code>UserCard</code>. Каталог клубов — <code>GymCard</code>. Лента
-            уведомлений — <code>.card-list</code> с <code>gap: 10px</code> (глобально gap 0). Профиль
-            — <code>.profile-block</code>, без стопки surface.
+            Люди в зале — <code>UserCard</code>. Каталог клубов — <code>GymCard</code>. Оба списка —
+            <code>.card-list--cards</code> (зазор 12px). Лента уведомлений — <code>.card-list</code> с{' '}
+            <code>gap: 10px</code> (глобально gap 0). Профиль — <code>.profile-block</code>, без стопки
+            surface.
           </p>
         </div>
       </section>

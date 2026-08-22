@@ -352,7 +352,7 @@ export function GymDetailPage() {
         >
           Люди в этом зале
         </SectionTitle>
-        <div className="card-list">
+        <div className="card-list card-list--cards">
           {showLoader ? (
             <SoftLoader label="Загружаем людей в зале…" />
           ) : showPeopleErrorBlock ? (

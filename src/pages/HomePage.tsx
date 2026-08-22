@@ -225,7 +225,7 @@ export function HomePage() {
               onLevelChange={setLevelFilter}
             />
 
-            <div className="card-list">
+            <div className="card-list card-list--cards">
               {showLoader ? (
                 <SoftLoader label="Загружаем людей в зале…" />
               ) : peopleLoadFailed ? (

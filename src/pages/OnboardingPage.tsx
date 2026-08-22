@@ -462,7 +462,7 @@ export function OnboardingPage() {
                   ))}
                 </div>
               ) : null}
-              <div className="card-list gym-pick-list">
+              <div className="card-list card-list--cards gym-pick-list">
                 {elsewhereSuggestions.length ? (
                   <ElsewhereGymBanner
                     suggestions={elsewhereSuggestions}

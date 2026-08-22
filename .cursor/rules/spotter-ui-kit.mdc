@@ -57,11 +57,12 @@ Before adding or redesigning UI in `src/pages` / `src/components`, follow the li
     halves, text centered. Items ~32px (`padding: 6px 12px`). Button or `Link` as
     `.seg-item`. Do not invent a local tab recipe. Not chips (multi-filter / labels) and
     not `.toggle` / `.toggle-row` (on/off). Specimen: UI kit «Сегмент».
-13. **Lists after flatten:** People / gyms = `UserCard` / `GymCard`. Likes = divider rows
-    (`.liked-list` / `.liked-row`). Workouts history = one grouped `.workouts-list`. Chats =
-    conversation rows, not a card per chat. Notifications feed = `.card-list` with explicit
-    `gap: 10px` (global `.card-list` is `gap: 0`). Profile sections = `.profile-block`
-    (hairline), not stacked `.surface`. Do not wrap each row in `.surface`.
+13. **Lists after flatten:** People / gyms = `UserCard` / `GymCard` in `.card-list.card-list--cards`
+    (`gap: 12px`). Likes = divider rows (`.liked-list` / `.liked-row`). Workouts history = one
+    grouped `.workouts-list`. Chats = conversation rows, not a card per chat. Notifications
+    feed = `.card-list` with explicit `gap: 10px` (global `.card-list` is `gap: 0`). Profile
+    sections = `.profile-block` (hairline), not stacked `.surface`. Do not wrap each row in
+    `.surface`.
 
 ## Sources of truth
 

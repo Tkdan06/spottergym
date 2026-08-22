@@ -256,10 +256,6 @@
   margin-bottom: 14px;
 }
 
-.home-people .card-list {
-  gap: 10px;
-}
-
 .home-empty-floor {
   display: flex;
   flex-direction: column;

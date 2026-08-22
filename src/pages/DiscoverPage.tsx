@@ -220,7 +220,7 @@ export function DiscoverPage() {
         <span className="muted">{gyms.length}</span>
       </div>
 
-      <div className="card-list">
+      <div className="card-list card-list--cards">
         {elsewhereSuggestions.length ? (
           <ElsewhereGymBanner
             suggestions={elsewhereSuggestions}

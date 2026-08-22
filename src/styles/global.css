@@ -915,6 +915,11 @@ a.btn-danger-ghost {
   gap: 0;
 }
 
+/** UserCard / GymCard stacks. Row lists (chats, likes, history) stay at gap 0. */
+.card-list--cards {
+  gap: 12px;
+}
+
 .surface {
   background: var(--bg-card);
   border: 1px solid var(--line);

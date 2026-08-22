@@ -30,7 +30,7 @@ import {
   resolveExpiresAt,
 } from '../lib/checkInExpiry.js'
 import { moscowDayKey, moscowDayStartUtc } from '../lib/adminAnalytics.js'
-import { buildMyActivityStats, type ActivityRange } from '../lib/activityStats.js'
+import { buildMyActivityStats, parseActivityRange } from '../lib/activityStats.js'
 import { notifyGymMembers } from '../lib/gymNotify.js'
 import {
   deleteRemovedMedia,
@@ -151,10 +151,7 @@ meRoutes.get(
   '/activity',
   rateLimit({ windowMs: 60_000, max: 60, route: 'me-activity' }),
   async (c) => {
-    const raw = c.req.query('range') || '30'
-    const rangeNum = Number(raw)
-    const range: ActivityRange =
-      rangeNum === 7 || rangeNum === 90 || rangeNum === 30 ? (rangeNum as ActivityRange) : 30
+    const range = parseActivityRange(c.req.query('range') || '30')
 
     void expireStaleCheckIns()
     const stats = await buildMyActivityStats(c.get('userId'), range)
