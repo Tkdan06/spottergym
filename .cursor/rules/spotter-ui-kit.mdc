@@ -48,11 +48,17 @@ Before adding or redesigning UI in `src/pages` / `src/components`, follow the li
    as separate targets — see workout history pattern on UiKit page.
 11. **Profile edit:** Settings via header gear; do not add a second full-width “Редактировать
    профиль” CTA wall. Feedback lives in Settings; admin contour button only for `isAdmin`.
-12. **Segmented control:** exclusive view switch (2–4 options) uses `.seg` + `.seg-item` +
-    `.is-active`. Compact period row adds `.seg--fit`. Do not invent a local tab recipe
-    (liked-tabs, activity-range-btn, workout-progress-mode). Not chips (multi-filter) and not
-    `.toggle` / `.toggle-row` (on/off). Live: Progress, Likes, Activity period. Specimen: UI kit
-    «Сегмент».
+12. **Segmented control:** exclusive view switch (2–4 options) uses `.seg.seg--fit` +
+    `.seg-item` + `.is-active`. Track hugs text (`width: max-content`), items are ~32px
+    (`padding: 6px 12px`). Button or `Link` as `.seg-item`. Do not stretch full width
+    (`.seg--fill` is last resort). Do not invent a local tab recipe. Not chips (multi-filter /
+    labels) and not `.toggle` / `.toggle-row` (on/off). Live: Progress, Likes, Activity period,
+    Notifications. Specimen: UI kit «Сегмент».
+13. **Lists after flatten:** People / gyms = `UserCard` / `GymCard`. Likes = divider rows
+    (`.liked-list` / `.liked-row`). Workouts history = one grouped `.workouts-list`. Chats =
+    conversation rows, not a card per chat. Notifications feed = `.card-list` with explicit
+    `gap: 10px` (global `.card-list` is `gap: 0`). Profile sections = `.profile-block`
+    (hairline), not stacked `.surface`. Do not wrap each row in `.surface`.
 
 ## Sources of truth
 

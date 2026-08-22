@@ -7,7 +7,9 @@ import {
   ChevronRight,
   ClipboardList,
   Copy,
+  Heart,
   Info,
+  MessageCircle,
   Share2,
 } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
@@ -16,6 +18,7 @@ import { SoftFlash } from '../components/SoftFlash'
 import { SoftLoader } from '../components/SoftLoader'
 import { useApp } from '../context/useApp'
 import './ActivityPage.css'
+import './LikedPage.css'
 import './UiKitPage.css'
 import './WorkoutsPage.css'
 
@@ -33,6 +36,7 @@ const TYPE_TOKENS = [
 const COLOR_TOKENS = [
   ['--bg', 'Фон'],
   ['--bg-elevated', 'Elevated'],
+  ['--bg-soft', 'Soft / трек сегмента'],
   ['--bg-card', 'Карточка'],
   ['--accent', 'Accent'],
   ['--text', 'Текст'],
@@ -54,6 +58,7 @@ export function UiKitPage() {
   const [toggleOn, setToggleOn] = useState(true)
   const [segDemo, setSegDemo] = useState<'ex' | 'body'>('ex')
   const [segPeriod, setSegPeriod] = useState<7 | 30 | 90>(30)
+  const [segLikes, setSegLikes] = useState<'received' | 'sent'>('received')
   const [hintOpen, setHintOpen] = useState(false)
   const [flashDemo, setFlashDemo] = useState('')
 
@@ -114,12 +119,14 @@ export function UiKitPage() {
           </li>
           <li>
             <strong>Списки с несколькими действиями:</strong> primary слева (навигация), secondary
-            справа/отдельной полосой (expand, copy). Не вешать всё на одну кнопку.
+            справа/отдельной полосой (expand, copy). Не вешать всё на одну кнопку. Люди/клубы —
+            карточки, история — одна группа, лайки — ряды с линией, не <code>.surface</code> на
+            каждый ряд.
           </li>
           <li>
-            <strong>Сегмент:</strong> взаимоисключающий вид — только <code>.seg</code> +{' '}
-            <code>.seg-item.is-active</code> (Прогресс, Лайки, период на Активности). Не чипы и не
-            <code>.toggle</code>.
+            <strong>Сегмент:</strong> взаимоисключающий вид — только <code>.seg seg--fit</code> +{' '}
+            <code>.seg-item.is-active</code>. Обнимает текст, не тянется. Не чипы и не{' '}
+            <code>.toggle</code>. Живые: Прогресс, Лайки, Активность, Уведомления.
           </li>
           <li>
             <strong>Действие у SectionTitle:</strong> только <code>.section-action</code> (Link или
@@ -448,25 +455,104 @@ export function UiKitPage() {
       <section className="surface ui-kit-block">
         <SectionTitle>Строка списка: primary + secondary</SectionTitle>
         <p className="muted ui-kit-section-lead">
-          Как в истории тренировок: слева переход по заголовку (без ›), справа quiet copy, снизу
-          отдельная полоса expand. Не открывай детали кликом по всему ряду, если есть навигация.
+          После облегчения визуала — четыре рецепта, не выдумывай пятый. Люди / клубы — карточки.
+          История тренировок — одна группа. Лайки — ряды с линией. Чаты — плоские ряды. Не оборачивай
+          каждый ряд в <code>.surface</code>.
         </p>
-        <div className="ui-kit-list-demo workouts-board">
-          <div className="workouts-board-top">
-            <div className="workouts-board-main" style={{ cursor: 'default' }}>
-              <div className="workouts-row-copy">
-                <strong>Жим · верх</strong>
-                <span className="muted">Сегодня · 78 кг</span>
-              </div>
-            </div>
-            <button type="button" className="workouts-row-copy-btn" aria-label="Копировать пример">
-              <Copy size={16} strokeWidth={2} />
-            </button>
+        <div className="ui-kit-type-stack">
+          <div>
+            <p className="dim ui-kit-meta">История · .workouts-list (одна карточка, линия между сессиями)</p>
+            <ul className="workouts-list ui-kit-list-demo">
+              <li className="workouts-board">
+                <div className="workouts-board-top">
+                  <div className="workouts-board-main" style={{ cursor: 'default' }}>
+                    <div className="workouts-row-copy">
+                      <strong>Жим · верх</strong>
+                      <span className="muted">Сегодня · 78 кг</span>
+                    </div>
+                  </div>
+                  <button type="button" className="workouts-row-copy-btn" aria-label="Копировать пример">
+                    <Copy size={16} strokeWidth={2} />
+                  </button>
+                </div>
+                <button type="button" className="workouts-board-expand" aria-expanded={false}>
+                  <span className="dim workouts-row-meta">3 упр. · 12 подх.</span>
+                  <ChevronDown size={16} className="workouts-board-chevron" aria-hidden />
+                </button>
+              </li>
+              <li className="workouts-board">
+                <div className="workouts-board-top">
+                  <div className="workouts-board-main" style={{ cursor: 'default' }}>
+                    <div className="workouts-row-copy">
+                      <strong>Ноги</strong>
+                      <span className="muted">Вчера · 82 кг</span>
+                    </div>
+                  </div>
+                  <button type="button" className="workouts-row-copy-btn" aria-label="Копировать пример">
+                    <Copy size={16} strokeWidth={2} />
+                  </button>
+                </div>
+                <button type="button" className="workouts-board-expand" aria-expanded={false}>
+                  <span className="dim workouts-row-meta">4 упр. · 16 подх.</span>
+                  <ChevronDown size={16} className="workouts-board-chevron" aria-hidden />
+                </button>
+              </li>
+            </ul>
           </div>
-          <button type="button" className="workouts-board-expand" aria-expanded={false}>
-            <span className="dim workouts-row-meta">3 упр. · 12 подх.</span>
-            <ChevronDown size={16} className="workouts-board-chevron" aria-hidden />
-          </button>
+          <div>
+            <p className="dim ui-kit-meta">Лайки · .liked-list / .liked-row (линия, без карточки на ряд)</p>
+            <div className="liked-list ui-kit-list-demo">
+              <article className="liked-row">
+                <div className="liked-main">
+                  <div className="avatar-wrap ui-kit-liked-avatar" aria-hidden />
+                  <div className="liked-body">
+                    <div className="liked-title-line">
+                      <strong>
+                        Анна<span className="age">, 27</span>
+                      </strong>
+                    </div>
+                    <p className="gym-line">DDX · Рязанский</p>
+                    <p className="muted preview">Открыть профиль</p>
+                  </div>
+                </div>
+                <div className="liked-actions">
+                  <span className="liked-action primary">
+                    <MessageCircle size={16} />
+                  </span>
+                  <span className="liked-action liked">
+                    <Heart size={16} />
+                  </span>
+                </div>
+              </article>
+              <article className="liked-row">
+                <div className="liked-main">
+                  <div className="avatar-wrap ui-kit-liked-avatar" aria-hidden />
+                  <div className="liked-body">
+                    <div className="liked-title-line">
+                      <strong>
+                        Макс<span className="age">, 31</span>
+                      </strong>
+                    </div>
+                    <p className="gym-line">World Class</p>
+                    <p className="muted preview">Силовые, зал вечером</p>
+                  </div>
+                </div>
+                <div className="liked-actions">
+                  <span className="liked-action">
+                    <MessageCircle size={16} />
+                  </span>
+                  <span className="liked-action">
+                    <Heart size={16} />
+                  </span>
+                </div>
+              </article>
+            </div>
+          </div>
+          <p className="dim" style={{ margin: 0 }}>
+            Люди в зале — <code>UserCard</code>. Каталог клубов — <code>GymCard</code>. Лента
+            уведомлений — <code>.card-list</code> с <code>gap: 10px</code> (глобально gap 0). Профиль
+            — <code>.profile-block</code>, без стопки surface.
+          </p>
         </div>
       </section>
 
@@ -575,56 +661,124 @@ export function UiKitPage() {
       <section className="surface ui-kit-block">
         <SectionTitle>Сегмент</SectionTitle>
         <p className="muted ui-kit-section-lead">
-          Переключатель вида: 2–4 взаимно исключающих пункта. Не чип (фильтр, можно несколько) и не{' '}
-          <code>.toggle</code> (вкл/выкл). Chrome: <code>.seg</code> + пункты <code>.seg-item</code>,
-          активный — <code>.is-active</code>. По умолчанию обнимает текст (
-          <code>.seg--fit</code>), не тянется на всю ширину. На всю строку — только{' '}
-          <code>.seg--fill</code> (Лайки).
-          Живые экраны: Прогресс, Лайки, Активность.
+          Единственный рецепт взаимоисключающего вида (2–4 пункта). Не чип (фильтр, можно несколько)
+          и не <code>.toggle</code> (вкл/выкл). Трек обнимает текст — на сетке страницы не растягивать.
+          Пункт — <code>button</code> или <code>Link</code> с классом <code>.seg-item</code>.
         </p>
-        <div className="ui-kit-type-stack" style={{ marginTop: 12 }}>
-          <div className="seg seg--fit" role="tablist" aria-label="Пример вида">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={segDemo === 'ex'}
-              className={`seg-item${segDemo === 'ex' ? ' is-active' : ''}`}
-              onClick={() => setSegDemo('ex')}
-            >
-              Упражнения
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={segDemo === 'body'}
-              className={`seg-item${segDemo === 'body' ? ' is-active' : ''}`}
-              onClick={() => setSegDemo('body')}
-            >
-              Мой вес
-            </button>
-          </div>
-          <div className="seg seg--fit" role="tablist" aria-label="Пример периода">
-            {([7, 30, 90] as const).map((id) => (
+        <ul className="ui-kit-rules">
+          <li>
+            Chrome: <code>.seg seg--fit</code> + <code>.seg-item</code>, активный —{' '}
+            <code>.is-active</code>. Роль <code>tablist</code> / <code>tab</code>.
+          </li>
+          <li>
+            Размер: трек <code>width: max-content</code>, пункт <code>min-height: 32px</code>,{' '}
+            <code>padding: 6px 12px</code>, Manrope 600 · 0.82rem. Активный —{' '}
+            <code>--bg-elevated</code>.
+          </li>
+          <li>
+            Не <code>.seg--fill</code>, не чипы, не локальные табы (
+            <code>liked-tabs</code> только margin). На grid-странице —{' '}
+            <code>justify-self: start</code>, если трек всё равно тянется.
+          </li>
+        </ul>
+        <div className="ui-kit-type-stack" style={{ marginTop: 16 }}>
+          <div>
+            <p className="dim ui-kit-meta">Прогресс · вид</p>
+            <div className="seg seg--fit" role="tablist" aria-label="Что смотреть">
               <button
-                key={id}
                 type="button"
                 role="tab"
-                aria-selected={segPeriod === id}
-                className={`seg-item${segPeriod === id ? ' is-active' : ''}`}
-                onClick={() => setSegPeriod(id)}
+                aria-selected={segDemo === 'ex'}
+                className={`seg-item${segDemo === 'ex' ? ' is-active' : ''}`}
+                onClick={() => setSegDemo('ex')}
               >
-                {id}д
+                Упражнения
               </button>
-            ))}
+              <button
+                type="button"
+                role="tab"
+                aria-selected={segDemo === 'body'}
+                className={`seg-item${segDemo === 'body' ? ' is-active' : ''}`}
+                onClick={() => setSegDemo('body')}
+              >
+                Мой вес
+              </button>
+            </div>
+          </div>
+          <div>
+            <p className="dim ui-kit-meta">Прогресс / Активность · период</p>
+            <div className="seg seg--fit" role="tablist" aria-label="Период">
+              {([7, 30, 90] as const).map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  role="tab"
+                  aria-selected={segPeriod === id}
+                  className={`seg-item${segPeriod === id ? ' is-active' : ''}`}
+                  onClick={() => setSegPeriod(id)}
+                >
+                  {id}д
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="dim ui-kit-meta">Лайки / Уведомления · длинные подписи, тот же трек</p>
+            <div className="seg seg--fit" role="tablist" aria-label="Лайки">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={segLikes === 'received'}
+                className={`seg-item${segLikes === 'received' ? ' is-active' : ''}`}
+                onClick={() => setSegLikes('received')}
+              >
+                Кто лайкнул
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={segLikes === 'sent'}
+                className={`seg-item${segLikes === 'sent' ? ' is-active' : ''}`}
+                onClick={() => setSegLikes('sent')}
+              >
+                Кого я лайкнул
+              </button>
+            </div>
           </div>
         </div>
+        <pre className="ui-kit-code" style={{ marginTop: 16 }}>{`<div className="seg seg--fit" role="tablist" aria-label="…">
+  <button type="button" role="tab" className="seg-item is-active">…</button>
+  <button type="button" role="tab" className="seg-item">…</button>
+</div>
+{/* Лайки: Link с теми же классами вместо button */}`}</pre>
+        <p className="dim" style={{ margin: '10px 0 0' }}>
+          Живые экраны: Прогресс, Лайки, Активность, Уведомления.
+        </p>
+      </section>
+
+      <section className="surface ui-kit-block">
+        <SectionTitle>Вкл / выкл</SectionTitle>
+        <p className="muted ui-kit-section-lead">
+          Один флаг в настройках, не смена вида. Не подменяй сегмент тогглом и наоборот.
+        </p>
+        <button
+          type="button"
+          className="toggle-row"
+          onClick={() => setToggleOn((v) => !v)}
+        >
+          <div>
+            <strong>Пуш-уведомления</strong>
+            <p className="muted">.toggle-row + .toggle</p>
+          </div>
+          <span className={`toggle ${toggleOn ? 'on' : ''}`} />
+        </button>
       </section>
 
       <section className="surface ui-kit-block">
         <SectionTitle>Чипы и пиллы</SectionTitle>
         <p className="muted ui-kit-section-lead">
-          Чипы — метки и фильтры. Не как главные CTA раздела — для переходов бери{' '}
-          <code>.btn</code> или tool-link.
+          Метки и мультифильтры (пол, спорт, «в зале»). Не для взаимоисключающего вида — там только{' '}
+          <code>.seg</code>. Не как главные CTA раздела.
         </p>
         <div className="chip-grid">
           <span className="chip">Обычный</span>
@@ -678,21 +832,9 @@ export function UiKitPage() {
           Блок surface
         </SectionTitle>
         <p className="muted">
-          Карточка: <code>.surface</code> + контент. Заголовок блока — только{' '}
-          <code>SectionTitle</code>.
+          Карточка группы: <code>.surface</code> + контент. Не стопка surface на экране (профиль —
+          <code>.profile-block</code> с линией). Заголовок блока — только <code>SectionTitle</code>.
         </p>
-        <button
-          type="button"
-          className="toggle-row"
-          style={{ marginTop: 12 }}
-          onClick={() => setToggleOn((v) => !v)}
-        >
-          <div>
-            <strong>Переключатель</strong>
-            <p className="muted">.toggle-row + .toggle</p>
-          </div>
-          <span className={`toggle ${toggleOn ? 'on' : ''}`} />
-        </button>
       </section>
 
       <section className="surface ui-kit-block">

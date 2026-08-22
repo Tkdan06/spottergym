@@ -38,10 +38,10 @@
   background: rgba(200, 245, 66, 0.16);
 }
 
-.notifications-page .filter-row {
+.notifications-page .seg {
   position: relative;
   z-index: 2;
-  flex-wrap: wrap;
+  justify-self: start;
 }
 
 .notif-setting-icon {

@@ -49,6 +49,7 @@
 
 .activity-range {
   margin: 0;
+  justify-self: start;
 }
 
 .activity-summary {

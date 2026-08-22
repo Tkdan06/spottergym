@@ -154,17 +154,21 @@ export function NotificationsPage() {
         </div>
       </header>
 
-      <div className="filter-row">
+      <div className="seg seg--fit" role="tablist" aria-label="Уведомления">
         <button
           type="button"
-          className={`chip ${tab === 'feed' ? 'active' : ''}`}
+          role="tab"
+          aria-selected={tab === 'feed'}
+          className={`seg-item${tab === 'feed' ? ' is-active' : ''}`}
           onClick={() => setTab('feed')}
         >
           Лента
         </button>
         <button
           type="button"
-          className={`chip ${tab === 'settings' ? 'active' : ''}`}
+          role="tab"
+          aria-selected={tab === 'settings'}
+          className={`seg-item${tab === 'settings' ? ' is-active' : ''}`}
           onClick={() => setTab('settings')}
         >
           Настройки
