@@ -1,11 +1,13 @@
-import type { Gym } from '../types'
+import type { AppUser, Gym } from '../types'
 import { isMemberOfGym } from './userGyms'
+
+type GymMember = Pick<AppUser, 'gymIds'> | null | undefined
 
 /** Текущий порядок списка «Залы»: сначала свои клубы, потом по названию. */
 export function compareGymsStandard(
   a: Pick<Gym, 'id' | 'name'>,
   b: Pick<Gym, 'id' | 'name'>,
-  user: { gymIds?: string[] } | null | undefined,
+  user: GymMember,
 ) {
   const am = isMemberOfGym(user, a.id) ? 0 : 1
   const bm = isMemberOfGym(user, b.id) ? 0 : 1
@@ -20,7 +22,7 @@ export function compareGymsStandard(
 export function sortGymsInCity<T extends Pick<Gym, 'id' | 'name'>>(
   gyms: T[],
   membersOf: (gym: T) => number,
-  user: { gymIds?: string[] } | null | undefined,
+  user: GymMember,
 ): T[] {
   if (gyms.length < 2) return gyms
 
