@@ -180,6 +180,18 @@ export async function apiPatchMe(patch: Partial<AppUser>) {
   return data.user
 }
 
+export async function apiClaimInvite(inviteFrom: string) {
+  return request<{
+    ok: true
+    attached: boolean
+    already: boolean
+    credited: boolean
+  }>('/me/claim-invite', {
+    method: 'POST',
+    json: { inviteFrom },
+  })
+}
+
 /** Soft-delete own account. Requires body confirm: "DELETE". */
 export async function apiDeleteAccount() {
   return request<{ ok: true }>('/me/delete-account', {

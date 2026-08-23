@@ -5,6 +5,7 @@ import {
   TERMS_SECTIONS,
   TERMS_VERSION,
 } from '../content/userAgreement'
+import { registerHref } from '../lib/inviteShare'
 import { markTermsAccepted } from '../lib/termsAcceptance'
 import './TermsPage.css'
 
@@ -21,7 +22,7 @@ export function TermsPage() {
   const accept = () => {
     if (fromRegister) {
       markTermsAccepted()
-      navigate('/register', { replace: true, state: { termsAccepted: true } })
+      navigate(registerHref(), { replace: true, state: { termsAccepted: true } })
       return
     }
     navigate('/', { replace: true })
@@ -30,7 +31,7 @@ export function TermsPage() {
   return (
     <div className="app-shell">
       <main className="page no-nav terms-page">
-        <Link to={fromRegister ? '/register' : '/'} className="brand-mark auth-brand">
+        <Link to={fromRegister ? registerHref() : '/'} className="brand-mark auth-brand">
           SPOT<span>TER</span>
         </Link>
 

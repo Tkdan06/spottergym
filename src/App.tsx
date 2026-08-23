@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './components/AppLayout'
+import { InviteCapture } from './components/InviteCapture'
 import { GuestOnly, ProtectedRoute } from './components/ProtectedRoute'
 import { AppProvider } from './context/AppContext'
 import { MomentProvider } from './components/MomentFX'
@@ -50,6 +51,7 @@ export default function App() {
     <AppProvider>
       <MomentProvider>
       <BrowserRouter>
+        <InviteCapture />
         <Routes>
           <Route element={<GuestOnly />}>
             <Route path="/" element={<WelcomePage />} />

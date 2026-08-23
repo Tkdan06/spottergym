@@ -1,4 +1,8 @@
 const INVITE_STORAGE_KEY = 'spotter.inviteFrom'
+/** Keep the inviter id across Telegram → Safari / PWA hops. */
+const INVITE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
+
+type StoredInvite = { id: string; at: number }
 
 /** Public HTTPS origin — messengers scrape this for the link preview (OG image). */
 const SHARE_ORIGIN = 'https://spottergym.ru'
@@ -116,30 +120,94 @@ export async function shareOrCopyInvite(payload: InvitePayload): Promise<ShareOr
   return copied ? 'copied' : 'failed'
 }
 
+function parseStoredInvite(raw: string | null): StoredInvite | null {
+  if (!raw) return null
+  try {
+    const parsed = JSON.parse(raw) as StoredInvite
+    if (parsed && typeof parsed.id === 'string' && typeof parsed.at === 'number') {
+      return { id: parsed.id.trim(), at: parsed.at }
+    }
+  } catch {
+    const id = raw.trim()
+    if (id) return { id, at: Date.now() }
+  }
+  return null
+}
+
+function readStoredInvite(): StoredInvite | null {
+  try {
+    const local = parseStoredInvite(localStorage.getItem(INVITE_STORAGE_KEY))
+    if (local) {
+      if (Date.now() - local.at > INVITE_MAX_AGE_MS) {
+        localStorage.removeItem(INVITE_STORAGE_KEY)
+        return null
+      }
+      return local
+    }
+    const session = parseStoredInvite(sessionStorage.getItem(INVITE_STORAGE_KEY))
+    if (session?.id) {
+      if (Date.now() - session.at > INVITE_MAX_AGE_MS) {
+        sessionStorage.removeItem(INVITE_STORAGE_KEY)
+        return null
+      }
+      persistInviteFrom(session.id)
+      return parseStoredInvite(localStorage.getItem(INVITE_STORAGE_KEY)) ?? session
+    }
+  } catch {
+    /* private mode / quota */
+  }
+  return null
+}
+
 export function persistInviteFrom(inviteId: string | null | undefined): void {
   const id = inviteId?.trim()
   if (!id) return
+  const value = JSON.stringify({ id, at: Date.now() } satisfies StoredInvite)
   try {
-    sessionStorage.setItem(INVITE_STORAGE_KEY, id)
+    localStorage.setItem(INVITE_STORAGE_KEY, value)
+    try {
+      sessionStorage.removeItem(INVITE_STORAGE_KEY)
+    } catch {
+      // ignore
+    }
   } catch {
-    // ignore
+    try {
+      sessionStorage.setItem(INVITE_STORAGE_KEY, value)
+    } catch {
+      // ignore
+    }
   }
 }
 
 export function consumeInviteFrom(): string | null {
+  const stored = readStoredInvite()
   try {
-    const id = sessionStorage.getItem(INVITE_STORAGE_KEY)
-    if (id) sessionStorage.removeItem(INVITE_STORAGE_KEY)
-    return id
+    localStorage.removeItem(INVITE_STORAGE_KEY)
   } catch {
-    return null
+    // ignore
   }
+  try {
+    sessionStorage.removeItem(INVITE_STORAGE_KEY)
+  } catch {
+    // ignore
+  }
+  return stored?.id ?? null
 }
 
 export function peekInviteFrom(): string | null {
-  try {
-    return sessionStorage.getItem(INVITE_STORAGE_KEY)
-  } catch {
-    return null
+  return readStoredInvite()?.id ?? null
+}
+
+/** Keep `?invite=` on register hops (welcome, login, terms). */
+export function registerHref(extra?: Record<string, string>): string {
+  const params = new URLSearchParams()
+  const invite = peekInviteFrom()
+  if (invite) params.set('invite', invite)
+  if (extra) {
+    for (const [key, value] of Object.entries(extra)) {
+      if (value) params.set(key, value)
+    }
   }
+  const query = params.toString()
+  return query ? `/register?${query}` : '/register'
 }

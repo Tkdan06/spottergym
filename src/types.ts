@@ -83,6 +83,8 @@ export interface UserProfile {
   referralTitle?: string
   referralBadge?: string
   referralChrome?: 'none' | 'soft' | 'strong' | 'hero'
+  /** When false, others do not see the circle sticker / chrome. Default true. */
+  referralStatusVisible?: boolean
 }
 
 /** Как в Telegram: часы → ✓ → ✓✓ → ✓✓ синие */

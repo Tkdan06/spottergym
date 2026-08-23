@@ -21,8 +21,8 @@ import {
   sessionCookieName,
   type AuthedEnv,
 } from '../middleware/auth.js'
+import { attachInvite } from '../lib/attachInvite.js'
 import { isEmailBlocked, isIpBlocked } from '../lib/blocks.js'
-import { createNotification } from '../lib/notify.js'
 import { notifyRegistrationAdmins } from '../lib/registrationNotify.js'
 import {
   consumePasswordResetToken,
@@ -102,23 +102,7 @@ authRoutes.post(
       include: { gyms: true, checkIns: { where: { checkedOutAt: null }, take: 1 } },
     })
 
-    const inviteFrom = body.data.inviteFrom?.trim()
-    if (inviteFrom && inviteFrom !== user.id) {
-      const inviter = await prisma.user.findUnique({ where: { id: inviteFrom } })
-      if (inviter) {
-        await prisma.invite.create({
-          data: { inviterId: inviter.id, inviteeId: user.id },
-        }).catch(() => undefined)
-        await createNotification({
-          userId: inviter.id,
-          type: 'system',
-          title: 'Друг зарегистрировался',
-          body: `${user.name} присоединился по твоей ссылке`,
-          href: `/app/user/${user.id}`,
-          actorId: user.id,
-        })
-      }
-    }
+    await attachInvite(user.id, body.data.inviteFrom)
 
     void notifyRegistrationAdmins({
       userId: user.id,

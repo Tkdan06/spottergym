@@ -42,6 +42,7 @@ import {
   apiBlockUser,
   apiCheckIn,
   apiCheckOut,
+  apiClaimInvite,
   apiExtendCheckIn,
   apiCreateTicket,
   apiFetchBlocks,
@@ -136,6 +137,7 @@ import {
   normalizeUsername,
 } from '../lib/username'
 import { normalizeInstagram } from '../lib/instagram'
+import { consumeInviteFrom, peekInviteFrom } from '../lib/inviteShare'
 import { activeBreakUntil } from '../lib/schedule'
 import {
   blockUserId,
@@ -460,6 +462,7 @@ function createDefaultUser(name: string, email: string, gender: Gender = 'male')
     breakUntil: null as string | null,
     privacy: 'open' as PrivacyMode,
     lookingToMeet: true,
+    referralStatusVisible: true,
     isActive: false,
     checkedInGymId: '',
     checkedInAt: '',
@@ -1240,12 +1243,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setApiOnline(online)
       if (online) {
         try {
+          const inviteFrom = peekInviteFrom() || undefined
           const me = await apiRegister({
             name: safeName,
             email: normalizedEmail,
             password: pass,
             gender: normalizeGender(gender),
+            inviteFrom,
           })
+          if (inviteFrom) consumeInviteFrom()
           sessionEpochRef.current += 1
           flushSync(() => {
             persistUser(withAdminFlags(normalizeGymFields(me as AppUser) as AppUser))
@@ -1360,6 +1366,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
           const me = await apiPatchMe(patch)
           applyServerUser(me as AppUser)
           syncedFromApi = true
+          const inviteFrom = peekInviteFrom()
+          if (inviteFrom) {
+            try {
+              const claimed = await apiClaimInvite(inviteFrom)
+              if (claimed.attached || claimed.already) consumeInviteFrom()
+            } catch {
+              /* keep invite for InviteCapture retry */
+            }
+          }
         } catch {
           syncedFromApi = false
         }
@@ -1491,6 +1506,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ...(safe.breakUntil !== undefined ? { breakUntil: safe.breakUntil } : {}),
           ...(safe.privacy !== undefined ? { privacy: safe.privacy } : {}),
           ...(safe.lookingToMeet !== undefined ? { lookingToMeet: safe.lookingToMeet } : {}),
+          ...(safe.referralStatusVisible !== undefined
+            ? { referralStatusVisible: safe.referralStatusVisible }
+            : {}),
           ...(safe.onboardingDone !== undefined
             ? { onboardingDone: safe.onboardingDone }
             : {}),

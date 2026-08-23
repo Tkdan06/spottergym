@@ -321,7 +321,7 @@ export function UserProfilePage() {
             {name}
             {!isAnon ? <span>, {person.age}</span> : null}
           </h1>
-          {!isAnon && person.referralTitle ? (
+          {!isAnon && person.referralStatusVisible !== false && person.referralTitle ? (
             <p className="referral-status-title-only">{person.referralTitle}</p>
           ) : null}
           <div className="profile-identity">

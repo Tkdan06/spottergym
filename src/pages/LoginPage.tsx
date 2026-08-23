@@ -2,6 +2,7 @@ import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/useApp'
 import { EMAIL_MAX, PASSWORD_MAX } from '../lib/fieldLimits'
+import { registerHref } from '../lib/inviteShare'
 import './AuthPages.css'
 
 type LoginLocationState = {
@@ -128,7 +129,7 @@ export function LoginPage() {
         </form>
 
         <p className="auth-switch muted">
-          Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
+          Нет аккаунта? <Link to={registerHref()}>Зарегистрироваться</Link>
         </p>
       </main>
     </div>

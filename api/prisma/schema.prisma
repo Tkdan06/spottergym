@@ -88,6 +88,8 @@ model User {
   breakUntil       String?
   privacy          PrivacyMode     @default(open)
   lookingToMeet    Boolean         @default(true)
+  /** Show circle status sticker / chrome on the public avatar */
+  referralStatusVisible Boolean    @default(true)
   onboardingDone   Boolean         @default(false)
   isAdmin          Boolean         @default(false)
   isMasterAdmin    Boolean         @default(false)

@@ -11,9 +11,19 @@ const STICKERS: Record<Exclude<ReferralTierId, 0>, string> = {
   4: '/images/referral/t4-crown.png',
 }
 
-export function referralChromeClass(
-  user: Pick<UserProfile, 'referralChrome' | 'referralTier' | 'referralCreditedCount'>,
+export function isReferralStatusVisible(
+  user: Pick<UserProfile, 'referralStatusVisible'>,
 ) {
+  return user.referralStatusVisible !== false
+}
+
+export function referralChromeClass(
+  user: Pick<
+    UserProfile,
+    'referralChrome' | 'referralTier' | 'referralCreditedCount' | 'referralStatusVisible'
+  >,
+) {
+  if (!isReferralStatusVisible(user)) return ''
   const chrome = user.referralChrome || referralTierFromCount(user.referralCreditedCount || 0).chrome
   if (!chrome || chrome === 'none') return ''
   return `referral-chrome referral-chrome--${chrome}`
@@ -30,10 +40,14 @@ export function ReferralBadge({
   size = 'sm',
   className = '',
 }: {
-  user: Pick<UserProfile, 'referralTier' | 'referralBadge' | 'referralTitle' | 'referralCreditedCount'>
+  user: Pick<
+    UserProfile,
+    'referralTier' | 'referralBadge' | 'referralTitle' | 'referralCreditedCount' | 'referralStatusVisible'
+  >
   size?: Size
   className?: string
 }) {
+  if (!isReferralStatusVisible(user)) return null
   const def = referralTierFromCount(user.referralCreditedCount || 0)
   const tier = user.referralTier ?? def.id
   if (!tier) return null

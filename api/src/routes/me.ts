@@ -47,8 +47,7 @@ import {
 import { SoftDeleteError, softDeleteUser } from '../lib/softDeleteUser.js'
 import { isValidUsername, normalizeUsername } from '../lib/username.js'
 import { ensureWelcomeInstallNotification } from '../lib/welcomeInstall.js'
-import { createNotification } from '../lib/notify.js'
-import { referralTierFromCount } from '../lib/referralTiers.js'
+import { attachInvite, notifyInviteCredited } from '../lib/attachInvite.js'
 import {
   loadAuthedUser,
   requireAuth,
@@ -125,6 +124,7 @@ const patchSchema = z.object({
   breakUntil: z.string().max(BREAK_UNTIL_MAX).nullable().optional(),
   privacy: z.enum(['open', 'anonymous']).optional(),
   lookingToMeet: z.boolean().optional(),
+  referralStatusVisible: z.boolean().optional(),
   onboardingDone: z.boolean().optional(),
 })
 
@@ -158,6 +158,20 @@ meRoutes.get(
   async (c) => {
     const circle = await buildInviteCircle(c.get('userId'))
     return c.json({ circle })
+  },
+)
+
+/** Late-bind a circle invite after register, or if the friend re-opens the link. */
+meRoutes.post(
+  '/claim-invite',
+  rateLimit({ windowMs: 60_000, max: 20, route: 'me-claim-invite' }),
+  async (c) => {
+    const body = z
+      .object({ inviteFrom: z.string().trim().min(1).max(64) })
+      .safeParse(await c.req.json().catch(() => null))
+    if (!body.success) return c.json({ error: 'Укажи приглашение' }, 400)
+    const result = await attachInvite(c.get('userId'), body.data.inviteFrom)
+    return c.json({ ok: true, ...result })
   },
 )
 
@@ -438,33 +452,10 @@ meRoutes.patch(
       select: { inviterId: true },
     })
     if (invite?.inviterId) {
-      const credited = await prisma.user.count({
-        where: {
-          deletedAt: null,
-          onboardingDone: true,
-          id: {
-            in: (
-              await prisma.invite.findMany({
-                where: { inviterId: invite.inviterId },
-                select: { inviteeId: true },
-              })
-            ).map((i) => i.inviteeId),
-          },
-        },
+      await notifyInviteCredited({
+        inviterId: invite.inviterId,
+        invitee: { id: user.id, name: user.name },
       })
-      const tier = referralTierFromCount(credited)
-      const prevTier = referralTierFromCount(Math.max(0, credited - 1))
-      const leveledUp = tier.id > prevTier.id && tier.title
-      await createNotification({
-        userId: invite.inviterId,
-        type: 'system',
-        title: leveledUp ? `Новый статус: ${tier.title}` : 'Друг в круге Spotter',
-        body: leveledUp
-          ? `${user.name} завершил онбординг — ты ${tier.title} (${credited})`
-          : `${user.name} завершил онбординг по твоей ссылке · ${credited} в круге`,
-        href: '/app/invite',
-        actorId: userId,
-      }).catch((err) => console.warn('[referral] credit notify failed', err))
     }
   }
 

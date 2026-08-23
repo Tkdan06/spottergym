@@ -104,6 +104,14 @@
   gap: 12px;
 }
 
+.invite-circle-status-toggle {
+  padding: 12px 0 4px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+}
+
 .invite-circle-track {
   position: relative;
   display: grid;

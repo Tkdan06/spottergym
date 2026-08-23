@@ -1,5 +1,6 @@
 import { ArrowRight, EyeOff, MessageSquare, Radio } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { registerHref } from '../lib/inviteShare'
 import './WelcomePage.css'
 
 export function WelcomePage() {
@@ -16,7 +17,7 @@ export function WelcomePage() {
             Найди людей в своём клубе: кто рядом, кто на тренировке и кто открыт к общению
           </p>
           <div className="welcome-actions">
-            <Link to="/register" className="btn btn-primary btn-block">
+            <Link to={registerHref()} className="btn btn-primary btn-block">
               Создать аккаунт
               <ArrowRight size={18} aria-hidden />
             </Link>

@@ -2,7 +2,11 @@ import { useState } from 'react'
 import { Bell, Copy, Settings, Share2, Shield } from 'lucide-react'
 import { Link, Navigate } from 'react-router-dom'
 import { LikesRow } from '../components/LikesRow'
-import { ReferralBadge, referralChromeClass } from '../components/ReferralBadge'
+import {
+  ReferralBadge,
+  isReferralStatusVisible,
+  referralChromeClass,
+} from '../components/ReferralBadge'
 import { PhotoGalleryModal } from '../components/PhotoGalleryModal'
 import { ProfilePhotoCarousel } from '../components/ProfilePhotoCarousel'
 import { SoftFlash } from '../components/SoftFlash'
@@ -97,7 +101,7 @@ export function ProfilePage() {
           <h2 className="profile-hero-name">
             {user.name}, {user.age}
           </h2>
-          {user.referralTitle ? (
+          {isReferralStatusVisible(user) && user.referralTitle ? (
             <p className="referral-status-title-only">{user.referralTitle}</p>
           ) : null}
           <div className="profile-identity">

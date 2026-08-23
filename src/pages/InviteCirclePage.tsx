@@ -32,7 +32,7 @@ const LADDER_TIERS = REFERRAL_TIERS.filter((t) => t.id > 0)
 
 export function InviteCirclePage() {
   const navigate = useNavigate()
-  const { user } = useApp()
+  const { user, updateProfile } = useApp()
   const [circle, setCircle] = useState<InviteCirclePayload | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -80,6 +80,8 @@ export function InviteCirclePage() {
   const credited = circle?.creditedCount ?? user?.referralCreditedCount ?? 0
   const previewTierDef = REFERRAL_TIERS.find((t) => t.id === previewTier) || LADDER_TIERS[0]
 
+  const statusOnAvatar = user?.referralStatusVisible !== false
+
   const previewUser = useMemo((): UserProfile | null => {
     if (!user) return null
     return {
@@ -89,8 +91,9 @@ export function InviteCirclePage() {
       referralBadge: previewTierDef.badge,
       referralChrome: previewTierDef.chrome,
       referralCreditedCount: Math.max(credited, previewTierDef.minCredited),
+      referralStatusVisible: statusOnAvatar,
     }
-  }, [user, previewTierDef, credited])
+  }, [user, previewTierDef, credited, statusOnAvatar])
 
   if (!user) return <Navigate to="/login" replace />
 
@@ -147,6 +150,7 @@ export function InviteCirclePage() {
                     referralBadge: circle?.badge ?? user.referralBadge,
                     referralTitle: title,
                     referralCreditedCount: credited,
+                    referralStatusVisible: true,
                   }}
                   size="md"
                 />
@@ -161,6 +165,24 @@ export function InviteCirclePage() {
             </p>
           </div>
         </div>
+
+        <button
+          type="button"
+          className="toggle-row invite-circle-status-toggle"
+          role="switch"
+          aria-checked={statusOnAvatar}
+          onClick={() => void updateProfile({ referralStatusVisible: !statusOnAvatar })}
+        >
+          <div>
+            <strong>Статус на аватаре</strong>
+            <p className="muted">
+              {statusOnAvatar
+                ? 'Другие видят стикер и рамку на твоём фото'
+                : 'Скрыт от других. Ссылка и рост круга работают как раньше'}
+            </p>
+          </div>
+          <span className={`toggle ${statusOnAvatar ? 'on' : ''}`} />
+        </button>
 
         <div className="invite-circle-progress" aria-label="Прогресс до следующего статуса">
           <div className="invite-circle-progress-track">
@@ -208,6 +230,7 @@ export function InviteCirclePage() {
                     referralTitle: tier.title,
                     referralBadge: tier.badge,
                     referralCreditedCount: tier.minCredited,
+                    referralStatusVisible: true,
                   }}
                   size="md"
                 />
@@ -266,7 +289,9 @@ export function InviteCirclePage() {
       <section className="surface invite-circle-section invite-circle-preview">
         <SectionTitle>Как выглядит в зале</SectionTitle>
         <p className="muted invite-circle-preview-hint">
-          Выбери стикер на лестнице — так будет выглядеть твоя карточка в зале.
+          {statusOnAvatar
+            ? 'Выбери стикер на лестнице — так будет выглядеть твоя карточка в зале.'
+            : 'Стикер на аватаре скрыт. Так тебя сейчас видят в зале.'}
         </p>
         {previewUser ? (
           <div className="invite-circle-preview-card">

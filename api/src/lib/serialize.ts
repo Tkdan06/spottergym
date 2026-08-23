@@ -111,6 +111,7 @@ export function serializeUser(
     breakUntil: user.breakUntil,
     privacy: user.privacy,
     lookingToMeet: user.lookingToMeet,
+    referralStatusVisible: user.referralStatusVisible !== false,
     isActive: Boolean(activeCheckIn),
     checkedInGymId: activeCheckIn?.gymId || '',
     checkedInAt: activeCheckIn?.checkedInAt?.toISOString() || '',
@@ -169,11 +170,15 @@ export function serializePublicUser(
     lastSeenAt: full.lastSeenAt,
     isDeleted: Boolean(full.isDeleted),
     verified: false,
-    referralCreditedCount: full.referralCreditedCount,
-    referralTier: full.referralTier,
-    referralTitle: full.referralTitle,
-    referralBadge: full.referralBadge,
-    referralChrome: full.referralChrome,
+    ...(full.referralStatusVisible === false
+      ? EMPTY_REFERRAL
+      : {
+          referralCreditedCount: full.referralCreditedCount,
+          referralTier: full.referralTier,
+          referralTitle: full.referralTitle,
+          referralBadge: full.referralBadge,
+          referralChrome: full.referralChrome,
+        }),
   }
 
   if (full.isDeleted) {
