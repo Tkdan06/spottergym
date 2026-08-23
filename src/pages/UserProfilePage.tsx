@@ -248,13 +248,72 @@ export function UserProfilePage() {
   }
 
   return (
-    <main className={`page profile-view${!isSelf ? ' has-sticky-cta' : ''}`}>
-      <header className="profile-other-top">
-        <button type="button" className="back-link" onClick={() => navigate(-1)}>
-          <ArrowLeft size={18} /> Назад
-        </button>
-        {!isSelf ? <SafetyActions person={person} /> : null}
-      </header>
+    <main className="page profile-view">
+      <div className="profile-hero-cover">
+        <div className="profile-hero-cover-photo">
+          <ProfilePhotoCarousel
+            cover
+            photos={galleryPhotos}
+            fallbackSrc={photo}
+            errorFallbackSrc={localGenderAvatar(person.gender)}
+            name={name}
+            onOpen={(index) => {
+              if (!galleryPhotos.length) return
+              setGalleryIndex(index)
+              setGalleryOpen(true)
+            }}
+          />
+          <div className="profile-hero-cover-scrim profile-hero-cover-scrim-top" aria-hidden />
+          <div className="profile-hero-cover-scrim" aria-hidden />
+          <div className="profile-hero-cover-chrome">
+            <button
+              type="button"
+              className="icon-btn profile-cover-icon"
+              aria-label="Назад"
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft size={18} />
+            </button>
+            <div className="profile-hero-cover-chrome-end">
+              {!isAnon &&
+              isReferralStatusVisible(person) &&
+              (person.referralTier || person.referralTitle) ? (
+                <ReferralBadge user={person} size="lg" className="referral-badge--on-cover" />
+              ) : null}
+              {!isSelf ? <SafetyActions person={person} /> : null}
+            </div>
+          </div>
+          <div className="profile-hero-cover-copy">
+            <h1>
+              {name}
+              {!isAnon ? <span>, {person.age}</span> : null}
+            </h1>
+            <p className="profile-hero-cover-presence">
+              {onBreak ? breakText : person.isActive ? 'В зале' : 'Не в зале'}
+            </p>
+            <p className="profile-hero-cover-status">
+              {!isAnon && person.isCoach
+                ? coachSports.length
+                  ? `Тренер · ${coachSports.slice(0, 2).join(', ')}`
+                  : 'Тренер'
+                : person.lookingToMeet
+                  ? person.gender === 'female'
+                    ? 'Открыта к знакомству'
+                    : 'Открыт к знакомству'
+                  : intentLabel(person.intent)}
+            </p>
+            {!isAnon && !person.isCoach && sports.length ? (
+              <div className="profile-hero-cover-chips">
+                {sports.slice(0, 2).map((tag) => (
+                  <span key={tag} className="chip">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
 
       {adminRevealed ? (
         <div className="profile-admin-reveal-banner" role="status">
@@ -290,65 +349,55 @@ export function UserProfilePage() {
         </div>
       ) : null}
 
-      <div className="profile-hero-cover">
-        <div className="profile-hero-cover-photo">
-          <ProfilePhotoCarousel
-            cover
-            photos={galleryPhotos}
-            fallbackSrc={photo}
-            errorFallbackSrc={localGenderAvatar(person.gender)}
-            name={name}
-            onOpen={(index) => {
-              if (!galleryPhotos.length) return
-              setGalleryIndex(index)
-              setGalleryOpen(true)
-            }}
-          />
-          <div className="profile-hero-cover-scrim" aria-hidden />
-          <div className="profile-hero-cover-top">
-            {onBreak ? (
-              <span className="pill pill-break">{breakText}</span>
-            ) : person.isActive ? (
-              <span className="pill pill-online">
-                <span className="online-dot" />В зале
-              </span>
-            ) : (
-              <span className="pill pill-offline">Не в зале</span>
-            )}
-            {!isAnon &&
-            isReferralStatusVisible(person) &&
-            (person.referralTier || person.referralTitle) ? (
-              <ReferralBadge user={person} size="lg" className="referral-badge--on-cover" />
-            ) : null}
-          </div>
-          <div className="profile-hero-cover-copy">
-            <h1>
-              {name}
-              {!isAnon ? <span>, {person.age}</span> : null}
-            </h1>
-            <p className="profile-hero-cover-status">
-              {!isAnon && person.isCoach
-                ? coachSports.length
-                  ? `Тренер · ${coachSports.slice(0, 2).join(', ')}`
-                  : 'Тренер'
-                : person.lookingToMeet
-                  ? person.gender === 'female'
-                    ? 'Открыта к знакомству'
-                    : 'Открыт к знакомству'
-                  : intentLabel(person.intent)}
-            </p>
-            {!isAnon && !person.isCoach && sports.length ? (
-              <div className="profile-hero-cover-chips">
-                {sports.slice(0, 2).map((tag) => (
-                  <span key={tag} className="chip">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            ) : null}
-          </div>
+      {!isSelf ? (
+        <div className="profile-cta">
+          {existingConversationId ? (
+            <button type="button" className="btn btn-primary btn-block" onClick={openExistingChat}>
+              <MessageCircle size={18} />
+              Открыть чат
+            </button>
+          ) : !openComposer ? (
+            <button
+              type="button"
+              className="btn btn-primary btn-block"
+              disabled={!canStartChat}
+              onClick={() => setOpenComposer(true)}
+            >
+              <MessageCircle size={18} />
+              {canStartChat ? 'Написать' : 'Сейчас не открыт к общению'}
+            </button>
+          ) : (
+            <form className="composer" onSubmit={(e) => void onSend(e)}>
+              <textarea
+                {...messageFieldProps}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder={DEFAULT_GREETING}
+                autoFocus
+                disabled={sendBusy}
+                maxLength={GREETING_MESSAGE_MAX}
+              />
+              <p className="composer-hint muted">
+                {message.trim()
+                  ? 'Уйдёт твой текст'
+                  : 'Поле пустое — уйдёт приветствие из подсказки. Начни печатать — напишешь своё, стирать ничего не нужно.'}
+              </p>
+              {sendError ? (
+                <p className="feedback-error" role="alert">
+                  {sendError}
+                </p>
+              ) : null}
+              <button type="submit" className="btn btn-primary btn-block" disabled={sendBusy}>
+                {sendBusy
+                  ? 'Отправляем…'
+                  : message.trim()
+                    ? 'Отправить запрос'
+                    : 'Отправить приветствие'}
+              </button>
+            </form>
+          )}
         </div>
-      </div>
+      ) : null}
 
       <div className="profile-hero-meta profile-hero-meta--after-cover">
         <div className="profile-identity">
@@ -514,55 +563,6 @@ export function UserProfilePage() {
         </section>
       ) : null}
 
-      {!isSelf ? (
-        <div className="profile-cta">
-          {existingConversationId ? (
-            <button type="button" className="btn btn-primary btn-block" onClick={openExistingChat}>
-              <MessageCircle size={18} />
-              Открыть чат
-            </button>
-          ) : !openComposer ? (
-            <button
-              type="button"
-              className="btn btn-primary btn-block"
-              disabled={!canStartChat}
-              onClick={() => setOpenComposer(true)}
-            >
-              <MessageCircle size={18} />
-              {canStartChat ? 'Написать' : 'Сейчас не открыт к общению'}
-            </button>
-          ) : (
-            <form className="composer" onSubmit={(e) => void onSend(e)}>
-              <textarea
-                {...messageFieldProps}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder={DEFAULT_GREETING}
-                autoFocus
-                disabled={sendBusy}
-                maxLength={GREETING_MESSAGE_MAX}
-              />
-              <p className="composer-hint muted">
-                {message.trim()
-                  ? 'Уйдёт твой текст'
-                  : 'Поле пустое — уйдёт приветствие из подсказки. Начни печатать — напишешь своё, стирать ничего не нужно.'}
-              </p>
-              {sendError ? (
-                <p className="feedback-error" role="alert">
-                  {sendError}
-                </p>
-              ) : null}
-              <button type="submit" className="btn btn-primary btn-block" disabled={sendBusy}>
-                {sendBusy
-                  ? 'Отправляем…'
-                  : message.trim()
-                    ? 'Отправить запрос'
-                    : 'Отправить приветствие'}
-              </button>
-            </form>
-          )}
-        </div>
-      ) : null}
       <SoftFlash message={likeFlash} />
     </main>
   )
