@@ -293,7 +293,7 @@ export function OnboardingPage() {
 
   const canNext = () => {
     if (step === 0) return Boolean(city)
-    if (step === 1) return true
+    if (step === 1) return gymIds.length > 0
     if (step === 2) {
       return ageOk && intent !== null && experienceLevel !== null && sports.length > 0 && bioOk
     }
@@ -355,7 +355,7 @@ export function OnboardingPage() {
   }
 
   const finish = async () => {
-    const parsedAge = typeof age === 'number' ? age : Number(age)
+    const parsedAge = Math.round(typeof age === 'number' ? age : Number(age))
     if (!Number.isFinite(parsedAge) || parsedAge < 18 || parsedAge > 80) return
     if (!intent || !experienceLevel) return
     setFinishError('')

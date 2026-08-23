@@ -138,7 +138,7 @@ export function SettingsPage() {
   const onSave = (e: FormEvent) => {
     e.preventDefault()
     if (saving) return
-    const parsedAge = typeof age === 'number' ? age : Number(age)
+    const parsedAge = Math.round(typeof age === 'number' ? age : Number(age))
     if (!Number.isFinite(parsedAge) || parsedAge < 18 || parsedAge > 80) {
       setAgeError('Укажи возраст от 18 до 80')
       return

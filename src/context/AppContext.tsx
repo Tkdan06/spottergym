@@ -1336,36 +1336,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const needApi = apiOnlineRef.current && !isDemoAccount(saved.email)
 
       if (needApi) {
+        const gymIds = Array.isArray(saved.gymIds) ? saved.gymIds.filter(Boolean) : []
+        const age = Math.round(Number(saved.age))
         const patch = {
-          ...data,
           onboardingDone: true as const,
-          gymIds: saved.gymIds,
-          homeGymId: saved.homeGymId || saved.gymIds[0] || undefined,
           city: saved.city,
-          age: saved.age,
+          ...(Number.isFinite(age) ? { age } : {}),
           bio: saved.bio,
           intent: saved.intent,
           experienceLevel: saved.experienceLevel,
-          interests: saved.interests,
-          sports: saved.sports,
-          isCoach: saved.isCoach,
-          coachSports: saved.coachSports,
-          visitSlots: saved.visitSlots,
+          interests: saved.interests || [],
+          sports: saved.sports || [],
+          isCoach: Boolean(saved.isCoach),
+          coachSports: saved.coachSports || [],
+          visitSlots: saved.visitSlots || [],
           privacy: saved.privacy,
           lookingToMeet: saved.lookingToMeet,
+          ...(gymIds.length
+            ? { gymIds, homeGymId: saved.homeGymId || gymIds[0] }
+            : {}),
         }
         try {
           const me = await apiPatchMe(patch)
           applyServerUser(me as AppUser)
           syncedFromApi = true
         } catch {
-          try {
-            const me = await apiPatchMe({ onboardingDone: true })
-            applyServerUser(me as AppUser)
-            syncedFromApi = true
-          } catch {
-            syncedFromApi = false
-          }
+          syncedFromApi = false
         }
         if (!syncedFromApi) {
           // Откат: онлайн, но сервер не принял — просим начать заново
@@ -1475,7 +1471,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ...(safe.name !== undefined ? { name: safe.name } : {}),
           ...(safe.username !== undefined ? { username: safe.username } : {}),
           ...(safe.instagram !== undefined ? { instagram: safe.instagram } : {}),
-          ...(safe.age !== undefined ? { age: safe.age } : {}),
+          ...(safe.age !== undefined ? { age: Math.round(Number(safe.age)) } : {}),
           ...(safe.gender !== undefined ? { gender: safe.gender } : {}),
           ...(safe.bio !== undefined ? { bio: safe.bio } : {}),
           ...(safe.photos !== undefined ? { photos: nextLocal.photos } : {}),

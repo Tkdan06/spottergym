@@ -57,7 +57,14 @@ import {
 import { rateLimit } from '../middleware/rateLimit.js'
 import { workoutRoutes } from './meWorkouts.js'
 
-const tagList = z.array(z.string().trim().min(1).max(TAG_ITEM_MAX)).max(TAGS_MAX)
+const tagList = z
+  .array(z.string())
+  .max(TAGS_MAX)
+  .transform((items) =>
+    items
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0 && item.length <= TAG_ITEM_MAX),
+  )
 
 const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'] as const
 const TIME_RE = /^([01]?\d|2[0-3]):[0-5]\d$/
@@ -85,33 +92,41 @@ const visitSlotSchema = z
     return { day: slot.day, from, to }
   })
 
-const patchSchema = z
-  .object({
-    name: z.string().trim().min(NAME_MIN).max(NAME_MAX).optional(),
-    username: z.string().trim().min(USERNAME_MIN).max(USERNAME_MAX).optional(),
-    /** Empty string clears the link */
-    instagram: z.string().max(INSTAGRAM_MAX + 64).optional(),
-    age: z.number().int().min(18).max(80).optional(),
-    gender: z.enum(['female', 'male']).optional(),
-    bio: z.string().min(BIO_MIN).max(BIO_MAX).optional(),
-    photos: z.array(z.string().max(PHOTO_DATA_URL_MAX_CHARS)).max(PHOTO_MAX_COUNT).optional(),
-    avatar: z.string().max(AVATAR_MAX_CHARS).optional(),
-    city: z.string().max(CITY_MAX).optional(),
-    homeGymId: z.string().max(GYM_ID_MAX).nullable().optional(),
-    gymIds: z.array(z.string().max(GYM_ID_MAX)).min(1).max(GYM_IDS_MAX).optional(),
-    intent: z.enum(['dating', 'buddy', 'both']).optional(),
-    experienceLevel: z.enum(['newbie', 'confident', 'experienced', 'pro']).optional(),
-    interests: tagList.optional(),
-    sports: tagList.optional(),
-    isCoach: z.boolean().optional(),
-    coachSports: tagList.optional(),
-    visitSlots: z.array(visitSlotSchema).max(VISIT_SLOTS_MAX).optional(),
-    breakUntil: z.string().max(BREAK_UNTIL_MAX).nullable().optional(),
-    privacy: z.enum(['open', 'anonymous']).optional(),
-    lookingToMeet: z.boolean().optional(),
-    onboardingDone: z.boolean().optional(),
-  })
-  .strict()
+const patchSchema = z.object({
+  name: z.string().trim().min(NAME_MIN).max(NAME_MAX).optional(),
+  username: z.string().trim().min(USERNAME_MIN).max(USERNAME_MAX).optional(),
+  /** Empty string clears the link */
+  instagram: z.string().max(INSTAGRAM_MAX + 64).optional(),
+  age: z.coerce.number().min(18).max(80).transform((n) => Math.round(n)).optional(),
+  gender: z.enum(['female', 'male']).optional(),
+  bio: z.string().min(BIO_MIN).max(BIO_MAX).optional(),
+  photos: z.array(z.string().max(PHOTO_DATA_URL_MAX_CHARS)).max(PHOTO_MAX_COUNT).optional(),
+  avatar: z.string().max(AVATAR_MAX_CHARS).optional(),
+  city: z.string().max(CITY_MAX).optional(),
+  homeGymId: z.string().max(GYM_ID_MAX).nullable().optional(),
+  gymIds: z.array(z.string().max(GYM_ID_MAX)).max(GYM_IDS_MAX).optional(),
+  intent: z.enum(['dating', 'buddy', 'both']).optional(),
+  experienceLevel: z.enum(['newbie', 'confident', 'experienced', 'pro']).optional(),
+  interests: tagList.optional(),
+  sports: tagList.optional(),
+  isCoach: z.boolean().optional(),
+  coachSports: tagList.optional(),
+  visitSlots: z
+    .array(z.unknown())
+    .max(VISIT_SLOTS_MAX)
+    .optional()
+    .transform((slots) => {
+      if (!slots) return undefined
+      return slots
+        .map((slot) => visitSlotSchema.safeParse(slot))
+        .filter((parsed) => parsed.success)
+        .map((parsed) => parsed.data)
+    }),
+  breakUntil: z.string().max(BREAK_UNTIL_MAX).nullable().optional(),
+  privacy: z.enum(['open', 'anonymous']).optional(),
+  lookingToMeet: z.boolean().optional(),
+  onboardingDone: z.boolean().optional(),
+})
 
 function publicActorName(user: { name: string; privacy: string }) {
   return user.privacy === 'anonymous' ? 'Аноним' : user.name
@@ -248,6 +263,7 @@ meRoutes.patch(
   async (c) => {
   const body = patchSchema.safeParse(await c.req.json().catch(() => null))
   if (!body.success) {
+    console.warn('[me] patch invalid', body.error.flatten())
     return c.json({ error: 'Некорректные данные профиля' }, 400)
   }
   const userId = c.get('userId')
@@ -327,7 +343,7 @@ meRoutes.patch(
     data.instagram = instagram
   }
 
-  if (data.gymIds) {
+  if (data.gymIds !== undefined && data.gymIds.length > 0) {
     const unique = [...new Set(data.gymIds)]
     const existing = await prisma.gym.findMany({
       where: { id: { in: unique } },
