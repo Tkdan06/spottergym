@@ -75,7 +75,6 @@
 .invite-circle-progress {
   display: grid;
   gap: 8px;
-  padding-top: 4px;
 }
 
 .invite-circle-progress .muted {

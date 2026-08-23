@@ -182,6 +182,19 @@ export function InviteCirclePage() {
           </div>
         </div>
 
+        <div className="invite-circle-progress" aria-label="Прогресс до следующего статуса">
+          <div className="invite-circle-progress-track">
+            <i style={{ width: `${progressPct}%` }} />
+          </div>
+          <p className="muted">
+            {nextTitle && toNext != null
+              ? toNext === 0
+                ? `Достигнут ${nextTitle}`
+                : `Ещё ${toNext} до «${nextTitle}»`
+              : 'Максимальный статус — GymBro Spotter'}
+          </p>
+        </div>
+
         <InviteFriendsButton
           userId={user.id}
           gymName={gymName}
@@ -191,26 +204,6 @@ export function InviteCirclePage() {
           <Share2 size={16} /> Поделиться ссылкой
         </InviteFriendsButton>
       </section>
-
-      <button
-        type="button"
-        className="toggle-row invite-circle-status-toggle"
-        role="switch"
-        aria-checked={statusOnAvatar}
-        disabled={savingToggle}
-        onClick={() => void onToggleAvatarStatus()}
-      >
-        <div>
-          <strong>Статус на аватаре</strong>
-          <p className="muted">
-            {statusOnAvatar
-              ? 'Другие видят стикер и рамку на твоём фото'
-              : 'Скрыт от других. Ссылка и рост круга работают как раньше'}
-          </p>
-        </div>
-        <span className={`toggle ${statusOnAvatar ? 'on' : ''}`} />
-      </button>
-      {toggleError ? <p className="admin-inline-error">{toggleError}</p> : null}
 
       <section className="surface invite-circle-section invite-circle-ladder">
         <SectionTitle>Лестница статусов</SectionTitle>
@@ -303,19 +296,27 @@ export function InviteCirclePage() {
             <UserCard user={previewUser} enableLike={false} priority staticPreview />
           </div>
         ) : null}
-        <div className="invite-circle-progress" aria-label="Прогресс до следующего статуса">
-          <div className="invite-circle-progress-track">
-            <i style={{ width: `${progressPct}%` }} />
-          </div>
+      </section>
+
+      <button
+        type="button"
+        className="toggle-row invite-circle-status-toggle"
+        role="switch"
+        aria-checked={statusOnAvatar}
+        disabled={savingToggle}
+        onClick={() => void onToggleAvatarStatus()}
+      >
+        <div>
+          <strong>Статус на аватаре</strong>
           <p className="muted">
-            {nextTitle && toNext != null
-              ? toNext === 0
-                ? `Достигнут ${nextTitle}`
-                : `Ещё ${toNext} до «${nextTitle}»`
-              : 'Максимальный статус — GymBro Spotter'}
+            {statusOnAvatar
+              ? 'Другие видят стикер и рамку на твоём фото'
+              : 'Скрыт от других. Ссылка и рост круга работают как раньше'}
           </p>
         </div>
-      </section>
+        <span className={`toggle ${statusOnAvatar ? 'on' : ''}`} />
+      </button>
+      {toggleError ? <p className="admin-inline-error">{toggleError}</p> : null}
     </main>
   )
 }
