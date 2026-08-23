@@ -1,51 +1,38 @@
-import type { AppUser, Gym } from '../types'
-import { isMemberOfGym } from './userGyms'
+import type { Gym } from '../types'
 
-type GymMember = Pick<AppUser, 'gymIds'> | null | undefined
+type RankGym = Pick<Gym, 'id' | 'name' | 'network'>
 
-/** Текущий порядок списка «Залы»: сначала свои клубы, потом по названию. */
-export function compareGymsStandard(
-  a: Pick<Gym, 'id' | 'name'>,
-  b: Pick<Gym, 'id' | 'name'>,
-  user: GymMember,
-) {
-  const am = isMemberOfGym(user, a.id) ? 0 : 1
-  const bm = isMemberOfGym(user, b.id) ? 0 : 1
-  if (am !== bm) return am - bm
-  return a.name.localeCompare(b.name, 'ru')
+/** Сколько клубов каждой сети в выборке (обычно все залы города). */
+export function networkHallCounts<T extends Pick<Gym, 'network'>>(gyms: T[]) {
+  const map = new Map<string, number>()
+  for (const gym of gyms) {
+    const key = gym.network || ''
+    map.set(key, (map.get(key) || 0) + 1)
+  }
+  return map
 }
 
 /**
- * В городе наверх — один зал с наибольшим числом прикреплённых.
- * Остальные — как compareGymsStandard. При нулях у всех топ не двигаем.
+ * В городе: сначала клубы с людьми (5 → 4 → 1), затем пустые по размеру сети
+ * (больше залов сети — выше). При равных счётчиках — та же сетка сетей.
  */
-export function sortGymsInCity<T extends Pick<Gym, 'id' | 'name'>>(
+export function sortGymsInCity<T extends RankGym>(
   gyms: T[],
   membersOf: (gym: T) => number,
-  user: GymMember,
+  hallCountOf?: (gym: T) => number,
 ): T[] {
   if (gyms.length < 2) return gyms
 
-  let topCount = 0
-  for (const gym of gyms) {
-    const n = membersOf(gym)
-    if (n > topCount) topCount = n
-  }
-
-  if (topCount <= 0) {
-    return [...gyms].sort((a, b) => compareGymsStandard(a, b, user))
-  }
-
-  const featured = gyms
-    .filter((gym) => membersOf(gym) === topCount)
-    .sort((a, b) => compareGymsStandard(a, b, user))[0]
-  if (!featured) {
-    return [...gyms].sort((a, b) => compareGymsStandard(a, b, user))
-  }
+  const fallback = hallCountOf ? null : networkHallCounts(gyms)
+  const halls = (gym: T) => hallCountOf?.(gym) ?? fallback?.get(gym.network || '') ?? 0
 
   return [...gyms].sort((a, b) => {
-    if (a.id === featured.id) return -1
-    if (b.id === featured.id) return 1
-    return compareGymsStandard(a, b, user)
+    const byPeople = membersOf(b) - membersOf(a)
+    if (byPeople) return byPeople
+    const byNetwork = halls(b) - halls(a)
+    if (byNetwork) return byNetwork
+    const byNetworkName = (a.network || '').localeCompare(b.network || '', 'ru')
+    if (byNetworkName) return byNetworkName
+    return a.name.localeCompare(b.name, 'ru')
   })
 }

@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { CityCarousel } from '../components/CityCarousel'
 import { ElsewhereGymBanner } from '../components/ElsewhereGymBanner'
 import { GymCard } from '../components/GymCard'
+import { SoftLoader, SOFT_LOADER_DELAY_MS } from '../components/SoftLoader'
 import { useApp } from '../context/useApp'
 import { GYMS, NETWORKS } from '../data/mock'
 import { apiFetchGyms } from '../lib/apiClient'
@@ -14,13 +15,23 @@ import {
   searchElsewhereLocal,
   type ElsewhereSuggestion,
 } from '../lib/elsewhereGyms'
+import { loadCityGyms, peekCityGyms } from '../lib/gymCatalog'
 import { gymMatchesQuery } from '../lib/gymSearch'
-import { sortGymsInCity } from '../lib/gymRank'
+import { networkHallCounts, sortGymsInCity } from '../lib/gymRank'
 import { buildRealGymStatsMap } from '../lib/gymStats'
 import { searchFieldProps } from '../lib/inputAttrs'
 import { isMemberOfGym } from '../lib/userGyms'
 import type { Gym } from '../types'
 import './DiscoverPage.css'
+
+function filterCityGyms(list: Gym[], city: string, network: string, query: string) {
+  const q = query.trim()
+  return list.filter((g) => {
+    if (g.city !== city) return false
+    if (network !== 'Все сети' && g.network !== network) return false
+    return gymMatchesQuery(g, q)
+  })
+}
 
 export function DiscoverPage() {
   const { user, apiOnline } = useApp()
@@ -32,7 +43,10 @@ export function DiscoverPage() {
   const [city, setCity] = useState(user?.city || 'Москва')
   const [network, setNetwork] = useState<(typeof NETWORKS)[number]>('Все сети')
   const [query, setQuery] = useState('')
-  const [remoteGyms, setRemoteGyms] = useState<Gym[] | null>(null)
+  const [remoteGyms, setRemoteGyms] = useState<Gym[] | null>(() =>
+    isDemoAccount(user?.email) ? null : peekCityGyms(user?.city || city),
+  )
+  const [liveFailed, setLiveFailed] = useState(false)
   const [elsewhereRemote, setElsewhereRemote] = useState<Gym[] | null>(null)
 
   const demoStats = isDemoAccount(user?.email)
@@ -43,32 +57,40 @@ export function DiscoverPage() {
   }
 
   useEffect(() => {
-    if (!apiOnline || demoStats) {
+    if (demoStats) {
       setRemoteGyms(null)
+      setLiveFailed(false)
       return
     }
+    const peek = peekCityGyms(city)
+    setRemoteGyms(peek)
+    setLiveFailed(false)
     let cancelled = false
-    void apiFetchGyms({ city, network, q: query || undefined })
+    void loadCityGyms(city)
       .then((list) => {
         if (!cancelled) setRemoteGyms(list)
       })
       .catch(() => {
-        if (!cancelled) setRemoteGyms(null)
+        if (!cancelled && !peek) setLiveFailed(true)
       })
     return () => {
       cancelled = true
     }
-  }, [apiOnline, demoStats, city, network, query])
+  }, [demoStats, city, apiOnline])
+
+  const cityGyms = useMemo(() => {
+    if (demoStats || liveFailed) {
+      return GYMS.filter((g) => g.city === city)
+    }
+    return remoteGyms ? remoteGyms.filter((g) => g.city === city) : null
+  }, [demoStats, liveFailed, remoteGyms, city])
 
   const catalog = useMemo(() => {
-    if (remoteGyms) return remoteGyms
-    const q = query.trim()
-    return GYMS.filter((g) => {
-      if (g.city !== city) return false
-      if (network !== 'Все сети' && g.network !== network) return false
-      return gymMatchesQuery(g, q)
-    })
-  }, [remoteGyms, city, network, query])
+    if (!cityGyms) return []
+    return filterCityGyms(cityGyms, city, network, query)
+  }, [cityGyms, city, network, query])
+
+  const waitingLiveCatalog = Boolean(!demoStats && cityGyms === null)
 
   const liveStats = useMemo(() => {
     if (demoStats) {
@@ -91,15 +113,14 @@ export function DiscoverPage() {
     )
   }, [demoStats, remoteGyms, catalog, user])
 
-  const gyms = useMemo(
-    () =>
-      sortGymsInCity(
-        catalog,
-        (g) => liveStats[g.id]?.membersCount ?? g.membersCount ?? 0,
-        user,
-      ),
-    [catalog, liveStats, user],
-  )
+  const gyms = useMemo(() => {
+    const hallCounts = networkHallCounts(cityGyms || catalog)
+    return sortGymsInCity(
+      catalog,
+      (g) => liveStats[g.id]?.membersCount ?? 0,
+      (g) => hallCounts.get(g.network || '') || 0,
+    )
+  }, [catalog, cityGyms, liveStats])
 
   const elsewhereQuery = query.trim()
   const needElsewhere =
@@ -222,7 +243,7 @@ export function DiscoverPage() {
 
       <div className="section-title">
         <h2 className="section-heading">Клубы</h2>
-        <span className="muted">{gyms.length}</span>
+        <span className="muted">{waitingLiveCatalog ? '…' : gyms.length}</span>
       </div>
 
       <div className="card-list card-list--cards">
@@ -232,7 +253,9 @@ export function DiscoverPage() {
             onSwitchCity={switchCityFromSearch}
           />
         ) : null}
-        {gyms.length ? (
+        {waitingLiveCatalog ? (
+          <SoftLoader delayMs={SOFT_LOADER_DELAY_MS} label="Загружаем клубы…" />
+        ) : gyms.length ? (
           gyms.map((gym, index) => (
             <GymCard
               key={gym.id}

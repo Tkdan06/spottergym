@@ -80,6 +80,7 @@ import {
   setStoredToken,
 } from '../lib/apiClient'
 import { DEMO_ACCOUNT_EMAIL, DEMO_ACCOUNT_NAME, isDemoAccount } from '../lib/demoAccount'
+import { prefetchCityGyms } from '../lib/gymCatalog'
 import { ensureWebPushSubscription, getActiveChatId, syncAppBadge } from '../lib/push'
 import {
   buildCheckInSessionFields,
@@ -1090,6 +1091,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!apiOnline || !user || !getStoredToken()) return
     void hydrateSocialFromApi()
   }, [apiOnline, user?.id, hydrateSocialFromApi])
+
+  // Каталог залов города — к моменту вкладки «Залы» список уже с живыми счётчиками
+  useEffect(() => {
+    if (!apiOnline || !user?.city || isDemoAccount(user.email)) return
+    prefetchCityGyms(user.city)
+  }, [apiOnline, user?.id, user?.city, user?.email])
 
   // Keep chats and notification badges fresh; likes are heavier and poll slower
   useEffect(() => {
