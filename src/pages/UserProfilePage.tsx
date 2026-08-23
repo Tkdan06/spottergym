@@ -10,7 +10,7 @@ import { SafetyActions } from '../components/SafetyActions'
 import { SectionTitle } from '../components/SectionTitle'
 import { SmartImage } from '../components/SmartImage'
 import { useApp } from '../context/useApp'
-import { displayName, experienceLabel, getUser, getUserGyms, intentLabel } from '../data/mock'
+import { displayName, experienceLabel, getUser, getUserGyms } from '../data/mock'
 import { localGenderAvatar, profileImage } from '../lib/avatar'
 import { otherParticipantId } from '../lib/conversations'
 import { isDemoAccount } from '../lib/demoAccount'
@@ -247,8 +247,28 @@ export function UserProfilePage() {
     })
   }
 
+  const onToggleLike = () => {
+    setLikeError('')
+    const nextLiked = !likesInfo.likedByMe
+    void Promise.resolve(toggleLike(person.id))
+      .then(() => {
+        setLikeFlash(nextLiked ? 'Лайк поставлен' : 'Лайк снят')
+        window.setTimeout(() => setLikeFlash(''), 1800)
+      })
+      .catch((err: unknown) => {
+        setLikeError(err instanceof Error ? err.message : 'Не удалось поставить лайк')
+      })
+  }
+
   return (
     <main className="page profile-view">
+      <header className="profile-other-top">
+        <button type="button" className="back-link" onClick={() => navigate(-1)}>
+          <ArrowLeft size={18} /> Назад
+        </button>
+        {!isSelf ? <SafetyActions person={person} /> : null}
+      </header>
+
       <div className="profile-hero-cover">
         <div className="profile-hero-cover-photo">
           <ProfilePhotoCarousel
@@ -263,52 +283,65 @@ export function UserProfilePage() {
               setGalleryOpen(true)
             }}
           />
-          <div className="profile-hero-cover-scrim profile-hero-cover-scrim-top" aria-hidden />
           <div className="profile-hero-cover-scrim" aria-hidden />
-          <div className="profile-hero-cover-chrome">
-            <button
-              type="button"
-              className="icon-btn profile-cover-icon"
-              aria-label="Назад"
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft size={18} />
-            </button>
-            <div className="profile-hero-cover-chrome-end">
-              {!isAnon &&
-              isReferralStatusVisible(person) &&
-              (person.referralTier || person.referralTitle) ? (
-                <ReferralBadge user={person} size="lg" className="referral-badge--on-cover" />
-              ) : null}
-              {!isSelf ? <SafetyActions person={person} /> : null}
-            </div>
+          <div className="profile-hero-cover-top">
+            {onBreak ? (
+              <span className="pill pill-break">{breakText}</span>
+            ) : person.isActive ? (
+              <span className="pill pill-online">
+                <span className="online-dot" />В зале
+              </span>
+            ) : (
+              <span className="pill pill-offline">Не в зале</span>
+            )}
+            {!isAnon &&
+            isReferralStatusVisible(person) &&
+            (person.referralTier || person.referralTitle) ? (
+              <ReferralBadge user={person} size="lg" className="referral-badge--on-cover" />
+            ) : null}
           </div>
           <div className="profile-hero-cover-copy">
-            <h1>
-              {name}
-              {!isAnon ? <span>, {person.age}</span> : null}
-            </h1>
-            <p className="profile-hero-cover-presence">
-              {onBreak ? breakText : person.isActive ? 'В зале' : 'Не в зале'}
-            </p>
-            <p className="profile-hero-cover-status">
-              {!isAnon && person.isCoach
-                ? coachSports.length
-                  ? `Тренер · ${coachSports.slice(0, 2).join(', ')}`
-                  : 'Тренер'
-                : person.lookingToMeet
-                  ? person.gender === 'female'
-                    ? 'Открыта к знакомству'
-                    : 'Открыт к знакомству'
-                  : intentLabel(person.intent)}
-            </p>
-            {!isAnon && !person.isCoach && sports.length ? (
-              <div className="profile-hero-cover-chips">
-                {sports.slice(0, 2).map((tag) => (
-                  <span key={tag} className="chip">
-                    {tag}
-                  </span>
-                ))}
+            <div className="profile-hero-cover-copy-text">
+              <h1>
+                {name}
+                {!isAnon ? <span>, {person.age}</span> : null}
+              </h1>
+              {person.username ? (
+                <p className="profile-hero-cover-handle">{formatUsername(person.username)}</p>
+              ) : null}
+            </div>
+            {!isSelf ? (
+              <div className="profile-hero-cover-actions">
+                <button
+                  type="button"
+                  className={`icon-btn profile-hero-cover-like ${likesInfo.likedByMe ? 'liked' : ''}`}
+                  aria-label={likesInfo.likedByMe ? 'Убрать лайк' : 'Лайк'}
+                  aria-pressed={likesInfo.likedByMe}
+                  onClick={onToggleLike}
+                >
+                  <Heart size={18} fill={likesInfo.likedByMe ? 'currentColor' : 'none'} />
+                </button>
+                <button
+                  type="button"
+                  className="icon-btn profile-hero-cover-chat"
+                  aria-label={
+                    existingConversationId
+                      ? 'Открыть чат'
+                      : canStartChat
+                        ? 'Написать'
+                        : 'Сейчас не открыт к общению'
+                  }
+                  disabled={!existingConversationId && !canStartChat}
+                  onClick={() => {
+                    if (existingConversationId) {
+                      openExistingChat()
+                      return
+                    }
+                    if (canStartChat) setOpenComposer(true)
+                  }}
+                >
+                  <MessageCircle size={18} />
+                </button>
               </div>
             ) : null}
           </div>
@@ -349,67 +382,44 @@ export function UserProfilePage() {
         </div>
       ) : null}
 
-      {!isSelf ? (
+      {!isSelf && !existingConversationId && openComposer ? (
         <div className="profile-cta">
-          {existingConversationId ? (
-            <button type="button" className="btn btn-primary btn-block" onClick={openExistingChat}>
-              <MessageCircle size={18} />
-              Открыть чат
-            </button>
-          ) : !openComposer ? (
-            <button
-              type="button"
-              className="btn btn-primary btn-block"
-              disabled={!canStartChat}
-              onClick={() => setOpenComposer(true)}
-            >
-              <MessageCircle size={18} />
-              {canStartChat ? 'Написать' : 'Сейчас не открыт к общению'}
-            </button>
-          ) : (
-            <form className="composer" onSubmit={(e) => void onSend(e)}>
-              <textarea
-                {...messageFieldProps}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder={DEFAULT_GREETING}
-                autoFocus
-                disabled={sendBusy}
-                maxLength={GREETING_MESSAGE_MAX}
-              />
-              <p className="composer-hint muted">
-                {message.trim()
-                  ? 'Уйдёт твой текст'
-                  : 'Поле пустое — уйдёт приветствие из подсказки. Начни печатать — напишешь своё, стирать ничего не нужно.'}
+          <form className="composer" onSubmit={(e) => void onSend(e)}>
+            <textarea
+              {...messageFieldProps}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder={DEFAULT_GREETING}
+              autoFocus
+              disabled={sendBusy}
+              maxLength={GREETING_MESSAGE_MAX}
+            />
+            <p className="composer-hint muted">
+              {message.trim()
+                ? 'Уйдёт твой текст'
+                : 'Поле пустое — уйдёт приветствие из подсказки. Начни печатать — напишешь своё, стирать ничего не нужно.'}
+            </p>
+            {sendError ? (
+              <p className="feedback-error" role="alert">
+                {sendError}
               </p>
-              {sendError ? (
-                <p className="feedback-error" role="alert">
-                  {sendError}
-                </p>
-              ) : null}
-              <button type="submit" className="btn btn-primary btn-block" disabled={sendBusy}>
-                {sendBusy
-                  ? 'Отправляем…'
-                  : message.trim()
-                    ? 'Отправить запрос'
-                    : 'Отправить приветствие'}
-              </button>
-            </form>
-          )}
+            ) : null}
+            <button type="submit" className="btn btn-primary btn-block" disabled={sendBusy}>
+              {sendBusy
+                ? 'Отправляем…'
+                : message.trim()
+                  ? 'Отправить запрос'
+                  : 'Отправить приветствие'}
+            </button>
+          </form>
         </div>
       ) : null}
 
       <div className="profile-hero-meta profile-hero-meta--after-cover">
         <div className="profile-identity">
-          {person.username ||
-          (!isAnon && isReferralStatusVisible(person) && person.referralTitle) ? (
+          {!isAnon && isReferralStatusVisible(person) && person.referralTitle ? (
             <div className="profile-handle-row">
-              {person.username ? (
-                <p className="profile-username-static">{formatUsername(person.username)}</p>
-              ) : null}
-              {!isAnon && isReferralStatusVisible(person) && person.referralTitle ? (
-                <span className="profile-status-mark">{person.referralTitle}</span>
-              ) : null}
+              <span className="profile-status-mark">{person.referralTitle}</span>
             </div>
           ) : null}
           {!isAnon && normalizeInstagram(person.instagram || '') ? (
@@ -461,34 +471,7 @@ export function UserProfilePage() {
       />
 
       <section className="profile-block likes-block">
-        <SectionTitle
-          action={
-            !isSelf ? (
-              <button
-                type="button"
-                className={`like-btn ${likesInfo.likedByMe ? 'liked' : ''}`}
-                onClick={() => {
-                  setLikeError('')
-                  const nextLiked = !likesInfo.likedByMe
-                  void Promise.resolve(toggleLike(person.id))
-                    .then(() => {
-                      setLikeFlash(nextLiked ? 'Лайк поставлен' : 'Лайк снят')
-                      window.setTimeout(() => setLikeFlash(''), 1800)
-                    })
-                    .catch((err: unknown) => {
-                      setLikeError(err instanceof Error ? err.message : 'Не удалось поставить лайк')
-                    })
-                }}
-                aria-pressed={likesInfo.likedByMe}
-              >
-                <Heart size={18} fill={likesInfo.likedByMe ? 'currentColor' : 'none'} />
-                {likesInfo.likedByMe ? 'Нравится' : 'Лайк'}
-              </button>
-            ) : undefined
-          }
-        >
-          Лайки в зале
-        </SectionTitle>
+        <SectionTitle>Лайки в зале</SectionTitle>
         {likeError ? (
           <p className="feedback-error" role="alert">
             {likeError}

@@ -47,7 +47,7 @@
 }
 
 .profile-carousel.cover .profile-carousel-dots {
-  top: calc(10px + var(--standalone-top) + 14px);
+  top: 12px;
 }
 
 .profile-carousel img,
