@@ -8127,7 +8127,7 @@
   {
     "id": "gym-nezavisimyy-fitness-24-veteranov-sankt-peterburg",
     "name": "Fitness 24 Ветеранов",
-    "network": "Независимый",
+    "network": "Fitness 24",
     "city": "Санкт-Петербург",
     "district": "Кировский",
     "address": "улица Солдата Корзуна, 1, корп. 2, лит. Б",
@@ -8140,7 +8140,7 @@
   {
     "id": "gym-nezavisimyy-fitness-24-ligovskiy-sankt-peterburg",
     "name": "Fitness 24 Лиговский",
-    "network": "Независимый",
+    "network": "Fitness 24",
     "city": "Санкт-Петербург",
     "district": "Центральный",
     "address": "улица Ново-Рыбинская, 19-21, ТЦ «Квартал», 4 этаж",
@@ -8153,7 +8153,7 @@
   {
     "id": "gym-nezavisimyy-fitness-24-narodnaya-sankt-peterburg",
     "name": "Fitness 24 Народная",
-    "network": "Независимый",
+    "network": "Fitness 24",
     "city": "Санкт-Петербург",
     "district": "Невский",
     "address": "улица Народная, 4, МФДЦ «Невский», 4 этаж",
@@ -8166,7 +8166,7 @@
   {
     "id": "gym-nezavisimyy-fitness-24-prosvescheniya-sankt-peterburg",
     "name": "Fitness 24 Просвещения",
-    "network": "Независимый",
+    "network": "Fitness 24",
     "city": "Санкт-Петербург",
     "district": "Выборгский",
     "address": "улица Кустодиева, 7, корп. 2, ЖК «Лондон Парк»",
@@ -8179,7 +8179,7 @@
   {
     "id": "gym-nezavisimyy-fitness-24-savushkina-sankt-peterburg",
     "name": "Fitness 24 Савушкина",
-    "network": "Независимый",
+    "network": "Fitness 24",
     "city": "Санкт-Петербург",
     "district": "Приморский",
     "address": "улица Савушкина, 126, ТРК «Атлантик Сити»",

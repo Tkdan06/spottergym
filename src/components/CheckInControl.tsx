@@ -30,6 +30,7 @@ function shortGymName(name: string) {
     .replace(/^Crocus Fitness\s+/i, '')
     .replace(/^XFIT\s+/i, '')
     .replace(/^Alex Fitness\s+/i, '')
+    .replace(/^Fitness 24\s+/i, '')
     .trim()
 }
 
