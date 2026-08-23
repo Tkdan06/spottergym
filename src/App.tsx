@@ -13,6 +13,7 @@ import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage'
 import { AdminGeographyPage } from './pages/AdminGeographyPage'
 import { AdminHubPage } from './pages/AdminHubPage'
 import { AdminLandingPage } from './pages/AdminLandingPage'
+import { AdminOpsPage } from './pages/AdminOpsPage'
 import { AdminPasswordResetsPage } from './pages/AdminPasswordResetsPage'
 import { AdminPlayersPage } from './pages/AdminPlayersPage'
 import { AdminReferralsPage } from './pages/AdminReferralsPage'
@@ -94,6 +95,7 @@ export default function App() {
               <Route path="admin/password-resets" element={<AdminPasswordResetsPage />} />
               <Route path="admin/referrals" element={<AdminReferralsPage />} />
               <Route path="admin/landing" element={<AdminLandingPage />} />
+              <Route path="admin/ops" element={<AdminOpsPage />} />
               <Route path="admin/broadcasts" element={<AdminBroadcastsPage />} />
               <Route path="admin/tickets" element={<AdminTicketsPage />} />
               <Route path="admin/users" element={<AdminUsersPage />} />

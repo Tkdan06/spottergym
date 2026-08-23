@@ -13,6 +13,7 @@ import {
   moscowDayStartUtc,
 } from '../lib/adminAnalytics.js'
 import { buildLandingAnalytics } from '../lib/landingAnalytics.js'
+import { buildOpsHealth } from '../lib/opsFaults.js'
 import { buildPasswordResetAnalytics } from '../lib/passwordResetAnalytics.js'
 import { buildReferralAnalytics } from '../lib/referralAnalytics.js'
 import { isMasterAdminEmail, normalizeEmail } from '../env.js'
@@ -75,6 +76,13 @@ adminRoutes.get('/landing', async (c) => {
   const gate = await requirePerm(c.get('userId'), 'viewUsers')
   if (!gate.ok) return c.json({ error: gate.error }, gate.status)
   const data = await buildLandingAnalytics()
+  return c.json(data)
+})
+
+adminRoutes.get('/ops', async (c) => {
+  const gate = await requirePerm(c.get('userId'), 'viewUsers')
+  if (!gate.ok) return c.json({ error: gate.error }, gate.status)
+  const data = await buildOpsHealth()
   return c.json(data)
 })
 

@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   BarChart3,
   Bell,
+  Activity,
   HardDrive,
   KeyRound,
   MapPin,
@@ -187,6 +188,22 @@ export function AdminHubPage() {
             </div>
           </section>
 
+          <Link to="/app/admin/ops" className="surface admin-inline-metric">
+            <div>
+              <strong>Работоспособность</strong>
+              <p className="dim">
+                {analytics?.ops
+                  ? analytics.ops.last5xx24h > 0
+                    ? `Сервер падал ${analytics.ops.last5xx24h} раз за 24ч · всего ошибок ${analytics.ops.last24h}`
+                    : analytics.ops.last24h > 0
+                      ? `За 24ч ${analytics.ops.last24h} ошибок запросов · расшифровка внутри`
+                      : 'За 24ч ошибок нет'
+                  : 'Ошибки API с расшифровкой, что сломалось у человека'}
+              </p>
+            </div>
+            <span className="muted">Открыть</span>
+          </Link>
+
           <Link to="/app/admin/password-resets" className="surface admin-inline-metric">
             <div>
               <strong>Сброс пароля</strong>
@@ -231,6 +248,17 @@ export function AdminHubPage() {
               <p className="muted">
                 Чекин {analytics?.checkedInToday ?? '—'} · сейчас в зале{' '}
                 {analytics?.activeNow ?? '—'}
+              </p>
+            </Link>
+            <Link to="/app/admin/ops" className="admin-hub-card">
+              <Activity size={20} />
+              <strong>Работоспособность</strong>
+              <p className="muted">
+                {analytics?.ops
+                  ? analytics.ops.last24h > 0
+                    ? `${analytics.ops.last24h} ошибок за 24ч · что не сохранилось`
+                    : 'Ошибки API · пока тихо'
+                  : 'Ошибки запросов простым языком'}
               </p>
             </Link>
             <Link to="/app/admin/analytics" className="admin-hub-card">

@@ -4,6 +4,7 @@ import {
   buildPasswordResetSummary,
   type PasswordResetSummary,
 } from './passwordResetAnalytics.js'
+import { opsFaultCounts } from './opsFaults.js'
 
 /** Europe/Moscow is UTC+3 year-round */
 const MSK_OFFSET_MS = 3 * 60 * 60 * 1000
@@ -41,6 +42,7 @@ export type AdminAnalytics = {
   tickets: { incoming: number; in_progress: number; closed: number; total: number }
   blockedEmails: number
   passwordResets: PasswordResetSummary
+  ops: { last24h: number; last5xx24h: number }
 }
 
 function utf8ByteLength(value: string) {
@@ -252,6 +254,10 @@ export async function buildAdminAnalytics(): Promise<AdminAnalytics> {
     avgAgeRaw != null && Number.isFinite(avgAgeRaw) ? Math.round(avgAgeRaw * 10) / 10 : null
 
   const passwordResets = await buildPasswordResetSummary()
+  const ops = await opsFaultCounts(new Date(now.getTime() - 24 * 60 * 60 * 1000)).catch(() => ({
+    last24h: 0,
+    last5xx24h: 0,
+  }))
 
   return {
     timezone: 'Europe/Moscow',
@@ -274,5 +280,6 @@ export async function buildAdminAnalytics(): Promise<AdminAnalytics> {
     tickets,
     blockedEmails,
     passwordResets,
+    ops,
   }
 }

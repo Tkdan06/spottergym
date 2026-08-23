@@ -37,6 +37,7 @@ export type AdminAnalytics = {
     uniqueEmails7d: number
     noAccount7d: number
   }
+  ops?: { last24h: number; last5xx24h: number }
 }
 
 export function formatRetentionRate(rate: number | null) {

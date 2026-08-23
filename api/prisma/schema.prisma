@@ -530,3 +530,20 @@ model WorkoutCoachReport {
   @@unique([userId, periodStart])
   @@index([userId, createdAt])
 }
+
+/** Failed API requests for the admin “site health” board. */
+model OpsFault {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  method    String
+  path      String
+  status    Int
+  code      String
+  title     String
+  meaning   String
+  message   String   @default("")
+  userId    String?
+
+  @@index([createdAt])
+  @@index([path, status, createdAt])
+}

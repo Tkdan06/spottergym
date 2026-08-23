@@ -14,6 +14,7 @@ import { HTTP_BODY_MAX_BYTES, PASSWORD_MAX } from './lib/fieldLimits.js'
 import { verifyPassword } from './lib/password.js'
 import { isPushConfigured } from './lib/push.js'
 import { startBroadcastLoop } from './lib/adminBroadcast.js'
+import { recordOpsFaultFromContext } from './lib/opsFaults.js'
 import { startWorkoutReminderLoop } from './lib/workoutReminders.js'
 import { rateLimit } from './middleware/rateLimit.js'
 import { adminRoutes } from './routes/admin.js'
@@ -33,6 +34,10 @@ import { userRoutes } from './routes/users.js'
 const app = new Hono()
 
 app.use('*', logger())
+app.use('*', async (c, next) => {
+  await next()
+  recordOpsFaultFromContext(c)
+})
 app.use('*', async (c, next) => {
   await next()
   c.header('X-Content-Type-Options', 'nosniff')

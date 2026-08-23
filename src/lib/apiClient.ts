@@ -598,6 +598,38 @@ export async function apiAdminFetchPasswordResets() {
   return request<PasswordResetAnalytics>('/admin/password-resets')
 }
 
+export type OpsHealth = {
+  last24h: number
+  last5xx24h: number
+  groups: {
+    method: string
+    path: string
+    status: number
+    code: string
+    title: string
+    meaning: string
+    count: number
+    lastAt: string
+    sampleMessage: string
+  }[]
+  recent: {
+    id: string
+    createdAt: string
+    method: string
+    path: string
+    status: number
+    code: string
+    title: string
+    meaning: string
+    message: string
+    userId: string | null
+  }[]
+}
+
+export async function apiAdminFetchOps() {
+  return request<OpsHealth>('/admin/ops')
+}
+
 export type LandingFunnelWindow = {
   views: number
   uniqueVisitors: number
