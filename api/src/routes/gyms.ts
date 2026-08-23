@@ -1,10 +1,10 @@
 import { Hono } from 'hono'
-import { expireStaleCheckIns } from '../lib/checkInExpiry.js'
+import { scheduleExpireStaleCheckIns } from '../lib/checkInExpiry.js'
 import { prisma } from '../db.js'
 import { expandGymQueryVariants, gymMatchesQuery } from '../lib/gymSearch.js'
 import { listHiddenUserIds } from '../lib/blocks.js'
 import { getReferralStatsMap } from '../lib/referralStats.js'
-import { serializeGym, serializePublicUser } from '../lib/serialize.js'
+import { serializeGym, serializePublicCard } from '../lib/serialize.js'
 import { requireAuth, type AuthedEnv } from '../middleware/auth.js'
 import { rateLimit } from '../middleware/rateLimit.js'
 
@@ -66,7 +66,7 @@ gymRoutes.get('/', async (c) => {
 
   const filtered = q ? gyms.filter((g) => gymMatchesQuery(g, q)) : gyms
 
-  await expireStaleCheckIns()
+  scheduleExpireStaleCheckIns()
   const ids = filtered.map((g) => g.id)
   const [memberCounts, activeCounts] = await Promise.all([
     prisma.userGym.groupBy({
@@ -99,7 +99,7 @@ gymRoutes.get('/:gymId', async (c) => {
   const gym = await prisma.gym.findUnique({ where: { id: gymId } })
   if (!gym) return c.json({ error: 'Зал не найден' }, 404)
 
-  await expireStaleCheckIns()
+  scheduleExpireStaleCheckIns()
   const [membersCount, activeNow] = await Promise.all([
     prisma.userGym.count({ where: { gymId } }),
     prisma.checkIn.count({ where: { gymId, checkedOutAt: null } }),
@@ -116,16 +116,47 @@ gymRoutes.get('/:gymId/people', requireAuth, async (c) => {
   if (!gym) return c.json({ error: 'Зал не найден' }, 404)
 
   const viewerId = c.get('userId')
-  await expireStaleCheckIns()
+  scheduleExpireStaleCheckIns()
   const [hidden, members] = await Promise.all([
     listHiddenUserIds(viewerId),
     prisma.userGym.findMany({
       where: { gymId, user: { deletedAt: null } },
-      include: {
+      select: {
+        userId: true,
         user: {
-          include: {
-            gyms: true,
-            checkIns: { where: { checkedOutAt: null }, take: 1 },
+          select: {
+            id: true,
+            username: true,
+            instagram: true,
+            name: true,
+            age: true,
+            gender: true,
+            bio: true,
+            photos: true,
+            avatar: true,
+            homeGymId: true,
+            city: true,
+            intent: true,
+            experienceLevel: true,
+            sports: true,
+            isCoach: true,
+            coachSports: true,
+            breakUntil: true,
+            privacy: true,
+            lookingToMeet: true,
+            lastSeenAt: true,
+            referralStatusVisible: true,
+            referralCreditedCount: true,
+            checkIns: {
+              where: { checkedOutAt: null },
+              take: 1,
+              select: {
+                gymId: true,
+                checkedInAt: true,
+                expiresAt: true,
+                extendCount: true,
+              },
+            },
           },
         },
       },
@@ -135,27 +166,24 @@ gymRoutes.get('/:gymId/people', requireAuth, async (c) => {
   const visible = hiddenSet.size ? members.filter((m) => !hiddenSet.has(m.userId)) : members
   const memberIds = visible.map((m) => m.userId)
 
-  const [tierMap, likeRows] = await Promise.all([
-    getReferralStatsMap(memberIds),
+  const [likeRows, tierMap] = await Promise.all([
     memberIds.length
       ? prisma.like.groupBy({
           by: ['toUserId'],
           where: { toUserId: { in: memberIds } },
           _count: { _all: true },
         })
-      : Promise.resolve([]),
+      : Promise.resolve(
+          [] as Array<{ toUserId: string; _count: { _all: number } }>,
+        ),
+    getReferralStatsMap(memberIds),
   ])
   const likeMap = new Map(likeRows.map((r) => [r.toUserId, r._count._all]))
 
   return c.json({
-    people: visible.map((m) => {
-      const person = serializePublicUser(m.user, { referral: tierMap.get(m.userId) })
-      // «В зале» только если открытый чек-ин именно в этом клубе (не во всех клубах профиля)
-      return {
-        ...person,
-        likeCount: likeMap.get(m.userId) || 0,
-        isActive: Boolean(person.isActive && person.checkedInGymId === gymId),
-      }
-    }),
+    people: visible.map((m) => ({
+      ...serializePublicCard(m.user, gymId, tierMap.get(m.userId)),
+      likeCount: likeMap.get(m.userId) || 0,
+    })),
   })
 })

@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { LikesRow } from '../components/LikesRow'
 import { PhotoGalleryModal } from '../components/PhotoGalleryModal'
 import { ProfilePhotoCarousel } from '../components/ProfilePhotoCarousel'
-import { ReferralBadge, referralChromeClass } from '../components/ReferralBadge'
+import { ReferralBadge, isReferralStatusVisible } from '../components/ReferralBadge'
 import { SoftFlash } from '../components/SoftFlash'
 import { SafetyActions } from '../components/SafetyActions'
 import { SectionTitle } from '../components/SectionTitle'
@@ -290,7 +290,7 @@ export function UserProfilePage() {
         </div>
       ) : null}
 
-      <div className={`profile-hero ${referralChromeClass(person)}`}>
+      <div className="profile-hero">
         <div className="profile-hero-photo-wrap">
           <ProfilePhotoCarousel
             photos={galleryPhotos}
@@ -321,12 +321,17 @@ export function UserProfilePage() {
             {name}
             {!isAnon ? <span>, {person.age}</span> : null}
           </h1>
-          {!isAnon && person.referralStatusVisible !== false && person.referralTitle ? (
-            <p className="referral-status-title-only">{person.referralTitle}</p>
-          ) : null}
           <div className="profile-identity">
-            {person.username ? (
-              <p className="profile-username-static">{formatUsername(person.username)}</p>
+            {person.username ||
+            (!isAnon && isReferralStatusVisible(person) && person.referralTitle) ? (
+              <div className="profile-handle-row">
+                {person.username ? (
+                  <p className="profile-username-static">{formatUsername(person.username)}</p>
+                ) : null}
+                {!isAnon && isReferralStatusVisible(person) && person.referralTitle ? (
+                  <span className="profile-status-mark">{person.referralTitle}</span>
+                ) : null}
+              </div>
             ) : null}
             {!isAnon && normalizeInstagram(person.instagram || '') ? (
               <a

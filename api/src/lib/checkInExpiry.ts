@@ -42,3 +42,10 @@ export async function expireStaleCheckIns(now = new Date()) {
   })
   return result.count
 }
+
+/** Do not block list/profile reads on the global expiry write. */
+export function scheduleExpireStaleCheckIns() {
+  void expireStaleCheckIns().catch((err) =>
+    console.warn('[check-in] expire failed', err),
+  )
+}

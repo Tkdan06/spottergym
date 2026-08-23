@@ -43,6 +43,7 @@ import { serializeUser } from '../lib/serialize.js'
 import {
   buildInviteCircle,
   getReferralStatsForUser,
+  incrementReferralCredit,
 } from '../lib/referralStats.js'
 import { SoftDeleteError, softDeleteUser } from '../lib/softDeleteUser.js'
 import { isValidUsername, normalizeUsername } from '../lib/username.js'
@@ -135,7 +136,7 @@ function publicActorName(user: { name: string; privacy: string }) {
 async function serializeMe(
   user: NonNullable<Awaited<ReturnType<typeof loadAuthedUser>>>,
 ) {
-  const referral = await getReferralStatsForUser(user.id)
+  const referral = await getReferralStatsForUser(user.id, user.referralCreditedCount)
   return serializeUser(user, { referral })
 }
 
@@ -147,8 +148,7 @@ meRoutes.route('/', workoutRoutes)
 meRoutes.get('/', async (c) => {
   const user = await loadAuthedUser(c.get('userId'))
   if (!user) return c.json({ error: 'Аккаунт не найден' }, 404)
-  const referral = await getReferralStatsForUser(user.id)
-  return c.json({ user: serializeUser(user, { referral }) })
+  return c.json({ user: await serializeMe(user) })
 })
 
 /** Invite circle: credited friends, pending, tier progress */
@@ -452,6 +452,7 @@ meRoutes.patch(
       select: { inviterId: true },
     })
     if (invite?.inviterId) {
+      await incrementReferralCredit(invite.inviterId)
       await notifyInviteCredited({
         inviterId: invite.inviterId,
         invitee: { id: user.id, name: user.name },
@@ -459,8 +460,7 @@ meRoutes.patch(
     }
   }
 
-  const referral = await getReferralStatsForUser(user.id)
-  return c.json({ user: serializeUser(user, { referral }) })
+  return c.json({ user: await serializeMe(user) })
   },
 )
 

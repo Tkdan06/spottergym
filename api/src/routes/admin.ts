@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 import { prisma } from '../db.js'
 import {
@@ -8,7 +9,6 @@ import {
 } from '../lib/admin.js'
 import {
   buildAdminAnalytics,
-  estimatePhotosBytes,
   moscowDayKey,
   moscowDayStartUtc,
 } from '../lib/adminAnalytics.js'
@@ -144,7 +144,40 @@ adminRoutes.get('/users', async (c) => {
           }
         : {}),
     },
-    include: {
+    select: {
+      id: true,
+      email: true,
+      username: true,
+      instagram: true,
+      name: true,
+      age: true,
+      gender: true,
+      bio: true,
+      city: true,
+      homeGymId: true,
+      intent: true,
+      experienceLevel: true,
+      interests: true,
+      sports: true,
+      isCoach: true,
+      coachSports: true,
+      visitSlots: true,
+      breakUntil: true,
+      privacy: true,
+      lookingToMeet: true,
+      referralStatusVisible: true,
+      referralCreditedCount: true,
+      onboardingDone: true,
+      isAdmin: true,
+      isMasterAdmin: true,
+      adminPermissions: true,
+      registeredAt: true,
+      lastSeenAt: true,
+      signupIp: true,
+      deletedAt: true,
+      tokenVersion: true,
+      createdAt: true,
+      updatedAt: true,
       gyms: true,
       checkIns: { where: { checkedOutAt: null }, take: 1 },
     },
@@ -203,25 +236,36 @@ adminRoutes.get('/users', async (c) => {
     }
   }
 
+  const photoStats = new Map<string, { n: number; bytes: number }>()
+  if (users.length) {
+    const rows = await prisma.$queryRaw<Array<{ id: string; n: number; bytes: number }>>`
+      SELECT id,
+        COALESCE(cardinality(photos), 0)::int AS n,
+        COALESCE(octet_length(array_to_string(photos, '')), 0)::int AS bytes
+      FROM "User"
+      WHERE id IN (${Prisma.join(users.map((u) => u.id))})
+    `
+    for (const row of rows) photoStats.set(row.id, { n: row.n, bytes: row.bytes })
+  }
+
   return c.json({
     users: users.map((u) => {
-      const full = serializeUser(u)
-      const photos = u.photos || []
-      // Slim payload: no photo blobs in admin directory
+      const full = serializeUser({ ...u, photos: [], avatar: '', passwordHash: '' })
       const { photos: _photos, avatar: _avatar, ...rest } = full
       const hideMasterEmail = !viewerIsMaster && isMasterAdminEmail(u.email)
       const todayCheckIn = checkedInTodayByUser.get(u.id)
       const signupIp = u.signupIp?.trim() || ''
       const signupIpCount =
         signupIp && signupIp !== 'unknown' ? signupIpCounts.get(signupIp) || 1 : 0
+      const photos = photoStats.get(u.id)
       return {
         ...rest,
         // Master email stays server-side for non-master admins
         email: hideMasterEmail ? 'скрыто' : rest.email,
         photos: [] as string[],
         avatar: '',
-        photosCount: photos.length,
-        photosBytes: estimatePhotosBytes(photos),
+        photosCount: photos?.n || 0,
+        photosBytes: photos?.bytes || 0,
         checkedInTodayAt: todayCheckIn?.checkedInAt.toISOString() || '',
         checkedInTodayGymId: todayCheckIn?.gymId || '',
         signupIp,

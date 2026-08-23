@@ -32,10 +32,12 @@ const LADDER_TIERS = REFERRAL_TIERS.filter((t) => t.id > 0)
 
 export function InviteCirclePage() {
   const navigate = useNavigate()
-  const { user, updateProfile } = useApp()
+  const { user, updateProfile, refreshMe } = useApp()
   const [circle, setCircle] = useState<InviteCirclePayload | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [toggleError, setToggleError] = useState('')
+  const [savingToggle, setSavingToggle] = useState(false)
   const [hintOpen, setHintOpen] = useState(false)
   const [previewTier, setPreviewTier] = useState<ReferralTierId>(1)
   const hintRef = useRef<HTMLDivElement>(null)
@@ -48,12 +50,13 @@ export function InviteCirclePage() {
       setCircle(next)
       const tier = (next.tier || 1) as ReferralTierId
       setPreviewTier(tier > 0 ? tier : 1)
+      void refreshMe()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось загрузить круг')
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [refreshMe])
 
   useEffect(() => {
     void load()
@@ -81,6 +84,19 @@ export function InviteCirclePage() {
   const previewTierDef = REFERRAL_TIERS.find((t) => t.id === previewTier) || LADDER_TIERS[0]
 
   const statusOnAvatar = user?.referralStatusVisible !== false
+
+  const onToggleAvatarStatus = async () => {
+    if (savingToggle) return
+    setSavingToggle(true)
+    setToggleError('')
+    try {
+      await updateProfile({ referralStatusVisible: !statusOnAvatar })
+    } catch (err) {
+      setToggleError(err instanceof Error ? err.message : 'Не удалось сохранить')
+    } finally {
+      setSavingToggle(false)
+    }
+  }
 
   const previewUser = useMemo((): UserProfile | null => {
     if (!user) return null
@@ -166,37 +182,6 @@ export function InviteCirclePage() {
           </div>
         </div>
 
-        <button
-          type="button"
-          className="toggle-row invite-circle-status-toggle"
-          role="switch"
-          aria-checked={statusOnAvatar}
-          onClick={() => void updateProfile({ referralStatusVisible: !statusOnAvatar })}
-        >
-          <div>
-            <strong>Статус на аватаре</strong>
-            <p className="muted">
-              {statusOnAvatar
-                ? 'Другие видят стикер и рамку на твоём фото'
-                : 'Скрыт от других. Ссылка и рост круга работают как раньше'}
-            </p>
-          </div>
-          <span className={`toggle ${statusOnAvatar ? 'on' : ''}`} />
-        </button>
-
-        <div className="invite-circle-progress" aria-label="Прогресс до следующего статуса">
-          <div className="invite-circle-progress-track">
-            <i style={{ width: `${progressPct}%` }} />
-          </div>
-          <p className="muted">
-            {nextTitle && toNext != null
-              ? toNext === 0
-                ? `Достигнут ${nextTitle}`
-                : `Ещё ${toNext} до «${nextTitle}»`
-              : 'Максимальный статус — GymBro Spotter'}
-          </p>
-        </div>
-
         <InviteFriendsButton
           userId={user.id}
           gymName={gymName}
@@ -206,6 +191,26 @@ export function InviteCirclePage() {
           <Share2 size={16} /> Поделиться ссылкой
         </InviteFriendsButton>
       </section>
+
+      <button
+        type="button"
+        className="toggle-row invite-circle-status-toggle"
+        role="switch"
+        aria-checked={statusOnAvatar}
+        disabled={savingToggle}
+        onClick={() => void onToggleAvatarStatus()}
+      >
+        <div>
+          <strong>Статус на аватаре</strong>
+          <p className="muted">
+            {statusOnAvatar
+              ? 'Другие видят стикер и рамку на твоём фото'
+              : 'Скрыт от других. Ссылка и рост круга работают как раньше'}
+          </p>
+        </div>
+        <span className={`toggle ${statusOnAvatar ? 'on' : ''}`} />
+      </button>
+      {toggleError ? <p className="admin-inline-error">{toggleError}</p> : null}
 
       <section className="surface invite-circle-section invite-circle-ladder">
         <SectionTitle>Лестница статусов</SectionTitle>
@@ -298,6 +303,18 @@ export function InviteCirclePage() {
             <UserCard user={previewUser} enableLike={false} priority staticPreview />
           </div>
         ) : null}
+        <div className="invite-circle-progress" aria-label="Прогресс до следующего статуса">
+          <div className="invite-circle-progress-track">
+            <i style={{ width: `${progressPct}%` }} />
+          </div>
+          <p className="muted">
+            {nextTitle && toNext != null
+              ? toNext === 0
+                ? `Достигнут ${nextTitle}`
+                : `Ещё ${toNext} до «${nextTitle}»`
+              : 'Максимальный статус — GymBro Spotter'}
+          </p>
+        </div>
       </section>
     </main>
   )

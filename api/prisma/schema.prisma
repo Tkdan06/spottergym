@@ -90,6 +90,8 @@ model User {
   lookingToMeet    Boolean         @default(true)
   /** Show circle status sticker / chrome on the public avatar */
   referralStatusVisible Boolean    @default(true)
+  /** Cached credited invitees — keep in sync on onboard / attach / delete */
+  referralCreditedCount Int        @default(0)
   onboardingDone   Boolean         @default(false)
   isAdmin          Boolean         @default(false)
   isMasterAdmin    Boolean         @default(false)
@@ -129,6 +131,7 @@ model User {
   @@index([username])
   @@index([deletedAt])
   @@index([signupIp])
+  @@index([lastSeenAt])
 }
 
 /** One-time password reset links (raw token never stored — only sha256 hash). */
@@ -359,6 +362,7 @@ model CheckIn {
   @@index([gymId, checkedOutAt])
   @@index([userId, checkedOutAt])
   @@index([expiresAt, checkedOutAt])
+  @@index([checkedInAt])
 }
 
 /** fromUser лайкнул toUser */

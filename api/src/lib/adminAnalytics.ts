@@ -1,5 +1,5 @@
 import { prisma } from '../db.js'
-import { expireStaleCheckIns } from './checkInExpiry.js'
+import { scheduleExpireStaleCheckIns } from './checkInExpiry.js'
 import {
   buildPasswordResetSummary,
   type PasswordResetSummary,
@@ -111,7 +111,7 @@ function computeDayNRetention(
 }
 
 export async function buildAdminAnalytics(): Promise<AdminAnalytics> {
-  await expireStaleCheckIns()
+  scheduleExpireStaleCheckIns()
 
   const now = new Date()
   const todayKey = moscowDayKey(now)
@@ -121,7 +121,11 @@ export async function buildAdminAnalytics(): Promise<AdminAnalytics> {
   const [
     users,
     activityRows,
-    photoRows,
+    photoAgg,
+    onboarded,
+    coaches,
+    dau,
+    mau,
     activeNow,
     checkedInTodayRows,
     cityGroups,
@@ -135,24 +139,26 @@ export async function buildAdminAnalytics(): Promise<AdminAnalytics> {
     prisma.user.count({ where: { deletedAt: null } }),
     prisma.user.findMany({
       where: { deletedAt: null },
-      select: {
-        registeredAt: true,
-        lastSeenAt: true,
-        onboardingDone: true,
-        isCoach: true,
-        age: true,
-      },
+      select: { registeredAt: true, lastSeenAt: true },
     }),
-    prisma.user.findMany({
-      where: { deletedAt: null },
-      select: { photos: true },
-    }),
+    prisma.$queryRaw<[{ users: bigint; photos: bigint; bytes: bigint }]>`
+      SELECT
+        COUNT(*) FILTER (WHERE cardinality(photos) > 0) AS users,
+        COALESCE(SUM(cardinality(photos)), 0) AS photos,
+        COALESCE(SUM(octet_length(array_to_string(photos, ''))), 0) AS bytes
+      FROM "User"
+      WHERE "deletedAt" IS NULL
+    `,
+    prisma.user.count({ where: { deletedAt: null, onboardingDone: true } }),
+    prisma.user.count({ where: { deletedAt: null, isCoach: true } }),
+    prisma.user.count({ where: { deletedAt: null, lastSeenAt: { gte: todayStart } } }),
+    prisma.user.count({ where: { deletedAt: null, lastSeenAt: { gte: mauStart } } }),
     prisma.checkIn.count({ where: { checkedOutAt: null } }),
-    prisma.checkIn.findMany({
-      where: { checkedInAt: { gte: todayStart } },
-      select: { userId: true },
-      distinct: ['userId'],
-    }),
+    prisma.$queryRaw<[{ n: bigint }]>`
+      SELECT COUNT(DISTINCT "userId")::bigint AS n
+      FROM "CheckIn"
+      WHERE "checkedInAt" >= ${todayStart}
+    `,
     prisma.user.groupBy({
       by: ['city'],
       _count: { _all: true },
@@ -178,28 +184,10 @@ export async function buildAdminAnalytics(): Promise<AdminAnalytics> {
     prisma.gym.findMany({ select: { id: true, name: true, network: true } }),
   ])
 
-  let onboarded = 0
-  let coaches = 0
-  let dau = 0
-  let mau = 0
-  for (const u of activityRows) {
-    if (u.onboardingDone) onboarded += 1
-    if (u.isCoach) coaches += 1
-    if (u.lastSeenAt >= todayStart) dau += 1
-    if (u.lastSeenAt >= mauStart) mau += 1
-  }
-
-  let withPhotos = 0
-  let totalPhotos = 0
-  let photosBytes = 0
-  for (const row of photoRows) {
-    const photos = row.photos || []
-    if (photos.length) {
-      withPhotos += 1
-      totalPhotos += photos.length
-      photosBytes += estimatePhotosBytes(photos)
-    }
-  }
+  const photoRow = photoAgg[0]
+  const withPhotos = Number(photoRow?.users || 0)
+  const totalPhotos = Number(photoRow?.photos || 0)
+  const photosBytes = Number(photoRow?.bytes || 0)
 
   const gymMap = new Map(gyms.map((g) => [g.id, g]))
   const byGym = gymGroups
@@ -269,7 +257,7 @@ export async function buildAdminAnalytics(): Promise<AdminAnalytics> {
     totalPhotos,
     photosBytes,
     activeNow,
-    checkedInToday: checkedInTodayRows.length,
+    checkedInToday: Number(checkedInTodayRows[0]?.n || 0),
     dau,
     mau,
     retention,

@@ -75,7 +75,7 @@
 .profile-hero {
   display: grid;
   gap: 14px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   justify-items: center;
   text-align: center;
 }
@@ -174,6 +174,58 @@
   align-items: flex-start;
 }
 
+/* Свой профиль: колонка узкая — статус сразу под @ником, без точки-сепаратора */
+.profile-handle-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Чужой профиль: шире и по центру — @ник · статус в одну строку */
+.profile-hero:not(.mine) .profile-handle-row {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px 8px;
+}
+
+.profile-handle-row .profile-username,
+.profile-handle-row .profile-username-static {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.profile-status-mark {
+  display: inline-block;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.profile-hero:not(.mine) .profile-username-static + .profile-status-mark::before {
+  content: '·';
+  margin-right: 8px;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+a.profile-status-mark:hover,
+a.profile-status-mark:focus-visible {
+  color: var(--accent);
+  outline: none;
+}
+
 .profile-identity:empty {
   display: none;
 }
@@ -215,10 +267,15 @@
 }
 
 .profile-block {
-  padding: 16px 0;
-  margin-bottom: 0;
-  border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
-  background: none;
+  padding: 16px;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+}
+
+.profile-block + .profile-block {
+  margin-top: 12px;
 }
 
 /* Bare h2 in block → same as .section-heading (UI kit) */

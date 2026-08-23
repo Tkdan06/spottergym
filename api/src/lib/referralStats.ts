@@ -44,9 +44,35 @@ export async function countCreditedInvites(inviterId: string): Promise<number> {
   })
 }
 
-export async function getReferralStatsForUser(userId: string): Promise<ReferralPublicStats> {
+export async function getReferralStatsForUser(
+  userId: string,
+  cachedCount?: number,
+): Promise<ReferralPublicStats> {
   const count = await countCreditedInvites(userId)
+  if (cachedCount !== count) {
+    void prisma.user
+      .update({
+        where: { id: userId },
+        data: { referralCreditedCount: count },
+      })
+      .catch(() => undefined)
+  }
   return statsFromCount(count)
+}
+
+export async function incrementReferralCredit(inviterId: string) {
+  await prisma.user.update({
+    where: { id: inviterId },
+    data: { referralCreditedCount: { increment: 1 } },
+  })
+}
+
+export async function decrementReferralCredit(inviterId: string) {
+  await prisma.$executeRaw`
+    UPDATE "User"
+    SET "referralCreditedCount" = GREATEST(0, "referralCreditedCount" - 1)
+    WHERE id = ${inviterId}
+  `
 }
 
 /** Batch map userId → credited stats for feed cards */

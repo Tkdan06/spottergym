@@ -2,11 +2,7 @@ import { useState } from 'react'
 import { Bell, Copy, Settings, Share2, Shield } from 'lucide-react'
 import { Link, Navigate } from 'react-router-dom'
 import { LikesRow } from '../components/LikesRow'
-import {
-  ReferralBadge,
-  isReferralStatusVisible,
-  referralChromeClass,
-} from '../components/ReferralBadge'
+import { ReferralBadge } from '../components/ReferralBadge'
 import { PhotoGalleryModal } from '../components/PhotoGalleryModal'
 import { ProfilePhotoCarousel } from '../components/ProfilePhotoCarousel'
 import { SoftFlash } from '../components/SoftFlash'
@@ -78,7 +74,7 @@ export function ProfilePage() {
         </p>
       ) : null}
 
-      <div className={`profile-hero mine ${referralChromeClass(user)}`}>
+      <div className="profile-hero mine">
         <div className="profile-hero-photo-wrap">
           <ProfilePhotoCarousel
             photos={user.photos}
@@ -101,31 +97,41 @@ export function ProfilePage() {
           <h2 className="profile-hero-name">
             {user.name}, {user.age}
           </h2>
-          {isReferralStatusVisible(user) && user.referralTitle ? (
-            <p className="referral-status-title-only">{user.referralTitle}</p>
-          ) : null}
           <div className="profile-identity">
-            {user.username ? (
-              <button
-                type="button"
-                className="profile-username"
-                onClick={() => {
-                  void navigator.clipboard
-                    ?.writeText(formatUsername(user.username))
-                    .then(() => {
-                      setCopyFlash('Скопировано')
-                      window.setTimeout(() => setCopyFlash(''), 1600)
-                    })
-                    .catch(() => {
-                      setCopyFlash('Не удалось скопировать')
-                      window.setTimeout(() => setCopyFlash(''), 1600)
-                    })
-                }}
-                title="Скопировать ник Spotter"
-              >
-                {formatUsername(user.username)}
-                <Copy size={14} aria-hidden />
-              </button>
+            {user.username || user.referralTitle ? (
+              <div className="profile-handle-row">
+                {user.username ? (
+                  <button
+                    type="button"
+                    className="profile-username"
+                    onClick={() => {
+                      void navigator.clipboard
+                        ?.writeText(formatUsername(user.username))
+                        .then(() => {
+                          setCopyFlash('Скопировано')
+                          window.setTimeout(() => setCopyFlash(''), 1600)
+                        })
+                        .catch(() => {
+                          setCopyFlash('Не удалось скопировать')
+                          window.setTimeout(() => setCopyFlash(''), 1600)
+                        })
+                    }}
+                    title="Скопировать ник Spotter"
+                  >
+                    {formatUsername(user.username)}
+                    <Copy size={14} aria-hidden />
+                  </button>
+                ) : null}
+                {user.referralTitle ? (
+                  <Link
+                    to="/app/invite"
+                    className="profile-status-mark"
+                    title="Мой круг"
+                  >
+                    {user.referralTitle}
+                  </Link>
+                ) : null}
+              </div>
             ) : null}
             {normalizeInstagram(user.instagram || '') ? (
               <a

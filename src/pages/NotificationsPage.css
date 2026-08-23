@@ -41,6 +41,13 @@
 .notifications-page .seg {
   position: relative;
   z-index: 2;
+  align-self: stretch;
+  width: 100%;
+  max-width: 100%;
+  margin-inline: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
 }
 
 .notif-setting-icon {

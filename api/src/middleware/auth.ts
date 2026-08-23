@@ -1,7 +1,7 @@
 import { createMiddleware } from 'hono/factory'
 import { getCookie } from 'hono/cookie'
 import { isIpBlocked } from '../lib/blocks.js'
-import { expireStaleCheckIns } from '../lib/checkInExpiry.js'
+import { scheduleExpireStaleCheckIns } from '../lib/checkInExpiry.js'
 import { prisma } from '../db.js'
 import { verifySession } from '../lib/jwt.js'
 import { getReferralStatsForUser } from '../lib/referralStats.js'
@@ -56,7 +56,7 @@ export const requireAuth = createMiddleware<AuthedEnv>(async (c, next) => {
 })
 
 export async function loadAuthedUser(userId: string) {
-  await expireStaleCheckIns()
+  scheduleExpireStaleCheckIns()
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: {
@@ -71,7 +71,7 @@ export async function loadAuthedUser(userId: string) {
 export async function authedUserJson(userId: string) {
   const user = await loadAuthedUser(userId)
   if (!user) return null
-  const referral = await getReferralStatsForUser(userId)
+  const referral = await getReferralStatsForUser(userId, user.referralCreditedCount)
   return serializeUser(user, { referral })
 }
 

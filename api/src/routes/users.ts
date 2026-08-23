@@ -1,11 +1,11 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
-import { expireStaleCheckIns } from '../lib/checkInExpiry.js'
+import { scheduleExpireStaleCheckIns } from '../lib/checkInExpiry.js'
 import { prisma } from '../db.js'
 import { resolveAdminFlags } from '../lib/admin.js'
 import { areUsersBlocked, listHiddenUserIds } from '../lib/blocks.js'
-import { serializePublicUser } from '../lib/serialize.js'
 import { getReferralStatsForUser, getReferralStatsMap } from '../lib/referralStats.js'
+import { serializePublicUser } from '../lib/serialize.js'
 import { loadAuthedUser, requireAuth, type AuthedEnv } from '../middleware/auth.js'
 import { rateLimit } from '../middleware/rateLimit.js'
 import { normalizeUsername } from '../lib/username.js'
@@ -46,7 +46,7 @@ userRoutes.get(
     return c.json({ error: 'Введи минимум 2 символа' }, 400)
   }
   const me = c.get('userId')
-  await expireStaleCheckIns()
+  scheduleExpireStaleCheckIns()
   const hidden = await listHiddenUserIds(me)
   const nick = q.replace(/[^a-z0-9_]/g, '')
   const nameQ = raw.replace(/^@+/, '').trim()
@@ -100,7 +100,7 @@ userRoutes.get('/by-username/:username', async (c) => {
     return c.json({ error: 'Пользователь недоступен' }, 403)
   }
 
-  const referral = await getReferralStatsForUser(found.id)
+  const referral = await getReferralStatsForUser(found.id, found.referralCreditedCount)
   return c.json({ user: serializePublicUser(found, { referral }) })
 })
 
@@ -121,11 +121,11 @@ userRoutes.get('/:id', async (c) => {
   if (id.data === me) {
     const self = await loadAuthedUser(me)
     if (!self) return c.json({ error: 'Аккаунт не найден' }, 404)
-    const referral = await getReferralStatsForUser(self.id)
+    const referral = await getReferralStatsForUser(self.id, self.referralCreditedCount)
     return c.json({ user: serializePublicUser(self, { revealAnonymous, referral }) })
   }
 
-  await expireStaleCheckIns()
+  scheduleExpireStaleCheckIns()
   const found = await prisma.user.findFirst({
     where: { id: id.data, deletedAt: null },
     include: userInclude,
@@ -135,7 +135,7 @@ userRoutes.get('/:id', async (c) => {
     return c.json({ error: 'Пользователь недоступен' }, 403)
   }
 
-  const referral = await getReferralStatsForUser(found.id)
+  const referral = await getReferralStatsForUser(found.id, found.referralCreditedCount)
   return c.json({
     user: serializePublicUser(found, { revealAnonymous, referral }),
   })

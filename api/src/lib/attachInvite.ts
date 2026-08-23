@@ -1,6 +1,6 @@
 import { prisma } from '../db.js'
 import { createNotification } from './notify.js'
-import { countCreditedInvites } from './referralStats.js'
+import { countCreditedInvites, incrementReferralCredit } from './referralStats.js'
 import { referralTierFromCount } from './referralTiers.js'
 
 export type AttachInviteResult = {
@@ -72,6 +72,7 @@ export async function attachInvite(
   }
 
   if (invitee.onboardingDone) {
+    await incrementReferralCredit(inviter.id)
     await notifyInviteCredited({ inviterId: inviter.id, invitee })
     return { attached: true, already: false, credited: true }
   }

@@ -1,7 +1,7 @@
 import type { CheckIn, Gym, User, UserGym } from '@prisma/client'
 import { resolveAdminFlags } from './admin.js'
 import { canExtendCheckIn, resolveExpiresAt } from './checkInExpiry.js'
-import type { ReferralPublicStats } from './referralStats.js'
+import { statsFromCount, type ReferralPublicStats } from './referralStats.js'
 
 type UserWithRels = User & {
   gyms?: UserGym[]
@@ -25,6 +25,16 @@ function referralFields(stats?: ReferralPublicStats | null) {
     referralBadge: s.referralBadge,
     referralChrome: s.referralChrome,
   }
+}
+
+function referralFromUser(
+  user: Pick<User, 'referralCreditedCount' | 'referralStatusVisible'>,
+  override?: ReferralPublicStats | null,
+  hideIfPrivate = false,
+) {
+  if (hideIfPrivate && user.referralStatusVisible === false) return EMPTY_REFERRAL
+  if (override) return referralFields(override)
+  return referralFields(statsFromCount(user.referralCreditedCount || 0))
 }
 
 export function serializeUser(
@@ -57,6 +67,7 @@ export function serializeUser(
       breakUntil: null as string | null,
       privacy: 'open' as const,
       lookingToMeet: false,
+      referralStatusVisible: false,
       isActive: false,
       checkedInGymId: '',
       checkedInAt: '',
@@ -72,7 +83,7 @@ export function serializeUser(
       canGrantAdmin: false,
       adminPermissions: resolveAdminFlags({ ...user, isAdmin: false, isMasterAdmin: false })
         .adminPermissions,
-      ...referralFields(opts?.referral),
+      ...referralFromUser(user, opts?.referral),
     }
   }
 
@@ -128,7 +139,7 @@ export function serializeUser(
     isMasterAdmin: flags.isMasterAdmin,
     canGrantAdmin: flags.canGrantAdmin,
     adminPermissions: flags.adminPermissions,
-    ...referralFields(opts?.referral),
+    ...referralFromUser(user, opts?.referral),
   }
 }
 
@@ -242,6 +253,127 @@ export function serializePublicUser(
   }
 
   return base
+}
+
+export type GymPeopleCardUser = {
+  id: string
+  username: string
+  instagram: string
+  name: string
+  age: number
+  gender: User['gender']
+  bio: string
+  photos: string[]
+  avatar: string
+  homeGymId: string | null
+  city: string
+  intent: User['intent']
+  experienceLevel: User['experienceLevel']
+  sports: string[]
+  isCoach: boolean
+  coachSports: string[]
+  breakUntil: string | null
+  privacy: User['privacy']
+  lookingToMeet: boolean
+  lastSeenAt: Date
+  referralStatusVisible: boolean
+  referralCreditedCount: number
+  checkIns: Array<{
+    gymId: string
+    checkedInAt: Date
+    expiresAt: Date | null
+    extendCount: number
+  }>
+}
+
+/** Floor / gym-detail card — no admin flags, no gym graph, one photo. */
+export function serializePublicCard(
+  user: GymPeopleCardUser,
+  gymId: string,
+  referralOverride?: ReferralPublicStats | null,
+) {
+  const now = new Date()
+  const open = user.checkIns[0]
+  const expiresAt = open ? resolveExpiresAt(open.checkedInAt, open.expiresAt) : null
+  const activeHere = Boolean(
+    open && expiresAt && expiresAt.getTime() > now.getTime() && open.gymId === gymId,
+  )
+  const photo = (user.photos || []).find((p) => typeof p === 'string' && p.length > 0) || ''
+  const referral = referralFromUser(user, referralOverride, true)
+
+  if (user.privacy === 'anonymous') {
+    return {
+      id: user.id,
+      username: '',
+      instagram: '',
+      name: 'Аноним',
+      age: 0,
+      gender: user.gender,
+      bio: '',
+      photos: [] as string[],
+      avatar: '',
+      gymIds: [] as string[],
+      homeGymId: '',
+      city: '',
+      intent: 'both' as const,
+      experienceLevel: 'confident' as const,
+      interests: [] as string[],
+      sports: [] as string[],
+      isCoach: false,
+      coachSports: [] as string[],
+      visitSlots: [] as unknown[],
+      breakUntil: user.breakUntil,
+      privacy: 'anonymous' as const,
+      lookingToMeet: user.lookingToMeet,
+      isActive: activeHere,
+      checkedInGymId: activeHere ? gymId : '',
+      checkedInAt: '',
+      checkedInExpiresAt: '',
+      checkInExtendCount: 0,
+      checkInCanExtend: false,
+      lastSeenAt: '',
+      isDeleted: false,
+      verified: false,
+      ...EMPTY_REFERRAL,
+    }
+  }
+
+  return {
+    id: user.id,
+    username: user.username,
+    instagram: user.instagram || '',
+    name: user.name,
+    age: user.age,
+    gender: user.gender,
+    bio: user.bio,
+    photos: photo ? [photo] : [],
+    avatar: user.avatar || '',
+    gymIds: [gymId],
+    homeGymId: user.homeGymId || gymId,
+    city: user.city,
+    intent: user.intent,
+    experienceLevel: user.experienceLevel,
+    interests: [] as string[],
+    sports: user.sports || [],
+    isCoach: user.isCoach,
+    coachSports: user.coachSports || [],
+    visitSlots: [] as unknown[],
+    breakUntil: user.breakUntil,
+    privacy: user.privacy,
+    lookingToMeet: user.lookingToMeet,
+    isActive: activeHere,
+    checkedInGymId: activeHere ? gymId : '',
+    checkedInAt: activeHere && open ? open.checkedInAt.toISOString() : '',
+    checkedInExpiresAt: activeHere && expiresAt ? expiresAt.toISOString() : '',
+    checkInExtendCount: activeHere && open ? open.extendCount : 0,
+    checkInCanExtend: Boolean(
+      activeHere && open && expiresAt && canExtendCheckIn(open.extendCount, expiresAt, now),
+    ),
+    lastSeenAt: user.lastSeenAt.toISOString(),
+    isDeleted: false,
+    verified: false,
+    ...referral,
+  }
 }
 
 export function serializeGym(

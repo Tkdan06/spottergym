@@ -51,6 +51,17 @@ export async function softDeleteUser(
     await tx.userBlock.deleteMany({
       where: { OR: [{ blockerId: userId }, { blockedId: userId }] },
     })
+    const asInvitee = await tx.invite.findUnique({
+      where: { inviteeId: userId },
+      select: { inviterId: true },
+    })
+    if (asInvitee && target.onboardingDone) {
+      await tx.$executeRaw`
+        UPDATE "User"
+        SET "referralCreditedCount" = GREATEST(0, "referralCreditedCount" - 1)
+        WHERE id = ${asInvitee.inviterId}
+      `
+    }
     await tx.invite.deleteMany({
       where: { OR: [{ inviterId: userId }, { inviteeId: userId }] },
     })

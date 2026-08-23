@@ -75,6 +75,7 @@
 .invite-circle-progress {
   display: grid;
   gap: 8px;
+  padding-top: 4px;
 }
 
 .invite-circle-progress .muted {
@@ -101,15 +102,21 @@
 }
 
 .invite-circle-status {
-  gap: 12px;
+  gap: 14px;
 }
 
 .invite-circle-status-toggle {
-  padding: 12px 0 4px;
-  border: 0;
-  border-top: 1px solid var(--line);
-  border-radius: 0;
-  background: transparent;
+  margin: 0;
+}
+
+.invite-circle-status-toggle:disabled {
+  opacity: 0.72;
+}
+
+.invite-circle-status-toggle .muted {
+  margin: 2px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.3;
 }
 
 .invite-circle-track {

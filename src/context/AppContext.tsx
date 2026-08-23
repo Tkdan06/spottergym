@@ -222,6 +222,7 @@ export interface AppContextValue {
     data: Partial<AppUser>,
   ) => void | Promise<{ ok: true } | { ok: false; error: string }>
   updateProfile: (data: Partial<AppUser>) => void | Promise<void>
+  refreshMe: () => Promise<void>
   /** Быстрый check-in/out; при нескольких залах лучше checkIn + picker */
   toggleActive: (gymId?: string) => void | Promise<void>
   checkIn: (gymId: string) => void | Promise<void>
@@ -1304,6 +1305,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     persistSessionUser(next)
     return next
   }, [])
+
+  const refreshMe = useCallback(async () => {
+    if (!apiOnlineRef.current) return
+    const current = userRef.current
+    if (current && isDemoAccount(current.email)) return
+    try {
+      const me = await apiMe()
+      applyServerUser(me as AppUser)
+    } catch {
+      /* keep session */
+    }
+  }, [applyServerUser])
 
   const completeOnboarding = useCallback(
     async (data: Partial<AppUser>): Promise<{ ok: true } | { ok: false; error: string }> => {
@@ -2790,6 +2803,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       logout,
       completeOnboarding,
       updateProfile,
+      refreshMe,
       toggleActive,
       checkIn,
       checkOut,
@@ -2881,6 +2895,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       logout,
       completeOnboarding,
       updateProfile,
+      refreshMe,
       toggleActive,
       checkIn,
       checkOut,
