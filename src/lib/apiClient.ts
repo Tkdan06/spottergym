@@ -1071,10 +1071,15 @@ export async function apiPinConversation(conversationId: string, pinned?: boolea
   return data.conversation
 }
 
-/** Hide chat from my inbox only (Telegram-style delete for me) */
-export async function apiDeleteConversation(conversationId: string) {
-  await request<{ ok: true; id: string }>(
-    `/conversations/${encodeURIComponent(conversationId)}`,
-    { method: 'DELETE' },
+/** Hide chat from my inbox, or wipe history and hide for both. */
+export async function apiDeleteConversation(
+  conversationId: string,
+  opts?: { forBoth?: boolean },
+) {
+  const forBoth = Boolean(opts?.forBoth)
+  const q = forBoth ? '?forBoth=1' : ''
+  await request<{ ok: true; id: string; forBoth: boolean }>(
+    `/conversations/${encodeURIComponent(conversationId)}${q}`,
+    { method: 'DELETE', json: { forBoth } },
   )
 }

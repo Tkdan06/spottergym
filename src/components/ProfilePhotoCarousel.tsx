@@ -12,6 +12,8 @@ type Props = {
   name: string
   /** Компактный квадрат для своего профиля */
   mine?: boolean
+  /** Full-bleed portrait on someone else's profile */
+  cover?: boolean
   onOpen: (index: number) => void
   emptyHint?: string
 }
@@ -22,6 +24,7 @@ export function ProfilePhotoCarousel({
   errorFallbackSrc,
   name,
   mine = false,
+  cover = false,
   onOpen,
   emptyHint,
 }: Props) {
@@ -71,7 +74,7 @@ export function ProfilePhotoCarousel({
 
   return (
     <div
-      className={`profile-carousel ${mine ? 'mine' : ''}`}
+      className={`profile-carousel ${mine ? 'mine' : ''} ${cover ? 'cover' : ''}`.trim()}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}

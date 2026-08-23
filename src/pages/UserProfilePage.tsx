@@ -248,7 +248,7 @@ export function UserProfilePage() {
   }
 
   return (
-    <main className="page profile-view">
+    <main className={`page profile-view${!isSelf ? ' has-sticky-cta' : ''}`}>
       <header className="profile-other-top">
         <button type="button" className="back-link" onClick={() => navigate(-1)}>
           <ArrowLeft size={18} /> Назад
@@ -290,9 +290,10 @@ export function UserProfilePage() {
         </div>
       ) : null}
 
-      <div className="profile-hero">
-        <div className="profile-hero-photo-wrap">
+      <div className="profile-hero-cover">
+        <div className="profile-hero-cover-photo">
           <ProfilePhotoCarousel
+            cover
             photos={galleryPhotos}
             fallbackSrc={photo}
             errorFallbackSrc={localGenderAvatar(person.gender)}
@@ -303,85 +304,101 @@ export function UserProfilePage() {
               setGalleryOpen(true)
             }}
           />
-          {!isAnon && (person.referralTier || person.referralTitle) ? (
-            <ReferralBadge user={person} size="lg" className="referral-badge--on-photo" />
-          ) : null}
-        </div>
-        <div className="profile-hero-meta">
-          {onBreak ? (
-            <span className="pill pill-break">{breakText}</span>
-          ) : person.isActive ? (
-            <span className="pill pill-online">
-              <span className="online-dot" />В зале
-            </span>
-          ) : (
-            <span className="pill pill-offline">Не в зале</span>
-          )}
-          <h1>
-            {name}
-            {!isAnon ? <span>, {person.age}</span> : null}
-          </h1>
-          <div className="profile-identity">
-            {person.username ||
-            (!isAnon && isReferralStatusVisible(person) && person.referralTitle) ? (
-              <div className="profile-handle-row">
-                {person.username ? (
-                  <p className="profile-username-static">{formatUsername(person.username)}</p>
-                ) : null}
-                {!isAnon && isReferralStatusVisible(person) && person.referralTitle ? (
-                  <span className="profile-status-mark">{person.referralTitle}</span>
-                ) : null}
-              </div>
-            ) : null}
-            {!isAnon && normalizeInstagram(person.instagram || '') ? (
-              <a
-                className="profile-instagram-link"
-                href={instagramProfileUrl(person.instagram || '')}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={`Открыть Instagram ${formatInstagram(person.instagram)}`}
-                aria-label={`Instagram ${formatInstagram(person.instagram)}`}
-              >
-                <InstagramIcon width={16} height={16} aria-hidden />
-                <span className="profile-instagram-label">Instagram</span>
-                <span className="profile-instagram-handle">
-                  {formatInstagram(person.instagram)}
-                </span>
-              </a>
+          <div className="profile-hero-cover-scrim" aria-hidden />
+          <div className="profile-hero-cover-top">
+            {onBreak ? (
+              <span className="pill pill-break">{breakText}</span>
+            ) : person.isActive ? (
+              <span className="pill pill-online">
+                <span className="online-dot" />В зале
+              </span>
+            ) : (
+              <span className="pill pill-offline">Не в зале</span>
+            )}
+            {!isAnon &&
+            isReferralStatusVisible(person) &&
+            (person.referralTier || person.referralTitle) ? (
+              <ReferralBadge user={person} size="lg" className="referral-badge--on-cover" />
             ) : null}
           </div>
-          <p className="muted">
-            {!isAnon && person.isCoach
-              ? coachSports.length
-                ? `Тренер · ${coachSports.join(', ')}`
-                : 'Тренер'
-              : intentLabel(person.intent)}
-          </p>
-          {gyms.length ? (
-            <div className="profile-gym-links" aria-label="Залы пользователя">
-              {gyms.map((gym) => {
-                const here = person.isActive && getCheckedInGymId(person) === gym.id
-                return (
-                  <Link
-                    key={gym.id}
-                    to={`/app/gym/${gym.id}`}
-                    className={`chip active profile-gym-link ${here ? 'is-here' : ''}`}
-                  >
-                    {gym.name}
-                    {here ? ' · сейчас' : ''}
-                  </Link>
-                )
-              })}
+          <div className="profile-hero-cover-copy">
+            <h1>
+              {name}
+              {!isAnon ? <span>, {person.age}</span> : null}
+            </h1>
+            <p className="profile-hero-cover-status">
+              {!isAnon && person.isCoach
+                ? coachSports.length
+                  ? `Тренер · ${coachSports.slice(0, 2).join(', ')}`
+                  : 'Тренер'
+                : person.lookingToMeet
+                  ? person.gender === 'female'
+                    ? 'Открыта к знакомству'
+                    : 'Открыт к знакомству'
+                  : intentLabel(person.intent)}
+            </p>
+            {!isAnon && !person.isCoach && sports.length ? (
+              <div className="profile-hero-cover-chips">
+                {sports.slice(0, 2).map((tag) => (
+                  <span key={tag} className="chip">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      <div className="profile-hero-meta profile-hero-meta--after-cover">
+        <div className="profile-identity">
+          {person.username ||
+          (!isAnon && isReferralStatusVisible(person) && person.referralTitle) ? (
+            <div className="profile-handle-row">
+              {person.username ? (
+                <p className="profile-username-static">{formatUsername(person.username)}</p>
+              ) : null}
+              {!isAnon && isReferralStatusVisible(person) && person.referralTitle ? (
+                <span className="profile-status-mark">{person.referralTitle}</span>
+              ) : null}
             </div>
-          ) : (
-            <p className="dim">Зал не указан</p>
-          )}
-          {!isAnon && person.isCoach ? (
-            <span className="pill pill-coach" style={{ marginTop: 8 }}>
-              Тренер
-            </span>
+          ) : null}
+          {!isAnon && normalizeInstagram(person.instagram || '') ? (
+            <a
+              className="profile-instagram-link"
+              href={instagramProfileUrl(person.instagram || '')}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={`Открыть Instagram ${formatInstagram(person.instagram)}`}
+              aria-label={`Instagram ${formatInstagram(person.instagram)}`}
+            >
+              <InstagramIcon width={16} height={16} aria-hidden />
+              <span className="profile-instagram-label">Instagram</span>
+              <span className="profile-instagram-handle">
+                {formatInstagram(person.instagram)}
+              </span>
+            </a>
           ) : null}
         </div>
+        {gyms.length ? (
+          <div className="profile-gym-links" aria-label="Залы пользователя">
+            {gyms.map((gym) => {
+              const here = person.isActive && getCheckedInGymId(person) === gym.id
+              return (
+                <Link
+                  key={gym.id}
+                  to={`/app/gym/${gym.id}`}
+                  className={`chip active profile-gym-link ${here ? 'is-here' : ''}`}
+                >
+                  {gym.name}
+                  {here ? ' · сейчас' : ''}
+                </Link>
+              )
+            })}
+          </div>
+        ) : (
+          <p className="dim">Зал не указан</p>
+        )}
       </div>
 
       <PhotoGalleryModal

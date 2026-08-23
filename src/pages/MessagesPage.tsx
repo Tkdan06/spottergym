@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type RefObject } from 'react'
 import { Heart, MessageCircle, Pin, PinOff, Search, Trash2, UserRound } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { PresenceBadge } from '../components/PresenceBadge'
@@ -9,6 +9,7 @@ import { profileImage, profileImageFallback } from '../lib/avatar'
 import { otherParticipantId } from '../lib/conversations'
 import { formatDialogTime } from '../lib/formatDialogTime'
 import { searchFieldProps } from '../lib/inputAttrs'
+import { useSheetA11y } from '../lib/sheetA11y'
 import { getCheckedInGymId } from '../lib/presence'
 import { formatUsername } from '../lib/username'
 import type { Conversation, UserProfile } from '../types'
@@ -16,6 +17,79 @@ import './FeedbackPage.css'
 import './MessagesPage.css'
 
 const LONG_PRESS_MS = 480
+
+function peerName(other: UserProfile | undefined) {
+  return other && !other.isDeleted ? displayName(other) : 'собеседника'
+}
+
+function DeleteChatConfirm({
+  conversation,
+  forBoth,
+  busy,
+  onToggleForBoth,
+  onConfirm,
+  onClose,
+  panelRef,
+  actionRef,
+}: {
+  conversation: Conversation
+  forBoth: boolean
+  busy: boolean
+  onToggleForBoth: () => void
+  onConfirm: () => void
+  onClose: () => void
+  panelRef: RefObject<HTMLDivElement | null>
+  actionRef: RefObject<HTMLButtonElement | null>
+}) {
+  const other = useOtherParticipant(conversation)
+  const name = peerName(other)
+
+  return (
+    <div className="app-sheet" role="dialog" aria-modal="true" aria-labelledby="chat-del-title">
+      <button
+        type="button"
+        className="app-sheet-backdrop"
+        aria-label="Закрыть"
+        disabled={busy}
+        onClick={onClose}
+      />
+      <div className="app-sheet-panel" ref={panelRef}>
+        <div className="app-sheet-grab" aria-hidden />
+        <h3 id="chat-del-title">Удалить чат?</h3>
+        <p className="muted">
+          {forBoth
+            ? 'История переписки удалится у обоих.'
+            : 'Чат пропадёт только из твоего списка.'}
+        </p>
+        <button
+          type="button"
+          className="toggle-row"
+          disabled={busy}
+          aria-pressed={forBoth}
+          onClick={onToggleForBoth}
+        >
+          <div>
+            <strong>Также удалить для {name}</strong>
+            <p className="muted">История исчезнет и у собеседника</p>
+          </div>
+          <span className={`toggle${forBoth ? ' on' : ''}`} />
+        </button>
+        <button
+          type="button"
+          ref={actionRef}
+          className="btn btn-danger btn-block"
+          disabled={busy}
+          onClick={onConfirm}
+        >
+          {busy ? 'Удаляем…' : 'Удалить'}
+        </button>
+        <button type="button" className="sheet-action" disabled={busy} onClick={onClose}>
+          Отмена
+        </button>
+      </div>
+    </div>
+  )
+}
 
 function sortConversations(list: Conversation[]) {
   return [...list].sort((a, b) => {
@@ -282,12 +356,16 @@ export function MessagesPage() {
   const [searchError, setSearchError] = useState('')
   const [results, setResults] = useState<UserProfile[]>([])
   const [sheetConv, setSheetConv] = useState<Conversation | null>(null)
+  const [deleteConv, setDeleteConv] = useState<Conversation | null>(null)
+  const [deleteForBoth, setDeleteForBoth] = useState(false)
   const [actionBusy, setActionBusy] = useState(false)
   const [hasMoreChats, setHasMoreChats] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const pinActionRef = useRef<HTMLButtonElement>(null)
   const pinPanelRef = useRef<HTMLDivElement>(null)
+  const deletePanelRef = useRef<HTMLDivElement>(null)
+  const deleteActionRef = useRef<HTMLButtonElement>(null)
   const restoreFocusRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
@@ -296,6 +374,15 @@ export function MessagesPage() {
       .then((res) => setHasMoreChats(Boolean(res.hasMore)))
       .catch(() => undefined)
   }, [apiOnline, refreshChats])
+
+  useSheetA11y(
+    Boolean(deleteConv),
+    () => {
+      if (!actionBusy) setDeleteConv(null)
+    },
+    deletePanelRef,
+    deleteActionRef,
+  )
 
   useEffect(() => {
     if (!sheetConv) return
@@ -312,7 +399,10 @@ export function MessagesPage() {
     }
     if (page) {
       for (const child of Array.from(page.children)) {
-        if (!child.classList.contains('app-sheet') && !child.classList.contains('chat-pin-sheet')) {
+        if (
+          !child.classList.contains('app-sheet') &&
+          !child.classList.contains('chat-pin-sheet')
+        ) {
           child.setAttribute('inert', '')
           inertNodes.push(child)
         }
@@ -413,16 +503,19 @@ export function MessagesPage() {
     }
   }
 
-  const onDeleteChat = async () => {
+  const onAskDelete = () => {
     if (!sheetConv || actionBusy) return
-    const name = sheetConv.other ? displayName(sheetConv.other) : 'Удалённый пользователь'
-    const ok = window.confirm(`Удалить чат с ${name} у себя? У собеседника переписка останется.`)
-    if (!ok) return
+    setDeleteForBoth(false)
+    setDeleteConv(sheetConv)
+    setSheetConv(null)
+  }
+
+  const onConfirmDelete = async () => {
+    if (!deleteConv || actionBusy) return
     setActionBusy(true)
     try {
-      const id = sheetConv.id
-      await deleteConversation(id)
-      setSheetConv(null)
+      await deleteConversation(deleteConv.id, { forBoth: deleteForBoth })
+      setDeleteConv(null)
     } finally {
       setActionBusy(false)
     }
@@ -489,7 +582,14 @@ export function MessagesPage() {
         {sorted.length ? (
           <>
             {sorted.map((c) => (
-              <ConversationRow key={c.id} conversation={c} onLongPress={setSheetConv} />
+              <ConversationRow
+                key={c.id}
+                conversation={c}
+                onLongPress={(conv) => {
+                  setDeleteConv(null)
+                  setSheetConv(conv)
+                }}
+              />
             ))}
             {hasMoreChats ? (
               <button
@@ -560,7 +660,7 @@ export function MessagesPage() {
                 type="button"
                 className="sheet-action is-danger"
                 disabled={actionBusy}
-                onClick={() => void onDeleteChat()}
+                onClick={onAskDelete}
               >
                 <Trash2 size={18} aria-hidden />
                 Удалить
@@ -568,6 +668,21 @@ export function MessagesPage() {
             </div>
           </div>
         </div>
+      ) : null}
+
+      {deleteConv ? (
+        <DeleteChatConfirm
+          conversation={deleteConv}
+          forBoth={deleteForBoth}
+          busy={actionBusy}
+          onToggleForBoth={() => setDeleteForBoth((v) => !v)}
+          onConfirm={() => void onConfirmDelete()}
+          onClose={() => {
+            if (!actionBusy) setDeleteConv(null)
+          }}
+          panelRef={deletePanelRef}
+          actionRef={deleteActionRef}
+        />
       ) : null}
     </main>
   )

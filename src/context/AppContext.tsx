@@ -252,8 +252,11 @@ export interface AppContextValue {
   markRead: (conversationId: string) => void | Promise<void>
   /** Закрепить / открепить чат (только для текущего пользователя) */
   togglePinConversation: (conversationId: string, pinned?: boolean) => void | Promise<void>
-  /** Удалить чат у себя (скрыть из списка) */
-  deleteConversation: (conversationId: string) => void | Promise<void>
+  /** Удалить чат у себя или у обоих (история стирается) */
+  deleteConversation: (
+    conversationId: string,
+    opts?: { forBoth?: boolean },
+  ) => void | Promise<void>
   /** Подтянуть список чатов / тред с сервера */
   refreshChats: (opts?: { before?: string; append?: boolean }) => Promise<{ hasMore: boolean }>
   refreshThread: (
@@ -2749,7 +2752,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   )
 
   const deleteConversation = useCallback(
-    async (conversationId: string) => {
+    async (conversationId: string, opts?: { forBoth?: boolean }) => {
       const applyLocal = () => {
         setConversations((prev) => {
           const next = prev.filter((c) => c.id !== conversationId)
@@ -2765,7 +2768,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       if (apiOnlineRef.current && getStoredToken()) {
         try {
-          await apiDeleteConversation(conversationId)
+          await apiDeleteConversation(conversationId, opts)
           applyLocal()
           return
         } catch {

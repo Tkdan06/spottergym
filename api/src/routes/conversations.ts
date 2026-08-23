@@ -474,7 +474,7 @@ conversationRoutes.post(
   },
 )
 
-/** Delete chat for me only (hides from inbox; peer keeps the thread) */
+/** Hide chat for me, or wipe history and hide for both (Telegram-style). */
 conversationRoutes.delete(
   '/:id',
   rateLimit({ windowMs: 60_000, max: 40, route: 'chat-hide' }),
@@ -483,14 +483,42 @@ conversationRoutes.delete(
     const conv = await loadConvForUser(c.req.param('id'), userId)
     if (!conv) return c.json({ error: 'Чат не найден' }, 404)
 
+    const body = z
+      .object({ forBoth: z.boolean().optional() })
+      .safeParse(await c.req.json().catch(() => ({})))
+    const forBothQuery = c.req.query('forBoth')
+    const forBoth =
+      forBothQuery === '1' ||
+      forBothQuery === 'true' ||
+      (body.success && body.data.forBoth === true)
+    const now = new Date()
     const isLow = conv.userLowId === userId
-    await prisma.conversation.update({
-      where: { id: conv.id },
-      data: isLow
-        ? { hiddenLowAt: new Date(), pinnedLowAt: null, unreadLow: 0 }
-        : { hiddenHighAt: new Date(), pinnedHighAt: null, unreadHigh: 0 },
-    })
 
-    return c.json({ ok: true, id: conv.id })
+    if (forBoth) {
+      await prisma.$transaction([
+        prisma.chatMessage.deleteMany({ where: { conversationId: conv.id } }),
+        prisma.conversation.update({
+          where: { id: conv.id },
+          data: {
+            hiddenLowAt: now,
+            hiddenHighAt: now,
+            pinnedLowAt: null,
+            pinnedHighAt: null,
+            unreadLow: 0,
+            unreadHigh: 0,
+            lastMessageText: '',
+          },
+        }),
+      ])
+    } else {
+      await prisma.conversation.update({
+        where: { id: conv.id },
+        data: isLow
+          ? { hiddenLowAt: now, pinnedLowAt: null, unreadLow: 0 }
+          : { hiddenHighAt: now, pinnedHighAt: null, unreadHigh: 0 },
+      })
+    }
+
+    return c.json({ ok: true, id: conv.id, forBoth })
   },
 )

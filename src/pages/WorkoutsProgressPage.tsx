@@ -23,8 +23,6 @@ const RANGES: { id: WorkoutProgressRange; label: string }[] = [
   { id: 90, label: '90д' },
 ]
 
-type Tab = 'body' | 'strength'
-
 function formatAxisDay(iso: string) {
   return new Date(iso).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
 }
@@ -229,14 +227,14 @@ function LineChart({
 export function WorkoutsProgressPage() {
   const navigate = useNavigate()
   const { user, apiOnline } = useApp()
-  const [tab, setTab] = useState<Tab>('strength')
   const [range, setRange] = useState<WorkoutProgressRange>(30)
   const [pickedExercise, setPickedExercise] = useState<string | undefined>()
   const [pickerOpen, setPickerOpen] = useState(false)
   const [progress, setProgress] = useState<WorkoutProgress | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [selected, setSelected] = useState(0)
+  const [selectedStrength, setSelectedStrength] = useState(0)
+  const [selectedBody, setSelectedBody] = useState(0)
   const pickerRef = useRef<HTMLDivElement>(null)
 
   useSheetA11y(pickerOpen, () => setPickerOpen(false), pickerRef)
@@ -278,11 +276,13 @@ export function WorkoutsProgressPage() {
     [progress],
   )
 
-  const activePoints = tab === 'body' ? bodyPoints : strengthPoints
+  useEffect(() => {
+    setSelectedStrength(strengthPoints.length ? strengthPoints.length - 1 : 0)
+  }, [strengthPoints, range, pickedExercise])
 
   useEffect(() => {
-    setSelected(activePoints.length ? activePoints.length - 1 : 0)
-  }, [activePoints, tab, range, pickedExercise])
+    setSelectedBody(bodyPoints.length ? bodyPoints.length - 1 : 0)
+  }, [bodyPoints, range])
 
   useEffect(() => {
     if (loading) return
@@ -292,31 +292,32 @@ export function WorkoutsProgressPage() {
 
   if (!user) return <Navigate to="/login" replace />
 
-  const selectedPoint = activePoints[selected] || null
+  const strengthPoint = strengthPoints[selectedStrength] || null
+  const bodyPoint = bodyPoints[selectedBody] || null
   const bodyDelta = formatBodyDelta(progress?.body.deltaKg)
   const strengthDelta = formatDeltaLabel(
     progress?.strength.deltaWeightKg,
     progress?.strength.deltaReps,
   )
   const exerciseValue = pickedExercise || progress?.strength.exercise || ''
-  const heroKg =
-    selectedPoint != null
-      ? formatKg(selectedPoint.value)
-      : tab === 'body'
-        ? formatKg(progress?.body.latestKg)
-        : formatKg(progress?.strength.latestWeightKg)
-  const periodDelta =
-    tab === 'body'
-      ? bodyDelta
-        ? `${bodyDelta} за период`
-        : progress && progress.body.points.length < 2
-          ? 'Нужна ещё одна точка'
-          : null
-      : strengthDelta
-        ? `${strengthDelta.text} за период`
-        : progress && progress.strength.points.length < 2
-          ? 'Нужна ещё одна тренировка'
-          : null
+  const strengthHero =
+    strengthPoint != null
+      ? formatKg(strengthPoint.value)
+      : formatKg(progress?.strength.latestWeightKg)
+  const bodyHero =
+    bodyPoint != null ? formatKg(bodyPoint.value) : formatKg(progress?.body.latestKg)
+  const strengthPeriodDelta = strengthDelta
+    ? `${strengthDelta.text} за период`
+    : progress && progress.strength.points.length < 2
+      ? 'Нужна ещё одна тренировка'
+      : null
+  const bodyPeriodDelta = bodyDelta
+    ? `${bodyDelta} за период`
+    : progress && progress.body.points.length < 2
+      ? 'Нужна ещё одна точка'
+      : null
+  const bothEmpty =
+    Boolean(progress) && strengthPoints.length === 0 && bodyPoints.length === 0
 
   return (
     <main className="page workouts-page workouts-progress-page">
@@ -333,29 +334,6 @@ export function WorkoutsProgressPage() {
       </div>
 
       <div className="workout-progress-toolbar">
-        <div className="seg seg--fit workout-progress-mode" role="tablist" aria-label="Что смотреть">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === 'strength'}
-            className={`seg-item${tab === 'strength' ? ' is-active' : ''}`}
-            onClick={() => setTab('strength')}
-          >
-            Упражнения
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === 'body'}
-            className={`seg-item${tab === 'body' ? ' is-active' : ''}`}
-            onClick={() => {
-              setPickerOpen(false)
-              setTab('body')
-            }}
-          >
-            Мой вес
-          </button>
-        </div>
         <div className="seg seg--fit workout-progress-period" role="tablist" aria-label="Период">
           {RANGES.map((r) => (
             <button
@@ -383,56 +361,105 @@ export function WorkoutsProgressPage() {
           <SoftLoader delayMs={SOFT_LOADER_DELAY_MS} label="Загружаем прогресс…" />
         ) : null}
 
-        {tab === 'strength' && progress && progress.exercises.length > 0 ? (
-          <button
-            type="button"
-            className="workout-progress-title-btn"
-            aria-haspopup="dialog"
-            aria-expanded={pickerOpen}
-            aria-label={`Упражнение: ${exerciseValue || 'выбрать'}`}
-            onClick={() => setPickerOpen(true)}
-          >
-            <span className="section-heading">{exerciseValue || 'Выбрать упражнение'}</span>
-            <ChevronDown size={18} aria-hidden />
-          </button>
+        {!loading && !progress && !error ? (
+          <section className="empty-copy">
+            <p className="empty-copy-title">Пока пусто</p>
+            <p className="empty-copy-lead">
+              Запиши подходы и вес в тренировке — здесь появятся графики силы и веса тела.
+            </p>
+            <Link to="/app/workouts/new" className="btn btn-primary btn-block">
+              Записать тренировку
+            </Link>
+          </section>
         ) : null}
 
-        {progress && !loading ? (
-          activePoints.length === 0 ? (
-            <section className="surface workouts-empty">
-              <p className="empty-copy-title">Пока пусто</p>
-              <p className="muted">
-                {tab === 'body'
-                  ? 'Укажи свой вес в тренировке — здесь появится график.'
-                  : 'Запиши подходы — здесь будет динамика по упражнению.'}
-              </p>
-              <Link to="/app/workouts/new" className="btn btn-primary btn-block">
-                Записать тренировку
-              </Link>
-            </section>
-          ) : (
-            <>
-              <section className="workout-progress-hero" aria-label="Значение">
-                <strong className="workout-progress-hero-value">{heroKg || '—'}</strong>
-                {periodDelta ? <p className="muted workout-progress-hero-delta">{periodDelta}</p> : null}
-              </section>
+        {progress && bothEmpty && !loading ? (
+          <section className="empty-copy">
+            <p className="empty-copy-title">Пока пусто</p>
+            <p className="empty-copy-lead">
+              Запиши подходы и вес в тренировке — здесь появятся графики силы и веса тела.
+            </p>
+            <Link to="/app/workouts/new" className="btn btn-primary btn-block">
+              Записать тренировку
+            </Link>
+          </section>
+        ) : null}
 
-              <section className="surface workout-progress-chart-block">
-                <LineChart
-                  points={activePoints}
-                  unit="кг"
-                  selectedIndex={selected}
-                  onSelect={setSelected}
-                />
-                {selectedPoint ? (
-                  <p className="workout-progress-caption muted">
-                    {formatCaptionDay(selectedPoint.at)}
-                    {selectedPoint.meta ? ` · ${selectedPoint.meta}` : ''}
-                  </p>
-                ) : null}
-              </section>
-            </>
-          )
+        {progress && !bothEmpty ? (
+          <>
+            <section className="surface workout-progress-metric" aria-label="Сила">
+              {progress.exercises.length > 0 ? (
+                <button
+                  type="button"
+                  className="workout-progress-title-btn"
+                  aria-haspopup="dialog"
+                  aria-expanded={pickerOpen}
+                  aria-label={`Упражнение: ${exerciseValue || 'выбрать'}`}
+                  onClick={() => setPickerOpen(true)}
+                >
+                  <span className="section-heading">{exerciseValue || 'Выбрать упражнение'}</span>
+                  <ChevronDown size={18} aria-hidden />
+                </button>
+              ) : (
+                <SectionTitle>Упражнения</SectionTitle>
+              )}
+              {strengthPoints.length === 0 ? (
+                <p className="muted workout-progress-metric-empty">
+                  Запиши подходы — здесь будет динамика по упражнению.
+                </p>
+              ) : (
+                <>
+                  <div className="workout-progress-hero" aria-label="Рабочий вес">
+                    <strong className="workout-progress-hero-value">{strengthHero || '—'}</strong>
+                    {strengthPeriodDelta ? (
+                      <p className="muted workout-progress-hero-delta">{strengthPeriodDelta}</p>
+                    ) : null}
+                  </div>
+                  <LineChart
+                    points={strengthPoints}
+                    unit="кг"
+                    selectedIndex={selectedStrength}
+                    onSelect={setSelectedStrength}
+                  />
+                  {strengthPoint ? (
+                    <p className="workout-progress-caption muted">
+                      {formatCaptionDay(strengthPoint.at)}
+                      {strengthPoint.meta ? ` · ${strengthPoint.meta}` : ''}
+                    </p>
+                  ) : null}
+                </>
+              )}
+            </section>
+
+            <section className="surface workout-progress-metric" aria-label="Вес тела">
+              <SectionTitle>Вес тела</SectionTitle>
+              {bodyPoints.length === 0 ? (
+                <p className="muted workout-progress-metric-empty">
+                  Укажи свой вес в тренировке — здесь появится график.
+                </p>
+              ) : (
+                <>
+                  <div className="workout-progress-hero" aria-label="Вес тела">
+                    <strong className="workout-progress-hero-value">{bodyHero || '—'}</strong>
+                    {bodyPeriodDelta ? (
+                      <p className="muted workout-progress-hero-delta">{bodyPeriodDelta}</p>
+                    ) : null}
+                  </div>
+                  <LineChart
+                    points={bodyPoints}
+                    unit="кг"
+                    selectedIndex={selectedBody}
+                    onSelect={setSelectedBody}
+                  />
+                  {bodyPoint ? (
+                    <p className="workout-progress-caption muted">
+                      {formatCaptionDay(bodyPoint.at)}
+                    </p>
+                  ) : null}
+                </>
+              )}
+            </section>
+          </>
         ) : null}
 
         {!loading && (!WORKOUT_RECAP_ADMIN_ONLY || user.isAdmin) ? <WorkoutWeekRecap /> : null}

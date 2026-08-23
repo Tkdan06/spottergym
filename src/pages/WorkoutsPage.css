@@ -614,7 +614,24 @@
 }
 
 .workout-progress-period {
-  margin-left: auto;
+  margin-left: 0;
+}
+
+.workout-progress-metric {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  min-width: 0;
+}
+
+.workout-progress-metric > .section-heading,
+.workout-progress-metric > .section-title {
+  margin: 0;
+}
+
+.workout-progress-metric-empty {
+  margin: 0;
+  line-height: 1.4;
 }
 
 .workout-progress-feed {

@@ -23,6 +23,29 @@
   border-radius: 24px;
 }
 
+.profile-carousel.cover {
+  width: 100%;
+  margin: 0;
+  border-radius: 0;
+  border: 0;
+  cursor: grab;
+}
+
+.profile-carousel.cover img,
+.profile-carousel.cover .smart-image {
+  aspect-ratio: 3 / 4;
+  max-height: min(78vh, 720px);
+  min-height: 280px;
+}
+
+.profile-carousel.cover .profile-carousel-count {
+  display: none;
+}
+
+.profile-carousel.cover .profile-carousel-dots {
+  top: 46px;
+}
+
 .profile-carousel img,
 .profile-carousel .smart-image {
   width: 100%;
@@ -102,12 +125,12 @@
 }
 
 @media (min-width: 900px) {
-  .profile-carousel:not(.mine) {
+  .profile-carousel:not(.mine):not(.cover) {
     width: min(100%, 240px);
   }
 
-  .profile-carousel:not(.mine) img,
-  .profile-carousel:not(.mine) .smart-image {
+  .profile-carousel:not(.mine):not(.cover) img,
+  .profile-carousel:not(.mine):not(.cover) .smart-image {
     max-height: 280px;
   }
 }

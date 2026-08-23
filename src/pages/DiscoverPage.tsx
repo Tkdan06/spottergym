@@ -15,6 +15,7 @@ import {
   type ElsewhereSuggestion,
 } from '../lib/elsewhereGyms'
 import { gymMatchesQuery } from '../lib/gymSearch'
+import { sortGymsInCity } from '../lib/gymRank'
 import { buildRealGymStatsMap } from '../lib/gymStats'
 import { searchFieldProps } from '../lib/inputAttrs'
 import { isMemberOfGym } from '../lib/userGyms'
@@ -59,30 +60,24 @@ export function DiscoverPage() {
     }
   }, [apiOnline, demoStats, city, network, query])
 
-  const gyms = useMemo(() => {
-    if (remoteGyms) {
-      return [...remoteGyms].sort((a, b) => {
-        const am = isMemberOfGym(user, a.id) ? 0 : 1
-        const bm = isMemberOfGym(user, b.id) ? 0 : 1
-        if (am !== bm) return am - bm
-        return a.name.localeCompare(b.name, 'ru')
-      })
-    }
+  const catalog = useMemo(() => {
+    if (remoteGyms) return remoteGyms
     const q = query.trim()
     return GYMS.filter((g) => {
       if (g.city !== city) return false
       if (network !== 'Все сети' && g.network !== network) return false
       return gymMatchesQuery(g, q)
-    }).sort((a, b) => {
-      const am = isMemberOfGym(user, a.id) ? 0 : 1
-      const bm = isMemberOfGym(user, b.id) ? 0 : 1
-      if (am !== bm) return am - bm
-      return a.name.localeCompare(b.name, 'ru')
     })
-  }, [remoteGyms, city, network, query, user])
+  }, [remoteGyms, city, network, query])
 
   const liveStats = useMemo(() => {
-    if (demoStats) return {}
+    if (demoStats) {
+      const map: Record<string, { membersCount: number; activeNow: number }> = {}
+      for (const g of catalog) {
+        map[g.id] = { membersCount: g.membersCount, activeNow: g.activeNow }
+      }
+      return map
+    }
     if (remoteGyms) {
       const map: Record<string, { membersCount: number; activeNow: number }> = {}
       for (const g of remoteGyms) {
@@ -91,10 +86,20 @@ export function DiscoverPage() {
       return map
     }
     return buildRealGymStatsMap(
-      gyms.map((g) => g.id),
+      catalog.map((g) => g.id),
       user,
     )
-  }, [demoStats, remoteGyms, gyms, user])
+  }, [demoStats, remoteGyms, catalog, user])
+
+  const gyms = useMemo(
+    () =>
+      sortGymsInCity(
+        catalog,
+        (g) => liveStats[g.id]?.membersCount ?? g.membersCount ?? 0,
+        user,
+      ),
+    [catalog, liveStats, user],
+  )
 
   const elsewhereQuery = query.trim()
   const needElsewhere =

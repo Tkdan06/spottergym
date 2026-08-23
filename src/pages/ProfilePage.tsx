@@ -364,9 +364,11 @@ export function ProfilePage() {
       </section>
 
       {user.isAdmin ? (
-        <Link to="/app/admin" className="btn btn-ghost btn-block">
-          <Shield size={16} /> Админка
-        </Link>
+        <div className="profile-admin-entry">
+          <Link to="/app/admin" className="btn btn-ghost btn-block">
+            <Shield size={16} /> Админка
+          </Link>
+        </div>
       ) : null}
 
       <SoftFlash message={copyFlash} />

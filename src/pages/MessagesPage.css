@@ -361,3 +361,16 @@
 .chat-pin-sheet-actions {
   display: grid;
 }
+
+.messages-page .app-sheet-panel .toggle-row {
+  padding: 12px 14px;
+}
+
+.messages-page .app-sheet-panel .toggle-row strong {
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+.messages-page .app-sheet-panel .toggle-row .muted {
+  margin: 4px 0 0;
+}
