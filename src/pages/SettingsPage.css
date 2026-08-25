@@ -36,7 +36,7 @@
   background: transparent;
   color: inherit;
   font: inherit;
-  font-weight: 600;
+  font-weight: var(--text-chip);
   text-align: left;
   cursor: pointer;
 }
@@ -44,7 +44,7 @@
 .settings-gym-home-tag {
   flex-shrink: 0;
   font-size: 0.68rem;
-  font-weight: 600;
+  font-weight: var(--text-chip-active);
   letter-spacing: 0.02em;
   text-transform: lowercase;
   color: var(--accent-ink);

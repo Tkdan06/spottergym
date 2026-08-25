@@ -915,6 +915,7 @@
 
 .workout-coach-chips li {
   font-size: 0.86rem;
+  font-weight: var(--text-chip);
   padding: 6px 10px;
   border-radius: 999px;
   border: 1px solid var(--line);

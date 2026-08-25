@@ -30,8 +30,10 @@ const TYPE_TOKENS = [
   ['--text-section-size', '1.05rem', 'Секция / empty · 600 Onest'],
   ['--text-gym-min / max', '1.25–1.375rem', 'Имя зала · Unbounded 700'],
   ['--text-label-size', '0.8125rem', 'Кикер и label · 600'],
-  ['--text-ui-emphasis', '500', 'Nav, chips, secondary'],
+  ['--text-ui-emphasis', '500', 'Nav, secondary'],
   ['--text-ui-strong', '600', 'Кнопки, метрики, секции'],
+  ['--text-chip', '400', 'Чипы'],
+  ['--text-chip-active', '500', 'Выбранный чип'],
   ['--letter-tight', '−0.03em', 'Только Unbounded'],
 ] as const
 
@@ -274,10 +276,10 @@ export function UiKitPage() {
         <div className="ui-kit-weight-block">
           <p className="dim ui-kit-meta">Onest</p>
           <p className="ui-kit-weight-line" style={{ fontWeight: 400 }}>
-            400 Regular — body, muted, dim
+            400 Regular — body, muted, dim, чипы
           </p>
           <p className="ui-kit-weight-line" style={{ fontWeight: 500 }}>
-            500 Medium — nav, chips, section-action
+            500 Medium — nav, выбранный чип, section-action
           </p>
           <p className="ui-kit-weight-line" style={{ fontWeight: 600 }}>
             600 Semibold — кнопки, секции, метрики, strong UI
@@ -304,7 +306,7 @@ export function UiKitPage() {
               ['Section action', '.section-action', 'Onest 500', '0.9rem', 'lh 1.35', '0'],
               ['Кнопка', '.btn', 'Onest 600', 'inherit', 'lh 1.2', '0'],
               ['Nav', '.nav-item', 'Onest 500 / active 600', '0.7rem', 'lh inherit', '0'],
-              ['Chip', '.chip', 'Onest 500 / active 600', '0.875rem', 'lh inherit', '0'],
+              ['Chip', '.chip', 'Onest 400 / active 500', '0.875rem', 'lh inherit', '0'],
               ['Empty lead', '.empty-copy-lead', 'Onest 400', '0.92rem', 'lh 1.4', '0'],
             ] as const
           ).map(([role, token, face, size, line, track]) => (

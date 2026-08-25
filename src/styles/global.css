@@ -48,6 +48,8 @@
   --text-label-weight: 600;
   --text-ui-emphasis: 500;
   --text-ui-strong: 600;
+  --text-chip: 400;
+  --text-chip-active: 500;
   --letter-tight: -0.03em;
   color-scheme: dark;
 }
@@ -756,7 +758,7 @@ a.btn-danger-ghost {
   background: var(--bg-elevated);
   color: var(--text-muted);
   font-size: 0.875rem;
-  font-weight: var(--text-ui-emphasis);
+  font-weight: var(--text-chip);
   transition: all 0.2s ease;
 }
 
@@ -764,7 +766,7 @@ a.btn-danger-ghost {
   background: var(--accent-soft);
   border-color: rgba(200, 245, 66, 0.45);
   color: var(--accent);
-  font-weight: var(--text-ui-strong);
+  font-weight: var(--text-chip-active);
 }
 
 .chip.small {
@@ -776,20 +778,20 @@ a.btn-danger-ghost {
   background: rgba(200, 245, 66, 0.18);
   border-color: rgba(200, 245, 66, 0.55);
   color: var(--accent);
-  font-weight: var(--text-ui-strong);
+  font-weight: var(--text-chip-active);
 }
 
 .chip.level {
   background: rgba(148, 163, 154, 0.14);
   border-color: rgba(148, 163, 154, 0.35);
   color: var(--text-muted);
-  font-weight: var(--text-ui-strong);
+  font-weight: var(--text-chip);
 }
 
 .pill-coach {
   background: var(--accent);
   color: #111;
-  font-weight: var(--text-ui-strong);
+  font-weight: var(--text-chip-active);
 }
 
 /* Block / section heading — one look everywhere (profile, home, settings…) */
@@ -966,7 +968,7 @@ a.btn-danger-ghost {
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 0.75rem;
-  font-weight: var(--text-ui-emphasis);
+  font-weight: var(--text-chip);
 }
 
 .pill-online {

@@ -90,8 +90,8 @@ Do not add a fourth family. Do not write `font-family: Onest` locally — use th
   and `.gym-hero-title` (700), profile names (`.profile-hero-name`, `.profile-hero-cover-copy h1`)
   at **800**, and hall `UserCard` name / age / rank (`.user-card-head h3`, 700). Not body, lists
   of copy, buttons, tab bar, small labels, section titles, metrics.
-- **Onest:** everything else. 400 body / muted / dim. 500 nav, chips, section-action. 600 buttons,
-  section titles, metrics, strong UI. Do **not** load or use Onest 700+.
+- **Onest:** everything else. 400 body / muted / dim / chips. 500 nav, selected chips, section-action.
+  600 buttons, section titles, metrics, strong UI. Do **not** load or use Onest 700+.
 
 Hierarchy = size + weight + line-height + color + spacing. Do not fake emphasis with 650/750/800
 on Onest. Fake weights 550/650/750 are forbidden.
@@ -103,6 +103,8 @@ on Onest. Fake weights 550/650/750 are forbidden.
 - `--text-label-weight: 600`
 - `--text-ui-emphasis: 500`
 - `--text-ui-strong: 600`
+- `--text-chip: 400`
+- `--text-chip-active: 500`
 - `--text-body-line: 1.45`
 - `--letter-tight: -0.03em` — Unbounded only
 

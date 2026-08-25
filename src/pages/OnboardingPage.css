@@ -130,7 +130,7 @@
 
 .onboarding-networks .chip-count {
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: var(--text-chip);
   opacity: 0.72;
 }
 

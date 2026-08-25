@@ -84,7 +84,7 @@
   border-radius: 999px;
   background: var(--accent-soft);
   color: var(--accent);
-  font-weight: 600;
+  font-weight: var(--text-chip-active);
   font-size: 0.85rem;
 }
 
@@ -122,14 +122,14 @@
 }
 
 .city-chip-name {
-  font-weight: 600;
+  font-weight: var(--text-chip);
   font-size: 0.92rem;
   color: var(--text);
 }
 
 .city-chip-meta {
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: var(--text-chip);
   color: var(--text-dim);
 }
 
@@ -142,6 +142,7 @@
 .city-chip.active .city-chip-name,
 .city-chip.active .city-chip-meta {
   color: var(--accent);
+  font-weight: var(--text-chip-active);
 }
 
 .city-chip-more {
@@ -285,7 +286,7 @@
   place-items: center;
   background: var(--accent-soft);
   color: var(--accent);
-  font-weight: 600;
+  font-weight: var(--text-chip-active);
   font-size: 0.8rem;
 }
 

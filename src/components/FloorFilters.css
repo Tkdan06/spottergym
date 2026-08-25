@@ -23,7 +23,7 @@
   background: var(--bg-soft);
   color: var(--text);
   font-size: 0.86rem;
-  font-weight: 600;
+  font-weight: var(--text-chip);
   flex-shrink: 0;
 }
 
@@ -35,6 +35,7 @@
   border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
   color: var(--accent);
   background: color-mix(in srgb, var(--accent) 10%, var(--bg-soft));
+  font-weight: var(--text-chip-active);
 }
 
 .floor-filter-badge {
@@ -46,7 +47,7 @@
   color: var(--accent-ink);
   font-size: 0.68rem;
   font-style: normal;
-  font-weight: 600;
+  font-weight: var(--text-chip-active);
   display: grid;
   place-items: center;
 }
@@ -88,7 +89,7 @@
   background: var(--accent-soft);
   color: var(--accent);
   font-size: 0.78rem;
-  font-weight: 600;
+  font-weight: var(--text-chip-active);
 }
 
 .floor-filter-clear {
