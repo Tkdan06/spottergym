@@ -11,6 +11,7 @@
 }
 
 .auth-page h1 {
+  font-family: var(--font-display);
   font-size: var(--text-page-size);
   font-weight: var(--text-page-weight);
   letter-spacing: var(--letter-tight);
@@ -50,7 +51,7 @@
 .feedback-success {
   color: #6ee7a8;
   font-size: 0.9rem;
-  font-weight: 650;
+  font-weight: 600;
   line-height: 1.4;
 }
 
@@ -62,7 +63,7 @@
 
 .auth-forgot a {
   color: var(--accent);
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .auth-forgot.is-emphasized {
@@ -72,7 +73,7 @@
 }
 
 .auth-forgot.is-emphasized a {
-  font-weight: 750;
+  font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -145,7 +146,7 @@
 
 .terms-check .terms-inline-link {
   color: var(--accent);
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 2px;
 }

@@ -30,7 +30,7 @@
 }
 
 .gym-hours-list strong {
-  font-weight: 750;
+  font-weight: 600;
   color: var(--text);
   white-space: nowrap;
 }
@@ -137,10 +137,10 @@
 .gym-hero-network {
   margin: 0;
   min-width: 0;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: clamp(0.95rem, 3.8vw, var(--text-section-size));
-  font-weight: 700;
-  letter-spacing: var(--letter-tight);
+  font-weight: var(--text-ui-strong);
+  letter-spacing: normal;
   color: var(--accent);
   white-space: nowrap;
   overflow: hidden;
@@ -161,10 +161,11 @@
   flex-direction: column;
   gap: 0;
   margin: 0;
+  font-family: var(--font-display);
   font-size: clamp(1.2rem, 5vw, 1.45rem);
   line-height: 1.1;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-weight: var(--text-page-weight);
+  letter-spacing: var(--letter-tight);
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
 }
 

@@ -23,14 +23,16 @@ import './UiKitPage.css'
 import './WorkoutsPage.css'
 
 const TYPE_TOKENS = [
-  ['--font-display', 'Unbounded', 'Заголовки'],
+  ['--font-display', 'Unbounded', 'Страницы, зал, имя в профиле'],
   ['--font-brand', 'Syne', 'SPOTTER, только латиница'],
-  ['--font-body', 'Manrope', 'Текст и UI'],
-  ['--text-page-size', '1.4375rem', 'Заголовок страницы · 800'],
-  ['--text-section-size', '1.05rem', 'Секция / empty · 700'],
-  ['--text-gym-min / max', '1.25–1.375rem', 'Имя зала над CTA · 800'],
+  ['--font-body', 'Onest', 'Текст и UI'],
+  ['--text-page-size', '1.4375rem', 'Заголовок страницы · 700'],
+  ['--text-section-size', '1.05rem', 'Секция / empty · 600 Onest'],
+  ['--text-gym-min / max', '1.25–1.375rem', 'Имя зала · Unbounded 700'],
   ['--text-label-size', '0.8125rem', 'Кикер и label · 600'],
-  ['--letter-tight', '−0.03em', 'Только Unbounded, не кикеры'],
+  ['--text-ui-emphasis', '500', 'Nav, chips, secondary'],
+  ['--text-ui-strong', '600', 'Кнопки, метрики, секции'],
+  ['--letter-tight', '−0.03em', 'Только Unbounded'],
 ] as const
 
 const COLOR_TOKENS = [
@@ -131,7 +133,7 @@ export function UiKitPage() {
           </li>
           <li>
             <strong>Действие у SectionTitle:</strong> только <code>.section-action</code> (Link или
-            button) — muted Manrope, без underline и без <code>text-link</code> с жирным весом.
+            button) — muted Onest 500, без underline и без <code>text-link</code> с жирным весом.
           </li>
           <li>
             <strong>Входы в разделы:</strong> <code>.entry-link</code> — product tools на Home.
@@ -139,10 +141,10 @@ export function UiKitPage() {
             isAdmin).
           </li>
           <li>
-            <strong>Заголовки:</strong> только Unbounded и токены{' '}
-            <code>--text-page-size</code> (1.4375rem / 800), <code>--text-section-size</code>{' '}
-            (1.05rem / 700). Не ставь 1.75rem и не выдумывай локальный кегль. Полная шкала — блок
-            «Типографика».
+            <strong>Заголовки:</strong> страница — Unbounded и <code>--text-page-size</code>{' '}
+            (1.4375rem / 700). Секция — Onest и <code>--text-section-size</code> (1.05rem / 600),
+            только через <code>SectionTitle</code>. Имя человека в профиле — Unbounded 800. Не
+            выдумывай локальный кегль. Полная шкала — блок «Типографика».
           </li>
           <li>
             <strong>Кикер / label:</strong> как обычный текст — <code>--text-label-size</code> · 600,
@@ -175,9 +177,10 @@ export function UiKitPage() {
       <section className="surface ui-kit-block">
         <SectionTitle>Типографика</SectionTitle>
         <p className="muted ui-kit-section-lead">
-          Три семейства — не подключай четвёртое. Unbounded меньше, чем раньше (страница 23px, не
-          28px), жирность та же. Кикеры без капса и широкого трекинга. Веса только из файлов: 650/750
-          браузер синтезирует, для нового UI не используй.
+          Три семейства — не подключай четвёртое. Иерархия: размер + вес + line-height + цвет, не
+          жирность ради жирности. Onest 700+ не грузим. 650/750 браузер синтезирует — в UI не
+          использовать. Кикеры без капса и широкого трекинга. <code>--letter-tight</code> только на
+          Unbounded.
         </p>
 
         <h3 className="ui-kit-type-sub">Токены — сверяйся сюда</h3>
@@ -194,37 +197,44 @@ export function UiKitPage() {
         <h3 className="ui-kit-type-sub">Семейства</h3>
         <div className="ui-kit-font-cards">
           <article className="ui-kit-font-card">
-            <p className="ui-kit-font-card-name" style={{ fontFamily: 'var(--font-display)' }}>
+            <p
+              className="ui-kit-font-card-name is-display"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
               Unbounded
             </p>
-            <p className="ui-kit-font-card-role">Заголовки</p>
+            <p className="ui-kit-font-card-role">Display</p>
             <p className="muted">
-              <code>--font-display</code> · кириллица, спорт. Страницы 1.4375rem / 800, секции
-              1.05rem / 700, empty, цифры активности 1.5–1.75rem, имя зала, карточки людей.
+              <code>--font-display</code> · страницы 1.4375rem / 700, имя зала, имя в своём и чужом
+              профиле (800) и имя / возраст / номер в карточке человека в зале (700). Не body, не
+              кнопки, не секции, не метрики.
             </p>
             <p className="dim">Загружено: 600 · 700 · 800</p>
           </article>
           <article className="ui-kit-font-card">
-            <p className="ui-kit-font-card-name" style={{ fontFamily: 'var(--font-brand)' }}>
+            <p
+              className="ui-kit-font-card-name is-brand"
+              style={{ fontFamily: 'var(--font-brand)' }}
+            >
               Syne
             </p>
             <p className="ui-kit-font-card-role">Бренд</p>
             <p className="muted">
               <code>--font-brand</code> · только латиница SPOTTER. Логотип, лендинг, lock/emergency.
-              Не для русских заголовков.
+              Не для русских заголовков и не для UI.
             </p>
             <p className="dim">Загружено: 700 · 800</p>
           </article>
           <article className="ui-kit-font-card">
             <p className="ui-kit-font-card-name" style={{ fontFamily: 'var(--font-body)' }}>
-              Manrope
+              Onest
             </p>
             <p className="ui-kit-font-card-role">Текст и UI</p>
             <p className="muted">
-              <code>--font-body</code> · абзацы, кнопки, поля, muted/dim, section-action, чипы,
-              навигация. Кикер и label — 600, как обычный текст, без капса.
+              <code>--font-body</code> · абзацы, кнопки, поля, muted/dim, секции, чипы, навигация,
+              формы, статистика. 400 body, 500 secondary, 600 strong. Кириллица — основной target.
             </p>
-            <p className="dim">Загружено: 400 · 500 · 600 · 700</p>
+            <p className="dim">Загружено: 400 · 500 · 600</p>
           </article>
           <article className="ui-kit-font-card">
             <p
@@ -243,13 +253,13 @@ export function UiKitPage() {
         <div className="ui-kit-weight-block">
           <p className="dim ui-kit-meta">Unbounded</p>
           <p className="ui-kit-weight-line ui-kit-w-display" style={{ fontWeight: 600 }}>
-            600 Полужирный — запас, редко
+            600 Полужирный — запас
           </p>
           <p className="ui-kit-weight-line ui-kit-w-display" style={{ fontWeight: 700 }}>
-            700 Жирный — секции, empty, активность
+            700 Жирный — страница, имя зала
           </p>
           <p className="ui-kit-weight-line ui-kit-w-display" style={{ fontWeight: 800 }}>
-            800 Extra — заголовок страницы, имя зала
+            800 Extra — имя в профиле (свой и чужой)
           </p>
         </div>
         <div className="ui-kit-weight-block">
@@ -262,18 +272,15 @@ export function UiKitPage() {
           </p>
         </div>
         <div className="ui-kit-weight-block">
-          <p className="dim ui-kit-meta">Manrope</p>
+          <p className="dim ui-kit-meta">Onest</p>
           <p className="ui-kit-weight-line" style={{ fontWeight: 400 }}>
-            400 Regular — длинный текст
+            400 Regular — body, muted, dim
           </p>
           <p className="ui-kit-weight-line" style={{ fontWeight: 500 }}>
-            500 Medium — кнопки, section-action, поля
+            500 Medium — nav, chips, section-action
           </p>
           <p className="ui-kit-weight-line" style={{ fontWeight: 600 }}>
-            600 Semibold — кикер, label, чипы
-          </p>
-          <p className="ui-kit-weight-line" style={{ fontWeight: 700 }}>
-            700 Bold — счётчики, сильный акцент
+            600 Semibold — кнопки, секции, метрики, strong UI
           </p>
         </div>
 
@@ -281,20 +288,24 @@ export function UiKitPage() {
         <div className="ui-kit-type-table" role="table">
           {(
             [
-              ['Страница', '.page-title', 'Unbounded 800', '1.4375rem', 'lh 1.15', '−0.03em'],
-              ['Зал над CTA', '.home-gym-title', 'Unbounded 800', '1.25–1.375', 'lh 1.15', '−0.03em'],
-              ['Секция', '.section-heading', 'Unbounded 700', '1.05rem', 'lh 1.25', '−0.03em'],
-              ['Empty title', '.empty-copy-title', 'Unbounded 700', '1.05rem', 'lh inherit', '−0.03em'],
-              ['Цифра / пик', '.activity-summary-total', 'Unbounded 700', '1.5–1.75', 'lh 1.05', 'tight'],
+              ['Страница', '.page-title', 'Unbounded 700', '1.4375rem', 'lh 1.15', '−0.03em'],
+              ['Зал над CTA', '.home-gym-title', 'Unbounded 700', '1.25–1.375', 'lh 1.15', '−0.03em'],
+              ['Имя в профиле', '.profile-hero-name / cover h1', 'Unbounded 800', '1.25–1.375', 'lh 1.15–1.2', '−0.03em'],
+              ['Имя в карточке зала', '.user-card-head h3', 'Unbounded 700', '1.05rem', 'lh 1.15', '−0.03em'],
+              ['Секция', '.section-heading', 'Onest 600', '1.05rem', 'lh 1.25', '0'],
+              ['Empty title', '.empty-copy-title', 'Onest 600', '1.05rem', 'lh 1.25', '0'],
+              ['Метрика', '.activity-summary-total', 'Onest 600', '1.5–1.75', 'lh 1.05', '0'],
               ['Бренд', '.brand-mark', 'Syne 800', '1.75–2.4', 'lh inherit', '−0.04em'],
-              ['Kicker', '.page-kicker', 'Manrope 600', '0.8125rem', 'lh 1.2', 'без капса'],
-              ['Label', 'token --text-label', 'Manrope 600', '0.8125rem', 'lh inherit', '0'],
-              ['Тело', 'body / p', 'Manrope 400', '1rem', 'lh 1.45', '0'],
-              ['Muted', '.muted', 'Manrope 400', '0.9rem', 'lh 1.45', '0'],
-              ['Dim', '.dim', 'Manrope 400', '0.84rem', 'lh inherit', '0'],
-              ['Section action', '.section-action', 'Manrope 500', '0.9rem', 'lh 1.35', '0'],
-              ['Кнопка', '.btn', 'Manrope 650*', 'inherit', 'lh inherit', '0'],
-              ['Empty lead', '.empty-copy-lead', 'Manrope 400', '0.92rem', 'lh 1.4', '0'],
+              ['Kicker', '.page-kicker', 'Onest 600', '0.8125rem', 'lh 1.2', 'без капса'],
+              ['Label', 'token --text-label', 'Onest 600', '0.8125rem', 'lh inherit', '0'],
+              ['Тело', 'body / p', 'Onest 400', '1rem', 'lh 1.45', '0'],
+              ['Muted', '.muted', 'Onest 400', '0.9rem', 'lh 1.45', '0'],
+              ['Dim', '.dim', 'Onest 400', '0.84rem', 'lh inherit', '0'],
+              ['Section action', '.section-action', 'Onest 500', '0.9rem', 'lh 1.35', '0'],
+              ['Кнопка', '.btn', 'Onest 600', 'inherit', 'lh 1.2', '0'],
+              ['Nav', '.nav-item', 'Onest 500 / active 600', '0.7rem', 'lh inherit', '0'],
+              ['Chip', '.chip', 'Onest 500 / active 600', '0.875rem', 'lh inherit', '0'],
+              ['Empty lead', '.empty-copy-lead', 'Onest 400', '0.92rem', 'lh 1.4', '0'],
             ] as const
           ).map(([role, token, face, size, line, track]) => (
             <div key={role} className="ui-kit-type-row" role="row">
@@ -308,8 +319,8 @@ export function UiKitPage() {
           ))}
         </div>
         <p className="dim" style={{ margin: '10px 0 0' }}>
-          * 650 нет в файлах — браузер рисует между 600/700. Новые роли: 500 / 600 / 700 / 800.
-          Кикеры и лейблы — как обычный текст, без uppercase и без трекинга 0.04–0.10em.
+          Не ставить Onest 700/800. Не ставить Unbounded на body, кнопки, tab bar, секции. Кикеры и
+          лейблы — как обычный текст, без uppercase и без трекинга 0.04–0.10em.
         </p>
 
         <h3 className="ui-kit-type-sub">Живые образцы</h3>
@@ -321,25 +332,28 @@ export function UiKitPage() {
             </p>
           </div>
           <div>
-            <p className="dim ui-kit-meta">.page-kicker · Manrope 600 · без капса</p>
+            <p className="dim ui-kit-meta">.page-kicker · Onest 600 · без капса</p>
             <p className="page-kicker">DDX Fitness</p>
           </div>
           <div>
-            <p className="dim ui-kit-meta">.page-title · Unbounded 800 · 1.4375rem · −0.03em</p>
+            <p className="dim ui-kit-meta">.page-title · Unbounded 700 · 1.4375rem · −0.03em</p>
             <h1 className="page-title">Мой зал</h1>
           </div>
           <div>
-            <p className="dim ui-kit-meta">.home-gym-title · Unbounded 800 · 1.25–1.375rem</p>
+            <p className="dim ui-kit-meta">.home-gym-title · Unbounded 700 · 1.25–1.375rem</p>
             <h2 className="ui-kit-gym-title">Рязанский проспект</h2>
           </div>
           <div>
-            <p className="dim ui-kit-meta">
-              .activity-summary-total · Unbounded 700 · 1.5–1.75rem
-            </p>
-            <strong className="activity-summary-total">12 ч 40 мин</strong>
+            <p className="dim ui-kit-meta">.profile-hero-name · Unbounded 800 · имя в профиле</p>
+            <h2 className="ui-kit-profile-name">Маша, 26</h2>
           </div>
           <div>
-            <p className="dim ui-kit-meta">SectionTitle · Unbounded 700 · 1.05rem + action Manrope 500</p>
+            <p className="dim ui-kit-meta">.activity-summary-total · Onest 600 · 1.5–1.75rem</p>
+            <strong className="activity-summary-total">12</strong>
+            <p className="muted">тренировок</p>
+          </div>
+          <div>
+            <p className="dim ui-kit-meta">SectionTitle · Onest 600 · 1.05rem + action Onest 500</p>
             <SectionTitle
               action={
                 <Link to="/app/profile" className="section-action">
@@ -351,20 +365,20 @@ export function UiKitPage() {
             </SectionTitle>
           </div>
           <div>
-            <p className="dim ui-kit-meta">.empty-copy-title · Unbounded 700 · 1.05rem</p>
+            <p className="dim ui-kit-meta">.empty-copy-title · Onest 600 · 1.05rem</p>
             <p className="empty-copy-title">Пока пусто</p>
           </div>
           <div>
-            <p className="dim ui-kit-meta">body / .muted / .dim · Manrope</p>
+            <p className="dim ui-kit-meta">body / .muted / .dim · Onest</p>
             <p>Обычный текст. Съешь ещё этих мягких французских булок.</p>
-            <p className="muted">Muted — пояснения и подписи.</p>
+            <p className="muted">Muted — пояснения и подписи. Открыт к знакомству.</p>
             <p className="dim">Dim — мета, счётчики, quiet-иконки.</p>
           </div>
           <div>
             <p className="dim ui-kit-meta">Трекинг</p>
             <p className="ui-kit-track-tight">Заголовок −0.03em · Unbounded</p>
-            <p className="ui-kit-track-wide">Кикер как предложение · Manrope 600</p>
-            <p className="ui-kit-track-none">Текст без трекинга · Manrope</p>
+            <p className="ui-kit-track-wide">Кикер как предложение · Onest 600</p>
+            <p className="ui-kit-track-none">Текст без трекинга · Onest</p>
           </div>
         </div>
       </section>
@@ -678,8 +692,9 @@ export function UiKitPage() {
             Уведомления).
           </li>
           <li>
-            Размер пункта: <code>min-height: 32px</code>, <code>padding: 6px 12px</code>, Manrope
-            600 · 0.82rem. Активный — <code>--bg-elevated</code>. Не чипы и не локальные табы.
+            Размер пункта: <code>min-height: 32px</code>, <code>padding: 6px 12px</code>, Onest
+            500 · 0.82rem, активный 600. Активный фон — <code>--bg-elevated</code>. Не чипы и не
+            локальные табы.
           </li>
         </ul>
         <div className="ui-kit-type-stack" style={{ marginTop: 16 }}>

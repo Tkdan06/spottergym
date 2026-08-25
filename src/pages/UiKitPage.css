@@ -32,7 +32,7 @@
 
 .ui-kit-rules strong {
   color: var(--text);
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .ui-kit-code {
@@ -95,10 +95,10 @@
 
 .ui-kit-type-sub {
   margin: 20px 0 10px;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-section-size);
   font-weight: var(--text-section-weight);
-  letter-spacing: var(--letter-tight);
+  letter-spacing: normal;
 }
 
 .ui-kit-type-sub:first-of-type {
@@ -152,9 +152,19 @@
 .ui-kit-font-card-name {
   margin: 0;
   font-size: 1.35rem;
+  font-weight: var(--text-ui-strong);
+  letter-spacing: normal;
+  line-height: 1.15;
+}
+
+.ui-kit-font-card-name.is-display {
   font-weight: 700;
   letter-spacing: var(--letter-tight);
-  line-height: 1.15;
+}
+
+.ui-kit-font-card-name.is-brand {
+  font-weight: 800;
+  letter-spacing: -0.04em;
 }
 
 .ui-kit-font-card-role {
@@ -214,9 +224,18 @@
   margin: 0;
   font-family: var(--font-display);
   font-size: clamp(var(--text-gym-min), 5vw, var(--text-gym-max));
-  font-weight: 800;
+  font-weight: var(--text-page-weight);
   line-height: 1.15;
   letter-spacing: var(--letter-tight);
+}
+
+.ui-kit-profile-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(var(--text-gym-min), 5vw, var(--text-gym-max));
+  font-weight: 800;
+  letter-spacing: var(--letter-tight);
+  line-height: 1.2;
 }
 
 .ui-kit-track-tight {

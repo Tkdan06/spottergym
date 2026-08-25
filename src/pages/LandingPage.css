@@ -46,7 +46,7 @@
   letter-spacing: normal;
 }
 
-/* Hierarchy: brand (Syne) > headline (Unbounded) > lead (Manrope) */
+/* Hierarchy: brand (Syne) > headline (Unbounded) > lead (Onest) */
 .lp-brand {
   display: block;
   margin: 0 0 10px;
@@ -96,7 +96,7 @@
 .lp-actions .btn {
   width: 100%;
   min-height: 50px;
-  font-weight: 750;
+  font-weight: 600;
 }
 
 .lp-actions .btn-primary {
@@ -214,7 +214,7 @@
   padding: 0 8px;
   border-radius: 999px;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 600;
   border: 1px solid var(--line);
   background: rgba(0, 0, 0, 0.22);
 }
@@ -245,20 +245,20 @@
 .lp-demo-body h3 {
   margin: 0;
   font-size: 1.02rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-weight: var(--text-ui-strong);
+  letter-spacing: normal;
   line-height: 1.2;
 }
 
 .lp-demo-age {
-  font-weight: 650;
+  font-weight: 600;
   color: var(--muted);
 }
 
 .lp-demo-gym {
   margin: 0;
   font-size: 0.84rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text);
 }
 
@@ -334,7 +334,7 @@
   border: 1.5px solid rgba(20, 27, 24, 0.95);
   background: rgba(255, 255, 255, 0.08);
   font-size: 0.68rem;
-  font-weight: 750;
+  font-weight: 600;
   color: var(--muted);
 }
 
@@ -344,7 +344,7 @@
   gap: 4px;
   color: #ff7a9a;
   font-size: 0.82rem;
-  font-weight: 750;
+  font-weight: 600;
 }
 
 .lp-pill {
@@ -354,7 +354,7 @@
   padding: 0 10px;
   border-radius: 999px;
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 600;
   border: 1px solid var(--line);
 }
 
@@ -385,11 +385,11 @@
   align-items: center;
   gap: 8px;
   margin: 0 0 12px;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-section-size);
   font-weight: var(--text-section-weight);
   line-height: var(--text-section-line);
-  letter-spacing: -0.02em;
+  letter-spacing: normal;
 }
 
 .lp-section-lead {
@@ -419,7 +419,7 @@
 .lp-block h3 {
   margin: 0 0 6px;
   font-size: 1rem;
-  font-weight: 750;
+  font-weight: 600;
 }
 
 .lp-block p {
@@ -443,7 +443,7 @@
   border-radius: 12px;
   background: var(--accent-soft);
   color: var(--accent);
-  font-weight: 800;
+  font-weight: 600;
   font-size: 0.95rem;
 }
 
@@ -454,7 +454,7 @@
 
 .lp-pain {
   color: var(--text);
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .lp-fix {
@@ -549,10 +549,10 @@
 
 .lp-slide-body h3 {
   margin: 0;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: 1.08rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-weight: var(--text-ui-strong);
+  letter-spacing: normal;
 }
 
 .lp-slide-body p {
@@ -619,7 +619,7 @@
   background: rgba(200, 245, 66, 0.08);
   color: var(--text);
   font-size: 0.82rem;
-  font-weight: 650;
+  font-weight: 600;
   line-height: 1.25;
 }
 

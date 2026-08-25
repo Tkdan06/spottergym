@@ -91,7 +91,7 @@
   border: 1px solid rgba(232, 240, 234, 0.14);
   color: var(--text);
   font-size: 0.68rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.02em;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -100,7 +100,7 @@
 
 .profile-carousel-count.empty {
   font-size: 0.64rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .profile-carousel-dots {

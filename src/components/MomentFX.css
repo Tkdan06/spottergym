@@ -86,9 +86,10 @@
 }
 
 .moment-fx-copy strong {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: 1.05rem;
-  letter-spacing: var(--letter-tight);
+  font-weight: var(--text-ui-strong);
+  letter-spacing: normal;
   line-height: 1.2;
 }
 

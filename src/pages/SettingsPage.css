@@ -36,7 +36,7 @@
   background: transparent;
   color: inherit;
   font: inherit;
-  font-weight: 650;
+  font-weight: 600;
   text-align: left;
   cursor: pointer;
 }
@@ -44,7 +44,7 @@
 .settings-gym-home-tag {
   flex-shrink: 0;
   font-size: 0.68rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: lowercase;
   color: var(--accent-ink);
@@ -117,7 +117,7 @@
   font-size: var(--text-section-size);
   font-weight: var(--text-section-weight);
   line-height: var(--text-section-line);
-  letter-spacing: var(--letter-tight);
+  letter-spacing: normal;
 }
 
 .settings-panel-head .muted {
@@ -330,7 +330,7 @@
   gap: 12px;
   min-height: 40px;
   font-size: 0.92rem;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .blocked-row .text-btn {
@@ -339,7 +339,7 @@
   color: var(--accent);
   font: inherit;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
   padding: 0;
   cursor: pointer;
 }
@@ -390,7 +390,7 @@
 .settings-password-form .feedback-success {
   margin: 0;
   font-size: 0.88rem;
-  font-weight: 650;
+  font-weight: 600;
   line-height: 1.35;
 }
 

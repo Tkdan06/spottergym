@@ -28,7 +28,7 @@
 
 .messages-presence-label {
   font-size: 0.75rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--text-muted);
   white-space: normal;
   overflow-wrap: anywhere;
@@ -255,7 +255,7 @@
   display: grid;
   place-items: center;
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-muted);
 }
 
@@ -277,7 +277,7 @@
 
 .conversation-body .gym-line {
   font-size: 0.75rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--accent);
   white-space: normal;
   overflow-wrap: anywhere;
@@ -318,7 +318,7 @@
 
 .conversation-body .preview.is-unread {
   color: var(--text);
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .conversation-body .time {
@@ -329,11 +329,11 @@
 
 .conversation-body .time.is-unread {
   color: var(--accent);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .conversation-row.is-unread .conversation-body > .row strong {
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .messages-page .unread-badge {
@@ -346,7 +346,7 @@
   color: var(--accent-ink);
   font-style: normal;
   font-size: 0.72rem;
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1;
   display: inline-grid;
   place-items: center;
@@ -368,7 +368,7 @@
 
 .messages-page .app-sheet-panel .toggle-row strong {
   font-size: 0.95rem;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .messages-page .app-sheet-panel .toggle-row .muted {

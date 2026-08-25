@@ -89,7 +89,7 @@
 .referral-status-title-only {
   margin: 4px 0 0;
   font-size: 0.88rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--accent);
   letter-spacing: -0.01em;
   overflow: hidden;
@@ -99,7 +99,7 @@
 
 .referral-status-inline .referral-status-title {
   font-size: 0.88rem;
-  font-weight: 650;
+  font-weight: 600;
   color: var(--accent);
   letter-spacing: -0.01em;
   overflow: hidden;

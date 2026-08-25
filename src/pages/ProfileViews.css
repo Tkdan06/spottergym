@@ -33,7 +33,7 @@
   background: none;
   color: var(--accent);
   font: inherit;
-  font-weight: 650;
+  font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
@@ -268,8 +268,10 @@
 .profile-hero-meta .profile-hero-name {
   margin: 10px 0 6px;
   max-width: 100%;
+  font-family: var(--font-display);
   font-size: clamp(var(--text-gym-min), 5vw, var(--text-gym-max));
   font-weight: 800;
+  letter-spacing: var(--letter-tight);
   line-height: 1.2;
   overflow-wrap: anywhere;
   word-break: break-word;
@@ -294,7 +296,7 @@
   background: none;
   color: var(--accent);
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -306,7 +308,7 @@
   margin: 0;
   color: var(--accent);
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 /** Spotter @ник и Instagram — отдельные строки, не один «логин» */
@@ -391,7 +393,7 @@ a.profile-status-mark:focus-visible {
   border: 1px solid color-mix(in srgb, var(--line, transparent) 85%, var(--accent) 15%);
   text-decoration: none;
   font-size: 0.88rem;
-  font-weight: 650;
+  font-weight: 600;
   line-height: 1.2;
 }
 
@@ -412,7 +414,7 @@ a.profile-status-mark:focus-visible {
   text-overflow: ellipsis;
   white-space: nowrap;
   opacity: 0.72;
-  font-weight: 550;
+  font-weight: 500;
 }
 
 .profile-block {
@@ -437,7 +439,7 @@ a.profile-status-mark:focus-visible {
   font-size: var(--text-section-size);
   font-weight: var(--text-section-weight);
   line-height: var(--text-section-line);
-  letter-spacing: var(--letter-tight);
+  letter-spacing: normal;
 }
 
 .break-note {
@@ -521,7 +523,7 @@ a.profile-status-mark:focus-visible {
   font-size: var(--text-section-size);
   font-weight: var(--text-section-weight);
   line-height: var(--text-section-line);
-  letter-spacing: var(--letter-tight);
+  letter-spacing: normal;
 }
 
 .like-btn {
@@ -533,7 +535,7 @@ a.profile-status-mark:focus-visible {
   border: 1px solid var(--line);
   background: var(--bg-elevated);
   color: var(--text);
-  font-weight: 650;
+  font-weight: 600;
   font-size: 0.9rem;
   transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
 }

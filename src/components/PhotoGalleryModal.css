@@ -146,8 +146,8 @@
 
 .photo-modal-empty p {
   margin: 0 0 4px;
-  font-family: var(--font-display);
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--text-ui-strong);
 }
 
 .photo-modal-empty span {
@@ -164,7 +164,7 @@
   background: var(--accent);
   color: var(--accent-ink);
   font-size: 0.75rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.02em;
 }
 

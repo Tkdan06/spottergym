@@ -4,7 +4,7 @@
 
 .admin-page .text-link {
   color: var(--accent);
-  font-weight: 650;
+  font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -24,7 +24,10 @@
 
 .admin-players-head h1 {
   margin: 0 0 4px;
+  font-family: var(--font-display);
   font-size: var(--text-page-size);
+  font-weight: var(--text-page-weight);
+  letter-spacing: var(--letter-tight);
   line-height: 1.15;
   overflow-wrap: anywhere;
 }
@@ -83,8 +86,9 @@
 }
 
 .admin-stat-card strong {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: 1.35rem;
+  font-weight: var(--text-ui-strong);
   line-height: 1.15;
 }
 
@@ -287,7 +291,7 @@
   color: var(--text-muted);
   font-family: inherit;
   font-size: 0.86rem;
-  font-weight: 650;
+  font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
   transition:
@@ -377,13 +381,13 @@
 .admin-ip-flag {
   color: var(--danger);
   font-size: var(--text-label-size);
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: normal;
 }
 
 .admin-detail-ip-warn {
   color: var(--danger);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .admin-player-row-top {
@@ -396,7 +400,7 @@
 .admin-player-row .mock-online {
   color: var(--online);
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .admin-player-meta {

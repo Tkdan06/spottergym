@@ -34,7 +34,7 @@ html.standalone .bottom-nav {
   gap: 4px;
   color: var(--text-dim);
   font-size: 0.7rem;
-  font-weight: 600;
+  font-weight: var(--text-ui-emphasis);
   border-radius: 12px;
   transition: color 0.2s ease, background 0.2s ease;
 }
@@ -42,6 +42,7 @@ html.standalone .bottom-nav {
 .nav-item.active {
   color: var(--accent);
   background: var(--accent-soft);
+  font-weight: var(--text-ui-strong);
 }
 
 .nav-icon-wrap {

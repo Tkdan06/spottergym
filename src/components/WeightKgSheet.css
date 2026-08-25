@@ -88,7 +88,7 @@
 
 .weight-kg-wheel-item.is-active {
   color: var(--text);
-  font-weight: 750;
+  font-weight: 600;
   font-size: 1.35rem;
 }
 
@@ -132,7 +132,7 @@
   transform: translateY(-50%);
   z-index: 2;
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--accent);
 }
 

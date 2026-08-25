@@ -10,7 +10,7 @@
   border-radius: 999px;
   border: 1px solid transparent;
   font-size: 0.64rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.1;
   white-space: nowrap;
   backdrop-filter: blur(8px);
@@ -69,7 +69,7 @@
   background: var(--accent-soft);
   color: var(--accent);
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1;
   white-space: nowrap;
 }

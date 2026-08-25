@@ -31,7 +31,7 @@
   border: 1px solid var(--line);
   background: var(--bg-card);
   color: var(--text-muted);
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .admin-referrals-tabs button.active {
@@ -60,7 +60,7 @@
   place-items: center;
   background: var(--bg-elevated);
   border: 1px solid var(--line);
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-muted);
 }
 
@@ -98,7 +98,7 @@
   place-items: center;
   background: var(--accent-soft);
   color: var(--accent);
-  font-weight: 800;
+  font-weight: 600;
   font-size: 0.95rem;
 }
 

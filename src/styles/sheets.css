@@ -47,10 +47,10 @@
 .app-sheet-panel > h2,
 .app-sheet-panel > h3 {
   margin: 0;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-section-size);
   font-weight: var(--text-section-weight);
-  letter-spacing: var(--letter-tight);
+  letter-spacing: normal;
   line-height: var(--text-section-line);
 }
 

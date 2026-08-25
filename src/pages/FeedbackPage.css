@@ -55,7 +55,7 @@
 
 .feedback-status {
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 600;
   padding: 3px 8px;
   border-radius: 999px;
   background: var(--bg-soft);
@@ -127,8 +127,9 @@
 }
 
 .admin-hub-card strong {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: 1.1rem;
+  font-weight: var(--text-ui-strong);
 }
 
 .admin-emergency {

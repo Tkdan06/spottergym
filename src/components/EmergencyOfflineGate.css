@@ -11,7 +11,7 @@
 
 .emergency-gate-loading {
   opacity: 0.7;
-  font-family: Syne, Unbounded, system-ui, sans-serif;
+  font-family: var(--font-brand, Syne, sans-serif);
   font-weight: 700;
   letter-spacing: -0.04em;
 }
@@ -29,7 +29,7 @@
 
 .emergency-gate-brand {
   margin: 0;
-  font-family: Syne, Unbounded, system-ui, sans-serif;
+  font-family: var(--font-brand, Syne, sans-serif);
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -38,8 +38,11 @@
 
 .emergency-gate-card h1 {
   margin: 0;
+  font-family: var(--font-display);
   font-size: 1.45rem;
-  letter-spacing: -0.03em;
+  font-weight: var(--text-page-weight);
+  letter-spacing: var(--letter-tight);
+  line-height: 1.15;
 }
 
 .emergency-gate-copy {
@@ -57,7 +60,7 @@
   background: none;
   color: #ff8a7a;
   font: inherit;
-  font-weight: 650;
+  font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;

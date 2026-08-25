@@ -20,12 +20,12 @@ Before adding or redesigning UI in `src/pages` / `src/components`, follow the li
    / replace, label «Мой зал»). Never `navigate(-1)` from the list and never push `/app/workouts`
    on top of progress or a session.
 3. **Section headings:** only `SectionTitle` / `.section-title` — no one-off `h2` font sizes for
-   the same role. Fonts: Unbounded = headlines (page 1.4375rem / 800, section 1.05rem / 700),
-   Syne = SPOTTER wordmark only, Manrope = UI/body. Kickers and labels are sentence case —
-   no `uppercase` and no letter-spacing 0.04–0.10em. Full specimen lives on the UI kit
-   «Типографика» block.
+   the same role. Section titles are Onest 600 (`--text-section-size` 1.05rem / lh 1.25), not
+   Unbounded. Page titles are Unbounded (`--text-page-size` 1.4375rem / 700). Full specimen lives
+   on the UI kit «Типографика» block. Kickers and labels are sentence case — no `uppercase` and no
+   letter-spacing 0.04–0.10em.
 4. **SectionTitle actions:** use `.section-action` for Link and `<button>` (“Кого я лайкнул”,
-   “Добавить”, “Изменить”). Same Manrope muted look — no `.text-link` / font-weight 650 in the
+   “Добавить”, “Изменить”). Same Onest muted 500 look — no `.text-link` / font-weight 650 in the
    action slot. Non-click meta → `.muted` / `.dim`. Admin accent nav links may keep `.text-link`
    outside SectionTitle.
 5. **Section entry links:** use `.entry-tools` + `.entry-link` for frequent product tools outside
@@ -55,8 +55,8 @@ Before adding or redesigning UI in `src/pages` / `src/components`, follow the li
     `.is-active`. Compact period/view (Progress, Activity) adds `.seg--fit` (hug text).
     Page-level two-way tabs (Likes, Notifications) use `.seg--fill`: full width, equal
     halves, text centered. Items ~32px (`padding: 6px 12px`). Button or `Link` as
-    `.seg-item`. Do not invent a local tab recipe. Not chips (multi-filter / labels) and
-    not `.toggle` / `.toggle-row` (on/off). Specimen: UI kit «Сегмент».
+    `.seg-item`. Onest 500, active 600. Do not invent a local tab recipe. Not chips
+    (multi-filter / labels) and not `.toggle` / `.toggle-row` (on/off). Specimen: UI kit «Сегмент».
 13. **Lists after flatten:** People / gyms = `UserCard` / `GymCard` in `.card-list.card-list--cards`
     (`gap: 12px`). Likes = divider rows (`.liked-list` / `.liked-row`). Workouts history = one
     grouped `.workouts-list`. Chats = conversation rows, not a card per chat. Notifications
@@ -64,10 +64,59 @@ Before adding or redesigning UI in `src/pages` / `src/components`, follow the li
     sections = `.profile-block` (hairline), not stacked `.surface`. Do not wrap each row in
     `.surface`.
 
+## Typography
+
+Fonts load once in `src/main.tsx` via `@fontsource`. Do not import fonts in components.
+
+| Token | Face | Role |
+|---|---|---|
+| `--font-brand` | Syne | SPOTTER wordmark only (SPOT + lime TER) |
+| `--font-display` | Unbounded | Page titles, gym heroes, profile names |
+| `--font-body` | Onest | All UI: body, buttons, nav, chips, forms, stats, sections |
+
+Stacks:
+
+- `--font-display: 'Unbounded', 'Onest', sans-serif`
+- `--font-brand: 'Syne', 'Unbounded', sans-serif`
+- `--font-body: 'Onest', sans-serif`
+
+Do not use Manrope, Montserrat, Roboto, Inter, Arial, or `system-ui` as the product UI face.
+Do not add a fourth family. Do not write `font-family: Onest` locally — use the token.
+
+### Roles
+
+- **Syne:** `.brand-mark` / lock / emergency / landing wordmark. Never body, buttons, cards, nav.
+- **Unbounded:** `.page-title` (1.4375rem / 700 / lh 1.15 / `--letter-tight`), `.home-gym-title`
+  and `.gym-hero-title` (700), profile names (`.profile-hero-name`, `.profile-hero-cover-copy h1`)
+  at **800**, and hall `UserCard` name / age / rank (`.user-card-head h3`, 700). Not body, lists
+  of copy, buttons, tab bar, small labels, section titles, metrics.
+- **Onest:** everything else. 400 body / muted / dim. 500 nav, chips, section-action. 600 buttons,
+  section titles, metrics, strong UI. Do **not** load or use Onest 700+.
+
+Hierarchy = size + weight + line-height + color + spacing. Do not fake emphasis with 650/750/800
+on Onest. Fake weights 550/650/750 are forbidden.
+
+### Tokens
+
+- `--text-page-weight: 700`
+- `--text-section-weight: 600` (Onest, letter-spacing normal)
+- `--text-label-weight: 600`
+- `--text-ui-emphasis: 500`
+- `--text-ui-strong: 600`
+- `--text-body-line: 1.45`
+- `--letter-tight: -0.03em` — Unbounded only
+
+Line-heights: display 1.0–1.15, UI headings 1.15–1.25, body 1.4–1.55, small UI 1.2–1.4,
+buttons ~1.0–1.2. Reuse existing tokens; do not invent a second type scale.
+
+Cyrillic is the primary target. Do not apply aggressive tracking to Russian. Do not hide overflow
+on long labels («Открыт к знакомству», «Записать тренировку»).
+
 ## Sources of truth
 
 - Live demo: `/app/admin/ui`
 - Code: `src/pages/UiKitPage.tsx`, `src/components/SectionTitle.tsx`, `src/components/SoftFlash.tsx`,
   `src/components/SoftLoader.tsx`
 - CSS: `src/styles/global.css`, `src/styles/sheets.css`
+- Fonts: `src/main.tsx`
 - Entry IA canvas: `feedback-entry-ia` (where feedback/admin belong)

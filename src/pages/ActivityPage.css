@@ -67,11 +67,11 @@
 }
 
 .activity-summary-total {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: clamp(1.5rem, 5.2vw, 1.75rem);
-  letter-spacing: var(--letter-tight);
+  letter-spacing: normal;
   line-height: 1.05;
-  font-weight: 700;
+  font-weight: var(--text-ui-strong);
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
 }
@@ -277,7 +277,7 @@
 
 .activity-day-detail-copy strong {
   font-size: 0.98rem;
-  letter-spacing: -0.02em;
+  font-weight: var(--text-ui-strong);
 }
 
 .activity-day-detail-copy span {
@@ -292,10 +292,10 @@
 
 .activity-day-detail-range {
   flex-shrink: 0;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: 0.92rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: var(--text-ui-strong);
+  letter-spacing: normal;
   color: var(--accent);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -348,9 +348,10 @@
 }
 
 .activity-peak strong {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: 1.05rem;
-  letter-spacing: var(--letter-tight);
+  font-weight: var(--text-ui-strong);
+  letter-spacing: normal;
   overflow-wrap: anywhere;
   line-height: 1.15;
 }
@@ -401,7 +402,7 @@
 .activity-sheet-panel h3 {
   margin: 0;
   font-size: 1.1rem;
-  letter-spacing: -0.02em;
+  letter-spacing: normal;
 }
 
 .activity-sheet-panel .muted {
@@ -420,7 +421,7 @@
   background: var(--bg-card);
   color: var(--text);
   font: inherit;
-  font-weight: 650;
+  font-weight: 600;
   font-size: 0.95rem;
   text-align: left;
   cursor: pointer;
