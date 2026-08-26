@@ -80,6 +80,46 @@ export function formatKg(kg: number | null | undefined) {
   return Number.isInteger(kg) ? `${kg} кг` : `${kg.toFixed(1)} кг`
 }
 
+export function formatSignedPercent(n: number | null | undefined) {
+  if (n == null || !Number.isFinite(n)) return null
+  const sign = n > 0 ? '+' : ''
+  const value = Number.isInteger(n) ? String(n) : n.toFixed(1)
+  return `${sign}${value}%`
+}
+
+/** Hide comparison when the previous window is empty — no fake 0% / +N. */
+export function formatVsPreviousPeriod(
+  delta: number | null | undefined,
+  previous: number | null | undefined,
+) {
+  if (delta == null || previous == null || previous <= 0) return null
+  const sign = delta > 0 ? '+' : ''
+  const n = Number.isInteger(delta) ? String(delta) : delta.toFixed(1)
+  return `${sign}${n} к прошлому периоду`
+}
+
+export function formatVolume(n: number) {
+  return Math.round(n).toLocaleString('ru-RU')
+}
+
+export function formatMinutesRu(total: number) {
+  if (total <= 0) return '0 мин'
+  const h = Math.floor(total / 60)
+  const m = total % 60
+  if (h <= 0) return `${m} мин`
+  if (m <= 0) return `${h} ч`
+  return `${h} ч ${m} мин`
+}
+
+export function ruPlural(n: number, one: string, few: string, many: string) {
+  const abs = Math.abs(n) % 100
+  const last = abs % 10
+  if (abs > 10 && abs < 20) return many
+  if (last === 1) return one
+  if (last >= 2 && last <= 4) return few
+  return many
+}
+
 export function formatBarWeightValue(kg: number) {
   const n = Math.round(kg * 10) / 10
   return Number.isInteger(n) ? String(n) : n.toFixed(1)
@@ -88,5 +128,18 @@ export function formatBarWeightValue(kg: number) {
 /** e.g. «80 × 10» or «80,5 × 8» */
 export function formatSetPair(weightKg: number, reps: number) {
   return `${formatBarWeightValue(weightKg)} × ${reps}`
+}
+
+export type WorkoutFelt = 'easy' | 'normal' | 'hard'
+
+export const WORKOUT_FELT_OPTIONS: { id: WorkoutFelt; label: string }[] = [
+  { id: 'easy', label: 'Легко' },
+  { id: 'normal', label: 'Нормально' },
+  { id: 'hard', label: 'Тяжело' },
+]
+
+export function workoutFeltLabel(value: WorkoutFelt | null | undefined) {
+  if (!value) return null
+  return WORKOUT_FELT_OPTIONS.find((o) => o.id === value)?.label ?? null
 }
 

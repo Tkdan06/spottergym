@@ -12,14 +12,9 @@ import {
   type ActivityStats,
 } from '../lib/apiClient'
 import { useSheetA11y } from '../lib/sheetA11y'
+import { PERIOD_TABS } from '../lib/periodRange'
 import './ActivityPage.css'
 import './FeedbackPage.css'
-
-const RANGES: { id: ActivityRange; label: string }[] = [
-  { id: 7, label: '7д' },
-  { id: 30, label: '30д' },
-  { id: 90, label: '90д' },
-]
 
 function formatMinutes(total: number) {
   if (total <= 0) return '0 мин'
@@ -267,8 +262,8 @@ export function ActivityPage() {
         <p className="muted">Нужен онлайн, чтобы загрузить историю чекинов.</p>
       ) : null}
 
-      <div className="seg seg--fill" role="tablist" aria-label="Период">
-        {RANGES.map((r) => (
+      <div className="seg seg--fill seg--dense" role="tablist" aria-label="Период">
+        {PERIOD_TABS.map((r) => (
           <button
             key={r.id}
             type="button"

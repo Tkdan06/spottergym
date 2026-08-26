@@ -24,6 +24,7 @@ import {
   formatBodyDelta,
   formatKg,
   formatWorkoutWhen,
+  workoutFeltLabel,
 } from '../lib/workouts'
 import './WorkoutsPage.css'
 import './FeedbackPage.css'
@@ -216,6 +217,9 @@ export function WorkoutsPage() {
                           {formatWorkoutWhen(w.performedAt)}
                           {w.bodyWeightKg != null ? ` · ${formatKg(w.bodyWeightKg)}` : ''}
                         </span>
+                        {workoutFeltLabel(w.feedback) ? (
+                          <span className="dim workouts-row-felt">{workoutFeltLabel(w.feedback)}</span>
+                        ) : null}
                         {w.notes?.trim() ? (
                           <span className="dim workouts-row-note">{w.notes.trim()}</span>
                         ) : null}

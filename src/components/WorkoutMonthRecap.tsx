@@ -5,13 +5,14 @@ import { SectionTitle } from './SectionTitle'
 import { SoftLoader } from './SoftLoader'
 import { useApp } from '../context/useApp'
 import {
-  apiFetchWorkoutInsight,
-  apiGenerateWorkoutInsight,
-  apiMarkWorkoutInsightViewed,
-  type WorkoutInsightFacts,
-  type WorkoutInsightState,
+  apiFetchWorkoutMonthly,
+  apiGenerateWorkoutMonthly,
+  apiMarkWorkoutMonthlyRecommendationClicked,
+  apiMarkWorkoutMonthlyViewed,
+  type WorkoutMonthlyFacts,
+  type WorkoutMonthlyState,
 } from '../lib/apiClient'
-import { formatSignedPercent, ruPlural } from '../lib/workouts'
+import { formatSignedPercent, formatVsPreviousPeriod, ruPlural } from '../lib/workouts'
 import { WORKOUT_RECAP_ADMIN_ONLY } from '../lib/workoutRecap'
 
 function sessionsWord(n: number) {
@@ -27,9 +28,11 @@ function recLooksLikeLogCta(title: string, text: string) {
   return /записать тренировк|запиши тренировк|добавить тренировк/i.test(`${title} ${text}`)
 }
 
-function FactsFallback({ facts }: { facts: WorkoutInsightFacts }) {
+function FactsFallback({ facts }: { facts: WorkoutMonthlyFacts }) {
   const vol = formatSignedPercent(facts.volume.deltaPercent)
+  const vs = formatVsPreviousPeriod(facts.workoutCount.delta, facts.workoutCount.previous)
   const items = [sessionsWord(facts.workoutCount.current)]
+  if (vs) items.push(vs)
   if (vol) items.push(`${vol} объёма`)
   if (facts.prs.count > 0) {
     items.push(
@@ -45,9 +48,9 @@ function FactsFallback({ facts }: { facts: WorkoutInsightFacts }) {
   )
 }
 
-export function WorkoutWeekRecap() {
+export function WorkoutMonthRecap() {
   const { user, apiOnline } = useApp()
-  const [insight, setInsight] = useState<WorkoutInsightState | null>(null)
+  const [monthly, setMonthly] = useState<WorkoutMonthlyState | null>(null)
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState('')
@@ -62,10 +65,10 @@ export function WorkoutWeekRecap() {
     setLoading(true)
     setError('')
     try {
-      setInsight(await apiFetchWorkoutInsight())
+      setMonthly(await apiFetchWorkoutMonthly())
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось загрузить разбор')
-      setInsight(null)
+      setError(err instanceof Error ? err.message : 'Не удалось загрузить разбор месяца')
+      setMonthly(null)
     } finally {
       setLoading(false)
     }
@@ -76,14 +79,14 @@ export function WorkoutWeekRecap() {
   }, [load])
 
   useEffect(() => {
-    if (!insight?.letter || !apiOnline || !allowed) return
-    const key = insight.periodStart
+    if (!monthly?.letter || !apiOnline || !allowed) return
+    const key = monthly.periodStart
     if (viewedFor.current === key) return
     viewedFor.current = key
-    void apiMarkWorkoutInsightViewed().catch(() => {
+    void apiMarkWorkoutMonthlyViewed().catch(() => {
       viewedFor.current = null
     })
-  }, [allowed, apiOnline, insight])
+  }, [allowed, apiOnline, monthly])
 
   if (!allowed) return null
 
@@ -92,23 +95,36 @@ export function WorkoutWeekRecap() {
     setGenerating(true)
     setError('')
     try {
-      setInsight(await apiGenerateWorkoutInsight())
+      setMonthly(await apiGenerateWorkoutMonthly())
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось собрать разбор')
+      setError(err instanceof Error ? err.message : 'Не удалось собрать разбор месяца')
     } finally {
       setGenerating(false)
     }
   }
 
-  const letter = insight?.letter
-  const facts = insight?.facts
+  const markRecClick = () => {
+    void apiMarkWorkoutMonthlyRecommendationClicked().catch(() => {})
+  }
+
+  const letter = monthly?.letter
+  const facts = monthly?.facts
   const showFallback =
-    Boolean(insight && !letter && (insight.status === 'offline' || insight.status === 'failed'))
+    Boolean(monthly && !letter && (monthly.status === 'offline' || monthly.status === 'failed'))
 
   return (
-    <div id="week-recap" className="workout-week-recap">
-      <SectionTitle action={insight ? <span className="muted">{insight.periodLabel}</span> : null}>
-        Разбор недели
+    <div id="month-recap" className="workout-week-recap">
+      <SectionTitle
+        action={
+          monthly ? (
+            <span className="muted">
+              {monthly.periodLabel}
+              <span className="dim"> · цифры за 30 дней</span>
+            </span>
+          ) : null
+        }
+      >
+        Твой месяц
       </SectionTitle>
 
       {error ? (
@@ -117,27 +133,46 @@ export function WorkoutWeekRecap() {
         </p>
       ) : null}
 
-      {loading ? <SoftLoader label="Загружаем разбор…" /> : null}
+      {loading ? <SoftLoader label="Загружаем разбор месяца…" /> : null}
 
-      {!loading && insight && letter ? (
+      {!loading && monthly && letter ? (
         <section className="surface workout-coach-block">
-          <p className="workout-coach-headline">{letter.summary.title}</p>
-          {letter.summary.text ? <p className="muted">{letter.summary.text}</p> : null}
+          <p className="workout-coach-headline">{letter.headline.title}</p>
+          {letter.headline.text ? <p className="muted">{letter.headline.text}</p> : null}
 
-          {letter.insights.length ? (
-            <ul className="workout-coach-wins">
-              {letter.insights.map((item, i) => (
-                <li key={`${item.title}-${i}`}>
-                  {item.title ? <strong>{item.title}</strong> : null}
-                  {item.text ? <p className="muted">{item.text}</p> : null}
-                </li>
-              ))}
-            </ul>
+          {letter.wins.length ? (
+            <div className="workout-coach-next">
+              <p className="workout-coach-next-label">Главный прогресс</p>
+              <ul className="workout-coach-wins">
+                {letter.wins.map((item, i) => (
+                  <li key={`${item.title}-${i}`}>
+                    {item.title ? <strong>{item.title}</strong> : null}
+                    {item.text ? <p className="muted">{item.text}</p> : null}
+                    {item.why ? <p className="muted">{item.why}</p> : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {letter.attention.length ? (
+            <div className="workout-coach-next">
+              <p className="workout-coach-next-label">Стоит обратить внимание</p>
+              <ul className="workout-coach-wins">
+                {letter.attention.map((item, i) => (
+                  <li key={`${item.title}-${i}`}>
+                    {item.title ? <strong>{item.title}</strong> : null}
+                    {item.text ? <p className="muted">{item.text}</p> : null}
+                    {item.why ? <p className="muted">{item.why}</p> : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
           ) : null}
 
           {letter.recommendations.length ? (
             <div className="workout-coach-next">
-              <p className="workout-coach-next-label">Дальше</p>
+              <p className="workout-coach-next-label">На следующий месяц</p>
               <ul className="workout-coach-wins">
                 {letter.recommendations.map((rec, i) => {
                   const logCta = recLooksLikeLogCta(rec.title, rec.text)
@@ -145,7 +180,7 @@ export function WorkoutWeekRecap() {
                     <li key={`${rec.title}-${i}`}>
                       {rec.title ? (
                         logCta ? (
-                          <Link to="/app/workouts/new">
+                          <Link to="/app/workouts/new" onClick={markRecClick}>
                             <strong>{rec.title}</strong>
                           </Link>
                         ) : (
@@ -160,22 +195,24 @@ export function WorkoutWeekRecap() {
             </div>
           ) : null}
 
-          <Link to="/app/workouts/new" className="btn btn-primary btn-block">
+          {letter.wrap ? <p className="muted">{letter.wrap}</p> : null}
+
+          <Link to="/app/workouts/new" className="btn btn-primary btn-block" onClick={markRecClick}>
             <Plus size={16} /> Записать тренировку
           </Link>
         </section>
       ) : null}
 
-      {!loading && insight && !letter && insight.canGenerate ? (
+      {!loading && monthly && !letter && monthly.canGenerate ? (
         <section className="surface workouts-empty">
           <ListChecks size={28} aria-hidden />
           <p className="empty-copy-title">
-            {insight.status === 'failed' ? 'Твой прогресс' : 'Собрать разбор'}
+            {monthly.status === 'failed' ? 'Твой месяц' : 'Собрать разбор месяца'}
           </p>
           <p className="muted">
-            {insight.status === 'failed'
+            {monthly.status === 'failed'
               ? 'Разбор временно недоступен'
-              : 'Коротко по дневнику: что изменилось за неделю и что попробовать дальше.'}
+              : 'Как ты тренировался в последние 30 дней и куда двигаешься.'}
           </p>
           {facts ? <FactsFallback facts={facts} /> : null}
           <button
@@ -184,28 +221,32 @@ export function WorkoutWeekRecap() {
             disabled={generating || !apiOnline}
             onClick={() => void generate()}
           >
-            {generating ? 'Собираем…' : insight.status === 'failed' ? 'Попробовать снова' : 'Собрать разбор'}
+            {generating
+              ? 'Собираем…'
+              : monthly.status === 'failed'
+                ? 'Попробовать снова'
+                : 'Собрать разбор'}
           </button>
         </section>
       ) : null}
 
-      {!loading && insight && !letter && !insight.canGenerate ? (
+      {!loading && monthly && !letter && !monthly.canGenerate ? (
         <section className="surface workouts-empty">
           <ListChecks size={28} aria-hidden />
           <p className="empty-copy-title">
-            {insight.status === 'locked'
-              ? 'Пока рано'
-              : insight.status === 'skipped'
+            {monthly.status === 'locked'
+              ? 'Пока мало данных'
+              : monthly.status === 'skipped'
                 ? 'Пока без разбора'
                 : showFallback
-                  ? 'Твой прогресс'
+                  ? 'Твой месяц'
                   : 'Разбор появится позже'}
           </p>
           <p className="muted">
-            {insight.status === 'locked'
-              ? 'Пока недостаточно данных для нового анализа.'
-              : insight.status === 'skipped'
-                ? 'На этой неделе нет заметных изменений для нового анализа.'
+            {monthly.status === 'locked'
+              ? 'Пока недостаточно данных за месяц.'
+              : monthly.status === 'skipped'
+                ? 'В этом месяце нет заметных изменений для нового анализа.'
                 : showFallback
                   ? 'Разбор временно недоступен'
                   : 'Цифры — на графике выше.'}
@@ -214,7 +255,7 @@ export function WorkoutWeekRecap() {
         </section>
       ) : null}
 
-      {!loading && !insight && !error ? (
+      {!loading && !monthly && !error ? (
         <section className="surface workouts-empty">
           <p className="empty-copy-title">Разбор появится позже</p>
           <p className="muted">Не удалось получить статус. Обнови страницу.</p>

@@ -1,6 +1,10 @@
 import type { Prisma } from '@prisma/client'
 import { prisma } from '../db.js'
+import { buildMyActivityStats } from './activityStats.js'
 import { WORKOUT_NOTE_MAX } from './fieldLimits.js'
+import { invalidateUserWorkoutInsights } from './insightClaim.js'
+import type { PeriodRange } from './periodRange.js'
+import { buildWorkoutInsights, type WorkoutInsights } from './workoutAnalytics.js'
 
 export type WorkoutSetDto = {
   id?: string
@@ -21,12 +25,17 @@ export type WorkoutExerciseDto = {
   sets: WorkoutSetDto[]
 }
 
+export type WorkoutFelt = 'easy' | 'normal' | 'hard'
+
+export const WORKOUT_FELT_VALUES = ['easy', 'normal', 'hard'] as const
+
 export type WorkoutSessionSummary = {
   id: string
   title: string
   performedAt: string
   bodyWeightKg: number | null
   notes: string
+  feedback: WorkoutFelt | null
   exerciseCount: number
   setCount: number
   exercises: WorkoutExercisePreview[]
@@ -40,12 +49,15 @@ export type WorkoutSessionDetail = {
   performedAt: string
   bodyWeightKg: number | null
   notes: string
+  feedback: WorkoutFelt | null
   exercises: WorkoutExerciseDto[]
   createdAt: string
   updatedAt: string
 }
 
-export type WorkoutProgressRange = 7 | 30 | 90
+export type WorkoutProgressRange = PeriodRange
+
+export type { WorkoutInsights } from './workoutAnalytics.js'
 
 export type WorkoutProgress = {
   range: WorkoutProgressRange
@@ -69,6 +81,7 @@ export type WorkoutProgress = {
     liftDeltaWeightKg: number | null
     liftDeltaReps: number | null
   }
+  insights: WorkoutInsights
 }
 
 export const sessionInclude = {
@@ -158,11 +171,39 @@ function normalizeTitle(title: string) {
 }
 
 function normalizeExerciseName(name: string) {
-  return name.trim().toLowerCase().replace(/\s+/g, ' ')
+  return name.trim().toLowerCase().replace(/ё/g, 'е').replace(/\s+/g, ' ')
 }
 
 export function displayExerciseName(name: string) {
   return name.trim().replace(/\s+/g, ' ')
+}
+
+export function parseWorkoutFelt(raw: unknown): WorkoutFelt | null {
+  if (raw == null) return null
+  if (raw === 'easy' || raw === 'normal' || raw === 'hard') return raw
+  throw new Error('invalid_felt')
+}
+
+export type WorkoutFeltPoint = { at: string; feedback: WorkoutFelt | null }
+
+export function feltTimeline(
+  sessions: { performedAt: Date; feedback: WorkoutFelt | null }[],
+  currentStart: Date,
+  limit = 20,
+  now: Date = new Date(),
+): WorkoutFeltPoint[] {
+  const nowMs = now.getTime()
+  return sessions
+    .filter((row) => {
+      const t = row.performedAt.getTime()
+      return t >= currentStart.getTime() && t <= nowMs
+    })
+    .sort((a, b) => a.performedAt.getTime() - b.performedAt.getTime())
+    .slice(-limit)
+    .map((row) => ({
+      at: row.performedAt.toISOString(),
+      feedback: row.feedback,
+    }))
 }
 
 export function normalizeTrackKey(raw: string | undefined | null) {
@@ -267,6 +308,7 @@ export function serializeSessionSummary(
     performedAt: row.performedAt.toISOString(),
     bodyWeightKg: bodyKg(row),
     notes: row.notes || '',
+    feedback: row.feedback ?? null,
     exerciseCount: exercises.length,
     setCount,
     exercises,
@@ -308,6 +350,7 @@ export function serializeSessionDetail(
     performedAt: row.performedAt.toISOString(),
     bodyWeightKg: bodyKg(row),
     notes: row.notes || '',
+    feedback: row.feedback ?? null,
     exercises,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -449,6 +492,42 @@ export async function getWorkoutSession(
   return serializeSessionDetail(row, prev)
 }
 
+/**
+ * Subjective feel for one session. Does not call GigaChat.
+ * Analytics (no LandingEvent bus — same pattern as recap viewedAt):
+ *   feedback_prompt_shown  → feedbackPromptedAt
+ *   feedback_selected      → feedback + feedbackSetAt (value = easy|normal|hard)
+ *   feedback_skipped       → promptedAt set and feedback still null
+ */
+export async function setWorkoutFeedback(
+  userId: string,
+  id: string,
+  input: { feedback?: WorkoutFelt | null; prompted?: boolean },
+): Promise<WorkoutSessionDetail | null> {
+  const existing = await prisma.workoutSession.findFirst({
+    where: { id, userId },
+    select: { id: true, feedbackPromptedAt: true },
+  })
+  if (!existing) return null
+
+  const data: {
+    feedback?: WorkoutFelt | null
+    feedbackSetAt?: Date | null
+    feedbackPromptedAt?: Date
+  } = {}
+  if (input.prompted && !existing.feedbackPromptedAt) {
+    data.feedbackPromptedAt = new Date()
+  }
+  if ('feedback' in input) {
+    data.feedback = input.feedback ?? null
+    data.feedbackSetAt = input.feedback ? new Date() : null
+  }
+  if (Object.keys(data).length) {
+    await prisma.workoutSession.update({ where: { id }, data })
+  }
+  return getWorkoutSession(userId, id)
+}
+
 export type WorkoutInput = {
   title: string
   performedAt: Date
@@ -489,6 +568,12 @@ function exerciseCreates(exercises: WorkoutInput['exercises']) {
   }))
 }
 
+export const PERFORMED_AT_FUTURE_SKEW_MS = 15 * 60 * 1000
+
+export function isPerformedAtInFuture(d: Date, now = new Date()) {
+  return d.getTime() > now.getTime() + PERFORMED_AT_FUTURE_SKEW_MS
+}
+
 export async function createWorkoutSession(userId: string, input: WorkoutInput) {
   const title = input.title.trim()
   const row = await prisma.workoutSession.create({
@@ -505,6 +590,7 @@ export async function createWorkoutSession(userId: string, input: WorkoutInput) 
     include: sessionInclude,
   })
   await pruneWorkoutSessionsIfNeeded(userId)
+  await invalidateUserWorkoutInsights(userId)
   return getWorkoutSession(userId, row.id)
 }
 
@@ -528,11 +614,13 @@ export async function replaceWorkoutSession(userId: string, id: string, input: W
     })
   })
 
+  await invalidateUserWorkoutInsights(userId)
   return getWorkoutSession(userId, id)
 }
 
 export async function deleteWorkoutSession(userId: string, id: string) {
   const result = await prisma.workoutSession.deleteMany({ where: { id, userId } })
+  if (result.count > 0) await invalidateUserWorkoutInsights(userId)
   return result.count > 0
 }
 
@@ -541,24 +629,43 @@ export async function getWorkoutProgress(
   range: WorkoutProgressRange,
   exerciseQuery?: string,
 ): Promise<WorkoutProgress> {
-  const since = new Date(Date.now() - range * 24 * 60 * 60 * 1000)
-  const rows = await prisma.workoutSession.findMany({
-    where: { userId, performedAt: { gte: since } },
-    orderBy: { performedAt: 'asc' },
-    // Cap matches retention: user never has more than MAX_WORKOUT_SESSIONS total.
-    take: MAX_WORKOUT_SESSIONS,
-    select: {
-      performedAt: true,
-      bodyWeightKg: true,
-      exercises: {
-        select: {
-          name: true,
-          trackKey: true,
-          sets: { select: { weightKg: true, reps: true } },
-        },
+  const now = new Date()
+  const since = new Date(now.getTime() - range * 24 * 60 * 60 * 1000)
+  const progressSelect = {
+    performedAt: true,
+    bodyWeightKg: true,
+    exercises: {
+      select: {
+        name: true,
+        trackKey: true,
+        sets: { select: { weightKg: true, reps: true } },
       },
     },
+  } as const
+
+  const [allRows, activity] = await Promise.all([
+    prisma.workoutSession.findMany({
+      where: { userId },
+      orderBy: { performedAt: 'desc' },
+      // Cap matches retention: user never has more than MAX_WORKOUT_SESSIONS total.
+      take: MAX_WORKOUT_SESSIONS,
+      select: progressSelect,
+    }),
+    buildMyActivityStats(userId, range),
+  ])
+
+  const chronological = [...allRows].reverse()
+  const nowMs = now.getTime()
+  const rows = chronological.filter((r) => {
+    const t = r.performedAt.getTime()
+    return t >= since.getTime() && t <= nowMs
   })
+  const insights = buildWorkoutInsights(
+    range,
+    chronological,
+    { totalSessions: activity.totalSessions, totalMinutes: activity.totalMinutes },
+    now,
+  )
 
   const bodyPoints = rows
     .map((r) => {
@@ -684,5 +791,6 @@ export async function getWorkoutProgress(
       liftDeltaWeightKg,
       liftDeltaReps,
     },
+    insights,
   }
 }

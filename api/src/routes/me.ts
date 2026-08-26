@@ -482,20 +482,21 @@ meRoutes.post(
   }
 
   const now = new Date()
-  await prisma.checkIn.updateMany({
-    where: { userId, checkedOutAt: null },
-    data: { checkedOutAt: now },
-  })
-
-  await prisma.checkIn.create({
-    data: {
-      userId,
-      gymId: body.data.gymId,
-      checkedInAt: now,
-      expiresAt: defaultExpiresAt(now),
-      extendCount: 0,
-    },
-  })
+  await prisma.$transaction([
+    prisma.checkIn.updateMany({
+      where: { userId, checkedOutAt: null },
+      data: { checkedOutAt: now },
+    }),
+    prisma.checkIn.create({
+      data: {
+        userId,
+        gymId: body.data.gymId,
+        checkedInAt: now,
+        expiresAt: defaultExpiresAt(now),
+        extendCount: 0,
+      },
+    }),
+  ])
 
   await prisma.user.update({
     where: { id: userId },

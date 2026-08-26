@@ -12,6 +12,7 @@ import type {
 } from '../types'
 import type { AdminAnalytics } from './adminAnalytics'
 import type { LikeCounts, LikesMap } from './likes'
+import type { PeriodRange } from './periodRange'
 
 /** Legacy JWT key — cleared; session is httpOnly cookie only. */
 const TOKEN_KEY = 'spotter.api.token'
@@ -218,7 +219,7 @@ export async function apiExtendCheckIn() {
   return data.user
 }
 
-export type ActivityRange = 7 | 30 | 90
+export type ActivityRange = PeriodRange
 
 export type ActivityDay = {
   date: string
@@ -289,12 +290,15 @@ export type WorkoutExerciseDto = {
   })[]
 }
 
+export type WorkoutFelt = 'easy' | 'normal' | 'hard'
+
 export type WorkoutSessionSummary = {
   id: string
   title: string
   performedAt: string
   bodyWeightKg: number | null
   notes: string
+  feedback: WorkoutFelt | null
   exerciseCount: number
   setCount: number
   exercises: WorkoutExercisePreview[]
@@ -308,6 +312,7 @@ export type WorkoutSessionDetail = {
   performedAt: string
   bodyWeightKg: number | null
   notes: string
+  feedback: WorkoutFelt | null
   exercises: WorkoutExerciseDto[]
   createdAt: string
   updatedAt: string
@@ -321,7 +326,78 @@ export type WorkoutSessionInput = {
   exercises: { name: string; trackKey?: string; sets: WorkoutSetInput[] }[]
 }
 
-export type WorkoutProgressRange = 7 | 30 | 90
+export type WorkoutProgressRange = PeriodRange
+
+export type WorkoutExerciseTrend = 'improving' | 'stable' | 'declining' | 'insufficient_data'
+
+export type WorkoutBestSet = { weightKg: number; reps: number; at?: string }
+
+export type WorkoutPeriodDelta = {
+  current: number
+  previous: number
+  delta: number
+  deltaPercent: number | null
+}
+
+export type WorkoutPrItem = {
+  name: string
+  at: string
+  weightKg: number
+  reps: number
+  kind: 'weight' | 'setVolume'
+}
+
+export type WorkoutPlateauExplain = {
+  sessionCount: number
+  spanDays: number
+  minWeightKg: number | null
+  maxWeightKg: number | null
+  weightDeltaKg: number | null
+  repsDelta: number | null
+}
+
+export type WorkoutExerciseInsight = {
+  identity: string
+  name: string
+  sessionCount: number
+  setCount: number
+  volume: number
+  maxWeightKg: number | null
+  bestSet: WorkoutBestSet | null
+  firstBest: WorkoutBestSet | null
+  lastBest: WorkoutBestSet | null
+  weightDeltaKg: number | null
+  repsDelta: number | null
+  weightDeltaPercent: number | null
+  volumeDelta: number | null
+  volumeDeltaPercent: number | null
+  trend: WorkoutExerciseTrend
+  plateauCandidate: boolean
+  plateau: WorkoutPlateauExplain
+}
+
+export type WorkoutActivitySummary = {
+  visits: number
+  totalMinutes: number
+  avgMinutes: number
+}
+
+export type WorkoutInsights = {
+  workoutCount: WorkoutPeriodDelta
+  frequency: { currentPerWeek: number; previousPerWeek: number }
+  volume: WorkoutPeriodDelta
+  consistency: {
+    trainingDays: number
+    sessionCount: number
+    perWeek: number
+    consecutiveWeeks: number
+  }
+  prs: { count: number; items: WorkoutPrItem[] }
+  exercises: WorkoutExerciseInsight[]
+  improving: WorkoutExerciseInsight[]
+  plateauCandidates: WorkoutExerciseInsight[]
+  activity: WorkoutActivitySummary | null
+}
 
 export type WorkoutProgress = {
   range: WorkoutProgressRange
@@ -345,6 +421,7 @@ export type WorkoutProgress = {
     liftDeltaWeightKg: number | null
     liftDeltaReps: number | null
   }
+  insights: WorkoutInsights
 }
 
 export async function apiFetchWorkouts(opts?: {
@@ -385,10 +462,17 @@ export async function apiFetchWorkout(id: string) {
   return data.workout
 }
 
-export async function apiCreateWorkout(body: WorkoutSessionInput) {
+export async function apiCreateWorkout(
+  body: WorkoutSessionInput,
+  opts?: { idempotencyKey?: string },
+) {
+  const headers: HeadersInit | undefined = opts?.idempotencyKey
+    ? { 'Idempotency-Key': opts.idempotencyKey }
+    : undefined
   const data = await request<{ workout: WorkoutSessionDetail }>('/me/workouts', {
     method: 'POST',
     json: body,
+    headers,
   })
   return data.workout
 }
@@ -396,6 +480,17 @@ export async function apiCreateWorkout(body: WorkoutSessionInput) {
 export async function apiUpdateWorkout(id: string, body: WorkoutSessionInput) {
   const data = await request<{ workout: WorkoutSessionDetail }>(
     `/me/workouts/${encodeURIComponent(id)}`,
+    { method: 'PATCH', json: body },
+  )
+  return data.workout
+}
+
+export async function apiPatchWorkoutFeedback(
+  id: string,
+  body: { feedback?: WorkoutFelt | null; prompted?: boolean },
+) {
+  const data = await request<{ workout: WorkoutSessionDetail }>(
+    `/me/workouts/${encodeURIComponent(id)}/feedback`,
     { method: 'PATCH', json: body },
   )
   return data.workout
@@ -455,6 +550,130 @@ export async function apiGenerateWorkoutCoach() {
     method: 'POST',
   })
   return data.coach
+}
+
+export type WorkoutInsightStatus =
+  | 'locked'
+  | 'skipped'
+  | 'ready'
+  | 'cached'
+  | 'offline'
+  | 'failed'
+
+export type WorkoutInsightLetterItem = {
+  type: 'progress' | 'behavior' | 'attention' | 'try_next'
+  priority: 'high' | 'medium' | 'low'
+  title: string
+  text: string
+  exercise: string | null
+  metric: string | null
+  value: string | null
+  confidence: number
+}
+
+export type WorkoutInsightLetter = {
+  summary: { title: string; text: string }
+  insights: WorkoutInsightLetterItem[]
+  recommendations: { title: string; text: string; reason: string }[]
+}
+
+export type WorkoutInsightFacts = {
+  workoutCount: WorkoutPeriodDelta
+  frequency: { currentPerWeek: number; previousPerWeek: number }
+  volume: WorkoutPeriodDelta
+  prs: { count: number }
+  activity: { visits: number; totalMinutes: number } | null
+}
+
+export type WorkoutInsightState = {
+  status: WorkoutInsightStatus
+  configured: boolean
+  eligible: boolean
+  canGenerate: boolean
+  demo?: boolean
+  skipReason: 'need_workouts' | 'no_signal' | null
+  periodStart: string
+  periodEnd: string
+  periodLabel: string
+  nextAt: string
+  facts: WorkoutInsightFacts
+  letter: WorkoutInsightLetter | null
+}
+
+export async function apiFetchWorkoutInsight() {
+  const data = await request<{ insight: WorkoutInsightState }>('/me/workouts/insight')
+  return data.insight
+}
+
+export async function apiGenerateWorkoutInsight() {
+  const data = await request<{ insight: WorkoutInsightState }>('/me/workouts/insight/generate', {
+    method: 'POST',
+  })
+  return data.insight
+}
+
+export async function apiMarkWorkoutInsightViewed() {
+  return request<{ ok: true }>('/me/workouts/insight/viewed', { method: 'PATCH' })
+}
+
+export type WorkoutMonthlyLetterItem = {
+  title: string
+  text: string
+  why: string
+  exercise: string | null
+  metric: string | null
+  value: string | null
+}
+
+export type WorkoutMonthlyLetter = {
+  headline: { title: string; text: string }
+  wins: WorkoutMonthlyLetterItem[]
+  attention: WorkoutMonthlyLetterItem[]
+  recommendations: { title: string; text: string; reason: string }[]
+  wrap: string
+}
+
+export type WorkoutMonthlyFacts = {
+  workoutCount: WorkoutPeriodDelta
+  frequency: { currentPerWeek: number; previousPerWeek: number }
+  volume: WorkoutPeriodDelta
+  prs: { count: number }
+  activity: { visits: number; totalMinutes: number } | null
+}
+
+export type WorkoutMonthlyState = {
+  status: WorkoutInsightStatus
+  configured: boolean
+  eligible: boolean
+  canGenerate: boolean
+  demo?: boolean
+  skipReason: 'need_workouts' | 'no_signal' | null
+  periodStart: string
+  periodEnd: string
+  periodLabel: string
+  nextAt: string
+  facts: WorkoutMonthlyFacts
+  letter: WorkoutMonthlyLetter | null
+}
+
+export async function apiFetchWorkoutMonthly() {
+  const data = await request<{ monthly: WorkoutMonthlyState }>('/me/workouts/monthly')
+  return data.monthly
+}
+
+export async function apiGenerateWorkoutMonthly() {
+  const data = await request<{ monthly: WorkoutMonthlyState }>('/me/workouts/monthly/generate', {
+    method: 'POST',
+  })
+  return data.monthly
+}
+
+export async function apiMarkWorkoutMonthlyViewed() {
+  return request<{ ok: true }>('/me/workouts/monthly/viewed', { method: 'PATCH' })
+}
+
+export async function apiMarkWorkoutMonthlyRecommendationClicked() {
+  return request<{ ok: true }>('/me/workouts/monthly/recommendation-clicked', { method: 'PATCH' })
 }
 
 export async function apiJoinGym(gymId: string, makeHome = false) {

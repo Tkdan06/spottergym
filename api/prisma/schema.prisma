@@ -51,6 +51,12 @@ enum FeedbackSenderType {
   admin
 }
 
+enum WorkoutFelt {
+  easy
+  normal
+  hard
+}
+
 enum ConversationStatus {
   pending
   accepted
@@ -124,6 +130,7 @@ model User {
   passwordResetTokens PasswordResetToken[]
   workoutSessions     WorkoutSession[]
   workoutCoachReports WorkoutCoachReport[]
+  workoutAiInsights   WorkoutAiInsight[]
   broadcastsCreated   AdminBroadcast[]
 
   @@index([email])
@@ -482,6 +489,10 @@ model WorkoutSession {
   /** Optional body weight logged with the session (kg). */
   bodyWeightKg Decimal? @db.Decimal(5, 2)
   notes       String   @default("")
+  /** Subjective how-it-felt; null = skipped or legacy row. Never inferred. */
+  feedback    WorkoutFelt?
+  feedbackPromptedAt DateTime?
+  feedbackSetAt      DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -534,6 +545,30 @@ model WorkoutCoachReport {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, periodStart])
+  @@index([userId, createdAt])
+}
+
+/** Cached GigaChat weekly insight — one row per user per kind per quota window. */
+model WorkoutAiInsight {
+  id               String    @id @default(cuid())
+  userId           String
+  kind             String    @default("weekly")
+  periodStart      DateTime
+  periodEnd        DateTime
+  inputJson        Json
+  inputHash        String
+  outputJson       Json
+  model            String    @default("")
+  promptTokens             Int       @default(0)
+  completionTokens         Int       @default(0)
+  promptVersion            String    @default("")
+  viewedAt                 DateTime?
+  recommendationClickedAt  DateTime?
+  createdAt                DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, kind, periodStart])
   @@index([userId, createdAt])
 }
 

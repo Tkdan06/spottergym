@@ -1,11 +1,11 @@
 import { prisma } from '../db.js'
 import { moscowDayKey, moscowDayStartUtc } from './adminAnalytics.js'
+import { parsePeriodRange, type PeriodRange } from './periodRange.js'
 
-export type ActivityRange = 7 | 30 | 90
+export type ActivityRange = PeriodRange
 
 export function parseActivityRange(raw: string | undefined): ActivityRange {
-  const n = Number(raw)
-  return n === 7 || n === 30 || n === 90 ? n : 30
+  return parsePeriodRange(raw)
 }
 
 export type ActivityDay = {

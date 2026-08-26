@@ -9,11 +9,14 @@ import {
 import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
 import {
+  ApiError,
   apiCreateWorkout,
   apiDeleteWorkout,
   apiFetchWorkout,
   apiFetchWorkouts,
+  apiPatchWorkoutFeedback,
   apiUpdateWorkout,
+  type WorkoutFelt,
   type WorkoutSessionDetail,
 } from '../lib/apiClient'
 import { WORKOUT_NOTE_MAX } from '../lib/fieldLimits'
@@ -32,12 +35,15 @@ import {
   MAX_EXERCISES_PER_WORKOUT,
   formatBarWeight,
 } from '../components/SetWeightSheet'
+import { WorkoutFeltSheet } from '../components/WorkoutFeltSheet'
 import { WorkoutReadonlySets } from '../components/WorkoutReadonlySets'
+import { SOFT_LOADER_DELAY_MS, SoftLoader } from '../components/SoftLoader'
 import {
   formatKg,
   formatWorkoutWhen,
   fromDatetimeLocalValue,
   toDatetimeLocalValue,
+  workoutFeltLabel,
 } from '../lib/workouts'
 import './WorkoutsPage.css'
 import './FeedbackPage.css'
@@ -85,6 +91,7 @@ function fromDetail(w: WorkoutSessionDetail): {
   when: string
   bodyWeightKg: number | null
   notes: string
+  feedback: WorkoutSessionDetail['feedback']
   exercises: DraftExercise[]
 } {
   return {
@@ -92,6 +99,7 @@ function fromDetail(w: WorkoutSessionDetail): {
     when: toDatetimeLocalValue(w.performedAt),
     bodyWeightKg: clampBodyWeight(w.bodyWeightKg),
     notes: String(w.notes || '').slice(0, WORKOUT_NOTE_MAX),
+    feedback: w.feedback ?? null,
     exercises: w.exercises.slice(0, MAX_EXERCISES_PER_WORKOUT).map((ex) => ({
       trackKey: ex.trackKey || newTrackKey(),
       name: ex.name.slice(0, EXERCISE_NAME_MAX),
@@ -150,7 +158,8 @@ export function WorkoutEditorPage() {
   const navigate = useNavigate()
   const { user, apiOnline } = useApp()
   const { celebrate } = useMoment()
-  const copyFromId = (location.state as { copyFromId?: string } | null)?.copyFromId
+  const copyFromId = (location.state as { copyFromId?: string; askFelt?: boolean } | null)?.copyFromId
+  const askFelt = Boolean((location.state as { askFelt?: boolean } | null)?.askFelt)
 
   const [title, setTitle] = useState('')
   const [when, setWhen] = useState(() => toDatetimeLocalValue(new Date()))
@@ -167,6 +176,11 @@ export function WorkoutEditorPage() {
   const [error, setError] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [feedback, setFeedback] = useState<WorkoutFelt | null>(null)
+  const [feltSheetOpen, setFeltSheetOpen] = useState(false)
+  const promptedRef = useRef(false)
+  const savingFeltRef = useRef(false)
+  const createKeyRef = useRef<string | null>(null)
 
   const menuRef = useRef<HTMLDivElement>(null)
   const confirmRef = useRef<HTMLDivElement>(null)
@@ -214,6 +228,7 @@ export function WorkoutEditorPage() {
               }))
             : draft.exercises,
         )
+        if (!isNew) setFeedback(draft.feedback)
       })
       .catch((err: unknown) => {
         if (!cancelled) {
@@ -227,6 +242,14 @@ export function WorkoutEditorPage() {
       cancelled = true
     }
   }, [loadId, apiOnline, isNew, copyFromId, defaultWhen])
+
+  useEffect(() => {
+    if (!isViewing || !askFelt || !id || !apiOnline || promptedRef.current) return
+    promptedRef.current = true
+    setFeltSheetOpen(true)
+    navigate(`/app/workouts/${id}`, { replace: true, state: {} })
+    void apiPatchWorkoutFeedback(id, { prompted: true }).catch(() => {})
+  }, [askFelt, apiOnline, id, isViewing, navigate])
 
   useEffect(() => {
     if (!isNew || !apiOnline) return
@@ -260,18 +283,27 @@ export function WorkoutEditorPage() {
     setSaving(true)
     setError('')
     try {
-      const saved = isNew
-        ? await apiCreateWorkout(payload)
-        : await apiUpdateWorkout(id!, payload)
+      let saved
+      if (isNew) {
+        if (!createKeyRef.current) createKeyRef.current = crypto.randomUUID()
+        saved = await apiCreateWorkout(payload, { idempotencyKey: createKeyRef.current })
+        createKeyRef.current = null
+      } else {
+        saved = await apiUpdateWorkout(id!, payload)
+      }
       celebrate('workout')
-      navigate(`/app/workouts/${saved.id}`, { replace: true })
+      navigate(`/app/workouts/${saved.id}`, { replace: true, state: isNew ? { askFelt: true } : undefined })
       const draft = fromDetail(saved)
       setTitle(draft.title)
       setWhen(draft.when)
       setBodyWeightKg(draft.bodyWeightKg)
       setNotes(draft.notes)
       setExercises(draft.exercises)
+      setFeedback(draft.feedback)
     } catch (err) {
+      if (err instanceof ApiError && err.status >= 400 && err.status < 500) {
+        createKeyRef.current = null
+      }
       setError(err instanceof Error ? err.message : 'Не удалось сохранить')
     } finally {
       setSaving(false)
@@ -290,6 +322,23 @@ export function WorkoutEditorPage() {
       setConfirmOpen(false)
     } finally {
       setDeleting(false)
+    }
+  }
+
+  const selectFelt = async (next: WorkoutFelt) => {
+    if (!id || !apiOnline || savingFeltRef.current) return
+    savingFeltRef.current = true
+    const previous = feedback
+    setFeedback(next)
+    setFeltSheetOpen(false)
+    try {
+      const saved = await apiPatchWorkoutFeedback(id, { feedback: next, prompted: true })
+      setFeedback(saved.feedback)
+    } catch (err) {
+      setFeedback(previous)
+      setError(err instanceof Error ? err.message : 'Не удалось сохранить оценку')
+    } finally {
+      savingFeltRef.current = false
     }
   }
 
@@ -326,12 +375,24 @@ export function WorkoutEditorPage() {
         </p>
       ) : null}
 
+      {loading ? (
+        <SoftLoader delayMs={SOFT_LOADER_DELAY_MS} label="Загружаем тренировку…" />
+      ) : null}
+
       {!loading && isViewing ? (
         <>
           <section className="surface workout-view-meta">
             <p className="muted">{formatWorkoutWhen(fromDatetimeLocalValue(when))}</p>
             {bodyWeightKg != null ? <p>Вес: {formatKg(bodyWeightKg)}</p> : null}
             {notes.trim() ? <p className="workout-view-note">{notes.trim()}</p> : null}
+            <button
+              type="button"
+              className="workout-felt-row"
+              onClick={() => setFeltSheetOpen(true)}
+            >
+              <span className="muted">Как прошла тренировка?</span>
+              <strong>{workoutFeltLabel(feedback) || 'Оценить'}</strong>
+            </button>
           </section>
           <section className="surface workouts-form-block">
             {exercises.length ? (
@@ -360,6 +421,7 @@ export function WorkoutEditorPage() {
               <input
                 type="datetime-local"
                 value={when}
+                max={toDatetimeLocalValue(new Date(Date.now() + 15 * 60 * 1000))}
                 onChange={(e) => setWhen(e.target.value)}
               />
             </label>
@@ -684,6 +746,12 @@ export function WorkoutEditorPage() {
           )
           setBarWeightTarget(null)
         }}
+      />
+      <WorkoutFeltSheet
+        open={feltSheetOpen && isViewing}
+        value={feedback}
+        onSelect={(next) => void selectFelt(next)}
+        onClose={() => setFeltSheetOpen(false)}
       />
     </main>
   )

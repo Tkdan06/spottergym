@@ -199,6 +199,11 @@
   gap: 1px;
 }
 
+.activity-chart-frame.range-180 .activity-bars,
+.activity-chart-frame.range-365 .activity-bars {
+  gap: 0;
+}
+
 .activity-bar-col {
   flex: 1 1 0;
   min-width: 0;

@@ -17,6 +17,7 @@ import { SoftFlash } from '../components/SoftFlash'
 import { SoftLoader } from '../components/SoftLoader'
 import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
+import { PERIOD_TABS, type PeriodRange } from '../lib/periodRange'
 import './ActivityPage.css'
 import './LikedPage.css'
 import './UiKitPage.css'
@@ -63,7 +64,7 @@ export function UiKitPage() {
   const { user, canViewUsers, canManageAdmins } = useApp()
   const [toggleOn, setToggleOn] = useState(true)
   const [segDemo, setSegDemo] = useState<'ex' | 'body'>('ex')
-  const [segPeriod, setSegPeriod] = useState<7 | 30 | 90>(30)
+  const [segPeriod, setSegPeriod] = useState<PeriodRange>(30)
   const [segLikes, setSegLikes] = useState<'received' | 'sent'>('received')
   const [hintOpen, setHintOpen] = useState(false)
   const [flashDemo, setFlashDemo] = useState('')
@@ -687,7 +688,8 @@ export function UiKitPage() {
           <li>
             Компактный: <code>.seg--fit</code> — трек обнимает текст, если рядом ещё контрол. На
             всю страницу: <code>.seg--fill</code> — равные колонки, текст по центру (Лайки,
-            Уведомления, период 7д / 30д / 90д).
+            Уведомления). Период прогресса и активности: 7д / 30д / 90д / 180д / 365д, плюс
+            <code>.seg--dense</code> из‑за пяти пунктов.
           </li>
           <li>
             Размер пункта: <code>min-height: 32px</code>, <code>padding: 6px 12px</code>, Onest
@@ -721,17 +723,17 @@ export function UiKitPage() {
           </div>
           <div>
             <p className="dim ui-kit-meta">Прогресс / Активность · период на всю ширину</p>
-            <div className="seg seg--fill" role="tablist" aria-label="Период">
-              {([7, 30, 90] as const).map((id) => (
+            <div className="seg seg--fill seg--dense" role="tablist" aria-label="Период">
+              {PERIOD_TABS.map((tab) => (
                 <button
-                  key={id}
+                  key={tab.id}
                   type="button"
                   role="tab"
-                  aria-selected={segPeriod === id}
-                  className={`seg-item${segPeriod === id ? ' is-active' : ''}`}
-                  onClick={() => setSegPeriod(id)}
+                  aria-selected={segPeriod === tab.id}
+                  className={`seg-item${segPeriod === tab.id ? ' is-active' : ''}`}
+                  onClick={() => setSegPeriod(tab.id)}
                 >
-                  {id}д
+                  {tab.label}
                 </button>
               ))}
             </div>

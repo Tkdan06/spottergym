@@ -7,27 +7,31 @@ import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
 import {
   apiFetchWorkoutProgress,
+  type WorkoutExerciseInsight,
+  type WorkoutInsights,
   type WorkoutProgress,
   type WorkoutProgressRange,
 } from '../lib/apiClient'
+import { PERIOD_TABS } from '../lib/periodRange'
 import { useSheetA11y } from '../lib/sheetA11y'
 import {
   formatBodyDelta,
   formatDeltaLabel,
   formatKg,
+  formatMinutesRu,
+  formatSetPair,
+  formatSignedPercent,
+  formatVolume,
+  formatVsPreviousPeriod,
+  ruPlural,
   type DeltaTone,
 } from '../lib/workouts'
 import { goWorkoutsHub } from '../lib/workoutsNav'
 import { WorkoutWeekRecap } from '../components/WorkoutWeekRecap'
+import { WorkoutMonthRecap } from '../components/WorkoutMonthRecap'
 import { WORKOUT_RECAP_ADMIN_ONLY } from '../lib/workoutRecap'
 import './WorkoutsPage.css'
 import './FeedbackPage.css'
-
-const RANGES: { id: WorkoutProgressRange; label: string }[] = [
-  { id: 7, label: '7д' },
-  { id: 30, label: '30д' },
-  { id: 90, label: '90д' },
-]
 
 function formatAxisDay(iso: string) {
   return new Date(iso).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
@@ -79,6 +83,189 @@ function HeroDelta({ text, tone }: { text: string | null; tone?: DeltaTone | nul
   if (!text) return null
   const toneClass = tone === 'up' ? 'is-up' : tone === 'down' ? 'is-down' : 'is-flat'
   return <p className={`workout-progress-hero-delta ${toneClass}`}>{text}</p>
+}
+
+function toneFromDelta(n: number | null | undefined): DeltaTone | null {
+  if (n == null) return null
+  if (n > 0) return 'up'
+  if (n < 0) return 'down'
+  return 'flat'
+}
+
+function visitsLabel(n: number) {
+  return `${n} ${ruPlural(n, 'посещение', 'посещения', 'посещений')}`
+}
+
+function LiftRow({
+  lift,
+  percent,
+}: {
+  lift: WorkoutExerciseInsight
+  percent: string | null
+}) {
+  const last = lift.lastBest
+  const pair = last ? formatSetPair(last.weightKg, last.reps) : null
+  const tone = toneFromDelta(lift.weightDeltaPercent ?? lift.weightDeltaKg)
+  return (
+    <li className="workout-insights-lift">
+      <div className="workout-insights-lift-copy">
+        <strong>{lift.name}</strong>
+        {pair ? <span className="muted">{pair}</span> : null}
+      </div>
+      {percent ? (
+        <span
+          className={`workout-insights-lift-delta${
+            tone === 'up' ? ' is-up' : tone === 'down' ? ' is-down' : ' is-flat'
+          }`}
+        >
+          {percent}
+        </span>
+      ) : null}
+    </li>
+  )
+}
+
+function InsightsBlocks({ insights }: { insights: WorkoutInsights }) {
+  const countDelta = formatVsPreviousPeriod(
+    insights.workoutCount.delta,
+    insights.workoutCount.previous,
+  )
+  const volumePercent = formatSignedPercent(insights.volume.deltaPercent)
+  const volumeVs = formatVsPreviousPeriod(insights.volume.delta, insights.volume.previous)
+  const volumeHero = volumePercent || formatVolume(insights.volume.current)
+  const volumeTone = toneFromDelta(insights.volume.deltaPercent ?? insights.volume.delta)
+  const showProgress =
+    insights.improving.length > 0 || insights.plateauCandidates.length > 0
+  const activity = insights.activity
+
+  return (
+    <>
+      <section className="surface workout-progress-metric" aria-label="Тренировки">
+        <SectionTitle>Тренировки</SectionTitle>
+        <div className="workout-progress-hero">
+          <strong className="workout-progress-hero-value">{insights.workoutCount.current}</strong>
+          <HeroDelta text={countDelta} tone={toneFromDelta(insights.workoutCount.delta)} />
+        </div>
+        {insights.frequency.currentPerWeek > 0 ? (
+          <p className="workout-progress-caption muted">
+            {insights.frequency.currentPerWeek} в неделю
+            {insights.consistency.trainingDays
+              ? ` · ${insights.consistency.trainingDays} ${ruPlural(
+                  insights.consistency.trainingDays,
+                  'день',
+                  'дня',
+                  'дней',
+                )}`
+              : ''}
+          </p>
+        ) : null}
+      </section>
+
+      <section className="surface workout-progress-metric" aria-label="Объём">
+        <SectionTitle>Объём</SectionTitle>
+        <div className="workout-progress-hero">
+          <strong className="workout-progress-hero-value">
+            {insights.volume.current > 0 ? volumeHero : '—'}
+          </strong>
+          <HeroDelta
+            text={volumePercent ? null : volumeVs}
+            tone={volumeTone}
+          />
+        </div>
+        {volumePercent && insights.volume.current > 0 ? (
+          <p className="workout-progress-caption muted">
+            {formatVolume(insights.volume.current)} кг·повт.
+          </p>
+        ) : null}
+      </section>
+
+      <section className="surface workout-progress-metric" aria-label="Рекорды">
+        <SectionTitle>PR</SectionTitle>
+        <div className="workout-progress-hero">
+          <strong className="workout-progress-hero-value">{insights.prs.count}</strong>
+          <HeroDelta
+            text={
+              insights.prs.count > 0
+                ? ruPlural(
+                    insights.prs.count,
+                    'новый рекорд',
+                    'новых рекорда',
+                    'новых рекордов',
+                  )
+                : 'Нет новых рекордов'
+            }
+            tone={insights.prs.count > 0 ? 'up' : 'flat'}
+          />
+        </div>
+        {insights.prs.items.length ? (
+          <ul className="workout-insights-list">
+            {insights.prs.items.map((pr) => (
+              <li key={`${pr.name}-${pr.at}-${pr.kind}`} className="workout-insights-lift">
+                <div className="workout-insights-lift-copy">
+                  <strong>{pr.name}</strong>
+                  <span className="muted">{formatSetPair(pr.weightKg, pr.reps)}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
+
+      {showProgress ? (
+        <section className="surface workout-progress-metric" aria-label="Прогресс по упражнениям">
+          <SectionTitle>Прогресс</SectionTitle>
+          {insights.improving.length ? (
+            <ul className="workout-insights-list">
+              {insights.improving.map((lift) => (
+                <LiftRow
+                  key={lift.identity}
+                  lift={lift}
+                  percent={formatSignedPercent(lift.weightDeltaPercent)}
+                />
+              ))}
+            </ul>
+          ) : null}
+          {insights.plateauCandidates.length ? (
+            <>
+              <p className="workout-insights-kicker muted">Без изменений</p>
+              <ul className="workout-insights-list">
+                {insights.plateauCandidates.map((lift) => (
+                  <LiftRow
+                    key={lift.identity}
+                    lift={lift}
+                    percent={formatSignedPercent(lift.weightDeltaPercent) || '0%'}
+                  />
+                ))}
+              </ul>
+            </>
+          ) : null}
+        </section>
+      ) : insights.workoutCount.current > 0 ? (
+        <section className="surface workout-progress-metric" aria-label="Прогресс по упражнениям">
+          <SectionTitle>Прогресс</SectionTitle>
+          <p className="muted workout-progress-metric-empty">Нужна ещё одна тренировка</p>
+        </section>
+      ) : null}
+
+      {activity ? (
+        <section
+          className="surface workout-progress-metric workout-insights-activity"
+          aria-label="Активность в зале"
+        >
+          <SectionTitle>Активность</SectionTitle>
+          <p className="workout-insights-kicker muted">Отметки «Я в зале», не тренировки</p>
+          <div className="workout-progress-hero">
+            <strong className="workout-progress-hero-value">{activity.visits}</strong>
+            <p className="workout-progress-hero-delta is-flat">{visitsLabel(activity.visits)}</p>
+          </div>
+          <p className="workout-progress-caption muted">
+            {formatMinutesRu(activity.totalMinutes)} в зале
+            {activity.avgMinutes > 0 ? ` · ср. ${formatMinutesRu(activity.avgMinutes)}` : ''}
+          </p>
+        </section>
+      ) : null}
+    </>
+  )
 }
 
 type ChartPoint = { at: string; value: number; meta?: string }
@@ -337,13 +524,15 @@ export function WorkoutsProgressPage() {
       : null
   const bothEmpty =
     Boolean(progress) && strengthPoints.length === 0 && bodyPoints.length === 0
+  const noWorkouts = Boolean(progress && progress.insights.workoutCount.current === 0)
+  const showInsights = Boolean(progress && progress.insights.workoutCount.current > 0)
 
   return (
     <main className="page workouts-page workouts-progress-page">
-      <SubpageHeader title="Прогресс" onBack={() => goWorkoutsHub(navigate)} />
+      <SubpageHeader title="Мой прогресс" onBack={() => goWorkoutsHub(navigate)} />
 
-      <div className="seg seg--fill" role="tablist" aria-label="Период">
-        {RANGES.map((r) => (
+      <div className="seg seg--fill seg--dense" role="tablist" aria-label="Период">
+        {PERIOD_TABS.map((r) => (
           <button
             key={r.id}
             type="button"
@@ -368,7 +557,7 @@ export function WorkoutsProgressPage() {
           <SoftLoader delayMs={SOFT_LOADER_DELAY_MS} label="Загружаем прогресс…" />
         ) : null}
 
-        {!loading && !progress && !error ? (
+        {!loading && (!progress || noWorkouts) && !error ? (
           <section className="empty-copy">
             <p className="empty-copy-title">Пока пусто</p>
             <p className="empty-copy-lead">
@@ -380,17 +569,7 @@ export function WorkoutsProgressPage() {
           </section>
         ) : null}
 
-        {progress && bothEmpty && !loading ? (
-          <section className="empty-copy">
-            <p className="empty-copy-title">Пока пусто</p>
-            <p className="empty-copy-lead">
-              Запиши подходы и вес в тренировке — здесь появятся графики силы и веса тела.
-            </p>
-            <Link to="/app/workouts/new" className="btn btn-primary btn-block">
-              Записать тренировку
-            </Link>
-          </section>
-        ) : null}
+        {showInsights && progress ? <InsightsBlocks insights={progress.insights} /> : null}
 
         {progress && !bothEmpty ? (
           <>
@@ -467,7 +646,12 @@ export function WorkoutsProgressPage() {
           </>
         ) : null}
 
-        {!loading && (!WORKOUT_RECAP_ADMIN_ONLY || user.isAdmin) ? <WorkoutWeekRecap /> : null}
+        {!loading && (!WORKOUT_RECAP_ADMIN_ONLY || user.isAdmin) ? (
+          <>
+            <WorkoutWeekRecap />
+            <WorkoutMonthRecap />
+          </>
+        ) : null}
       </div>
 
       {pickerOpen && progress ? (

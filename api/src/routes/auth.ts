@@ -1,10 +1,10 @@
 import { Hono } from 'hono'
-import { deleteCookie, setCookie } from 'hono/cookie'
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 import { z } from 'zod'
 import { prisma } from '../db.js'
 import { isMasterAdminEmail, normalizeEmail } from '../env.js'
 import { FULL_PERMISSIONS, resolveAdminFlags } from '../lib/admin.js'
-import { signSession } from '../lib/jwt.js'
+import { signSession, verifySession } from '../lib/jwt.js'
 import { hashPassword, verifyPassword } from '../lib/password.js'
 import { serializeUser } from '../lib/serialize.js'
 import { allocateUsername, ensureUserHasUsername } from '../lib/username.js'
@@ -192,6 +192,19 @@ authRoutes.post(
 )
 
 authRoutes.post('/logout', async (c) => {
+  const header = c.req.header('authorization')
+  const bearer = header?.startsWith('Bearer ') ? header.slice(7) : ''
+  const custom = c.req.header('x-spotter-token') || ''
+  const token = custom || bearer || getCookie(c, sessionCookieName()) || ''
+  if (token) {
+    const session = await verifySession(token)
+    if (session?.sub) {
+      await prisma.checkIn.updateMany({
+        where: { userId: session.sub, checkedOutAt: null },
+        data: { checkedOutAt: new Date() },
+      })
+    }
+  }
   deleteCookie(c, sessionCookieName(), { path: '/' })
   return c.json({ ok: true })
 })

@@ -11,19 +11,18 @@ function clientKey(ip: string, route: string) {
 
 /**
  * Client IP: prefer nginx X-Real-IP (set from $remote_addr).
- * Do NOT trust the leftmost X-Forwarded-For (client-spoofable).
+ * Do not trust X-Forwarded-For from the client.
  */
-export function clientIp(c: { req: { header: (name: string) => string | undefined } }) {
+export function clientIp(c: { req: { header: (name: string) => string | undefined }; env?: unknown }) {
   const real = c.req.header('x-real-ip')?.trim()
   if (real) return real.slice(0, 64)
 
-  const xf = c.req.header('x-forwarded-for')
-  if (xf) {
-    // Rightmost hop is typically the one added by the trusted proxy
-    const parts = xf.split(',').map((p) => p.trim()).filter(Boolean)
-    const last = parts[parts.length - 1]
-    if (last) return last.slice(0, 64)
-  }
+  // Direct to Node: ignore client X-Forwarded-For (spoofable). Nginx should set X-Real-IP.
+  const incoming = (c.env as { incoming?: { socket?: { remoteAddress?: string } } } | undefined)
+    ?.incoming
+  const remote = incoming?.socket?.remoteAddress?.replace(/^::ffff:/, '').trim()
+  if (remote && remote !== '::1') return remote.slice(0, 64)
+  if (remote === '::1') return '127.0.0.1'
   return 'unknown'
 }
 

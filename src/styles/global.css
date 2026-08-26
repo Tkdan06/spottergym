@@ -756,6 +756,11 @@ a.btn-danger-ghost {
   text-align: center;
 }
 
+.seg--fill.seg--dense .seg-item {
+  padding: 6px 4px;
+  font-size: 0.75rem;
+}
+
 .seg-item.is-active {
   background: var(--bg-elevated);
   color: var(--text);
