@@ -56,7 +56,7 @@
 }
 
 .safety-error {
-  color: #ff8b8b;
+  color: var(--danger);
 }
 
 .safety-sheet {
@@ -84,7 +84,7 @@
   border-radius: 22px 22px 0 0;
   border: 1px solid var(--line);
   border-bottom: 0;
-  background: #101614;
+  background: var(--bg-elevated);
   display: grid;
   gap: 12px;
   animation: fade-up 0.22s ease both;

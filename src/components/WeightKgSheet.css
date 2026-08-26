@@ -23,7 +23,7 @@
   border-radius: 22px 22px 0 0;
   border: 1px solid var(--line);
   border-bottom: 0;
-  background: #101614;
+  background: var(--bg-elevated);
   display: grid;
   gap: 10px;
   animation: fade-up 0.22s ease both;
@@ -116,12 +116,12 @@
 
 .weight-kg-wheel-fade-top {
   top: 0;
-  background: linear-gradient(to bottom, #101614, transparent);
+  background: linear-gradient(to bottom, var(--bg-elevated), transparent);
 }
 
 .weight-kg-wheel-fade-bottom {
   bottom: 0;
-  background: linear-gradient(to top, #101614, transparent);
+  background: linear-gradient(to top, var(--bg-elevated), transparent);
 }
 
 .weight-kg-wheel-unit {

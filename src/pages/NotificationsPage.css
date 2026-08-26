@@ -141,9 +141,9 @@
 }
 
 .notification-card.is-unread {
-  border-color: rgba(200, 245, 66, 0.45);
+  border-color: var(--line-strong);
   background:
-    linear-gradient(135deg, rgba(200, 245, 66, 0.1), transparent 55%),
+    linear-gradient(135deg, var(--bg-soft), transparent 55%),
     var(--bg-card);
 }
 
@@ -210,8 +210,8 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 0 3px rgba(200, 245, 66, 0.18);
+  background: var(--text);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 12%, transparent);
   flex-shrink: 0;
 }
 

@@ -46,7 +46,7 @@
 
 .schedule-day-btn.active {
   background: var(--accent);
-  color: #111;
+  color: var(--accent-ink);
   border-right-color: transparent;
 }
 

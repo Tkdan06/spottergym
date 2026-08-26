@@ -44,7 +44,7 @@
 }
 
 .feedback-error {
-  color: #ff8b8b;
+  color: var(--danger);
   font-size: 0.9rem;
 }
 
@@ -79,7 +79,8 @@
 }
 
 .auth-form input[aria-invalid='true'] {
-  border-color: color-mix(in srgb, #ff8b8b 70%, var(--line));
+  border-color: color-mix(in srgb, var(--danger) 70%, var(--line));
+  background: var(--danger-soft);
 }
 
 .auth-success-panel {

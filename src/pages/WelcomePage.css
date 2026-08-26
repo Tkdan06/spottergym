@@ -9,9 +9,14 @@
   padding-top: calc(20px + env(safe-area-inset-top, 0px));
   padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
   /* Локальный hero — без Unsplash (в RU часто таймаут / не грузится) */
-  background-color: #0b0f0e;
+  background-color: var(--bg);
   background-image:
-    linear-gradient(180deg, rgba(11, 15, 14, 0.4) 0%, rgba(11, 15, 14, 0.84) 52%, #0b0f0e 100%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--bg) 40%, transparent) 0%,
+      color-mix(in srgb, var(--bg) 84%, transparent) 52%,
+      var(--bg) 100%
+    ),
     url('/images/welcome-gym.jpg');
   background-position: center;
   background-size: cover;
@@ -31,7 +36,7 @@
   width: min(200px, 55vw);
   height: min(200px, 55vw);
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(200, 245, 66, 0.26), transparent 68%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 26%, transparent), transparent 68%);
   top: 8px;
   left: -28px;
   filter: blur(8px);

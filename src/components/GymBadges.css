@@ -26,9 +26,9 @@
 }
 
 .gym-presence-badge--online {
-  border-color: rgba(87, 242, 135, 0.35);
-  background: rgba(12, 28, 18, 0.78);
-  color: var(--online);
+  border-color: color-mix(in srgb, var(--online) 28%, transparent);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  color: var(--text);
 }
 
 .gym-presence-badge--off {

@@ -1,19 +1,4 @@
 :root {
-  --bg: #0b0f0e;
-  --bg-elevated: #121816;
-  --bg-soft: #1a221e;
-  --bg-card: #141b18;
-  --line: rgba(232, 240, 234, 0.1);
-  --line-strong: rgba(232, 240, 234, 0.18);
-  --text: #eef5ef;
-  --text-muted: #94a39a;
-  --text-dim: #6b7a71;
-  --accent: #c8f542;
-  --accent-ink: #13200a;
-  --accent-soft: rgba(200, 245, 66, 0.14);
-  --danger: #ff6b6b;
-  --warning: #ffc857;
-  --online: #57f287;
   --radius-sm: 10px;
   --radius: 16px;
   --radius-lg: 24px;
@@ -80,9 +65,9 @@ body {
   font-weight: 400;
   line-height: var(--text-body-line);
   background:
-    radial-gradient(1200px 600px at 80% -10%, rgba(200, 245, 66, 0.08), transparent 55%),
-    radial-gradient(900px 500px at -10% 20%, rgba(87, 242, 135, 0.05), transparent 50%),
-    linear-gradient(180deg, #0d1311 0%, var(--bg) 40%, #090c0b 100%);
+    radial-gradient(1200px 600px at 80% -10%, var(--glow-lime), transparent 55%),
+    radial-gradient(900px 500px at -10% 20%, var(--glow-presence), transparent 50%),
+    linear-gradient(180deg, var(--bg-wash-top) 0%, var(--bg) 40%, var(--bg-wash-bottom) 100%);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -790,7 +775,7 @@ a.btn-danger-ghost {
 
 .pill-coach {
   background: var(--accent);
-  color: #111;
+  color: var(--accent-ink);
   font-weight: var(--text-chip-active);
 }
 
@@ -972,8 +957,8 @@ a.btn-danger-ghost {
 }
 
 .pill-online {
-  background: rgba(87, 242, 135, 0.14);
-  color: var(--online);
+  background: var(--online-soft);
+  color: var(--text);
 }
 
 .pill-offline {
@@ -982,9 +967,9 @@ a.btn-danger-ghost {
 }
 
 .pill-break {
-  background: rgba(255, 184, 77, 0.14);
-  color: #ffb84d;
-  border: 1px solid rgba(255, 184, 77, 0.28);
+  background: var(--warning-soft);
+  color: var(--warning);
+  border: 1px solid color-mix(in srgb, var(--warning) 28%, transparent);
 }
 
 .pill-accent {

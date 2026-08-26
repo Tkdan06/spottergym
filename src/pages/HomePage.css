@@ -87,7 +87,7 @@
 }
 
 .home-status-live {
-  color: var(--online);
+  color: var(--text);
 }
 
 .home-status-you {
@@ -225,7 +225,7 @@
   border-radius: 50%;
   background: var(--online);
   flex-shrink: 0;
-  box-shadow: 0 0 0 3px rgba(87, 242, 135, 0.18);
+  box-shadow: 0 0 0 3px var(--online-soft);
 }
 
 .floor-gym-chip.active {

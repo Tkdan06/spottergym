@@ -7,8 +7,8 @@ alwaysApply: false
 # Spotter UI kit
 
 Before adding or redesigning UI in `src/pages` / `src/components`, follow the living kit at
-`/app/admin/ui` (`src/pages/UiKitPage.tsx`) and tokens in `src/styles/global.css` +
-`src/styles/sheets.css`.
+`/app/admin/ui` (`src/pages/UiKitPage.tsx`) and tokens in `src/styles/color-themes.css`,
+`src/styles/global.css`, and `src/styles/sheets.css`.
 
 ## Must follow
 
@@ -114,11 +114,30 @@ buttons ~1.0–1.2. Reuse existing tokens; do not invent a second type scale.
 Cyrillic is the primary target. Do not apply aggressive tracking to Russian. Do not hide overflow
 on long labels («Открыт к знакомству», «Записать тренировку»).
 
+## Color
+
+Tokens live in `src/styles/color-themes.css`. Default `:root` is the current production palette.
+Do not invent a parallel `--color-*` system. Screens use `var(--*)` from `global.css`.
+
+| Role | Token | Use |
+|---|---|---|
+| Brand | `--accent` / `--accent-ink` / `--accent-soft` | Primary CTA, selected chips, active tab, SPOTTER TER, coach, PR, «Я в зале» |
+| Presence | `--online` / `--online-soft` | Dots and «В зале». Text is `--text`; do not stack mint text + fill + border |
+| Progress | `--progress` | Workout line charts and activity bars. On the current theme this aliases `--accent` |
+| Unread | `--text` on `--bg-soft` / `--line-strong` | Nav and chat badges, notification unread. Not lime |
+| Danger / warning | `--danger` / `--warning` (+ `-soft`) | Expire, validation, destructive only |
+
+Admin preview: `.toggle-row` on Admin hub («Новая палитра»). Sets `html[data-spotter-theme=v2]`
+and `localStorage` key `spotter.color-theme`. Apply only after `user.isAdmin` is known
+(`src/lib/colorTheme.ts`). Ordinary sessions always stay on the current palette. Not chips and
+not `.seg`.
+
 ## Sources of truth
 
 - Live demo: `/app/admin/ui`
 - Code: `src/pages/UiKitPage.tsx`, `src/components/SectionTitle.tsx`, `src/components/SoftFlash.tsx`,
   `src/components/SoftLoader.tsx`
-- CSS: `src/styles/global.css`, `src/styles/sheets.css`
+- CSS: `src/styles/color-themes.css`, `src/styles/global.css`, `src/styles/sheets.css`
+- Theme preview: `src/lib/colorTheme.ts` (admin-only)
 - Fonts: `src/main.tsx`
 - Entry IA canvas: `feedback-entry-ia` (where feedback/admin belong)

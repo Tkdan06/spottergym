@@ -16,6 +16,7 @@ import { EmergencyOfflineGate } from './components/EmergencyOfflineGate'
 import { SiteLockGate } from './components/SiteLockGate'
 import { startPwaViewportSync } from './lib/pwaViewport'
 import { registerSpotterServiceWorker } from './lib/push'
+import './styles/color-themes.css'
 import './styles/global.css'
 import './styles/sheets.css'
 

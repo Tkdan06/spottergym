@@ -24,7 +24,7 @@
   border-radius: 20px 20px 0 0;
   border: 1px solid var(--line);
   border-bottom: 0;
-  background: #101614;
+  background: var(--bg-elevated);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 12px;

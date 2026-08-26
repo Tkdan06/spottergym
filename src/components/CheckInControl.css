@@ -50,8 +50,8 @@
   gap: 8px;
   padding: 12px 14px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 200, 87, 0.35);
-  background: linear-gradient(135deg, rgba(255, 200, 87, 0.12), transparent 70%), var(--bg-card);
+  border: 1px solid color-mix(in srgb, var(--warning) 35%, transparent);
+  background: linear-gradient(135deg, var(--warning-soft), transparent 70%), var(--bg-card);
 }
 
 .checkin-expire-banner p {

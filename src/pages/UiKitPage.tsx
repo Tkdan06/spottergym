@@ -42,11 +42,13 @@ const COLOR_TOKENS = [
   ['--bg-elevated', 'Elevated'],
   ['--bg-soft', 'Soft / трек сегмента'],
   ['--bg-card', 'Карточка'],
-  ['--accent', 'Accent'],
+  ['--accent', 'Brand'],
+  ['--progress', 'Progress'],
   ['--text', 'Текст'],
   ['--text-muted', 'Muted'],
   ['--text-dim', 'Dim'],
-  ['--online', 'Online'],
+  ['--text-disabled', 'Disabled'],
+  ['--online', 'Presence'],
   ['--danger', 'Danger'],
   ['--warning', 'Warning'],
 ] as const
@@ -162,8 +164,11 @@ export function UiKitPage() {
       <section className="surface ui-kit-block">
         <SectionTitle>Цвета</SectionTitle>
         <p className="muted ui-kit-section-lead">
-          Один primary accent. Warning/danger — только для expire и опасных действий, не конкурируют
-          с «Я в зале».
+          Brand (<code>--accent</code>) — primary CTA, selected chips, active tab, «Я в зале».
+          Presence (<code>--online</code>) — точка и «В зале»: текст primary, не mint fill+text+border
+          сразу. Progress (<code>--progress</code>) — графики и бары активности; на текущей палитре
+          это алиас lime. Unread — нейтральный, не lime. Warning/danger только для expire и опасных
+          действий. Новая палитра — админский превью-тоггл в Админке, только на этом устройстве.
         </p>
         <div className="ui-kit-swatches">
           {COLOR_TOKENS.map(([token, label]) => (
@@ -234,7 +239,8 @@ export function UiKitPage() {
             <p className="ui-kit-font-card-role">Текст и UI</p>
             <p className="muted">
               <code>--font-body</code> · абзацы, кнопки, поля, muted/dim, секции, чипы, навигация,
-              формы, статистика. 400 body, 500 secondary, 600 strong. Кириллица — основной target.
+              формы, статистика. 400 body / чипы, 500 nav / выбранный чип, 600 кнопки и секции.
+              Кириллица — основной target.
             </p>
             <p className="dim">Загружено: 400 · 500 · 600</p>
           </article>

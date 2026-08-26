@@ -19,8 +19,8 @@
 }
 
 .presence-badge.on {
-  background: rgba(87, 242, 135, 0.16);
-  color: var(--online);
+  background: var(--online-soft);
+  color: var(--text);
 }
 
 .presence-badge.off {

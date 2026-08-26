@@ -260,8 +260,8 @@
 }
 
 .profile-gym-link.is-here {
-  border-color: rgba(87, 242, 135, 0.45);
-  color: var(--online, #57f287);
+  border-color: color-mix(in srgb, var(--online) 35%, var(--line));
+  color: var(--text);
 }
 
 .profile-hero-meta h1,

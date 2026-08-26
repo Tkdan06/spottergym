@@ -28,9 +28,14 @@
   position: absolute;
   inset: 0 0 18%;
   z-index: -1;
-  background-color: #0b0f0e;
+  background-color: var(--bg);
   background-image:
-    linear-gradient(180deg, rgba(11, 15, 14, 0.62) 0%, rgba(11, 15, 14, 0.92) 58%, var(--bg) 100%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--bg) 62%, transparent) 0%,
+      color-mix(in srgb, var(--bg) 92%, transparent) 58%,
+      var(--bg) 100%
+    ),
     url('/images/welcome-gym.jpg');
   background-position: center top;
   background-size: cover;
@@ -227,8 +232,12 @@
 }
 
 .lp-demo-presence.on {
-  color: var(--online, #57f287);
-  border-color: rgba(87, 242, 135, 0.35);
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--online) 35%, transparent);
+}
+
+.lp-demo-presence.on i {
+  background: var(--online);
 }
 
 .lp-demo-presence.off {
@@ -359,9 +368,9 @@
 }
 
 .lp-pill-on {
-  color: var(--online, #57f287);
-  border-color: rgba(87, 242, 135, 0.35);
-  background: rgba(87, 242, 135, 0.08);
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--online) 28%, transparent);
+  background: var(--online-soft);
 }
 
 .lp-pill-open {

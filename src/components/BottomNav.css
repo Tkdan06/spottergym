@@ -14,7 +14,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 4px;
-  background: rgba(11, 15, 14, 0.88);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
   border-top: 1px solid var(--line);
   backdrop-filter: blur(16px);
   z-index: 40;
@@ -23,7 +23,7 @@
 
 html.standalone .bottom-nav {
   /* Paint the first-launch hole the same as the bar, even before the shift applies */
-  box-shadow: 0 64px 0 0 #0b0f0e;
+  box-shadow: 0 64px 0 0 var(--bg);
 }
 
 .nav-item {
@@ -58,8 +58,9 @@ html.standalone .bottom-nav {
   height: 16px;
   padding: 0 4px;
   border-radius: 999px;
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: var(--bg-soft);
+  color: var(--text);
+  box-shadow: 0 0 0 1px var(--line-strong);
   font-size: 0.65rem;
   font-style: normal;
   display: grid;
@@ -83,7 +84,7 @@ html.standalone .bottom-nav {
     padding: 28px 16px;
     border-top: 0;
     border-right: 1px solid var(--line);
-    background: rgba(11, 15, 14, 0.95);
+    background: color-mix(in srgb, var(--bg) 95%, transparent);
     box-shadow: none;
   }
 

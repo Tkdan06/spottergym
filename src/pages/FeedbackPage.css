@@ -201,7 +201,7 @@
 }
 
 .feedback-error {
-  color: #ff8b8b;
+  color: var(--danger);
   font-size: 0.9rem;
 }
 

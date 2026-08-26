@@ -34,7 +34,7 @@
   padding: 14px 16px;
   border-radius: 18px;
   border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--line));
-  background: color-mix(in srgb, #101614 92%, var(--accent));
+  background: color-mix(in srgb, var(--bg-elevated) 92%, var(--accent));
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.42);
   animation: moment-card-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
   pointer-events: none;
