@@ -33,6 +33,9 @@ export type WorkoutPrItem = {
   weightKg: number
   reps: number
   kind: WorkoutPrKind
+  /** Best before this set; null = first logged working set of the lift. */
+  prevWeightKg?: number | null
+  prevReps?: number | null
 }
 
 export type WorkoutPlateauExplain = {
@@ -330,7 +333,10 @@ function accumulate(rows: AnalyticsSession[]) {
 }
 
 function detectPrs(sessions: AnalyticsSession[], currentStart: Date, now: Date): WorkoutPrItem[] {
-  const running = new Map<string, { maxWeight: number; maxVolume: number }>()
+  const running = new Map<
+    string,
+    { maxWeight: number; maxVolume: number; repsAtMaxWeight: number; repsAtMaxVolume: number }
+  >()
   const items: WorkoutPrItem[] = []
   const nowMs = now.getTime()
 
@@ -362,6 +368,12 @@ function detectPrs(sessions: AnalyticsSession[], currentStart: Date, now: Date):
           weightKg: round1(w),
           reps: s.reps,
           kind,
+          prevWeightKg: prior ? round1(prior.maxWeight) : null,
+          prevReps: prior
+            ? kind === 'weight'
+              ? prior.repsAtMaxWeight
+              : prior.repsAtMaxVolume
+            : null,
         })
       }
     }
@@ -369,14 +381,25 @@ function detectPrs(sessions: AnalyticsSession[], currentStart: Date, now: Date):
     for (const item of sessionBest.values()) items.push(item)
 
     for (const [identity, rec] of lifts) {
-      const next = running.get(identity) || { maxWeight: 0, maxVolume: 0 }
+      const next = running.get(identity) || {
+        maxWeight: 0,
+        maxVolume: 0,
+        repsAtMaxWeight: 0,
+        repsAtMaxVolume: 0,
+      }
       for (const s of rec.sets) {
         if (s.reps <= 0) continue
         const w = num(s.weightKg)
         if (!Number.isFinite(w) || w <= 0) continue
         const vol = w * s.reps
-        if (w > next.maxWeight) next.maxWeight = w
-        if (vol > next.maxVolume) next.maxVolume = vol
+        if (w > next.maxWeight) {
+          next.maxWeight = w
+          next.repsAtMaxWeight = s.reps
+        }
+        if (vol > next.maxVolume) {
+          next.maxVolume = vol
+          next.repsAtMaxVolume = s.reps
+        }
       }
       running.set(identity, next)
     }

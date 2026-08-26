@@ -646,10 +646,8 @@
   gap: 8px;
   padding: 14px;
   overflow: visible;
-}
-
-.workout-progress-tile .workout-progress-hero {
-  display: block;
+  align-content: start;
+  grid-template-rows: auto auto minmax(1.3em, auto);
 }
 
 .workout-progress-tile .workout-progress-hero-value {
@@ -663,9 +661,9 @@
   min-width: 0;
 }
 
-.workout-progress-metric .ui-hint-pop {
-  left: 0;
-  right: auto;
+.workout-progress-metric .section-title .ui-hint-pop {
+  right: 0;
+  left: auto;
 }
 
 .workout-progress-metric-empty {
@@ -722,12 +720,17 @@
 
 .workout-progress-hero-value {
   min-width: 0;
+  margin: 0;
   font-family: var(--font-body);
   font-size: var(--text-page-size);
   font-weight: var(--text-ui-strong);
   letter-spacing: normal;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
+}
+
+.workout-progress-hero-value.is-up-text {
+  color: var(--online);
 }
 
 .workout-progress-hero-delta {
@@ -754,6 +757,7 @@
 
 .workout-progress-caption {
   margin: 0;
+  min-height: calc(var(--text-muted-size) * 1.3);
   font-size: var(--text-muted-size);
   font-weight: 500;
   line-height: 1.3;
@@ -839,6 +843,23 @@
 
 .workout-insights-lift-delta.is-flat {
   color: var(--text-muted);
+}
+
+.workout-insights-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  justify-self: start;
+}
+
+.workout-insights-more svg {
+  flex-shrink: 0;
+  color: var(--text-dim);
+  transition: transform 0.18s ease;
+}
+
+.workout-insights-more svg.is-open {
+  transform: rotate(180deg);
 }
 
 .workout-exercise-picker-sheet {
@@ -1112,6 +1133,15 @@
 .workout-week-recap > .surface > .section-title,
 .workout-coach-block > .section-title {
   margin: 0;
+}
+
+.workout-week-recap > .surface.workouts-empty {
+  justify-items: stretch;
+}
+
+.workout-week-recap .workout-coach-chips {
+  width: 100%;
+  justify-content: flex-start;
 }
 
 

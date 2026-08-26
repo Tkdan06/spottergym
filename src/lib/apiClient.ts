@@ -345,6 +345,8 @@ export type WorkoutPrItem = {
   weightKg: number
   reps: number
   kind: 'weight' | 'setVolume'
+  prevWeightKg?: number | null
+  prevReps?: number | null
 }
 
 export type WorkoutPlateauExplain = {

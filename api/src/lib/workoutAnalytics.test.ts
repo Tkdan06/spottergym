@@ -205,6 +205,20 @@ describe('buildWorkoutInsights', () => {
     assert.equal(insights.prs.count, 1)
     assert.equal(insights.prs.items[0].kind, 'weight')
     assert.equal(insights.prs.items[0].weightKg, 85)
+    assert.equal(insights.prs.items[0].prevWeightKg, 80)
+    assert.equal(insights.prs.items[0].prevReps, 5)
+  })
+
+  it('records a reps PR against the previous best set', () => {
+    const rows = [
+      session(20, [{ name: 'Жим', sets: [{ weightKg: 80, reps: 8 }] }]),
+      session(1, [{ name: 'Жим', sets: [{ weightKg: 80, reps: 10 }] }]),
+    ]
+    const insights = buildWorkoutInsights(7, rows, null, NOW)
+    assert.equal(insights.prs.count, 1)
+    assert.equal(insights.prs.items[0].kind, 'setVolume')
+    assert.equal(insights.prs.items[0].reps, 10)
+    assert.equal(insights.prs.items[0].prevReps, 8)
   })
 
   it('does not mix workout count with check-in visits', () => {

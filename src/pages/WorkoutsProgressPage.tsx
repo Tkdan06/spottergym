@@ -9,20 +9,22 @@ import {
   apiFetchWorkoutProgress,
   type WorkoutExerciseInsight,
   type WorkoutInsights,
+  type WorkoutPrItem,
   type WorkoutProgress,
   type WorkoutProgressRange,
 } from '../lib/apiClient'
 import { PERIOD_TABS } from '../lib/periodRange'
 import { useSheetA11y } from '../lib/sheetA11y'
 import {
+  formatBarWeightValue,
   formatBodyDelta,
+  formatCompactDelta,
   formatDeltaLabel,
   formatKg,
   formatMinutesRu,
   formatSetPair,
   formatSignedPercent,
   formatVolume,
-  formatVsPreviousPeriod,
   ruPlural,
   type DeltaTone,
 } from '../lib/workouts'
@@ -132,9 +134,19 @@ function HintTip({ label, children }: { label: string; children: string }) {
   )
 }
 
-function prKindLabel(kind: 'weight' | 'setVolume') {
-  return kind === 'weight' ? 'вес' : 'повторы'
+function prGainLabel(pr: WorkoutPrItem) {
+  if (pr.prevWeightKg == null && pr.prevReps == null) return 'впервые'
+  if (pr.kind === 'weight') {
+    const d = Math.round((pr.weightKg - (pr.prevWeightKg ?? 0)) * 10) / 10
+    if (d <= 0) return 'вес'
+    return `+${formatBarWeightValue(d)} кг`
+  }
+  const d = pr.reps - (pr.prevReps ?? 0)
+  if (d <= 0) return 'повторы'
+  return `+${d} ${ruPlural(d, 'повтор', 'повтора', 'повторов')}`
 }
+
+const PR_PREVIEW = 5
 
 function LiftRow({
   lift,
@@ -166,19 +178,22 @@ function LiftRow({
 }
 
 function InsightsBlocks({ insights }: { insights: WorkoutInsights }) {
-  const countDelta = formatVsPreviousPeriod(
+  const [prsOpen, setPrsOpen] = useState(false)
+  const countDelta = formatCompactDelta(
     insights.workoutCount.delta,
     insights.workoutCount.previous,
   )
   const countTone = toneFromDelta(insights.workoutCount.delta)
   const volumePercent = formatSignedPercent(insights.volume.deltaPercent)
-  const volumeVs = formatVsPreviousPeriod(insights.volume.delta, insights.volume.previous)
+  const volumeDelta = formatCompactDelta(insights.volume.delta, insights.volume.previous)
+  const volumeHeroDelta = volumePercent || volumeDelta
   const volumeTone = toneFromDelta(insights.volume.deltaPercent ?? insights.volume.delta)
   const showProgress =
     insights.improving.length > 0 || insights.plateauCandidates.length > 0
   const activity = insights.activity
-  const volumeCaption = volumePercent || volumeVs
-  const volumeCaptionTone = volumePercent ? volumeTone : 'flat'
+  const prs = insights.prs.items
+  const prsVisible = prsOpen ? prs : prs.slice(0, PR_PREVIEW)
+  const prsHidden = Math.max(0, prs.length - PR_PREVIEW)
 
   return (
     <>
@@ -187,79 +202,71 @@ function InsightsBlocks({ insights }: { insights: WorkoutInsights }) {
           <SectionTitle>Тренировки</SectionTitle>
           <div className="workout-progress-hero">
             <strong className="workout-progress-hero-value">{insights.workoutCount.current}</strong>
+            <HeroDelta text={countDelta} tone={countTone} />
           </div>
-          {insights.frequency.currentPerWeek > 0 ? (
-            <p className="workout-progress-caption muted">
-              {insights.frequency.currentPerWeek} в неделю
-            </p>
-          ) : countDelta ? (
-            <p
-              className={`workout-progress-caption${
-                countTone === 'up' ? ' is-up' : countTone === 'down' ? ' is-down' : ' is-flat'
-              }`}
-            >
-              {countDelta}
-            </p>
-          ) : null}
+          <p className="workout-progress-caption muted">
+            {insights.frequency.currentPerWeek > 0
+              ? `${insights.frequency.currentPerWeek} в неделю`
+              : '\u00a0'}
+          </p>
         </section>
 
         <section className="surface workout-progress-metric workout-progress-tile" aria-label="Объём">
-          <SectionTitle>
-            <span className="workout-metric-heading">
-              Объём
+          <SectionTitle
+            action={
               <HintTip label="Что считается объёмом">
                 Сумма вес × повторы всех рабочих подходов за выбранный период.
               </HintTip>
-            </span>
+            }
+          >
+            Объём
           </SectionTitle>
           <div className="workout-progress-hero">
             <strong className="workout-progress-hero-value">
               {insights.volume.current > 0 ? `${formatVolume(insights.volume.current)} кг` : '—'}
             </strong>
+            <HeroDelta text={volumeHeroDelta} tone={volumeTone} />
           </div>
-          {volumeCaption ? (
-            <p
-              className={`workout-progress-caption${
-                volumeCaptionTone === 'up'
-                  ? ' is-up'
-                  : volumeCaptionTone === 'down'
-                    ? ' is-down'
-                    : ' is-flat'
-              }`}
-            >
-              {volumeCaption}
-            </p>
-          ) : null}
+          <p className="workout-progress-caption muted">{'\u00a0'}</p>
         </section>
       </div>
 
       <section className="surface workout-progress-metric" aria-label="Рекорды">
         <SectionTitle>Рекорды</SectionTitle>
-        <div className="workout-progress-hero">
-          <strong className="workout-progress-hero-value">{insights.prs.count}</strong>
-        </div>
-        <p className={`workout-progress-caption${insights.prs.count > 0 ? ' is-up' : ' is-flat'}`}>
+        <p className={`workout-progress-hero-value${insights.prs.count > 0 ? ' is-up-text' : ''}`}>
           {insights.prs.count > 0
-            ? ruPlural(
+            ? `${insights.prs.count} ${ruPlural(
                 insights.prs.count,
                 'новый рекорд',
                 'новых рекорда',
                 'новых рекордов',
-              )
+              )}`
             : 'Нет новых рекордов'}
         </p>
-        {insights.prs.items.length ? (
-          <ul className="workout-insights-list">
-            {insights.prs.items.map((pr) => (
-              <li key={`${pr.name}-${pr.at}-${pr.kind}`} className="workout-insights-lift">
-                <strong>{pr.name}</strong>
-                <div className="workout-insights-lift-meta">
-                  <span className="muted">{formatSetPair(pr.weightKg, pr.reps)}</span>
-                  <span className="workout-insights-lift-kind">{prKindLabel(pr.kind)}</span>
-                </div>
-              </li>
-            ))}
-          </ul>
+        {prs.length ? (
+          <>
+            <ul className="workout-insights-list">
+              {prsVisible.map((pr) => (
+                <li key={`${pr.name}-${pr.at}-${pr.kind}`} className="workout-insights-lift">
+                  <strong>{pr.name}</strong>
+                  <div className="workout-insights-lift-meta">
+                    <span className="muted">{formatSetPair(pr.weightKg, pr.reps)}</span>
+                    <span className="workout-insights-lift-delta is-up">{prGainLabel(pr)}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            {prsHidden > 0 ? (
+              <button
+                type="button"
+                className="section-action workout-insights-more"
+                onClick={() => setPrsOpen((v) => !v)}
+              >
+                {prsOpen ? 'Свернуть' : `Ещё ${prsHidden}`}
+                <ChevronDown size={16} aria-hidden className={prsOpen ? 'is-open' : undefined} />
+              </button>
+            ) : null}
+          </>
         ) : null}
       </section>
 
@@ -282,11 +289,7 @@ function InsightsBlocks({ insights }: { insights: WorkoutInsights }) {
               <p className="workout-insights-kicker muted">Без изменений</p>
               <ul className="workout-insights-list">
                 {insights.plateauCandidates.map((lift) => (
-                  <LiftRow
-                    key={lift.identity}
-                    lift={lift}
-                    percent={formatSignedPercent(lift.weightDeltaPercent) || '0%'}
-                  />
+                  <LiftRow key={lift.identity} lift={lift} percent={null} />
                 ))}
               </ul>
             </>
@@ -301,20 +304,26 @@ function InsightsBlocks({ insights }: { insights: WorkoutInsights }) {
 
       {activity ? (
         <section className="surface workout-progress-metric" aria-label="Активность в зале">
-          <SectionTitle>
-            <span className="workout-metric-heading">
-              Активность
+          <SectionTitle
+            action={
               <HintTip label="Что такое активность">
                 Отметки «Я в зале», не тренировки.
               </HintTip>
-            </span>
+            }
+          >
+            Активность
           </SectionTitle>
           <div className="workout-progress-hero">
             <strong className="workout-progress-hero-value">{activity.visits}</strong>
+            <p className="workout-progress-hero-delta is-flat">
+              {ruPlural(activity.visits, 'посещение', 'посещения', 'посещений')}
+            </p>
           </div>
           <p className="workout-progress-caption muted">
-            {formatMinutesRu(activity.totalMinutes)} в зале
-            {activity.avgMinutes > 0 ? ` · ср. ${formatMinutesRu(activity.avgMinutes)}` : ''}
+            {formatMinutesRu(activity.totalMinutes, 'long')} в зале
+            {activity.avgMinutes > 0
+              ? ` · среднее ${formatMinutesRu(activity.avgMinutes, 'long')}`
+              : ''}
           </p>
         </section>
       ) : null}

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ListChecks, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { SectionTitle } from './SectionTitle'
 import { SoftLoader } from './SoftLoader'
@@ -176,7 +176,6 @@ export function WorkoutWeekRecap() {
       {!loading && insight && !letter && insight.canGenerate ? (
         <section className="surface workouts-empty">
           {recapTitle}
-          <ListChecks size={28} aria-hidden />
           <p className="empty-copy-title">
             {insight.status === 'failed' ? 'Твой прогресс' : 'Собрать разбор'}
           </p>
@@ -200,10 +199,9 @@ export function WorkoutWeekRecap() {
       {!loading && insight && !letter && !insight.canGenerate ? (
         <section className="surface workouts-empty">
           {recapTitle}
-          <ListChecks size={28} aria-hidden />
           <p className="empty-copy-title">
             {insight.status === 'locked'
-              ? 'Пока рано'
+              ? 'Нужно больше тренировок'
               : insight.status === 'skipped'
                 ? 'Пока без разбора'
                 : showFallback
@@ -212,9 +210,9 @@ export function WorkoutWeekRecap() {
           </p>
           <p className="muted">
             {insight.status === 'locked'
-              ? 'Пока недостаточно данных для нового анализа.'
+              ? 'Разбор сравнивает эту неделю с предыдущей. Запиши ещё одну тренировку — и можно будет собрать разбор.'
               : insight.status === 'skipped'
-                ? 'На этой неделе нет заметных изменений для нового анализа.'
+                ? 'За неделю цифры почти не сдвинулись. Новый разбор появится, когда будет рекорд, сдвиг объёма или частоты.'
                 : showFallback
                   ? 'Разбор временно недоступен'
                   : 'Цифры — на графике выше.'}

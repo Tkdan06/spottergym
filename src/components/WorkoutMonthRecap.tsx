@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ListChecks, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { SectionTitle } from './SectionTitle'
 import { SoftLoader } from './SoftLoader'
@@ -213,7 +213,6 @@ export function WorkoutMonthRecap() {
       {!loading && monthly && !letter && monthly.canGenerate ? (
         <section className="surface workouts-empty">
           {recapTitle}
-          <ListChecks size={28} aria-hidden />
           <p className="empty-copy-title">
             {monthly.status === 'failed' ? 'Твой месяц' : 'Собрать разбор месяца'}
           </p>
@@ -241,10 +240,9 @@ export function WorkoutMonthRecap() {
       {!loading && monthly && !letter && !monthly.canGenerate ? (
         <section className="surface workouts-empty">
           {recapTitle}
-          <ListChecks size={28} aria-hidden />
           <p className="empty-copy-title">
             {monthly.status === 'locked'
-              ? 'Пока мало данных'
+              ? 'Нужно больше тренировок'
               : monthly.status === 'skipped'
                 ? 'Пока без разбора'
                 : showFallback
@@ -253,9 +251,9 @@ export function WorkoutMonthRecap() {
           </p>
           <p className="muted">
             {monthly.status === 'locked'
-              ? 'Пока недостаточно данных за месяц.'
+              ? 'Разбор месяца сравнивает последние 30 дней с предыдущими. Нужно минимум четыре тренировки, чтобы было с чем сравнить.'
               : monthly.status === 'skipped'
-                ? 'В этом месяце нет заметных изменений для нового анализа.'
+                ? 'За месяц цифры почти не сдвинулись. Новый разбор появится, когда будет рекорд, сдвиг объёма или частоты.'
                 : showFallback
                   ? 'Разбор временно недоступен'
                   : 'Цифры — на графике выше.'}

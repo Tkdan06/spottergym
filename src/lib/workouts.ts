@@ -81,10 +81,21 @@ export function formatKg(kg: number | null | undefined) {
 }
 
 export function formatSignedPercent(n: number | null | undefined) {
-  if (n == null || !Number.isFinite(n)) return null
+  if (n == null || !Number.isFinite(n) || n === 0) return null
   const sign = n > 0 ? '+' : ''
   const value = Number.isInteger(n) ? String(n) : n.toFixed(1)
   return `${sign}${value}%`
+}
+
+/** Compact +/− next to a hero number. Hidden when there is no previous window. */
+export function formatCompactDelta(
+  delta: number | null | undefined,
+  previous: number | null | undefined,
+) {
+  if (delta == null || previous == null || previous <= 0 || delta === 0) return null
+  const sign = delta > 0 ? '+' : ''
+  const n = Number.isInteger(delta) ? String(delta) : delta.toFixed(1)
+  return `${sign}${n}`
 }
 
 /** Hide comparison when the previous window is empty — no fake 0% / +N. */
@@ -102,10 +113,15 @@ export function formatVolume(n: number) {
   return Math.round(n).toLocaleString('ru-RU')
 }
 
-export function formatMinutesRu(total: number) {
-  if (total <= 0) return '0 мин'
+export function formatMinutesRu(total: number, style: 'short' | 'long' = 'short') {
+  if (total <= 0) return style === 'long' ? '0 минут' : '0 мин'
   const h = Math.floor(total / 60)
   const m = total % 60
+  if (style === 'long') {
+    const hours = h > 0 ? `${h} ${ruPlural(h, 'час', 'часа', 'часов')}` : ''
+    const mins = m > 0 ? `${m} ${ruPlural(m, 'минута', 'минуты', 'минут')}` : ''
+    return [hours, mins].filter(Boolean).join(' ')
+  }
   if (h <= 0) return `${m} мин`
   if (m <= 0) return `${h} ч`
   return `${h} ч ${m} мин`
