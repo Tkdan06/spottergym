@@ -51,18 +51,17 @@
   transition: opacity 0.15s ease;
 }
 
-.activity-range {
-  margin: 0;
-  justify-self: start;
-}
-
 .activity-summary {
   display: grid;
-  gap: 2px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 12px;
+  row-gap: 2px;
+  align-items: end;
   min-width: 0;
 }
 
 .activity-summary-label {
+  grid-column: 1 / -1;
   margin: 0;
   font-size: var(--text-label-size);
   letter-spacing: normal;
@@ -71,6 +70,7 @@
 }
 
 .activity-summary-total {
+  min-width: 0;
   font-family: var(--font-body);
   font-size: clamp(1.5rem, 5.2vw, 1.75rem);
   letter-spacing: normal;
@@ -81,8 +81,14 @@
 }
 
 .activity-summary-sessions {
-  margin: 2px 0 0;
-  font-size: 0.95rem;
+  margin: 0;
+  padding-bottom: 0.12em;
+  font-size: var(--text-label-size);
+  font-weight: var(--text-label-weight);
+  line-height: 1.2;
+  color: var(--text-muted);
+  text-align: right;
+  white-space: nowrap;
 }
 
 .activity-empty {
@@ -287,11 +293,6 @@
 .activity-day-detail-copy span {
   color: var(--text-muted);
   font-size: 0.9rem;
-}
-
-.activity-day-hint {
-  margin: 0;
-  font-size: var(--text-dim-size);
 }
 
 .activity-day-detail-range {

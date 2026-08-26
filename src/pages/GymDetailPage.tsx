@@ -16,6 +16,8 @@ import {
   shortGymName,
 } from '../data/mock'
 import { ApiError, apiFetchGym } from '../lib/apiClient'
+import { isDemoAccount } from '../lib/demoAccount'
+import { gymWithoutSeedStats, peekGym } from '../lib/gymCatalog'
 import { getGymHours } from '../lib/gymHours'
 import { useGymPeople } from '../hooks/useGymPeople'
 import { getHallRank, sortByLikes } from '../lib/likes'
@@ -23,6 +25,18 @@ import { formatMembersInSpotter } from '../lib/presenceCopy'
 import { isMemberOfGym } from '../lib/userGyms'
 import type { Gym } from '../types'
 import './GymDetailPage.css'
+
+function gymForDetailPage(
+  gymId: string,
+  city: string | undefined,
+  allowSeedStats: boolean,
+): Gym | undefined {
+  const local = getGym(gymId)
+  const live = peekGym(gymId, [city, local?.city])
+  if (live) return live
+  if (!local) return undefined
+  return allowSeedStats ? local : gymWithoutSeedStats(local)
+}
 
 export function GymDetailPage() {
   const { gymId = '' } = useParams()
@@ -33,8 +47,11 @@ export function GymDetailPage() {
   const fromHome = from === 'home'
   const { user, joinGym, leaveGym, setHomeGym, likes, likeCounts, blockedUserIds, apiOnline } =
     useApp()
+  const demoStats = isDemoAccount(user?.email)
 
-  const [gym, setGym] = useState<Gym | undefined>(() => (gymId ? getGym(gymId) : undefined))
+  const [gym, setGym] = useState<Gym | undefined>(() =>
+    gymId ? gymForDetailPage(gymId, user?.city, demoStats) : undefined,
+  )
   const [gymLoading, setGymLoading] = useState(false)
   const [gymMissing, setGymMissing] = useState(false)
   const [actionError, setActionError] = useState('')
@@ -48,20 +65,20 @@ export function GymDetailPage() {
       return
     }
 
-    const local = getGym(gymId)
-    if (local) {
-      setGym(local)
+    const initial = gymForDetailPage(gymId, user?.city, demoStats)
+    if (initial) {
+      setGym(initial)
       setGymMissing(false)
     }
 
     if (!apiOnline) {
       setGymLoading(false)
-      setGymMissing(!local)
+      setGymMissing(!initial)
       return
     }
 
     let cancelled = false
-    if (!local) setGymLoading(true)
+    if (!initial) setGymLoading(true)
 
     void apiFetchGym(gymId)
       .then((remote) => {
@@ -71,7 +88,7 @@ export function GymDetailPage() {
       })
       .catch(() => {
         if (cancelled) return
-        if (!local) {
+        if (!initial) {
           setGym(undefined)
           setGymMissing(true)
         }
@@ -83,7 +100,7 @@ export function GymDetailPage() {
     return () => {
       cancelled = true
     }
-  }, [gymId, apiOnline])
+  }, [gymId, apiOnline, user?.city, demoStats])
 
   useEffect(() => {
     if (!gym) return
@@ -120,12 +137,8 @@ export function GymDetailPage() {
   )
 
   const activeFromPeople = people.filter((p) => p.isActive).length
-  /** Server activeNow until members resolve; then live count from the list */
-  const activeCount = fromApi
-    ? activeFromPeople
-    : typeof gym?.activeNow === 'number'
-      ? gym.activeNow
-      : activeFromPeople
+  /** Live list after fetch; until then — API/catalog cache, never gyms.json seeds */
+  const activeCount = !demoStats && fromApi ? activeFromPeople : gym?.activeNow ?? 0
 
   const goBack = () => {
     if (fromSettings) {

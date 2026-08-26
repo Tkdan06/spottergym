@@ -122,9 +122,9 @@ export function UiKitPage() {
           </li>
           <li>
             <strong>Сегмент:</strong> взаимоисключающий вид — только <code>.seg</code> +{' '}
-            <code>.seg-item.is-active</code>. Компакт — <code>.seg--fit</code> (Прогресс,
-            Активность). На всю ширину — <code>.seg--fill</code>, текст по центру (Лайки,
-            Уведомления). Не чипы и не <code>.toggle</code>.
+            <code>.seg-item.is-active</code>. На всю ширину — <code>.seg--fill</code> (Лайки,
+            Уведомления, период на Прогрессе и Активности). Компакт <code>.seg--fit</code> — только
+            если сегмент стоит рядом с другим контролом. Не чипы и не <code>.toggle</code>.
           </li>
           <li>
             <strong>Действие у SectionTitle:</strong> только <code>.section-action</code> (Link или
@@ -682,9 +682,9 @@ export function UiKitPage() {
             Роль <code>tablist</code> / <code>tab</code>.
           </li>
           <li>
-            Компактный: <code>.seg--fit</code> — трек обнимает текст (Прогресс, Активность). На
-            всю страницу: <code>.seg--fill</code> — равные половины, текст по центру (Лайки,
-            Уведомления).
+            Компактный: <code>.seg--fit</code> — трек обнимает текст, если рядом ещё контрол. На
+            всю страницу: <code>.seg--fill</code> — равные колонки, текст по центру (Лайки,
+            Уведомления, период 7д / 30д / 90д).
           </li>
           <li>
             Размер пункта: <code>min-height: 32px</code>, <code>padding: 6px 12px</code>, Onest
@@ -717,8 +717,8 @@ export function UiKitPage() {
             </div>
           </div>
           <div>
-            <p className="dim ui-kit-meta">Прогресс / Активность · период</p>
-            <div className="seg seg--fit" role="tablist" aria-label="Период">
+            <p className="dim ui-kit-meta">Прогресс / Активность · период на всю ширину</p>
+            <div className="seg seg--fill" role="tablist" aria-label="Период">
               {([7, 30, 90] as const).map((id) => (
                 <button
                   key={id}

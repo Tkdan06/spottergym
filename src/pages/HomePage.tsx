@@ -155,14 +155,6 @@ export function HomePage() {
 
             <div className="home-gym-checkin">
               <CheckInControl preferredGymId={floorGymId} block />
-              {youHere ? (
-                <Link
-                  to="/app/workouts/new?fromCheckIn=1"
-                  className="btn btn-soft btn-sm btn-block home-log-workout"
-                >
-                  <ClipboardList size={16} /> Записать тренировку
-                </Link>
-              ) : null}
             </div>
 
             <nav className="entry-tools entry-tools--2" aria-label="Дневник и активность">

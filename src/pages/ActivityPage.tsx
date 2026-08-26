@@ -262,13 +262,12 @@ export function ActivityPage() {
           </button>
         }
       />
-      <p className="muted">Время в зале по отметкам</p>
 
       {!apiOnline ? (
         <p className="muted">Нужен онлайн, чтобы загрузить историю чекинов.</p>
       ) : null}
 
-      <div className="seg seg--fit activity-range" role="tablist" aria-label="Период">
+      <div className="seg seg--fill" role="tablist" aria-label="Период">
         {RANGES.map((r) => (
           <button
             key={r.id}
@@ -303,7 +302,7 @@ export function ActivityPage() {
           <section className="activity-summary" aria-label="Сводка">
             <span className="activity-summary-label">Всего за период</span>
             <strong className="activity-summary-total">{formatMinutes(stats.totalMinutes)}</strong>
-            <p className="activity-summary-sessions muted">
+            <p className="activity-summary-sessions">
               {stats.totalSessions > 0 ? sessionsLabel(stats.totalSessions) : 'Пока без тренировок'}
             </p>
           </section>
@@ -426,9 +425,6 @@ export function ActivityPage() {
                     </>
                   ) : null}
                 </div>
-                {selectedDay && selectedDay.minutes > 0 ? (
-                  <p className="dim activity-day-hint">Зажми столбец, чтобы убрать день из статистики</p>
-                ) : null}
               </section>
 
               {stats.busiestDay || stats.quietestDay ? (

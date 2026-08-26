@@ -132,7 +132,6 @@ export function WorkoutsPage() {
   return (
     <main className="page workouts-page">
       <SubpageHeader title="Тренировки" onBack={() => exitWorkoutsSection(navigate)} />
-      <p className="muted">Дневник прогресса</p>
 
       {error ? (
         <p className="feedback-error" role="alert">

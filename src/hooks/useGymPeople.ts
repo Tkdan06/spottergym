@@ -37,7 +37,9 @@ function withSelfOnFloor(list: UserProfile[], user: AppUser, gymId: string) {
  */
 export function useGymPeople({ gymId, user, apiOnline, mode, blockedUserIds }: Options) {
   const [remote, setRemote] = useState<UserProfile[] | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(() =>
+    Boolean(gymId && user && apiOnline && !isDemoAccount(user.email)),
+  )
   const [showLoader, setShowLoader] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [retryTick, setRetryTick] = useState(0)

@@ -1,5 +1,16 @@
+.discover-page {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.discover-page .page-header,
+.discover-page .section-title {
+  margin-bottom: 0;
+}
+
 .discover-settings-lead {
-  margin: 8px 0 14px;
+  margin: 0;
   max-width: 36ch;
   line-height: 1.4;
 }
@@ -8,7 +19,6 @@
 .discover-toolbar {
   display: grid;
   gap: 10px;
-  margin-bottom: 14px;
   min-width: 0;
   max-width: 100%;
 }

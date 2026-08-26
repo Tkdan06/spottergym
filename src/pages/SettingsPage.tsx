@@ -202,7 +202,6 @@ export function SettingsPage() {
   return (
     <main className="page settings-page">
       <SubpageHeader title="Настройки" onBack={() => navigate('/app/profile')} />
-      <p className="muted">Редактируй профиль и список своих залов.</p>
 
       {isDemoAccount(user.email) ? (
         <p className="demo-local-banner" role="status">
@@ -261,7 +260,6 @@ export function SettingsPage() {
             placeholder="username или ссылка"
             inputMode="url"
           />
-          <p className="muted">Необязательно. На профиле появится иконка со ссылкой.</p>
           {instagramError ? <p className="feedback-error">{instagramError}</p> : null}
         </div>
         <div className="field">
@@ -348,9 +346,6 @@ export function SettingsPage() {
                   ) : null,
                 )}
               </div>
-              <p className="dim settings-panel-hint">
-                Нажми зал — сделать главным на «Мой зал». Крестик — убрать из списка.
-              </p>
             </>
           ) : (
             <p className="muted">
@@ -392,9 +387,6 @@ export function SettingsPage() {
 
         <div>
           <p className="field-label">Уровень</p>
-          <p className="muted" style={{ marginBottom: 8 }}>
-            Как себя чувствуешь в зале
-          </p>
           <div className="chip-grid">
             {EXPERIENCE_LEVELS.map((level) => (
               <button
@@ -410,8 +402,8 @@ export function SettingsPage() {
           </div>
         </div>
 
-        <details className="settings-chip-fold">
-          <summary>Активности{sports.length ? ` · ${sports.length}` : ''}</summary>
+        <div>
+          <p className="field-label">Активности</p>
           <div className="chip-grid">
             {SPORTS.map((s) => (
               <button
@@ -429,10 +421,10 @@ export function SettingsPage() {
               </button>
             ))}
           </div>
-        </details>
+        </div>
 
-        <details className="settings-chip-fold">
-          <summary>Интересы{interests.length ? ` · ${interests.length}` : ''}</summary>
+        <div>
+          <p className="field-label">Интересы</p>
           <div className="chip-grid">
             {INTERESTS.map((s) => (
               <button
@@ -445,17 +437,7 @@ export function SettingsPage() {
               </button>
             ))}
           </div>
-        </details>
-
-        <section className="settings-panel">
-          <div className="settings-panel-head">
-            <h2>Расписание</h2>
-            <p className="muted">Дни и время редактируются в профиле</p>
-          </div>
-          <Link to="/app/profile" className="btn btn-soft btn-block">
-            Открыть расписание в профиле
-          </Link>
-        </section>
+        </div>
 
         <section className="settings-panel">
           <button
@@ -527,9 +509,8 @@ export function SettingsPage() {
           </button>
 
           {isCoach ? (
-            <details className="settings-chip-fold settings-coach-fields" open>
-              <summary>Чему тренирую{coachSports.length ? ` · ${coachSports.length}` : ''}</summary>
-              <p className="muted">Групповые, персональные и другие направления</p>
+            <div className="settings-coach-fields">
+              <p className="field-label">Чему тренирую</p>
               <div className="chip-grid">
                 {COACH_DIRECTIONS.map((s) => (
                   <button
@@ -542,7 +523,7 @@ export function SettingsPage() {
                   </button>
                 ))}
               </div>
-            </details>
+            </div>
           ) : null}
         </section>
 
@@ -558,8 +539,8 @@ export function SettingsPage() {
 
       <section className="settings-support">
         <SectionTitle>Поддержка</SectionTitle>
-        <Link to="/app/feedback" className="entry-link">
-          <span>Обратная связь</span>
+        <Link to="/app/feedback" className="btn btn-ghost btn-block">
+          Обратная связь
         </Link>
       </section>
 

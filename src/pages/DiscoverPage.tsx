@@ -179,11 +179,6 @@ export function DiscoverPage() {
           Выбери город и клуб — добавишь в «Мои залы», потом вернёшься в настройки.
         </p>
       ) : null}
-      {fromHome ? (
-        <p className="muted discover-settings-lead">
-          Выбери клуб — откроется страница зала, там можно сделать его своим.
-        </p>
-      ) : null}
     </>
   ) : (
     <header className="page-header discover-header">

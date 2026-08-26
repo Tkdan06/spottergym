@@ -32,6 +32,25 @@ function readStored(city: string): Gym[] | null {
   }
 }
 
+/** Живой клуб из кэша каталога (после списка «Залы»), не сиды из gyms.json. */
+export function peekGym(gymId: string, cities: (string | undefined)[]): Gym | undefined {
+  if (!gymId) return undefined
+  const seen = new Set<string>()
+  for (const city of cities) {
+    const key = city?.trim()
+    if (!key || seen.has(key)) continue
+    seen.add(key)
+    const hit = peekCityGyms(key)?.find((g) => g.id === gymId)
+    if (hit) return hit
+  }
+  return undefined
+}
+
+/** Сиды activeNow/membersCount из локального JSON — не показывать как онлайн. */
+export function gymWithoutSeedStats(gym: Gym): Gym {
+  return { ...gym, activeNow: 0, membersCount: 0 }
+}
+
 /** Синхронный снимок города — память или sessionStorage, без сети. */
 export function peekCityGyms(city: string): Gym[] | null {
   const key = city.trim()

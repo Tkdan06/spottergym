@@ -54,11 +54,12 @@ Before adding or redesigning UI in `src/pages` / `src/components`, follow the li
     Profile admin). Delete account is a quiet text control under it — never a 48px CTA or
     danger card. Confirm step may use `btn-danger btn-sm`. Do not invert those weights.
 12. **Segmented control:** exclusive view switch (2–4 options) uses `.seg` + `.seg-item` +
-    `.is-active`. Compact period/view (Progress, Activity) adds `.seg--fit` (hug text).
-    Page-level two-way tabs (Likes, Notifications) use `.seg--fill`: full width, equal
-    halves, text centered. Items ~32px (`padding: 6px 12px`). Button or `Link` as
-    `.seg-item`. Onest 500, active 600. Do not invent a local tab recipe. Not chips
-    (multi-filter / labels) and not `.toggle` / `.toggle-row` (on/off). Specimen: UI kit «Сегмент».
+    `.is-active`. Page-level tabs (Likes, Notifications, Progress period, Activity period) use
+    `.seg--fill`: full width, equal columns, text centered. Compact hug-text (`.seg--fit`) is
+    only when the control sits beside something else in a toolbar. Items ~32px
+    (`padding: 6px 12px`). Button or `Link` as `.seg-item`. Onest 500, active 600. Do not invent
+    a local tab recipe. Not chips (multi-filter / labels) and not `.toggle` / `.toggle-row`
+    (on/off). Specimen: UI kit «Сегмент».
 13. **Lists after flatten:** People / gyms = `UserCard` / `GymCard` in `.card-list.card-list--cards`
     (`gap: 12px`). Likes = divider rows (`.liked-list` / `.liked-row`). Workouts history = one
     grouped `.workouts-list`. Chats = conversation rows, not a card per chat. Notifications

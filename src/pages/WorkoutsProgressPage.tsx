@@ -11,7 +11,12 @@ import {
   type WorkoutProgressRange,
 } from '../lib/apiClient'
 import { useSheetA11y } from '../lib/sheetA11y'
-import { formatBodyDelta, formatDeltaLabel, formatKg } from '../lib/workouts'
+import {
+  formatBodyDelta,
+  formatDeltaLabel,
+  formatKg,
+  type DeltaTone,
+} from '../lib/workouts'
 import { goWorkoutsHub } from '../lib/workoutsNav'
 import { WorkoutWeekRecap } from '../components/WorkoutWeekRecap'
 import { WORKOUT_RECAP_ADMIN_ONLY } from '../lib/workoutRecap'
@@ -61,6 +66,19 @@ function niceStep(raw: number) {
 
 function roundNice(n: number) {
   return Math.round(n * 100) / 100
+}
+
+function deltaToneFromKg(deltaKg: number | null | undefined): DeltaTone | null {
+  if (deltaKg == null) return null
+  if (deltaKg > 0) return 'up'
+  if (deltaKg < 0) return 'down'
+  return 'flat'
+}
+
+function HeroDelta({ text, tone }: { text: string | null; tone?: DeltaTone | null }) {
+  if (!text) return null
+  const toneClass = tone === 'up' ? 'is-up' : tone === 'down' ? 'is-down' : 'is-flat'
+  return <p className={`workout-progress-hero-delta ${toneClass}`}>{text}</p>
 }
 
 type ChartPoint = { at: string; value: number; meta?: string }
@@ -324,21 +342,19 @@ export function WorkoutsProgressPage() {
     <main className="page workouts-page workouts-progress-page">
       <SubpageHeader title="Прогресс" onBack={() => goWorkoutsHub(navigate)} />
 
-      <div className="workout-progress-toolbar">
-        <div className="seg seg--fit workout-progress-period" role="tablist" aria-label="Период">
-          {RANGES.map((r) => (
-            <button
-              key={r.id}
-              type="button"
-              role="tab"
-              aria-selected={range === r.id}
-              className={`seg-item${range === r.id ? ' is-active' : ''}`}
-              onClick={() => setRange(r.id)}
-            >
-              {r.label}
-            </button>
-          ))}
-        </div>
+      <div className="seg seg--fill" role="tablist" aria-label="Период">
+        {RANGES.map((r) => (
+          <button
+            key={r.id}
+            type="button"
+            role="tab"
+            aria-selected={range === r.id}
+            className={`seg-item${range === r.id ? ' is-active' : ''}`}
+            onClick={() => setRange(r.id)}
+          >
+            {r.label}
+          </button>
+        ))}
       </div>
 
       {error ? (
@@ -388,8 +404,10 @@ export function WorkoutsProgressPage() {
                   aria-label={`Упражнение: ${exerciseValue || 'выбрать'}`}
                   onClick={() => setPickerOpen(true)}
                 >
-                  <span className="section-heading">{exerciseValue || 'Выбрать упражнение'}</span>
-                  <ChevronDown size={18} aria-hidden />
+                  <span className="workout-progress-exercise-name">
+                    {exerciseValue || 'Выбрать упражнение'}
+                  </span>
+                  <ChevronDown size={16} aria-hidden />
                 </button>
               ) : (
                 <SectionTitle>Упражнения</SectionTitle>
@@ -402,9 +420,7 @@ export function WorkoutsProgressPage() {
                 <>
                   <div className="workout-progress-hero" aria-label="Рабочий вес">
                     <strong className="workout-progress-hero-value">{strengthHero || '—'}</strong>
-                    {strengthPeriodDelta ? (
-                      <p className="muted workout-progress-hero-delta">{strengthPeriodDelta}</p>
-                    ) : null}
+                    <HeroDelta text={strengthPeriodDelta} tone={strengthDelta?.tone} />
                   </div>
                   <LineChart
                     points={strengthPoints}
@@ -432,9 +448,7 @@ export function WorkoutsProgressPage() {
                 <>
                   <div className="workout-progress-hero" aria-label="Вес тела">
                     <strong className="workout-progress-hero-value">{bodyHero || '—'}</strong>
-                    {bodyPeriodDelta ? (
-                      <p className="muted workout-progress-hero-delta">{bodyPeriodDelta}</p>
-                    ) : null}
+                    <HeroDelta text={bodyPeriodDelta} tone={deltaToneFromKg(progress.body.deltaKg)} />
                   </div>
                   <LineChart
                     points={bodyPoints}

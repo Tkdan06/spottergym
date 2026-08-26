@@ -5,7 +5,6 @@ import {
   useLocation,
   useNavigate,
   useParams,
-  useSearchParams,
 } from 'react-router-dom'
 import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
@@ -149,7 +148,6 @@ export function WorkoutEditorPage() {
   const isEditing = isNew || isEditRoute
   const isViewing = !isNew && !isEditRoute
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
   const { user, apiOnline } = useApp()
   const { celebrate } = useMoment()
   const copyFromId = (location.state as { copyFromId?: string } | null)?.copyFromId
@@ -189,12 +187,6 @@ export function WorkoutEditorPage() {
   useEffect(() => {
     if (isNew && !copyFromId) setWhen(defaultWhen)
   }, [isNew, copyFromId, defaultWhen])
-
-  useEffect(() => {
-    if (searchParams.get('fromCheckIn') === '1' && isNew && !copyFromId) {
-      setWhen(defaultWhen)
-    }
-  }, [searchParams, isNew, copyFromId, defaultWhen])
 
   const loadId = isNew ? copyFromId : id
 
@@ -398,9 +390,6 @@ export function WorkoutEditorPage() {
                 {notes.trim() ? notePreview(notes) : 'Заметка'}
               </span>
             </button>
-            {user.isActive && searchParams.get('fromCheckIn') === '1' ? (
-              <p className="dim workout-checkin-hint">Подставлено из отметки «Я в зале»</p>
-            ) : null}
           </section>
 
           <section className="workouts-exercises">

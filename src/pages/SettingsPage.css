@@ -2,10 +2,6 @@
   margin: 0;
 }
 
-.settings-page > .muted {
-  margin-top: 8px;
-}
-
 .settings-gyms {
   gap: 12px;
 }
@@ -220,32 +216,6 @@
   opacity: 0.75;
   filter: invert(1) brightness(1.1);
   flex-shrink: 0;
-}
-
-.settings-chip-fold {
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.settings-chip-fold > summary {
-  cursor: pointer;
-  font-size: var(--text-label-size);
-  font-weight: var(--text-label-weight);
-  color: var(--text-muted);
-  list-style: none;
-}
-
-.settings-chip-fold > summary::-webkit-details-marker {
-  display: none;
-}
-
-.settings-chip-fold[open] > summary {
-  margin-bottom: 10px;
-}
-
-.settings-chip-fold .chip-grid {
-  margin-top: 0;
 }
 
 .settings-support {
