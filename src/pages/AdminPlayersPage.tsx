@@ -1,6 +1,5 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
 import {
-  ArrowLeft,
   ArrowUpRight,
   Ban,
   MessageCircle,
@@ -11,6 +10,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
+import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
 import { formatAdminDate, formatBytes } from '../lib/adminStats'
 import { experienceLabel, getGym, intentLabel } from '../data/mock'
@@ -335,16 +335,10 @@ export function AdminPlayersPage() {
 
   return (
     <main className="page admin-page admin-players-page">
-      <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => navigate('/app/admin')}>
-          <ArrowLeft size={18} /> Админка
-        </button>
-
-        <header className="admin-players-head">
-          <div>
-            <h1>Пользователи</h1>
-            <p className="muted">{subtitle}</p>
-          </div>
+      <SubpageHeader
+        title="Пользователи"
+        onBack={() => navigate('/app/admin')}
+        action={
           <button
             type="button"
             className="btn-icon-refresh"
@@ -355,8 +349,9 @@ export function AdminPlayersPage() {
           >
             <RefreshCw size={22} strokeWidth={2.4} />
           </button>
-        </header>
-      </div>
+        }
+      />
+      <p className="muted">{subtitle}</p>
 
       <p className="dim">
         DAU считает любой вход в аккаунт. Чекин «в зале» — отдельно. Города — в{' '}

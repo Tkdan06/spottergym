@@ -14,10 +14,12 @@ Before adding or redesigning UI in `src/pages` / `src/components`, follow the li
 
 1. **One primary action per section.** Default `.btn` is 48px. Secondary block actions use
    `.btn-sm` (40px) and/or `.btn-soft` / `.btn-ghost`. Do not stack many full-size ghost blocks.
-2. **Secondary screens:** wrap back + title in `.subpage-top` (14px gap). Do not combine
-   `.back-link { margin-bottom: 14px }` with an extra page grid gap between the same elements.
+2. **Secondary screens:** `SubpageHeader` — one row, left-aligned `[.subpage-back] [.page-title]
+   [optional action]`. Title is the *current* screen, never the previous one. Do not center the
+   title and do not duplicate it in the content. Root tabs (Мой зал / Залы / Чаты / Профиль) have
+   no back. Chat and another user’s profile reuse `SubpageBack` without a page-title row.
    Workouts IA: list is the hub (`goWorkoutsHub` / replace). Hub exits to Home (`exitWorkoutsSection`
-   / replace, label «Мой зал»). Never `navigate(-1)` from the list and never push `/app/workouts`
+   / replace). Never `navigate(-1)` from the list and never push `/app/workouts`
    on top of progress or a session.
 3. **Section headings:** only `SectionTitle` / `.section-title` — no one-off `h2` font sizes for
    the same role. Section titles are Onest 600 (`--text-section-size` 1.05rem / lh 1.25), not
@@ -123,7 +125,7 @@ Do not invent a parallel `--color-*` system. Screens use `var(--*)` from `global
 |---|---|---|
 | Brand | `--accent` / `--accent-ink` / `--accent-soft` | Primary CTA, selected chips, active tab, SPOTTER TER, coach, PR, «Я в зале» |
 | Presence | `--online` / `--online-soft` | Dots and «В зале». Text is `--text`; do not stack mint text + fill + border |
-| Progress | `--progress` | Workout line charts and activity bars. On the current theme this aliases `--accent` |
+| Progress | `--progress` | Workout line charts and activity bars. Aliases `--accent` (lime) in both palettes |
 | Unread | `--text` on `--bg-soft` / `--line-strong` | Nav and chat badges, notification unread. Not lime |
 | Danger / warning | `--danger` / `--warning` (+ `-soft`) | Expire, validation, destructive only |
 

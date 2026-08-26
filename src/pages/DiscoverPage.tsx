@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { CityCarousel } from '../components/CityCarousel'
 import { ElsewhereGymBanner } from '../components/ElsewhereGymBanner'
 import { GymCard } from '../components/GymCard'
 import { SoftLoader, SOFT_LOADER_DELAY_MS } from '../components/SoftLoader'
+import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
 import { GYMS, NETWORKS } from '../data/mock'
 import { apiFetchGyms } from '../lib/apiClient'
@@ -167,42 +168,34 @@ export function DiscoverPage() {
     setNetwork('Все сети')
   }
 
-  const pageHeader = (
+  const pageHeader = fromSettings || fromHome ? (
+    <>
+      <SubpageHeader
+        title="Каталог залов"
+        onBack={() => navigate(fromHome ? '/app' : '/app/settings')}
+      />
+      {fromSettings ? (
+        <p className="muted discover-settings-lead">
+          Выбери город и клуб — добавишь в «Мои залы», потом вернёшься в настройки.
+        </p>
+      ) : null}
+      {fromHome ? (
+        <p className="muted discover-settings-lead">
+          Выбери клуб — откроется страница зала, там можно сделать его своим.
+        </p>
+      ) : null}
+    </>
+  ) : (
     <header className="page-header discover-header">
       <div className="page-header-text">
-        <h1 className="page-title">
-          {fromSettings || fromHome ? 'Каталог залов' : 'Залы'}
-        </h1>
-        {fromSettings ? (
-          <p className="muted discover-settings-lead">
-            Выбери город и клуб — добавишь в «Мои залы», потом вернёшься в настройки.
-          </p>
-        ) : null}
-        {fromHome ? (
-          <p className="muted discover-settings-lead">
-            Выбери клуб — откроется страница зала, там можно сделать его своим.
-          </p>
-        ) : null}
+        <h1 className="page-title">Залы</h1>
       </div>
     </header>
   )
 
   return (
     <main className="page discover-page">
-      {fromSettings || fromHome ? (
-        <div className="subpage-top">
-          <button
-            type="button"
-            className="back-link"
-            onClick={() => navigate(fromHome ? '/app' : '/app/settings')}
-          >
-            <ArrowLeft size={18} /> {fromHome ? 'Мой зал' : 'Настройки'}
-          </button>
-          {pageHeader}
-        </div>
-      ) : (
-        pageHeader
-      )}
+      {pageHeader}
 
       {/* 1 search → 2 city → 3 network — one job per row (Material / progressive disclosure) */}
       <div className="discover-toolbar">

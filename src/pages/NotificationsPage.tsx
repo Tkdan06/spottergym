@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, Bell, BellOff, Smartphone } from 'lucide-react'
+import { Bell, BellOff, Smartphone } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
 import {
   NOTIF_PREF_LABELS,
@@ -127,20 +128,14 @@ export function NotificationsPage() {
 
   return (
     <main className="page notifications-page">
-      <header className="subpage-top notifications-top">
-        <button
-          type="button"
-          className="back-link"
-          onClick={() => {
-            if (window.history.length > 1) navigate(-1)
-            else navigate('/app')
-          }}
-        >
-          <ArrowLeft size={18} /> Назад
-        </button>
-        <div className="notifications-title-row">
-          <h1 className="page-title">Уведомления</h1>
-          {unreadNotifications > 0 ? (
+      <SubpageHeader
+        title="Уведомления"
+        onBack={() => {
+          if (window.history.length > 1) navigate(-1)
+          else navigate('/app')
+        }}
+        action={
+          unreadNotifications > 0 ? (
             <button
               type="button"
               className="notifications-mark-all"
@@ -150,9 +145,9 @@ export function NotificationsPage() {
             >
               Прочитать все
             </button>
-          ) : null}
-        </div>
-      </header>
+          ) : undefined
+        }
+      />
 
       <div className="seg seg--fill" role="tablist" aria-label="Уведомления">
         <button

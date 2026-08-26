@@ -1,11 +1,12 @@
 import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, Clock3, Eye, Heart, MessageCircle, Shield } from 'lucide-react'
+import { Clock3, Eye, Heart, MessageCircle, Shield } from 'lucide-react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { LikesRow } from '../components/LikesRow'
 import { PhotoGalleryModal } from '../components/PhotoGalleryModal'
 import { ProfilePhotoCarousel } from '../components/ProfilePhotoCarousel'
 import { ReferralBadge, isReferralStatusVisible } from '../components/ReferralBadge'
 import { SoftFlash } from '../components/SoftFlash'
+import { SubpageBack } from '../components/SubpageHeader'
 import { SafetyActions } from '../components/SafetyActions'
 import { SectionTitle } from '../components/SectionTitle'
 import { SmartImage } from '../components/SmartImage'
@@ -151,9 +152,7 @@ export function UserProfilePage() {
   if (person.isDeleted) {
     return (
       <main className="page">
-        <button type="button" className="back-link" onClick={() => navigate(-1)}>
-          <ArrowLeft size={18} /> Назад
-        </button>
+        <SubpageBack onClick={() => navigate(-1)} />
         <div className="empty-copy" style={{ marginTop: 24 }}>
           <SmartImage
             src="/images/deleted-user.svg"
@@ -263,9 +262,7 @@ export function UserProfilePage() {
   return (
     <main className="page profile-view">
       <header className="profile-other-top">
-        <button type="button" className="back-link" onClick={() => navigate(-1)}>
-          <ArrowLeft size={18} /> Назад
-        </button>
+        <SubpageBack onClick={() => navigate(-1)} />
         {!isSelf ? <SafetyActions person={person} /> : null}
       </header>
 

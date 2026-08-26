@@ -68,8 +68,8 @@
   min-width: 0;
 }
 
-.profile-other-top .back-link {
-  margin-bottom: 0;
+.profile-other-top .subpage-back {
+  margin: 0 0 0 -12px;
 }
 
 .profile-hero-cover {

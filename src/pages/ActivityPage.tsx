@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, MoreHorizontal, RotateCcw, Trash2 } from 'lucide-react'
+import { MoreHorizontal, RotateCcw, Trash2 } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { SOFT_LOADER_DELAY_MS, SoftLoader } from '../components/SoftLoader'
+import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
 import {
   apiDeleteMyActivityDay,
@@ -242,31 +243,26 @@ export function ActivityPage() {
 
   return (
     <main className="page activity-page">
-      <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => navigate(-1)}>
-          <ArrowLeft size={18} /> Назад
-        </button>
-
-        <header className="activity-head">
-          <div className="activity-head-row">
-            <h1 className="page-title">Активность</h1>
-            <button
-              type="button"
-              className={`icon-btn activity-more-btn ${canReset ? '' : 'is-reserved'}`.trim()}
-              aria-label="Ещё"
-              aria-haspopup="dialog"
-              aria-expanded={sheet !== 'closed'}
-              aria-hidden={!canReset}
-              tabIndex={canReset ? 0 : -1}
-              onClick={() => setSheet('menu')}
-              disabled={resetting || !canReset}
-            >
-              <MoreHorizontal size={20} />
-            </button>
-          </div>
-          <p className="muted">Время в зале по отметкам</p>
-        </header>
-      </div>
+      <SubpageHeader
+        title="Активность"
+        onBack={() => navigate(-1)}
+        action={
+          <button
+            type="button"
+            className={`icon-btn activity-more-btn ${canReset ? '' : 'is-reserved'}`.trim()}
+            aria-label="Ещё"
+            aria-haspopup="dialog"
+            aria-expanded={sheet !== 'closed'}
+            aria-hidden={!canReset}
+            tabIndex={canReset ? 0 : -1}
+            onClick={() => setSheet('menu')}
+            disabled={resetting || !canReset}
+          >
+            <MoreHorizontal size={20} />
+          </button>
+        }
+      />
+      <p className="muted">Время в зале по отметкам</p>
 
       {!apiOnline ? (
         <p className="muted">Нужен онлайн, чтобы загрузить историю чекинов.</p>

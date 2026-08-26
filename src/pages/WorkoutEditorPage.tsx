@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, Copy, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
+import { Copy, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
 import {
   Navigate,
   useLocation,
@@ -7,6 +7,7 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom'
+import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
 import {
   apiCreateWorkout,
@@ -310,29 +311,22 @@ export function WorkoutEditorPage() {
 
   return (
     <main className="page workouts-page workout-editor">
-      <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => goWorkoutsHub(navigate)}>
-          <ArrowLeft size={18} /> Тренировки
-        </button>
-
-        <header className="page-header">
-          <div className="page-header-text">
-            <h1 className="page-title">{pageTitle}</h1>
-          </div>
-          {!isNew ? (
-            <div className="page-header-actions">
-              <button
-                type="button"
-                className="icon-btn"
-                aria-label="Ещё"
-                onClick={() => setMenuOpen(true)}
-              >
-                <MoreHorizontal size={20} />
-              </button>
-            </div>
-          ) : null}
-        </header>
-      </div>
+      <SubpageHeader
+        title={pageTitle}
+        onBack={() => goWorkoutsHub(navigate)}
+        action={
+          !isNew ? (
+            <button
+              type="button"
+              className="icon-btn"
+              aria-label="Ещё"
+              onClick={() => setMenuOpen(true)}
+            >
+              <MoreHorizontal size={20} />
+            </button>
+          ) : undefined
+        }
+      />
 
       {error ? (
         <p className="feedback-error" role="alert">

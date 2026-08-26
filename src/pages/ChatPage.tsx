@@ -8,8 +8,8 @@ import {
   useRef,
   useState,
 } from 'react'
-import { ArrowLeft } from 'lucide-react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { SubpageBack } from '../components/SubpageHeader'
 import { MessageTicks } from '../components/MessageTicks'
 import { PresenceBadge } from '../components/PresenceBadge'
 import { SafetyActions } from '../components/SafetyActions'
@@ -414,10 +414,7 @@ export function ChatPage() {
     <main className="chat-page" ref={pageRef}>
       <h1 className="sr-only">Чат с {name}</h1>
       <header className="chat-header">
-        <button
-          type="button"
-          className="icon-btn"
-          aria-label="Назад"
+        <SubpageBack
           onClick={() => {
             if (backTo) {
               navigate(backTo)
@@ -429,9 +426,7 @@ export function ChatPage() {
             }
             navigate('/app/messages')
           }}
-        >
-          <ArrowLeft size={18} />
-        </button>
+        />
         {deleted ? (
           <div className="chat-user">
             <div className="chat-user-avatar">

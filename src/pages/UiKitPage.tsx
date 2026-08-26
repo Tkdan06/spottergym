@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import {
-  ArrowLeft,
   Bell,
   ChartNoAxesColumn,
   ChevronDown,
@@ -16,6 +15,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { SectionTitle } from '../components/SectionTitle'
 import { SoftFlash } from '../components/SoftFlash'
 import { SoftLoader } from '../components/SoftLoader'
+import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
 import './ActivityPage.css'
 import './LikedPage.css'
@@ -78,21 +78,11 @@ export function UiKitPage() {
 
   return (
     <main className="page ui-kit-page">
-      <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => navigate('/app/admin')}>
-          <ArrowLeft size={18} /> Админка
-        </button>
-
-        <header className="page-header">
-          <div className="page-header-text">
-            <h1 className="page-title">UI kit</h1>
-            <p className="muted ui-kit-lead">
-              Живой эталон Spotter. Перед новым экраном или CTA сверься с правилами ниже — не
-              изобретай локальные отступы, размеры кнопок и «праздники» мимо системы.
-            </p>
-          </div>
-        </header>
-      </div>
+      <SubpageHeader title="UI kit" onBack={() => navigate('/app/admin')} />
+      <p className="muted ui-kit-lead">
+        Живой эталон Spotter. Перед новым экраном или CTA сверься с правилами ниже — не изобретай
+        локальные отступы, размеры кнопок и «праздники» мимо системы.
+      </p>
 
       <section className="surface ui-kit-block">
         <SectionTitle>Правила продукта</SectionTitle>
@@ -105,8 +95,9 @@ export function UiKitPage() {
             для второстепенных block. Не строй стену одинаковых 48px ghost.
           </li>
           <li>
-            <strong>Назад:</strong> всегда <code>.subpage-top</code> → gap 14px до заголовка. Не
-            дублируй margin <code>.back-link</code> с grid-gap страницы. Секция тренировок: хаб{' '}
+            <strong>Назад:</strong> вторичные экраны — <code>SubpageHeader</code> (
+            <code>← Текущий экран</code>, слева). Не писать название предыдущего раздела на стрелке.
+            Корневые вкладки (Мой зал / Залы / Чаты / Профиль) без back. Секция тренировок: хаб{' '}
             <code>/app/workouts</code>, вложенные экраны возвращаются туда с <code>replace</code>, с
             хаба выход — <code>/app</code> («Мой зал»), тоже <code>replace</code>. Не{' '}
             <code>navigate(-1)</code> и не пушить хаб поверх прогресса/записи.
@@ -166,8 +157,8 @@ export function UiKitPage() {
         <p className="muted ui-kit-section-lead">
           Brand (<code>--accent</code>) — primary CTA, selected chips, active tab, «Я в зале».
           Presence (<code>--online</code>) — точка и «В зале»: текст primary, не mint fill+text+border
-          сразу. Progress (<code>--progress</code>) — графики и бары активности; на текущей палитре
-          это алиас lime. Unread — нейтральный, не lime. Warning/danger только для expire и опасных
+          сразу. Progress (<code>--progress</code>) — графики и бары, алиас lime. Unread — нейтральный,
+          не lime. Warning/danger только для expire и опасных
           действий. Новая палитра — админский превью-тоггл в Админке, только на этом устройстве.
         </p>
         <div className="ui-kit-swatches">
@@ -394,20 +385,16 @@ export function UiKitPage() {
       <section className="surface ui-kit-block">
         <SectionTitle>Навигация вторичных экранов</SectionTitle>
         <p className="muted ui-kit-section-lead">
-          Класс <code>.subpage-top</code> в <code>global.css</code>: grid gap <strong>14px</strong>,
-          у прямого <code>.back-link</code> margin обнулён. Пример уже наверху этой страницы.
+          <code>SubpageHeader</code>: один ряд <code>.subpage-top</code> — лёгкая стрелка{' '}
+          <code>.subpage-back</code> (44×44, без рамки) и текущий <code>.page-title</code> слева.
+          Не центрировать заголовок и не дублировать его в контенте. Пример уже наверху этой страницы.
         </p>
-        <pre className="ui-kit-code">{`<div className="subpage-top">
-  <button className="back-link">…</button>
-  <header className="page-header">
-    <div className="page-header-text">… page-title …</div>
-    {/* actions (⋯) — сюда, не в один ряд с back */}
-  </header>
-</div>`}</pre>
+        <pre className="ui-kit-code">{`<SubpageHeader title="Активность" onBack={…} />
+{/* optional action: ⋯ / refresh — только если нужен */}
+<SubpageHeader title="Прогресс" onBack={…} action={…} />`}</pre>
         <p className="dim" style={{ margin: '10px 0 0' }}>
-          Не оборачивай <code>back-link</code> в flex-ряд с <code>icon-btn</code> — высота ряда
-          ломает визуальный gap 14px. Горизонтальные ряды (чат, чужой профиль) — исключение: back в
-          одной линии с actions, margin 0 локально.
+          Чат и чужой профиль — исключение по композиции: та же <code>SubpageBack</code>, без
+          заголовка «Профиль» над фото. Не класть back в <code>.icon-btn</code>.
         </p>
       </section>
 

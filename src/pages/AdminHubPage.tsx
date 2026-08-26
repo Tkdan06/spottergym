@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
-  ArrowLeft,
   BarChart3,
   Bell,
   Activity,
@@ -18,6 +17,7 @@ import {
 } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { SectionTitle } from '../components/SectionTitle'
+import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
 import {
   formatRetentionRate,
@@ -83,29 +83,11 @@ export function AdminHubPage() {
 
   return (
     <main className="page admin-page">
-      <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => navigate('/app/profile')}>
-          <ArrowLeft size={18} /> Профиль
-        </button>
-
-        <header className="admin-players-head">
-          <div>
-            <h1 className="page-title">Админка</h1>
-            <p className="muted">
-              {roleLabel} · {user.email}
-            </p>
-            {analytics ? (
-              <p className="dim" style={{ marginTop: 4 }}>
-                Сервер · МСК · обновлено {formatAdminDate(analytics.generatedAt)}
-                {loading ? ' · обновляем…' : ''}
-              </p>
-            ) : (
-              <p className="dim" style={{ marginTop: 4 }}>
-                {loading ? 'Загружаем метрики…' : 'Дашборд по данным сервера'}
-              </p>
-            )}
-          </div>
-          {canViewUsers ? (
+      <SubpageHeader
+        title="Админка"
+        onBack={() => navigate('/app/profile')}
+        action={
+          canViewUsers ? (
             <button
               type="button"
               className="btn-icon-refresh"
@@ -116,8 +98,23 @@ export function AdminHubPage() {
             >
               <RefreshCw size={22} strokeWidth={2.4} />
             </button>
-          ) : null}
-        </header>
+          ) : undefined
+        }
+      />
+      <div>
+        <p className="muted">
+          {roleLabel} · {user.email}
+        </p>
+        {analytics ? (
+          <p className="dim" style={{ marginTop: 4 }}>
+            Сервер · МСК · обновлено {formatAdminDate(analytics.generatedAt)}
+            {loading ? ' · обновляем…' : ''}
+          </p>
+        ) : (
+          <p className="dim" style={{ marginTop: 4 }}>
+            {loading ? 'Загружаем метрики…' : 'Дашборд по данным сервера'}
+          </p>
+        )}
       </div>
 
       {error ? <p className="admin-inline-error">{error}</p> : null}

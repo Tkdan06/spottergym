@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, Info, Share2, Users } from 'lucide-react'
+import { Info, Share2, Users } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { InviteFriendsButton } from '../components/InviteFriendsButton'
 import { ReferralBadge } from '../components/ReferralBadge'
 import { SectionTitle } from '../components/SectionTitle'
+import { SubpageHeader } from '../components/SubpageHeader'
 import { UserCard } from '../components/UserCard'
 import { useApp } from '../context/useApp'
 import {
@@ -123,33 +124,25 @@ export function InviteCirclePage() {
 
   return (
     <main className="page invite-circle-page">
-      <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => navigate('/app/profile')}>
-          <ArrowLeft size={18} /> Профиль
-        </button>
-
-        <header className="invite-circle-head">
-          <h1 className="page-title">Мой круг</h1>
-          <div className="invite-circle-lead">
-            <p className="muted">Приглашай друзей — расти в статусе</p>
-            <div className="ui-hint invite-circle-hint" ref={hintRef}>
-              <button
-                type="button"
-                className="ui-hint-trigger"
-                aria-label="Как засчитываются друзья"
-                aria-expanded={hintOpen}
-                onClick={() => setHintOpen((v) => !v)}
-              >
-                <Info size={14} strokeWidth={2.25} />
-              </button>
-              {hintOpen ? (
-                <div className="ui-hint-pop" role="tooltip">
-                  Засчитываются друзья, которые зарегистрировались по твоей ссылке и прошли онбординг.
-                </div>
-              ) : null}
+      <SubpageHeader title="Мой круг" onBack={() => navigate('/app/profile')} />
+      <div className="invite-circle-lead">
+        <p className="muted">Приглашай друзей — расти в статусе</p>
+        <div className="ui-hint invite-circle-hint" ref={hintRef}>
+          <button
+            type="button"
+            className="ui-hint-trigger"
+            aria-label="Как засчитываются друзья"
+            aria-expanded={hintOpen}
+            onClick={() => setHintOpen((v) => !v)}
+          >
+            <Info size={14} strokeWidth={2.25} />
+          </button>
+          {hintOpen ? (
+            <div className="ui-hint-pop" role="tooltip">
+              Засчитываются друзья, которые зарегистрировались по твоей ссылке и прошли онбординг.
             </div>
-          </div>
-        </header>
+          ) : null}
+        </div>
       </div>
 
       {error ? <p className="admin-inline-error">{error}</p> : null}

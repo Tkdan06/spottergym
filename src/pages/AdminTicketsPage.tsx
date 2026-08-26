@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
-import { ArrowLeft } from 'lucide-react'
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
+import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
 import {
   categoryLabel,
@@ -86,15 +86,13 @@ export function AdminTicketsPage() {
     const closed = isTicketClosed(selected.status)
     return (
       <main className="page admin-page">
-        <div className="subpage-top">
-          <button type="button" className="back-link" onClick={() => setSelectedId(null)}>
-            <ArrowLeft size={18} /> К списку
-          </button>
-          <div className="feedback-ticket-card-top">
-            <h1>#{selected.id.slice(-6)}</h1>
+        <SubpageHeader
+          title={`#${selected.id.slice(-6)}`}
+          onBack={() => setSelectedId(null)}
+          action={
             <span className={`feedback-status ${selected.status}`}>{statusLabel(selected.status)}</span>
-          </div>
-        </div>
+          }
+        />
         <p className="muted">
           {selected.userName} · {selected.userEmail} · {categoryLabel(selected.category)}
         </p>
@@ -180,12 +178,7 @@ export function AdminTicketsPage() {
 
   return (
     <main className="page admin-page">
-      <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => navigate('/app/admin')}>
-          <ArrowLeft size={18} /> Админка
-        </button>
-        <h1>Обращения</h1>
-      </div>
+      <SubpageHeader title="Обращения" onBack={() => navigate('/app/admin')} />
       <div className="admin-tabs">
         {(
           [

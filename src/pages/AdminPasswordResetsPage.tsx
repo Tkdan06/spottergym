@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ArrowLeft, RefreshCw } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { SectionTitle } from '../components/SectionTitle'
+import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
 import {
   apiAdminFetchPasswordResets,
@@ -59,19 +60,10 @@ export function AdminPasswordResetsPage() {
 
   return (
     <main className="page admin-page admin-players-page">
-      <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => navigate('/app/admin')}>
-          <ArrowLeft size={18} /> Админка
-        </button>
-
-        <header className="admin-players-head">
-          <div>
-            <h1>Сброс пароля</h1>
-            <p className="muted">
-              Кто запрашивал восстановление · спам и забывчивость
-              {loading ? ' · обновляем…' : ''}
-            </p>
-          </div>
+      <SubpageHeader
+        title="Сброс пароля"
+        onBack={() => navigate('/app/admin')}
+        action={
           <button
             type="button"
             className="btn-icon-refresh"
@@ -81,8 +73,12 @@ export function AdminPasswordResetsPage() {
           >
             <RefreshCw size={22} strokeWidth={2.4} />
           </button>
-        </header>
-      </div>
+        }
+      />
+      <p className="muted">
+        Кто запрашивал восстановление · спам и забывчивость
+        {loading ? ' · обновляем…' : ''}
+      </p>
 
       {error ? <p className="admin-inline-error">{error}</p> : null}
 

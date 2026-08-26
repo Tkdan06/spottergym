@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
-import { ArrowLeft } from 'lucide-react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
 import {
   FEEDBACK_CATEGORIES,
@@ -94,15 +94,13 @@ export function FeedbackPage() {
     const closed = isTicketClosed(selected.status)
     return (
       <main className="page feedback-page">
-        <div className="subpage-top">
-          <button type="button" className="back-link" onClick={() => navigate('/app/feedback')}>
-            <ArrowLeft size={18} /> К обращениям
-          </button>
-          <div className="feedback-ticket-card-top">
-            <h1>#{selected.id.slice(-6)}</h1>
+        <SubpageHeader
+          title={`#${selected.id.slice(-6)}`}
+          onBack={() => navigate('/app/feedback')}
+          action={
             <span className={`feedback-status ${selected.status}`}>{statusLabel(selected.status)}</span>
-          </div>
-        </div>
+          }
+        />
         <p className="muted">
           {categoryLabel(selected.category)} · {formatWhen(selected.updatedAt)}
         </p>
@@ -143,21 +141,12 @@ export function FeedbackPage() {
   if (view === 'create') {
     return (
       <main className="page feedback-page">
-        <div className="subpage-top">
-          <button type="button" className="back-link" onClick={() => setView('list')}>
-            <ArrowLeft size={18} /> Назад
-          </button>
-          <header className="page-header">
-            <div className="page-header-text">
-              <h1 className="page-title">Новое обращение</h1>
-              <p className="muted feedback-lead">
-                {category === 'suggestion' && message.startsWith('Заявка на добавление зала')
-                  ? 'Заполни название и адрес — добавим клуб в каталог.'
-                  : 'Баг, идея или вопрос — ответим в этом же чате обращения.'}
-              </p>
-            </div>
-          </header>
-        </div>
+        <SubpageHeader title="Новое обращение" onBack={() => setView('list')} />
+        <p className="muted feedback-lead">
+          {category === 'suggestion' && message.startsWith('Заявка на добавление зала')
+            ? 'Заполни название и адрес — добавим клуб в каталог.'
+            : 'Баг, идея или вопрос — ответим в этом же чате обращения.'}
+        </p>
         <form className="feedback-actions" onSubmit={onCreate}>
           <div className="chip-grid">
             {FEEDBACK_CATEGORIES.map((c) => (
@@ -195,18 +184,8 @@ export function FeedbackPage() {
 
   return (
     <main className="page feedback-page">
-      <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => navigate('/app/profile')}>
-          <ArrowLeft size={18} /> Профиль
-        </button>
-
-        <header className="page-header">
-          <div className="page-header-text">
-            <h1 className="page-title">Обратная связь</h1>
-            <p className="muted feedback-lead">Баг, идея или вопрос — ответим здесь</p>
-          </div>
-        </header>
-      </div>
+      <SubpageHeader title="Обратная связь" onBack={() => navigate('/app/profile')} />
+      <p className="muted feedback-lead">Баг, идея или вопрос — ответим здесь</p>
 
       {user.isAdmin ? (
         <Link to="/app/admin" className="btn btn-soft btn-block">

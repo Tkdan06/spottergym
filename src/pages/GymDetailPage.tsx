@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, Check, MapPin, Star } from 'lucide-react'
+import { Check, MapPin, Star } from 'lucide-react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { GymMineBadge, GymPresenceBadge } from '../components/GymBadges'
 import { InviteFriendsButton } from '../components/InviteFriendsButton'
 import { SectionTitle } from '../components/SectionTitle'
 import { SmartImage } from '../components/SmartImage'
 import { SoftLoader } from '../components/SoftLoader'
+import { SubpageBack } from '../components/SubpageHeader'
 import { UserCard } from '../components/UserCard'
 import { useApp } from '../context/useApp'
 import {
@@ -160,9 +161,7 @@ export function GymDetailPage() {
   if (gymLoading && !gym) {
     return (
       <main className="page gym-detail">
-        <button type="button" className="back-link" onClick={goBack}>
-          <ArrowLeft size={18} /> Назад
-        </button>
+        <SubpageBack onClick={goBack} />
         <SoftLoader label="Загружаем зал…" />
       </main>
     )
@@ -172,9 +171,7 @@ export function GymDetailPage() {
     return (
       <main className="page">
         <p>Зал не найден</p>
-        <button type="button" className="back-link" onClick={goBack}>
-          <ArrowLeft size={18} /> Назад
-        </button>
+        <SubpageBack onClick={goBack} />
       </main>
     )
   }
@@ -187,12 +184,9 @@ export function GymDetailPage() {
 
   return (
     <main className="page gym-detail">
-      <div className="subpage-top">
-        <button type="button" className="back-link" onClick={goBack}>
-          <ArrowLeft size={18} /> Назад
-        </button>
+      <SubpageBack onClick={goBack} />
 
-        <section className="gym-hero">
+      <section className="gym-hero">
           <SmartImage
             src={gym.image}
             alt=""
@@ -228,7 +222,6 @@ export function GymDetailPage() {
             </p>
           </div>
         </section>
-      </div>
 
       {hours ? (
         <section className="gym-hours surface">

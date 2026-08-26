@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
-import { ArrowLeft, Share, Smartphone } from 'lucide-react'
+import { Share, Smartphone } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { SubpageHeader } from '../components/SubpageHeader'
 import './InstallGuidePage.css'
 
 type SectionId = 'safari' | 'chrome-ios' | 'chrome-android'
@@ -41,21 +42,11 @@ export function InstallGuidePage() {
 
   return (
     <main className="page install-guide-page">
-      <div className="subpage-top">
-        <button type="button" className="back-link" onClick={goBack}>
-          <ArrowLeft size={18} /> Назад
-        </button>
-
-        <header className="page-header">
-          <div className="page-header-text">
-            <h1 className="page-title">Ярлык на экран</h1>
-            <p className="muted install-guide-lead">
-              Добавь Spotter на домашний экран — так удобнее заходить и работают пуши. Шаги зависят от
-              браузера и телефона.
-            </p>
-          </div>
-        </header>
-      </div>
+      <SubpageHeader title="Ярлык на экран" onBack={goBack} />
+      <p className="muted install-guide-lead">
+        Добавь Spotter на домашний экран — так удобнее заходить и работают пуши. Шаги зависят от
+        браузера и телефона.
+      </p>
 
       <nav className="install-guide-nav filter-row" aria-label="Быстрый переход к браузеру">
         {SECTIONS.map((s) => (

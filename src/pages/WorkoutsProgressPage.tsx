@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, Check, ChevronDown } from 'lucide-react'
+import { Check, ChevronDown } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { SectionTitle } from '../components/SectionTitle'
 import { SOFT_LOADER_DELAY_MS, SoftLoader } from '../components/SoftLoader'
+import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
 import {
   apiFetchWorkoutProgress,
@@ -321,17 +322,7 @@ export function WorkoutsProgressPage() {
 
   return (
     <main className="page workouts-page workouts-progress-page">
-      <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => goWorkoutsHub(navigate)}>
-          <ArrowLeft size={18} /> Тренировки
-        </button>
-
-        <header className="page-header">
-          <div className="page-header-text">
-            <h1 className="page-title">Прогресс</h1>
-          </div>
-        </header>
-      </div>
+      <SubpageHeader title="Прогресс" onBack={() => goWorkoutsHub(navigate)} />
 
       <div className="workout-progress-toolbar">
         <div className="seg seg--fit workout-progress-period" role="tablist" aria-label="Период">

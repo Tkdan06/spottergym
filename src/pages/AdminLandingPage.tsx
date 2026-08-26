@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ArrowLeft, RefreshCw } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 import { Navigate, useNavigate } from 'react-router-dom'
+import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
 import {
   apiAdminFetchLanding,
@@ -97,20 +98,10 @@ export function AdminLandingPage() {
 
   return (
     <main className="page admin-page admin-players-page">
-      <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => navigate('/app/admin')}>
-          <ArrowLeft size={18} /> Админка
-        </button>
-
-        <header className="admin-players-head">
-          <div>
-            <h1>Лендинг /lp</h1>
-            <p className="muted">
-              Воронка рекламы: визиты → скролл → CTA → регистрация
-              {loading ? ' · обновляем…' : ''}
-              {data ? ` · ${formatAdminDate(data.generatedAt)}` : ''}
-            </p>
-          </div>
+      <SubpageHeader
+        title="Лендинг /lp"
+        onBack={() => navigate('/app/admin')}
+        action={
           <button
             type="button"
             className="btn-icon-refresh"
@@ -120,8 +111,13 @@ export function AdminLandingPage() {
           >
             <RefreshCw size={22} strokeWidth={2.4} />
           </button>
-        </header>
-      </div>
+        }
+      />
+      <p className="muted">
+        Воронка рекламы: визиты → скролл → CTA → регистрация
+        {loading ? ' · обновляем…' : ''}
+        {data ? ` · ${formatAdminDate(data.generatedAt)}` : ''}
+      </p>
 
       {error ? <p className="admin-inline-error">{error}</p> : null}
 

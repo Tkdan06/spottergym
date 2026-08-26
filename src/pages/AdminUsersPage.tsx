@@ -1,6 +1,6 @@
 import { type FormEvent, useMemo, useState } from 'react'
-import { ArrowLeft } from 'lucide-react'
 import { Navigate, useNavigate } from 'react-router-dom'
+import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
 import { searchFieldProps } from '../lib/inputAttrs'
 import {
@@ -131,18 +131,11 @@ export function AdminUsersPage() {
 
   return (
     <main className="page admin-page admin-roles-page">
-      <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => navigate('/app/admin')}>
-          <ArrowLeft size={18} /> Админка
-        </button>
-        <header>
-          <h1 className="page-title">Админы и права</h1>
-          <p className="muted">
-            Главный админ отмечен в списке. Можно выдать ограниченные права (только тикеты) или полные
-            (блок, удаление, назначение других админов).
-          </p>
-        </header>
-      </div>
+      <SubpageHeader title="Админы и права" onBack={() => navigate('/app/admin')} />
+      <p className="muted">
+        Главный админ отмечен в списке. Можно выдать ограниченные права (только тикеты) или полные
+        (блок, удаление, назначение других админов).
+      </p>
 
       {canManageAdmins ? (
         <section className="admin-preset-help surface">

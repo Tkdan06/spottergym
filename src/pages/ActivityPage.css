@@ -26,6 +26,10 @@
   margin: 0;
 }
 
+.activity-page > .muted {
+  margin: 0;
+}
+
 .activity-more-btn {
   flex-shrink: 0;
   color: var(--text-muted);

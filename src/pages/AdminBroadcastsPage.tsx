@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ArrowLeft, Megaphone, RefreshCw } from 'lucide-react'
+import { Megaphone, RefreshCw } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { SectionTitle } from '../components/SectionTitle'
+import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
 import {
   apiAdminCreateBroadcast,
@@ -95,16 +96,10 @@ export function AdminBroadcastsPage() {
 
   return (
     <main className="page admin-page">
-      <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => navigate('/app/admin')}>
-          <ArrowLeft size={18} /> Админка
-        </button>
-
-        <header className="admin-players-head">
-          <div>
-            <h1 className="page-title">Рассылка</h1>
-            <p className="muted">Сообщение всем в колокольчик · очередь и прочтения</p>
-          </div>
+      <SubpageHeader
+        title="Рассылка"
+        onBack={() => navigate('/app/admin')}
+        action={
           <button
             type="button"
             className="btn-icon-refresh"
@@ -115,8 +110,9 @@ export function AdminBroadcastsPage() {
           >
             <RefreshCw size={22} strokeWidth={2.4} />
           </button>
-        </header>
-      </div>
+        }
+      />
+      <p className="muted">Сообщение всем в колокольчик · очередь и прочтения</p>
 
       {error ? (
         <p className="feedback-error" role="alert">

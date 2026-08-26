@@ -19,6 +19,10 @@
   margin: 0;
 }
 
+.workouts-page > .muted {
+  margin: 0;
+}
+
 .workouts-actions {
   display: grid;
   gap: 8px;

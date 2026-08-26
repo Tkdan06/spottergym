@@ -2,6 +2,10 @@
   margin: 0;
 }
 
+.settings-page > .muted {
+  margin-top: 8px;
+}
+
 .settings-gyms {
   gap: 12px;
 }

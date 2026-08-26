@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, Link2, RefreshCw, UserPlus, Users } from 'lucide-react'
+import { Link2, RefreshCw, UserPlus, Users } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
 import {
   apiAdminFetchReferrals,
@@ -112,20 +113,10 @@ export function AdminReferralsPage() {
 
   return (
     <main className="page admin-page admin-players-page admin-referrals-page">
-      <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => navigate('/app/admin')}>
-          <ArrowLeft size={18} /> Админка
-        </button>
-
-        <header className="admin-players-head">
-          <div>
-            <h1>Рефералы</h1>
-            <p className="muted">
-              Кто кого пригласил · засчёт после онбординга
-              {loading ? ' · обновляем…' : ''}
-              {data ? ` · ${formatAdminDate(data.generatedAt)}` : ''}
-            </p>
-          </div>
+      <SubpageHeader
+        title="Рефералы"
+        onBack={() => navigate('/app/admin')}
+        action={
           <button
             type="button"
             className="btn-icon-refresh"
@@ -135,8 +126,13 @@ export function AdminReferralsPage() {
           >
             <RefreshCw size={22} strokeWidth={2.4} />
           </button>
-        </header>
-      </div>
+        }
+      />
+      <p className="muted">
+        Кто кого пригласил · засчёт после онбординга
+        {loading ? ' · обновляем…' : ''}
+        {data ? ` · ${formatAdminDate(data.generatedAt)}` : ''}
+      </p>
 
       {error ? <p className="admin-inline-error">{error}</p> : null}
 

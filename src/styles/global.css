@@ -282,14 +282,48 @@ html.standalone .page {
 }
 
 /**
- * Secondary screen chrome: back + title block.
- * Gap is always 14px (same as .back-link margin-bottom). Prefer this wrapper
- * on grid pages so page `gap` does not double the back→title distance.
+ * Secondary screen chrome: [back icon] [current title] [optional action].
+ * One row, left-aligned. Do not put the previous screen name on the control.
  */
 .subpage-top {
-  display: grid;
-  gap: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
+  min-height: 44px;
+}
+
+.subpage-back {
+  flex-shrink: 0;
+  box-sizing: border-box;
+  width: 44px;
+  height: 44px;
+  margin: 0 0 0 -12px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+  background: none;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.subpage-back:active {
+  opacity: 0.7;
+}
+
+.subpage-top .page-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subpage-top .page-header-actions {
+  margin-left: auto;
 }
 
 .subpage-top .back-link {

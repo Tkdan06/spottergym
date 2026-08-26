@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  ArrowLeft,
   ChevronDown,
   ChevronRight,
   ClipboardList,
@@ -12,6 +11,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { exitWorkoutsSection } from '../lib/workoutsNav'
 import { SectionTitle } from '../components/SectionTitle'
 import { SOFT_LOADER_DELAY_MS, SoftLoader } from '../components/SoftLoader'
+import { SubpageHeader } from '../components/SubpageHeader'
 import { WorkoutReadonlySets } from '../components/WorkoutReadonlySets'
 import { useApp } from '../context/useApp'
 import {
@@ -131,18 +131,8 @@ export function WorkoutsPage() {
 
   return (
     <main className="page workouts-page">
-      <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => exitWorkoutsSection(navigate)}>
-          <ArrowLeft size={18} /> Мой зал
-        </button>
-
-        <header className="page-header">
-          <div className="page-header-text workouts-head">
-            <h1 className="page-title">Мои тренировки</h1>
-            <p className="muted">Дневник прогресса</p>
-          </div>
-        </header>
-      </div>
+      <SubpageHeader title="Тренировки" onBack={() => exitWorkoutsSection(navigate)} />
+      <p className="muted">Дневник прогресса</p>
 
       {error ? (
         <p className="feedback-error" role="alert">

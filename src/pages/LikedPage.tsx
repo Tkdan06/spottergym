@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { ArrowLeft, Heart, MessageCircle } from 'lucide-react'
+import { Heart, MessageCircle } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
+import { SubpageHeader } from '../components/SubpageHeader'
 import { PresenceBadge } from '../components/PresenceBadge'
 import { SmartImage } from '../components/SmartImage'
 import { useApp } from '../context/useApp'
@@ -159,42 +160,32 @@ export function LikedPage({ mode = 'received' }: { mode?: LikesMode }) {
 
   return (
     <main className="page liked-page">
-      <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => navigate('/app/profile')}>
-          <ArrowLeft size={18} /> Профиль
-        </button>
-
-        <header className="page-header liked-header">
-          <div className="page-header-text">
-            <h1 className="page-title">Лайки</h1>
-            <div className="seg seg--fill liked-tabs" role="tablist" aria-label="Лайки">
-              <Link
-                to="/app/likes"
-                role="tab"
-                aria-selected={mode === 'received'}
-                className={`seg-item${mode === 'received' ? ' is-active' : ''}`}
-              >
-                Кто лайкнул
-              </Link>
-              <Link
-                to="/app/likes/sent"
-                role="tab"
-                aria-selected={mode === 'sent'}
-                className={`seg-item${mode === 'sent' ? ' is-active' : ''}`}
-              >
-                Кого я лайкнул
-              </Link>
-            </div>
-            <p className="liked-count">
-              {people.length
-                ? `${people.length} ${
-                    people.length === 1 ? 'человек' : people.length < 5 ? 'человека' : 'человек'
-                  }`
-                : 'Пока пусто'}
-            </p>
-          </div>
-        </header>
+      <SubpageHeader title="Лайки" onBack={() => navigate('/app/profile')} />
+      <div className="seg seg--fill liked-tabs" role="tablist" aria-label="Лайки">
+        <Link
+          to="/app/likes"
+          role="tab"
+          aria-selected={mode === 'received'}
+          className={`seg-item${mode === 'received' ? ' is-active' : ''}`}
+        >
+          Кто лайкнул
+        </Link>
+        <Link
+          to="/app/likes/sent"
+          role="tab"
+          aria-selected={mode === 'sent'}
+          className={`seg-item${mode === 'sent' ? ' is-active' : ''}`}
+        >
+          Кого я лайкнул
+        </Link>
       </div>
+      <p className="liked-count">
+        {people.length
+          ? `${people.length} ${
+              people.length === 1 ? 'человек' : people.length < 5 ? 'человека' : 'человек'
+            }`
+          : 'Пока пусто'}
+      </p>
 
       {people.length ? (
         <div className="liked-list">

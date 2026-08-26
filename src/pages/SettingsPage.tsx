@@ -1,8 +1,9 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, Plus, X } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { ChangePasswordForm } from '../components/ChangePasswordForm'
 import { SectionTitle } from '../components/SectionTitle'
+import { SubpageHeader } from '../components/SubpageHeader'
 import { useApp } from '../context/useApp'
 import {
   COACH_DIRECTIONS,
@@ -200,15 +201,8 @@ export function SettingsPage() {
 
   return (
     <main className="page settings-page">
-      <div className="subpage-top">
-        <button type="button" className="back-link" onClick={() => navigate('/app/profile')}>
-          <ArrowLeft size={18} /> Профиль
-        </button>
-        <header>
-          <h1 className="page-title">Настройки</h1>
-          <p className="muted">Редактируй профиль и список своих залов.</p>
-        </header>
-      </div>
+      <SubpageHeader title="Настройки" onBack={() => navigate('/app/profile')} />
+      <p className="muted">Редактируй профиль и список своих залов.</p>
 
       {isDemoAccount(user.email) ? (
         <p className="demo-local-banner" role="status">
