@@ -28,6 +28,67 @@ function recLooksLikeLogCta(title: string, text: string) {
   return /записать тренировк|запиши тренировк|добавить тренировк/i.test(`${title} ${text}`)
 }
 
+function distinctDetail(primary: string, extra?: string | null) {
+  const a = primary.trim()
+  const b = (extra || '').trim()
+  if (!b || b === a) return null
+  return b
+}
+
+function RecapItem({
+  title,
+  text,
+  detail,
+  value,
+  valueTone = 'up',
+  href,
+  onTitleClick,
+}: {
+  title: string
+  text: string
+  detail?: string | null
+  value?: string | null
+  valueTone?: 'up' | 'flat'
+  href?: string
+  onTitleClick?: () => void
+}) {
+  const heading = title.trim()
+  const body = text.trim()
+  const rawAside = value?.trim() || ''
+  const aside = rawAside && !heading.includes(rawAside) ? rawAside : null
+  const note = detail?.trim() || null
+  if (!heading && !body && !note) return null
+
+  const titleNode = heading ? (
+    href ? (
+      <Link to={href} className="workout-recap-item-title" onClick={onTitleClick}>
+        {heading}
+      </Link>
+    ) : (
+      <strong className="workout-recap-item-title">{heading}</strong>
+    )
+  ) : null
+
+  return (
+    <li className="workout-recap-item">
+      {titleNode || aside ? (
+        <div className="workout-recap-item-head">
+          {titleNode}
+          {aside ? (
+            <span
+              className={`workout-recap-item-value${valueTone === 'up' ? ' is-up' : ' is-flat'}`}
+            >
+              {aside}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+      {body ? <p className="muted">{body}</p> : null}
+      {note ? <p className="dim workout-recap-item-detail">{note}</p> : null}
+    </li>
+  )
+}
+
 function FactsFallback({ facts }: { facts: WorkoutMonthlyFacts }) {
   const vol = formatSignedPercent(facts.volume.deltaPercent)
   const vs = formatVsPreviousPeriod(facts.workoutCount.delta, facts.workoutCount.previous)
@@ -139,7 +200,7 @@ export function WorkoutMonthRecap() {
   )
 
   return (
-    <div id="month-recap" className="workout-week-recap">
+    <div id="month-recap" className="workout-week-recap workout-month-recap">
       {error ? (
         <p className="feedback-error" role="alert">
           {error}
@@ -157,71 +218,77 @@ export function WorkoutMonthRecap() {
         <section className="surface workout-coach-block">
           {recapTitle}
           {open ? (
-            <>
-              <p className="dim">
-                {monthly.periodLabel}
-                <span> · цифры за 30 дней</span>
-              </p>
-              <p className="workout-coach-headline">{letter.headline.title}</p>
-              {letter.headline.text ? <p className="muted">{letter.headline.text}</p> : null}
+            <div className="workout-recap-body">
+              <div className="workout-recap-lead">
+                <p className="workout-recap-caption dim">
+                  {monthly.periodLabel}
+                  <span> · цифры за 30 дней</span>
+                </p>
+                {letter.headline.title && letter.headline.title !== 'Твой месяц' ? (
+                  <p className="workout-recap-lead-title">{letter.headline.title}</p>
+                ) : null}
+                {letter.headline.text ? <p className="muted">{letter.headline.text}</p> : null}
+              </div>
 
               {letter.wins.length ? (
-                <div className="workout-coach-next">
-                  <p className="workout-coach-next-label">Главный прогресс</p>
-                  <ul className="workout-coach-wins">
+                <section className="workout-recap-section" aria-label="Главный прогресс">
+                  <p className="workout-recap-kicker">Главный прогресс</p>
+                  <ul className="workout-recap-list">
                     {letter.wins.map((item, i) => (
-                      <li key={`${item.title}-${i}`}>
-                        {item.title ? <strong>{item.title}</strong> : null}
-                        {item.text ? <p className="muted">{item.text}</p> : null}
-                        {item.why ? <p className="muted">{item.why}</p> : null}
-                      </li>
+                      <RecapItem
+                        key={`${item.title}-${i}`}
+                        title={item.title}
+                        text={item.text}
+                        detail={distinctDetail(item.text, item.why)}
+                        value={item.value}
+                        valueTone="up"
+                      />
                     ))}
                   </ul>
-                </div>
+                </section>
               ) : null}
 
               {letter.attention.length ? (
-                <div className="workout-coach-next">
-                  <p className="workout-coach-next-label">Стоит обратить внимание</p>
-                  <ul className="workout-coach-wins">
+                <section className="workout-recap-section" aria-label="Стоит обратить внимание">
+                  <p className="workout-recap-kicker">Стоит обратить внимание</p>
+                  <ul className="workout-recap-list">
                     {letter.attention.map((item, i) => (
-                      <li key={`${item.title}-${i}`}>
-                        {item.title ? <strong>{item.title}</strong> : null}
-                        {item.text ? <p className="muted">{item.text}</p> : null}
-                        {item.why ? <p className="muted">{item.why}</p> : null}
-                      </li>
+                      <RecapItem
+                        key={`${item.title}-${i}`}
+                        title={item.title}
+                        text={item.text}
+                        detail={distinctDetail(item.text, item.why)}
+                        value={item.value}
+                        valueTone="flat"
+                      />
                     ))}
                   </ul>
-                </div>
+                </section>
               ) : null}
 
               {letter.recommendations.length ? (
-                <div className="workout-coach-next">
-                  <p className="workout-coach-next-label">На следующий месяц</p>
-                  <ul className="workout-coach-wins">
+                <section className="workout-recap-section" aria-label="На следующий месяц">
+                  <p className="workout-recap-kicker">На следующий месяц</p>
+                  <ul className="workout-recap-list">
                     {letter.recommendations.map((rec, i) => {
                       const logCta = recLooksLikeLogCta(rec.title, rec.text)
                       return (
-                        <li key={`${rec.title}-${i}`}>
-                          {rec.title ? (
-                            logCta ? (
-                              <Link to="/app/workouts/new" onClick={markRecClick}>
-                                <strong>{rec.title}</strong>
-                              </Link>
-                            ) : (
-                              <strong>{rec.title}</strong>
-                            )
-                          ) : null}
-                          {rec.text ? <p className="muted">{rec.text}</p> : null}
-                        </li>
+                        <RecapItem
+                          key={`${rec.title}-${i}`}
+                          title={rec.title}
+                          text={rec.text}
+                          detail={distinctDetail(rec.text, rec.reason)}
+                          href={logCta ? '/app/workouts/new' : undefined}
+                          onTitleClick={logCta ? markRecClick : undefined}
+                        />
                       )
                     })}
                   </ul>
-                </div>
+                </section>
               ) : null}
 
-              {letter.wrap ? <p className="muted">{letter.wrap}</p> : null}
-            </>
+              {letter.wrap ? <p className="workout-recap-wrap dim">{letter.wrap}</p> : null}
+            </div>
           ) : null}
         </section>
       ) : null}
