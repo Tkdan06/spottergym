@@ -58,11 +58,14 @@ html.standalone .bottom-nav {
   height: 16px;
   padding: 0 4px;
   border-radius: 999px;
-  background: var(--bg-soft);
-  color: var(--text);
-  box-shadow: 0 0 0 1px var(--line-strong);
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 0 0 2px var(--bg);
   font-size: 0.65rem;
   font-style: normal;
+  font-weight: var(--text-ui-strong);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
   display: grid;
   place-items: center;
 }

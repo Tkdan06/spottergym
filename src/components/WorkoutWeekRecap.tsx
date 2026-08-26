@@ -104,23 +104,30 @@ export function WorkoutWeekRecap() {
   const facts = insight?.facts
   const showFallback =
     Boolean(insight && !letter && (insight.status === 'offline' || insight.status === 'failed'))
+  const recapTitle = (
+    <SectionTitle action={insight ? <span className="muted">{insight.periodLabel}</span> : null}>
+      Разбор недели
+    </SectionTitle>
+  )
 
   return (
     <div id="week-recap" className="workout-week-recap">
-      <SectionTitle action={insight ? <span className="muted">{insight.periodLabel}</span> : null}>
-        Разбор недели
-      </SectionTitle>
-
       {error ? (
         <p className="feedback-error" role="alert">
           {error}
         </p>
       ) : null}
 
-      {loading ? <SoftLoader label="Загружаем разбор…" /> : null}
+      {loading ? (
+        <>
+          {recapTitle}
+          <SoftLoader label="Загружаем разбор…" />
+        </>
+      ) : null}
 
       {!loading && insight && letter ? (
         <section className="surface workout-coach-block">
+          {recapTitle}
           <p className="workout-coach-headline">{letter.summary.title}</p>
           {letter.summary.text ? <p className="muted">{letter.summary.text}</p> : null}
 
@@ -168,6 +175,7 @@ export function WorkoutWeekRecap() {
 
       {!loading && insight && !letter && insight.canGenerate ? (
         <section className="surface workouts-empty">
+          {recapTitle}
           <ListChecks size={28} aria-hidden />
           <p className="empty-copy-title">
             {insight.status === 'failed' ? 'Твой прогресс' : 'Собрать разбор'}
@@ -191,6 +199,7 @@ export function WorkoutWeekRecap() {
 
       {!loading && insight && !letter && !insight.canGenerate ? (
         <section className="surface workouts-empty">
+          {recapTitle}
           <ListChecks size={28} aria-hidden />
           <p className="empty-copy-title">
             {insight.status === 'locked'
@@ -216,6 +225,7 @@ export function WorkoutWeekRecap() {
 
       {!loading && !insight && !error ? (
         <section className="surface workouts-empty">
+          {recapTitle}
           <p className="empty-copy-title">Разбор появится позже</p>
           <p className="muted">Не удалось получить статус. Обнови страницу.</p>
         </section>

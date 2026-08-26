@@ -111,32 +111,39 @@ export function WorkoutMonthRecap() {
   const facts = monthly?.facts
   const showFallback =
     Boolean(monthly && !letter && (monthly.status === 'offline' || monthly.status === 'failed'))
+  const recapTitle = (
+    <SectionTitle
+      action={
+        monthly ? (
+          <span className="muted">
+            {monthly.periodLabel}
+            <span className="dim"> · цифры за 30 дней</span>
+          </span>
+        ) : null
+      }
+    >
+      Твой месяц
+    </SectionTitle>
+  )
 
   return (
     <div id="month-recap" className="workout-week-recap">
-      <SectionTitle
-        action={
-          monthly ? (
-            <span className="muted">
-              {monthly.periodLabel}
-              <span className="dim"> · цифры за 30 дней</span>
-            </span>
-          ) : null
-        }
-      >
-        Твой месяц
-      </SectionTitle>
-
       {error ? (
         <p className="feedback-error" role="alert">
           {error}
         </p>
       ) : null}
 
-      {loading ? <SoftLoader label="Загружаем разбор месяца…" /> : null}
+      {loading ? (
+        <>
+          {recapTitle}
+          <SoftLoader label="Загружаем разбор месяца…" />
+        </>
+      ) : null}
 
       {!loading && monthly && letter ? (
         <section className="surface workout-coach-block">
+          {recapTitle}
           <p className="workout-coach-headline">{letter.headline.title}</p>
           {letter.headline.text ? <p className="muted">{letter.headline.text}</p> : null}
 
@@ -205,6 +212,7 @@ export function WorkoutMonthRecap() {
 
       {!loading && monthly && !letter && monthly.canGenerate ? (
         <section className="surface workouts-empty">
+          {recapTitle}
           <ListChecks size={28} aria-hidden />
           <p className="empty-copy-title">
             {monthly.status === 'failed' ? 'Твой месяц' : 'Собрать разбор месяца'}
@@ -232,6 +240,7 @@ export function WorkoutMonthRecap() {
 
       {!loading && monthly && !letter && !monthly.canGenerate ? (
         <section className="surface workouts-empty">
+          {recapTitle}
           <ListChecks size={28} aria-hidden />
           <p className="empty-copy-title">
             {monthly.status === 'locked'
@@ -257,6 +266,7 @@ export function WorkoutMonthRecap() {
 
       {!loading && !monthly && !error ? (
         <section className="surface workouts-empty">
+          {recapTitle}
           <p className="empty-copy-title">Разбор появится позже</p>
           <p className="muted">Не удалось получить статус. Обнови страницу.</p>
         </section>

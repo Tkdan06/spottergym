@@ -342,15 +342,14 @@
   height: 22px;
   padding: 0 6px;
   border-radius: 999px;
-  background: var(--bg-soft);
-  color: var(--text);
+  background: var(--accent);
+  color: var(--accent-ink);
   font-style: normal;
   font-size: 0.72rem;
   font-weight: 600;
   line-height: 1;
   display: inline-grid;
   place-items: center;
-  box-shadow: 0 0 0 1px var(--line-strong);
 }
 
 .messages-page .card-list {

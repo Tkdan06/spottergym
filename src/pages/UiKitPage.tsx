@@ -160,8 +160,10 @@ export function UiKitPage() {
           <code>--accent</code> · <code>#c8f542</code>) — primary CTA, selected chips, active tab,
           «Я в зале». Progress (<code>--progress</code>) — графики и бары, тот же lime, не синий.
           Presence (<code>--online</code> · <code>#67efc1</code>) — точка и «В зале»: текст
-          primary, не mint fill+text+border сразу. Unread — нейтральный, не lime. Warning/danger
-          только для expire и опасных действий. Старые значения —{' '}
+          primary, не mint fill+text+border сразу. Unread (колокольчик, Чаты, непрочитанная
+          плашка в ленте) — lime <code>--accent</code> / <code>--accent-soft</code>, иначе на
+          тёмном хроме не видно. Warning/danger только для expire и опасных действий. Старые
+          значения —{' '}
           <code>docs/color-palette-history.md</code>.
         </p>
         <div className="ui-kit-swatches">
@@ -426,8 +428,9 @@ export function UiKitPage() {
             <button type="button" className="btn btn-primary">
               Inline
             </button>
-            <button type="button" className="icon-btn" aria-label="Пример">
+            <button type="button" className="icon-btn" aria-label="Пример с непрочитанными">
               <Bell size={20} />
+              <i className="nav-badge">3</i>
             </button>
             <button type="button" className="btn btn-danger-ghost btn-sm">
               Danger ghost

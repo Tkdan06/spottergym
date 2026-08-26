@@ -129,7 +129,7 @@ Tokens live in `src/styles/color-themes.css` (`:root` only). Do not invent a par
 | Brand | `--accent` / `--accent-ink` / `--accent-soft` | Primary CTA, selected chips, active tab, SPOTTER TER, coach, PR, «Я в зале» |
 | Presence | `--online` / `--online-soft` | Dots and «В зале». Text is `--text`; do not stack mint text + fill + border |
 | Progress | `--progress` | Workout line charts and activity bars. Aliases `--accent` (lime), never blue |
-| Unread | `--text` on `--bg-soft` / `--line-strong` | Nav and chat badges, notification unread. Not lime |
+| Unread | `--accent` / `--accent-ink` / `--accent-soft` | Bell and chat count badges; unread notification cards (lime border + soft gradient). Neutral `--text` on `--bg-soft` disappears on dark chrome |
 | Danger / warning | `--danger` / `--warning` (+ `-soft`) | Expire, validation, destructive only |
 
 One palette for everyone. Do not add an admin preview toggle or `data-spotter-theme`.

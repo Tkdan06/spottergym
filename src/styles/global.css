@@ -560,6 +560,11 @@ a.btn-danger-ghost {
   flex-shrink: 0;
 }
 
+.icon-btn .nav-badge {
+  top: 4px;
+  right: 4px;
+}
+
 .field {
   display: flex;
   flex-direction: column;

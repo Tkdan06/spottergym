@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
-import { Check, ChevronDown } from 'lucide-react'
+import { Check, ChevronDown, Info } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { SectionTitle } from '../components/SectionTitle'
 import { SOFT_LOADER_DELAY_MS, SoftLoader } from '../components/SoftLoader'
@@ -92,8 +92,48 @@ function toneFromDelta(n: number | null | undefined): DeltaTone | null {
   return 'flat'
 }
 
-function visitsLabel(n: number) {
-  return `${n} ${ruPlural(n, 'посещение', 'посещения', 'посещений')}`
+function HintTip({ label, children }: { label: string; children: string }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onDoc = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDoc)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  return (
+    <div className="ui-hint" ref={ref}>
+      <button
+        type="button"
+        className="ui-hint-trigger"
+        aria-label={label}
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <Info size={14} strokeWidth={2.25} />
+      </button>
+      {open ? (
+        <div className="ui-hint-pop" role="tooltip">
+          {children}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+function prKindLabel(kind: 'weight' | 'setVolume') {
+  return kind === 'weight' ? 'вес' : 'повторы'
 }
 
 function LiftRow({
@@ -108,19 +148,19 @@ function LiftRow({
   const tone = toneFromDelta(lift.weightDeltaPercent ?? lift.weightDeltaKg)
   return (
     <li className="workout-insights-lift">
-      <div className="workout-insights-lift-copy">
-        <strong>{lift.name}</strong>
+      <strong>{lift.name}</strong>
+      <div className="workout-insights-lift-meta">
         {pair ? <span className="muted">{pair}</span> : null}
+        {percent ? (
+          <span
+            className={`workout-insights-lift-delta${
+              tone === 'up' ? ' is-up' : tone === 'down' ? ' is-down' : ' is-flat'
+            }`}
+          >
+            {percent}
+          </span>
+        ) : null}
       </div>
-      {percent ? (
-        <span
-          className={`workout-insights-lift-delta${
-            tone === 'up' ? ' is-up' : tone === 'down' ? ' is-down' : ' is-flat'
-          }`}
-        >
-          {percent}
-        </span>
-      ) : null}
     </li>
   )
 }
@@ -130,80 +170,92 @@ function InsightsBlocks({ insights }: { insights: WorkoutInsights }) {
     insights.workoutCount.delta,
     insights.workoutCount.previous,
   )
+  const countTone = toneFromDelta(insights.workoutCount.delta)
   const volumePercent = formatSignedPercent(insights.volume.deltaPercent)
   const volumeVs = formatVsPreviousPeriod(insights.volume.delta, insights.volume.previous)
-  const volumeHero = volumePercent || formatVolume(insights.volume.current)
   const volumeTone = toneFromDelta(insights.volume.deltaPercent ?? insights.volume.delta)
   const showProgress =
     insights.improving.length > 0 || insights.plateauCandidates.length > 0
   const activity = insights.activity
+  const volumeCaption = volumePercent || volumeVs
+  const volumeCaptionTone = volumePercent ? volumeTone : 'flat'
 
   return (
     <>
-      <section className="surface workout-progress-metric" aria-label="Тренировки">
-        <SectionTitle>Тренировки</SectionTitle>
-        <div className="workout-progress-hero">
-          <strong className="workout-progress-hero-value">{insights.workoutCount.current}</strong>
-          <HeroDelta text={countDelta} tone={toneFromDelta(insights.workoutCount.delta)} />
-        </div>
-        {insights.frequency.currentPerWeek > 0 ? (
-          <p className="workout-progress-caption muted">
-            {insights.frequency.currentPerWeek} в неделю
-            {insights.consistency.trainingDays
-              ? ` · ${insights.consistency.trainingDays} ${ruPlural(
-                  insights.consistency.trainingDays,
-                  'день',
-                  'дня',
-                  'дней',
-                )}`
-              : ''}
-          </p>
-        ) : null}
-      </section>
+      <div className="workout-progress-pair">
+        <section className="surface workout-progress-metric workout-progress-tile" aria-label="Тренировки">
+          <SectionTitle>Тренировки</SectionTitle>
+          <div className="workout-progress-hero">
+            <strong className="workout-progress-hero-value">{insights.workoutCount.current}</strong>
+          </div>
+          {insights.frequency.currentPerWeek > 0 ? (
+            <p className="workout-progress-caption muted">
+              {insights.frequency.currentPerWeek} в неделю
+            </p>
+          ) : countDelta ? (
+            <p
+              className={`workout-progress-caption${
+                countTone === 'up' ? ' is-up' : countTone === 'down' ? ' is-down' : ' is-flat'
+              }`}
+            >
+              {countDelta}
+            </p>
+          ) : null}
+        </section>
 
-      <section className="surface workout-progress-metric" aria-label="Объём">
-        <SectionTitle>Объём</SectionTitle>
-        <div className="workout-progress-hero">
-          <strong className="workout-progress-hero-value">
-            {insights.volume.current > 0 ? volumeHero : '—'}
-          </strong>
-          <HeroDelta
-            text={volumePercent ? null : volumeVs}
-            tone={volumeTone}
-          />
-        </div>
-        {volumePercent && insights.volume.current > 0 ? (
-          <p className="workout-progress-caption muted">
-            {formatVolume(insights.volume.current)} кг·повт.
-          </p>
-        ) : null}
-      </section>
+        <section className="surface workout-progress-metric workout-progress-tile" aria-label="Объём">
+          <SectionTitle>
+            <span className="workout-metric-heading">
+              Объём
+              <HintTip label="Что считается объёмом">
+                Сумма вес × повторы всех рабочих подходов за выбранный период.
+              </HintTip>
+            </span>
+          </SectionTitle>
+          <div className="workout-progress-hero">
+            <strong className="workout-progress-hero-value">
+              {insights.volume.current > 0 ? `${formatVolume(insights.volume.current)} кг` : '—'}
+            </strong>
+          </div>
+          {volumeCaption ? (
+            <p
+              className={`workout-progress-caption${
+                volumeCaptionTone === 'up'
+                  ? ' is-up'
+                  : volumeCaptionTone === 'down'
+                    ? ' is-down'
+                    : ' is-flat'
+              }`}
+            >
+              {volumeCaption}
+            </p>
+          ) : null}
+        </section>
+      </div>
 
       <section className="surface workout-progress-metric" aria-label="Рекорды">
-        <SectionTitle>PR</SectionTitle>
+        <SectionTitle>Рекорды</SectionTitle>
         <div className="workout-progress-hero">
           <strong className="workout-progress-hero-value">{insights.prs.count}</strong>
-          <HeroDelta
-            text={
-              insights.prs.count > 0
-                ? ruPlural(
-                    insights.prs.count,
-                    'новый рекорд',
-                    'новых рекорда',
-                    'новых рекордов',
-                  )
-                : 'Нет новых рекордов'
-            }
-            tone={insights.prs.count > 0 ? 'up' : 'flat'}
-          />
         </div>
+        <p className={`workout-progress-caption${insights.prs.count > 0 ? ' is-up' : ' is-flat'}`}>
+          {insights.prs.count > 0
+            ? ruPlural(
+                insights.prs.count,
+                'новый рекорд',
+                'новых рекорда',
+                'новых рекордов',
+              )
+            : 'Нет новых рекордов'}
+        </p>
         {insights.prs.items.length ? (
           <ul className="workout-insights-list">
             {insights.prs.items.map((pr) => (
               <li key={`${pr.name}-${pr.at}-${pr.kind}`} className="workout-insights-lift">
-                <div className="workout-insights-lift-copy">
-                  <strong>{pr.name}</strong>
+                <strong>{pr.name}</strong>
+                <div className="workout-insights-lift-meta">
                   <span className="muted">{formatSetPair(pr.weightKg, pr.reps)}</span>
+                  <span className="workout-insights-lift-kind">{prKindLabel(pr.kind)}</span>
                 </div>
               </li>
             ))}
@@ -248,15 +300,17 @@ function InsightsBlocks({ insights }: { insights: WorkoutInsights }) {
       ) : null}
 
       {activity ? (
-        <section
-          className="surface workout-progress-metric workout-insights-activity"
-          aria-label="Активность в зале"
-        >
-          <SectionTitle>Активность</SectionTitle>
-          <p className="workout-insights-kicker muted">Отметки «Я в зале», не тренировки</p>
+        <section className="surface workout-progress-metric" aria-label="Активность в зале">
+          <SectionTitle>
+            <span className="workout-metric-heading">
+              Активность
+              <HintTip label="Что такое активность">
+                Отметки «Я в зале», не тренировки.
+              </HintTip>
+            </span>
+          </SectionTitle>
           <div className="workout-progress-hero">
             <strong className="workout-progress-hero-value">{activity.visits}</strong>
-            <p className="workout-progress-hero-delta is-flat">{visitsLabel(activity.visits)}</p>
           </div>
           <p className="workout-progress-caption muted">
             {formatMinutesRu(activity.totalMinutes)} в зале

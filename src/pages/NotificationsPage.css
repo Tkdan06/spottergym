@@ -141,9 +141,9 @@
 }
 
 .notification-card.is-unread {
-  border-color: var(--line-strong);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
   background:
-    linear-gradient(135deg, var(--bg-soft), transparent 55%),
+    linear-gradient(135deg, var(--accent-soft), transparent 55%),
     var(--bg-card);
 }
 
@@ -192,9 +192,9 @@
 }
 
 .notification-card.is-welcome-install {
-  border-color: rgba(200, 245, 66, 0.4);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
   background:
-    linear-gradient(145deg, rgba(200, 245, 66, 0.12), transparent 60%),
+    linear-gradient(145deg, var(--accent-soft), transparent 60%),
     var(--bg-card);
 }
 
@@ -210,8 +210,8 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--text);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 12%, transparent);
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft-strong);
   flex-shrink: 0;
 }
 
