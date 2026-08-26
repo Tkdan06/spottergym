@@ -145,10 +145,6 @@ export function GymDetailPage() {
       navigate('/app/discover?from=settings')
       return
     }
-    if (fromHome) {
-      navigate('/app/discover?from=home')
-      return
-    }
     if (window.history.length > 1) navigate(-1)
     else navigate('/app')
   }

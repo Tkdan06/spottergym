@@ -144,7 +144,7 @@ export function HomePage() {
                 </p>
               </div>
               <Link
-                to={`/app/gym/${gym!.id}?from=home`}
+                to={`/app/gym/${gym!.id}`}
                 className="home-gym-title-link"
                 aria-label={`${gymLabel}, о зале`}
               >

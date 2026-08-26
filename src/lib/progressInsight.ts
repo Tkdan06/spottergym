@@ -1,8 +1,4 @@
-import type {
-  WorkoutExerciseInsight,
-  WorkoutInsights,
-  WorkoutProgressRange,
-} from './apiClient'
+import type { WorkoutExerciseInsight, WorkoutInsights } from './apiClient'
 import { formatSignedPercent, ruPlural } from './workouts'
 
 export type ProgressInsightKind =
@@ -27,10 +23,6 @@ function signedAmount(n: number) {
   const sign = n > 0 ? '+' : ''
   const value = Number.isInteger(n) ? String(n) : n.toFixed(1)
   return `${sign}${value}`
-}
-
-export function periodDaysLabel(range: WorkoutProgressRange) {
-  return `${range} ${ruPlural(range, 'день', 'дня', 'дней')}`
 }
 
 /** Same visible-delta rule as the Progress list: never a blank % cell. */

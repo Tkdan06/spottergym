@@ -43,7 +43,7 @@ export const NOTIF_PREF_LABELS: {
   {
     key: 'likes',
     title: 'Лайки',
-    hint: 'Тебя отметили на карточке',
+    hint: 'Кто-то отметил твой профиль',
   },
   {
     key: 'chatRequests',
@@ -94,7 +94,7 @@ export const SEED_NOTIFICATIONS: AppNotification[] = [
     id: 'n-2',
     type: 'like',
     title: 'Новый лайк',
-    body: 'Иван отметил твою карточку.',
+    body: 'Иван отметил твой профиль.',
     createdAt: new Date(Date.now() - 1000 * 60 * 55).toISOString(),
     read: false,
     href: '/app/profile',

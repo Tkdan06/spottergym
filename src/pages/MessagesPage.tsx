@@ -361,7 +361,6 @@ export function MessagesPage() {
   const [actionBusy, setActionBusy] = useState(false)
   const [hasMoreChats, setHasMoreChats] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
-  const searchInputRef = useRef<HTMLInputElement>(null)
   const pinActionRef = useRef<HTMLButtonElement>(null)
   const pinPanelRef = useRef<HTMLDivElement>(null)
   const deletePanelRef = useRef<HTMLDivElement>(null)
@@ -551,7 +550,6 @@ export function MessagesPage() {
           <Search size={16} aria-hidden />
           <input
             {...searchFieldProps}
-            ref={searchInputRef}
             value={query}
             onChange={(e) => {
               setQuery(e.target.value)
@@ -611,13 +609,6 @@ export function MessagesPage() {
             <Link to="/app" className="btn btn-primary btn-block">
               В свой зал
             </Link>
-            <button
-              type="button"
-              className="section-action"
-              onClick={() => searchInputRef.current?.focus()}
-            >
-              Найти по @нику
-            </button>
           </div>
         )}
       </div>

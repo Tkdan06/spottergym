@@ -12,6 +12,12 @@ export const likesRoutes = new Hono<AuthedEnv>()
 
 likesRoutes.use('*', requireAuth)
 
+function likeNotificationBody(name: string | null | undefined, gender: 'male' | 'female' | null | undefined) {
+  const who = name?.trim() || 'Кто-то'
+  const verb = gender === 'female' ? 'отметила' : 'отметил'
+  return `${who} ${verb} твой профиль`
+}
+
 /**
  * Privacy-scoped likes for the viewer:
  * - full liker ids only for likes *received* by the viewer
@@ -121,13 +127,13 @@ likesRoutes.post(
       if (liked) {
         const me = await prisma.user.findUnique({
           where: { id: fromUserId },
-          select: { name: true },
+          select: { name: true, gender: true },
         })
         await createNotification({
           userId: toUserId.data,
           type: 'like',
           title: 'Новый лайк',
-          body: `${me?.name || 'Кто-то'} отметил твою карточку`,
+          body: likeNotificationBody(me?.name, me?.gender),
           href: '/app/likes',
           actorId: fromUserId,
         }).catch(() => undefined)

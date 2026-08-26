@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Plus } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { SectionTitle } from './SectionTitle'
 import { SoftLoader } from './SoftLoader'
@@ -50,6 +50,7 @@ function FactsFallback({ facts }: { facts: WorkoutMonthlyFacts }) {
 
 export function WorkoutMonthRecap() {
   const { user, apiOnline } = useApp()
+  const [open, setOpen] = useState(false)
   const [monthly, setMonthly] = useState<WorkoutMonthlyState | null>(null)
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
@@ -96,6 +97,7 @@ export function WorkoutMonthRecap() {
     setError('')
     try {
       setMonthly(await apiGenerateWorkoutMonthly())
+      setOpen(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось собрать разбор месяца')
     } finally {
@@ -114,7 +116,17 @@ export function WorkoutMonthRecap() {
   const recapTitle = (
     <SectionTitle
       action={
-        monthly ? (
+        letter ? (
+          <button
+            type="button"
+            className="section-action workout-recap-toggle"
+            aria-expanded={open}
+            aria-label={open ? 'Свернуть разбор месяца' : 'Посмотреть разбор'}
+            onClick={() => setOpen((v) => !v)}
+          >
+            <ChevronDown size={16} aria-hidden className={open ? 'is-open' : undefined} />
+          </button>
+        ) : monthly ? (
           <span className="muted">
             {monthly.periodLabel}
             <span className="dim"> · цифры за 30 дней</span>
@@ -144,69 +156,73 @@ export function WorkoutMonthRecap() {
       {!loading && monthly && letter ? (
         <section className="surface workout-coach-block">
           {recapTitle}
-          <p className="workout-coach-headline">{letter.headline.title}</p>
-          {letter.headline.text ? <p className="muted">{letter.headline.text}</p> : null}
+          {open ? (
+            <>
+              <p className="dim">
+                {monthly.periodLabel}
+                <span> · цифры за 30 дней</span>
+              </p>
+              <p className="workout-coach-headline">{letter.headline.title}</p>
+              {letter.headline.text ? <p className="muted">{letter.headline.text}</p> : null}
 
-          {letter.wins.length ? (
-            <div className="workout-coach-next">
-              <p className="workout-coach-next-label">Главный прогресс</p>
-              <ul className="workout-coach-wins">
-                {letter.wins.map((item, i) => (
-                  <li key={`${item.title}-${i}`}>
-                    {item.title ? <strong>{item.title}</strong> : null}
-                    {item.text ? <p className="muted">{item.text}</p> : null}
-                    {item.why ? <p className="muted">{item.why}</p> : null}
-                  </li>
-                ))}
-              </ul>
-            </div>
+              {letter.wins.length ? (
+                <div className="workout-coach-next">
+                  <p className="workout-coach-next-label">Главный прогресс</p>
+                  <ul className="workout-coach-wins">
+                    {letter.wins.map((item, i) => (
+                      <li key={`${item.title}-${i}`}>
+                        {item.title ? <strong>{item.title}</strong> : null}
+                        {item.text ? <p className="muted">{item.text}</p> : null}
+                        {item.why ? <p className="muted">{item.why}</p> : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {letter.attention.length ? (
+                <div className="workout-coach-next">
+                  <p className="workout-coach-next-label">Стоит обратить внимание</p>
+                  <ul className="workout-coach-wins">
+                    {letter.attention.map((item, i) => (
+                      <li key={`${item.title}-${i}`}>
+                        {item.title ? <strong>{item.title}</strong> : null}
+                        {item.text ? <p className="muted">{item.text}</p> : null}
+                        {item.why ? <p className="muted">{item.why}</p> : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {letter.recommendations.length ? (
+                <div className="workout-coach-next">
+                  <p className="workout-coach-next-label">На следующий месяц</p>
+                  <ul className="workout-coach-wins">
+                    {letter.recommendations.map((rec, i) => {
+                      const logCta = recLooksLikeLogCta(rec.title, rec.text)
+                      return (
+                        <li key={`${rec.title}-${i}`}>
+                          {rec.title ? (
+                            logCta ? (
+                              <Link to="/app/workouts/new" onClick={markRecClick}>
+                                <strong>{rec.title}</strong>
+                              </Link>
+                            ) : (
+                              <strong>{rec.title}</strong>
+                            )
+                          ) : null}
+                          {rec.text ? <p className="muted">{rec.text}</p> : null}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              ) : null}
+
+              {letter.wrap ? <p className="muted">{letter.wrap}</p> : null}
+            </>
           ) : null}
-
-          {letter.attention.length ? (
-            <div className="workout-coach-next">
-              <p className="workout-coach-next-label">Стоит обратить внимание</p>
-              <ul className="workout-coach-wins">
-                {letter.attention.map((item, i) => (
-                  <li key={`${item.title}-${i}`}>
-                    {item.title ? <strong>{item.title}</strong> : null}
-                    {item.text ? <p className="muted">{item.text}</p> : null}
-                    {item.why ? <p className="muted">{item.why}</p> : null}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-
-          {letter.recommendations.length ? (
-            <div className="workout-coach-next">
-              <p className="workout-coach-next-label">На следующий месяц</p>
-              <ul className="workout-coach-wins">
-                {letter.recommendations.map((rec, i) => {
-                  const logCta = recLooksLikeLogCta(rec.title, rec.text)
-                  return (
-                    <li key={`${rec.title}-${i}`}>
-                      {rec.title ? (
-                        logCta ? (
-                          <Link to="/app/workouts/new" onClick={markRecClick}>
-                            <strong>{rec.title}</strong>
-                          </Link>
-                        ) : (
-                          <strong>{rec.title}</strong>
-                        )
-                      ) : null}
-                      {rec.text ? <p className="muted">{rec.text}</p> : null}
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
-          ) : null}
-
-          {letter.wrap ? <p className="muted">{letter.wrap}</p> : null}
-
-          <Link to="/app/workouts/new" className="btn btn-primary btn-block" onClick={markRecClick}>
-            <Plus size={16} /> Записать тренировку
-          </Link>
         </section>
       ) : null}
 
@@ -256,7 +272,7 @@ export function WorkoutMonthRecap() {
                 ? 'За месяц цифры почти не сдвинулись. Новый разбор появится, когда будет рекорд, сдвиг объёма или частоты.'
                 : showFallback
                   ? 'Разбор временно недоступен'
-                  : 'Цифры — на графике выше.'}
+                  : 'Цифры — в блоках ниже.'}
           </p>
           {facts ? <FactsFallback facts={facts} /> : null}
         </section>

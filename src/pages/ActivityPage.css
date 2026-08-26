@@ -44,6 +44,7 @@
   display: grid;
   gap: 16px;
   min-height: 320px;
+  align-content: start;
 }
 
 .activity-feed.is-refreshing {
@@ -95,10 +96,19 @@
   display: grid;
   gap: 10px;
   padding: 16px;
+  align-content: start;
+  width: 100%;
+}
+
+.activity-empty .btn {
+  min-height: 48px;
+  height: auto;
+  align-self: start;
 }
 
 .activity-empty .muted,
-.activity-empty .empty-copy-title {
+.activity-empty .empty-copy-title,
+.activity-empty .empty-copy-lead {
   margin: 0;
 }
 

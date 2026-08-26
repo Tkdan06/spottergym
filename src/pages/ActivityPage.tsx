@@ -305,7 +305,7 @@ export function ActivityPage() {
           {empty ? (
             <section className="surface activity-empty">
               <p className="empty-copy-title">Пока пусто</p>
-              <p className="muted">
+              <p className="muted empty-copy-lead">
                 Отмечайся «Я в зале» — здесь появится график времени по дням.
               </p>
               <Link to="/app" className="btn btn-primary btn-block">

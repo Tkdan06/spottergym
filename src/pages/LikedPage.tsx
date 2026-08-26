@@ -224,15 +224,10 @@ export function LikedPage({ mode = 'received' }: { mode?: LikesMode }) {
         <section className="liked-empty surface">
           <div className="empty-copy" role="status">
             <p className="empty-copy-title">
-              {mode === 'received' ? 'Пока никто не лайкнул' : 'Ты ещё никого не лайкнул'}
-            </p>
-            <p className="empty-copy-lead">
-              {mode === 'received'
-                ? 'Как только кто-то отметит тебя — появится здесь'
-                : 'Отмечай людей в зале или в профиле — появятся здесь'}
+              {mode === 'received' ? 'Пока никто не лайкнул' : 'Пока никого не лайкнул'}
             </p>
           </div>
-          <Link to="/app" className="btn btn-primary">
+          <Link to="/app" className="btn btn-primary btn-block">
             В зал
           </Link>
         </section>

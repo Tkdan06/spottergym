@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { SectionTitle } from './SectionTitle'
 import { SoftLoader } from './SoftLoader'
@@ -166,10 +165,6 @@ export function WorkoutWeekRecap() {
               </ul>
             </div>
           ) : null}
-
-          <Link to="/app/workouts/new" className="btn btn-primary btn-block">
-            <Plus size={16} /> Записать тренировку
-          </Link>
         </section>
       ) : null}
 
@@ -215,7 +210,7 @@ export function WorkoutWeekRecap() {
                 ? 'За неделю цифры почти не сдвинулись. Новый разбор появится, когда будет рекорд, сдвиг объёма или частоты.'
                 : showFallback
                   ? 'Разбор временно недоступен'
-                  : 'Цифры — на графике выше.'}
+                  : 'Цифры — в блоках ниже.'}
           </p>
           {facts ? <FactsFallback facts={facts} /> : null}
         </section>

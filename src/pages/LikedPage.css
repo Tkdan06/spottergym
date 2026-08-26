@@ -155,14 +155,20 @@
 .liked-empty {
   display: grid;
   gap: 10px;
-  justify-items: center;
+  justify-items: stretch;
+  align-content: start;
+  width: 100%;
   padding: 22px 18px;
 }
 
 .liked-empty .empty-copy {
-  padding: 12px 0 0;
+  padding: 4px 0 0;
 }
 
 .liked-empty .btn {
   margin-top: 6px;
+  min-height: 48px;
+  height: auto;
+  align-self: start;
+  width: 100%;
 }
