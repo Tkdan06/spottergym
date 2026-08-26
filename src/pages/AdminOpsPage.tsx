@@ -53,7 +53,7 @@ export function AdminOpsPage() {
           <div>
             <h1 className="page-title">Работоспособность</h1>
             <p className="muted">
-              Ошибки API за сутки — что сломалось для человека, не аббревиатуры
+              Что сломалось у человека за сутки. Сканы чужих URL (.env, swagger) не считаем
               {loading ? ' · обновляем…' : ''}
             </p>
           </div>
@@ -75,7 +75,7 @@ export function AdminOpsPage() {
         <article className="admin-stat-card">
           <span className="muted">Ошибки за 24ч</span>
           <strong>{data?.last24h ?? '—'}</strong>
-          <p className="dim">4xx и 5xx, без обычного «не вошёл»</p>
+          <p className="dim">Живые маршруты, без входа и ботов</p>
         </article>
         <article className="admin-stat-card">
           <span className="muted">Падения сервера</span>
@@ -91,7 +91,9 @@ export function AdminOpsPage() {
 
       <SectionTitle>Что ломается</SectionTitle>
       {data && data.groups.length === 0 ? (
-        <p className="muted">За сутки ошибок нет — либо тихо, либо журнал ещё пустой после деплоя.</p>
+        <p className="muted">
+          За сутки ошибок приложения нет. Случайный шум сканеров сюда не попадает.
+        </p>
       ) : (
         <div className="card-list card-list--cards">
           {data?.groups.map((row) => (

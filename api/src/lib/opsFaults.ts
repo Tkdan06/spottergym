@@ -35,6 +35,24 @@ export type OpsHealth = {
 
 type Explained = { code: string; title: string; meaning: string }
 
+/** Live API mounts — 404 outside these are scanners, not product faults. */
+const PRODUCT_ROOTS = [
+  '/health',
+  '/admin',
+  '/analytics',
+  '/media',
+  '/auth',
+  '/me',
+  '/users',
+  '/gyms',
+  '/likes',
+  '/notifications',
+  '/push',
+  '/tickets',
+  '/conversations',
+  '/blocks',
+] as const
+
 function normalizePath(path: string) {
   return path
     .replace(/\/+$/, '')
@@ -45,6 +63,31 @@ function normalizePath(path: string) {
     .replace(/\/\d{6,}/g, '/:id')
 }
 
+export function isProductApiPath(path: string) {
+  const p = (path.split('?')[0] || '/').replace(/\/+$/, '') || '/'
+  return PRODUCT_ROOTS.some((root) => p === root || p.startsWith(`${root}/`))
+}
+
+/** Hide 404s to URLs we do not serve (.env, swagger, phpunit, k8s…). */
+function isScanner404(path: string, status: number) {
+  return status === 404 && !isProductApiPath(path)
+}
+
+function productPathWhere() {
+  return PRODUCT_ROOTS.flatMap((root) => [{ path: root }, { path: { startsWith: `${root}/` } }])
+}
+
+function visibleOpsWhere(extra?: { createdAt?: { gte: Date }; status?: { gte: number } }) {
+  return {
+    AND: [
+      ...(extra ? [extra] : []),
+      {
+        OR: [{ status: { not: 404 } }, ...productPathWhere()],
+      },
+    ],
+  }
+}
+
 function shouldIgnore(method: string, path: string, status: number) {
   if (method === 'OPTIONS') return true
   if (status < 400) return true
@@ -53,6 +96,7 @@ function shouldIgnore(method: string, path: string, status: number) {
   if (path.startsWith('/media') && status < 500) return true
   if (path.startsWith('/admin') && status < 500) return true
   if (status === 401) return true
+  if (isScanner404(path, status)) return true
   return false
 }
 
@@ -247,8 +291,10 @@ export function recordOpsFaultFromContext(c: Context) {
 
 export async function opsFaultCounts(since: Date) {
   const [last24h, last5xx24h] = await Promise.all([
-    prisma.opsFault.count({ where: { createdAt: { gte: since } } }),
-    prisma.opsFault.count({ where: { createdAt: { gte: since }, status: { gte: 500 } } }),
+    prisma.opsFault.count({ where: visibleOpsWhere({ createdAt: { gte: since } }) }),
+    prisma.opsFault.count({
+      where: visibleOpsWhere({ createdAt: { gte: since }, status: { gte: 500 } }),
+    }),
   ])
   return { last24h, last5xx24h }
 }
@@ -258,11 +304,12 @@ export async function buildOpsHealth(): Promise<OpsHealth> {
   const [counts, rows, recent] = await Promise.all([
     opsFaultCounts(since),
     prisma.opsFault.findMany({
-      where: { createdAt: { gte: since } },
+      where: visibleOpsWhere({ createdAt: { gte: since } }),
       orderBy: { createdAt: 'desc' },
       take: 400,
     }),
     prisma.opsFault.findMany({
+      where: visibleOpsWhere(),
       orderBy: { createdAt: 'desc' },
       take: 40,
     }),
