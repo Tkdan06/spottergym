@@ -1,38 +1,9 @@
 /**
- * Color tokens. Default :root = current production palette.
- * html[data-spotter-theme="v2"] = admin preview only (see src/lib/colorTheme.ts).
- * Delete the v2 block + the toggle to drop the experiment.
+ * Production color tokens. One palette for everyone.
+ * Previous values (and the unused v2-blue progress) live in docs/color-palette-history.md.
  */
 
 :root {
-  --bg: #0b0f0e;
-  --bg-elevated: #121816;
-  --bg-soft: #1a221e;
-  --bg-card: #141b18;
-  --bg-wash-top: #0d1311;
-  --bg-wash-bottom: #090c0b;
-  --line: rgba(232, 240, 234, 0.1);
-  --line-strong: rgba(232, 240, 234, 0.18);
-  --text: #eef5ef;
-  --text-muted: #94a39a;
-  --text-dim: #6b7a71;
-  --text-disabled: #5a665f;
-  --accent: #c8f542;
-  --accent-ink: #13200a;
-  --accent-soft: rgba(200, 245, 66, 0.14);
-  --accent-soft-strong: rgba(200, 245, 66, 0.2);
-  --danger: #ff6b6b;
-  --danger-soft: rgba(255, 107, 107, 0.12);
-  --warning: #ffc857;
-  --warning-soft: rgba(255, 200, 87, 0.12);
-  --online: #57f287;
-  --online-soft: rgba(87, 242, 135, 0.1);
-  --progress: var(--accent);
-  --glow-lime: rgba(200, 245, 66, 0.08);
-  --glow-presence: rgba(87, 242, 135, 0.05);
-}
-
-html[data-spotter-theme='v2'] {
   --bg: #0a0d0c;
   --bg-elevated: #101513;
   --bg-soft: #1b231f;

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" fill="none">
   <!-- Full-bleed square: iOS applies its own squircle mask (do not pre-round) -->
-  <rect width="180" height="180" fill="#0B0F0E"/>
+  <rect width="180" height="180" fill="#0A0D0C"/>
   <g transform="translate(180 0) scale(-1 1)">
     <path
       fill="#C8F542"

@@ -59,8 +59,8 @@ export async function issuePasswordResetForUser(user: {
   const html = `
 <!DOCTYPE html>
 <html lang="ru">
-<body style="margin:0;padding:0;background:#0b0f0e;color:#eef5ef;font-family:Onest,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;background:#0b0f0e;">
+<body style="margin:0;padding:0;background:#0a0d0c;color:#eef5ef;font-family:Onest,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;background:#0a0d0c;">
     <tr>
       <td align="center">
         <table role="presentation" width="100%" style="max-width:480px;background:#141b18;border:1px solid rgba(232,240,234,0.1);border-radius:16px;padding:28px 24px;">

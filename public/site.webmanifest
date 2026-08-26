@@ -6,8 +6,8 @@
   "scope": "/",
   "display": "standalone",
   "id": "/app",
-  "background_color": "#0B0F0E",
-  "theme_color": "#0B0F0E",
+  "background_color": "#0A0D0C",
+  "theme_color": "#0A0D0C",
   "lang": "ru",
   "icons": [
     {

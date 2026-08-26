@@ -119,21 +119,20 @@ on long labels («Открыт к знакомству», «Записать т�
 
 ## Color
 
-Tokens live in `src/styles/color-themes.css`. Default `:root` is the current production palette.
-Do not invent a parallel `--color-*` system. Screens use `var(--*)` from `global.css`.
+Tokens live in `src/styles/color-themes.css` (`:root` only). Do not invent a parallel
+`--color-*` system. Screens use `var(--*)` from `global.css`. Previous palettes:
+`docs/color-palette-history.md`.
 
 | Role | Token | Use |
 |---|---|---|
 | Brand | `--accent` / `--accent-ink` / `--accent-soft` | Primary CTA, selected chips, active tab, SPOTTER TER, coach, PR, «Я в зале» |
 | Presence | `--online` / `--online-soft` | Dots and «В зале». Text is `--text`; do not stack mint text + fill + border |
-| Progress | `--progress` | Workout line charts and activity bars. Aliases `--accent` (lime) in both palettes |
+| Progress | `--progress` | Workout line charts and activity bars. Aliases `--accent` (lime), never blue |
 | Unread | `--text` on `--bg-soft` / `--line-strong` | Nav and chat badges, notification unread. Not lime |
 | Danger / warning | `--danger` / `--warning` (+ `-soft`) | Expire, validation, destructive only |
 
-Admin preview: `.toggle-row` on Admin hub («Новая палитра»). Sets `html[data-spotter-theme=v2]`
-and `localStorage` key `spotter.color-theme`. Apply only after `user.isAdmin` is known
-(`src/lib/colorTheme.ts`). Ordinary sessions always stay on the current palette. Not chips and
-not `.seg`.
+One palette for everyone. Do not add an admin preview toggle or `data-spotter-theme`.
+Not chips and not `.seg`.
 
 ## Sources of truth
 
@@ -141,6 +140,5 @@ not `.seg`.
 - Code: `src/pages/UiKitPage.tsx`, `src/components/SectionTitle.tsx`, `src/components/SoftFlash.tsx`,
   `src/components/SoftLoader.tsx`
 - CSS: `src/styles/color-themes.css`, `src/styles/global.css`, `src/styles/sheets.css`
-- Theme preview: `src/lib/colorTheme.ts` (admin-only)
 - Fonts: `src/main.tsx`
 - Entry IA canvas: `feedback-entry-ia` (where feedback/admin belong)

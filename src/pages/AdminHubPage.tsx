@@ -26,7 +26,6 @@ import {
 } from '../lib/adminAnalytics'
 import { formatAdminDate, formatBytes } from '../lib/adminStats'
 import { permissionSummary } from '../lib/adminPermissions'
-import { readStoredColorTheme, setAdminColorTheme } from '../lib/colorTheme'
 import {
   apiAdminEmergencyShutdown,
   apiAdminFetchAnalytics,
@@ -53,7 +52,6 @@ export function AdminHubPage() {
   const [killBusy, setKillBusy] = useState(false)
   const [killError, setKillError] = useState('')
   const [killOpen, setKillOpen] = useState(false)
-  const [v2On, setV2On] = useState(() => readStoredColorTheme() === 'v2')
 
   const load = useCallback(async () => {
     if (!canViewUsers) return
@@ -118,24 +116,6 @@ export function AdminHubPage() {
       </div>
 
       {error ? <p className="admin-inline-error">{error}</p> : null}
-
-      <button
-        type="button"
-        className="toggle-row"
-        role="switch"
-        aria-checked={v2On}
-        onClick={() => {
-          const next = v2On ? 'current' : 'v2'
-          setAdminColorTheme(next, true)
-          setV2On(next === 'v2')
-        }}
-      >
-        <div>
-          <strong>Новая палитра</strong>
-          <p className="muted">Только у тебя, можно выключить</p>
-        </div>
-        <span className={`toggle ${v2On ? 'on' : ''}`} />
-      </button>
 
       {canViewUsers ? (
         <>

@@ -124,7 +124,7 @@ export async function optimizeImageFile(file: File): Promise<string> {
       canvas.height = h
       const ctx = canvas.getContext('2d')
       if (!ctx) throw new Error('Не удалось обработать изображение')
-      ctx.fillStyle = '#121816'
+      ctx.fillStyle = '#101513'
       ctx.fillRect(0, 0, w, h)
       source.draw(ctx, w, h)
 

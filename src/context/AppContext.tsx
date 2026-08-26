@@ -138,7 +138,6 @@ import {
   normalizeUsername,
 } from '../lib/username'
 import { normalizeInstagram } from '../lib/instagram'
-import { applySpotterColorTheme } from '../lib/colorTheme'
 import { consumeInviteFrom, peekInviteFrom } from '../lib/inviteShare'
 import { activeBreakUntil } from '../lib/schedule'
 import {
@@ -648,10 +647,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     notificationPrefsRef.current = notificationPrefs
   }, [notificationPrefs])
-  useEffect(() => {
-    applySpotterColorTheme(Boolean(user?.isAdmin))
-  }, [user?.id, user?.isAdmin])
-
   // Postgres API: health + восстановление сессии по JWT
   useEffect(() => {
     let cancelled = false
@@ -1303,7 +1298,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     flushSync(() => {
       persistUser(null)
     })
-    applySpotterColorTheme(false)
     try {
       await apiLogout()
     } catch {

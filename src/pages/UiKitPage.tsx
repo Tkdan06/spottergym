@@ -38,19 +38,19 @@ const TYPE_TOKENS = [
 ] as const
 
 const COLOR_TOKENS = [
-  ['--bg', 'Фон'],
-  ['--bg-elevated', 'Elevated'],
-  ['--bg-soft', 'Soft / трек сегмента'],
-  ['--bg-card', 'Карточка'],
-  ['--accent', 'Brand'],
-  ['--progress', 'Progress'],
-  ['--text', 'Текст'],
-  ['--text-muted', 'Muted'],
-  ['--text-dim', 'Dim'],
-  ['--text-disabled', 'Disabled'],
-  ['--online', 'Presence'],
-  ['--danger', 'Danger'],
-  ['--warning', 'Warning'],
+  ['--bg', 'Фон', '#0a0d0c'],
+  ['--bg-elevated', 'Elevated', '#101513'],
+  ['--bg-soft', 'Soft / трек сегмента', '#1b231f'],
+  ['--bg-card', 'Карточка', '#151b18'],
+  ['--accent', 'Brand', '#c8f542'],
+  ['--progress', 'Progress', '#c8f542'],
+  ['--text', 'Текст', '#eef5ef'],
+  ['--text-muted', 'Muted', '#a1ada5'],
+  ['--text-dim', 'Dim', '#748179'],
+  ['--text-disabled', 'Disabled', '#4f5a54'],
+  ['--online', 'Presence', '#67efc1'],
+  ['--danger', 'Danger', '#ff5263'],
+  ['--warning', 'Warning', '#ffb84d'],
 ] as const
 
 /**
@@ -155,18 +155,21 @@ export function UiKitPage() {
       <section className="surface ui-kit-block">
         <SectionTitle>Цвета</SectionTitle>
         <p className="muted ui-kit-section-lead">
-          Brand (<code>--accent</code>) — primary CTA, selected chips, active tab, «Я в зале».
-          Presence (<code>--online</code>) — точка и «В зале»: текст primary, не mint fill+text+border
-          сразу. Progress (<code>--progress</code>) — графики и бары, алиас lime. Unread — нейтральный,
-          не lime. Warning/danger только для expire и опасных
-          действий. Новая палитра — админский превью-тоггл в Админке, только на этом устройстве.
+          Одна палитра в <code>:root</code> (<code>src/styles/color-themes.css</code>). Brand (
+          <code>--accent</code> · <code>#c8f542</code>) — primary CTA, selected chips, active tab,
+          «Я в зале». Progress (<code>--progress</code>) — графики и бары, тот же lime, не синий.
+          Presence (<code>--online</code> · <code>#67efc1</code>) — точка и «В зале»: текст
+          primary, не mint fill+text+border сразу. Unread — нейтральный, не lime. Warning/danger
+          только для expire и опасных действий. Старые значения —{' '}
+          <code>docs/color-palette-history.md</code>.
         </p>
         <div className="ui-kit-swatches">
-          {COLOR_TOKENS.map(([token, label]) => (
+          {COLOR_TOKENS.map(([token, label, hex]) => (
             <div key={token} className="ui-kit-swatch">
               <span className="ui-kit-swatch-chip" style={{ background: `var(${token})` }} />
               <strong>{label}</strong>
               <code>{token}</code>
+              <span className="dim">{hex}</span>
             </div>
           ))}
         </div>
