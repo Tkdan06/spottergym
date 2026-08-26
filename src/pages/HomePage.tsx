@@ -19,7 +19,6 @@ import { getHallRank, sortByLikes } from '../lib/likes'
 import { useCheckInElapsed } from '../hooks/useCheckInElapsed'
 import { useGymPeople } from '../hooks/useGymPeople'
 import { getCheckInStartedAt, getCheckedInGymId } from '../lib/presence'
-import { formatActiveNowLabel } from '../lib/presenceCopy'
 import './HomePage.css'
 
 function shortGymName(name: string) {
@@ -135,22 +134,23 @@ export function HomePage() {
             <div className="home-gym-block-head">
               <div className="home-gym-network-row">
                 <p className="home-gym-network">{gym!.network}</p>
-                <Link to={`/app/gym/${gym!.id}?from=home`} className="home-gym-link">
-                  О зале <ChevronRight size={15} />
-                </Link>
-              </div>
-              <h2 className="home-gym-title">{gymLabel}</h2>
-              <p className="home-status">
-                <span className="home-status-live">
-                  {activeNow > 0 ? formatActiveNowLabel(activeNow) : 'Пока никого в зале'}
-                </span>
-                {youHere ? (
-                  <span className="home-status-you">
-                    {' '}
-                    · ты тут · уже {sessionElapsed || '0:00'}
+                <p className="home-status">
+                  <span className={`home-status-live${activeNow > 0 ? ' is-live' : ''}`}>
+                    {activeNow > 0 ? `${activeNow} в зале` : 'Никого в зале'}
                   </span>
-                ) : null}
-              </p>
+                  {youHere ? (
+                    <span className="home-status-you"> · {sessionElapsed || '0:00'}</span>
+                  ) : null}
+                </p>
+              </div>
+              <Link
+                to={`/app/gym/${gym!.id}?from=home`}
+                className="home-gym-title-link"
+                aria-label={`${gymLabel}, о зале`}
+              >
+                <h2 className="home-gym-title">{gymLabel}</h2>
+                <ChevronRight className="home-gym-title-chevron" size={20} aria-hidden />
+              </Link>
             </div>
 
             <div className="home-gym-checkin">

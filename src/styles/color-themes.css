@@ -55,7 +55,7 @@ html[data-spotter-theme='v2'] {
   --warning-soft: rgba(255, 184, 77, 0.12);
   --online: #67efc1;
   --online-soft: rgba(103, 239, 193, 0.1);
-  --progress: #5e9cff;
+  --progress: var(--accent);
   --glow-lime: rgba(200, 245, 66, 0.04);
   --glow-presence: transparent;
 }
