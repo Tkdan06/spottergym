@@ -638,16 +638,19 @@
 .workout-progress-pair {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  align-items: stretch;
   gap: 10px;
   min-width: 0;
 }
 
 .workout-progress-tile {
+  height: 100%;
   gap: 8px;
   padding: 14px;
   overflow: visible;
-  align-content: start;
-  grid-template-rows: auto auto minmax(1.3em, auto);
+  align-content: stretch;
+  grid-template-rows: auto 1fr auto;
 }
 
 .workout-progress-tile .workout-progress-hero-value {
@@ -656,14 +659,20 @@
 
 .workout-metric-heading {
   display: inline-flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 6px;
   min-width: 0;
+  white-space: nowrap;
 }
 
 .workout-progress-metric .section-title .ui-hint-pop {
   right: 0;
   left: auto;
+}
+
+.workout-progress-metric .section-title .ui-hint--start .ui-hint-pop {
+  left: 0;
+  right: auto;
 }
 
 .workout-progress-metric-empty {
@@ -673,8 +682,97 @@
 
 .workout-progress-feed {
   display: grid;
+  gap: 22px;
+  min-width: 0;
+}
+
+.workout-progress-cluster {
+  display: grid;
   gap: 14px;
   min-width: 0;
+}
+
+.workout-progress-cluster--support {
+  gap: 16px;
+}
+
+.workout-progress-insight {
+  display: grid;
+  gap: 8px;
+  padding: 2px 2px 0;
+  min-width: 0;
+}
+
+.workout-progress-insight > .section-title,
+.workout-progress-support > .section-title {
+  margin: 0;
+}
+
+.workout-progress-insight-headline {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-section-size);
+  font-weight: var(--text-section-weight);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.workout-progress-insight-detail,
+.workout-progress-insight-meta {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.workout-progress-insight-cta {
+  justify-self: start;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.workout-progress-support {
+  display: grid;
+  gap: 8px;
+  padding: 0 2px;
+  min-width: 0;
+}
+
+.workout-progress-rhythm {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.workout-progress-rhythm-col {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.workout-progress-rhythm-volume {
+  margin: 0;
+  font-size: var(--text-muted-size);
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.workout-progress-stat-unit {
+  font-size: var(--text-muted-size);
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.workout-progress-support .section-title .ui-hint-pop {
+  right: auto;
+  left: 0;
+}
+
+@media (min-width: 640px) {
+  .workout-progress-rhythm {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 16px 28px;
+    align-items: start;
+  }
 }
 
 .workout-progress-title-btn {
@@ -685,6 +783,7 @@
   width: auto;
   max-width: 100%;
   min-width: 0;
+  min-height: 44px;
   margin: 0;
   padding: 0;
   border: 0;
@@ -718,6 +817,11 @@
   min-width: 0;
 }
 
+.workout-progress-tile .workout-progress-hero {
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 10px;
+}
+
 .workout-progress-hero-value {
   min-width: 0;
   margin: 0;
@@ -739,8 +843,28 @@
   font-size: var(--text-label-size);
   font-weight: var(--text-label-weight);
   line-height: 1.2;
+  font-variant-numeric: tabular-nums;
   text-align: right;
   white-space: nowrap;
+}
+
+.workout-progress-hero-delta.is-note {
+  padding-bottom: 0.18em;
+  font-size: var(--text-muted-size);
+  line-height: 1.25;
+  white-space: normal;
+}
+
+.workout-progress-stat-line {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-section-size);
+  font-weight: var(--text-ui-strong);
+  line-height: var(--text-section-line);
+}
+
+.workout-progress-stat-line.is-up-text {
+  color: var(--online);
 }
 
 .workout-progress-hero-delta.is-up {
@@ -757,7 +881,6 @@
 
 .workout-progress-caption {
   margin: 0;
-  min-height: calc(var(--text-muted-size) * 1.3);
   font-size: var(--text-muted-size);
   font-weight: 500;
   line-height: 1.3;
@@ -765,10 +888,12 @@
 
 .workout-progress-caption.is-up {
   color: var(--online);
+  font-weight: var(--text-label-weight);
 }
 
 .workout-progress-caption.is-down {
   color: var(--danger);
+  font-weight: var(--text-label-weight);
 }
 
 .workout-progress-caption.is-flat {
@@ -776,8 +901,12 @@
 }
 
 .workout-insights-kicker {
-  margin: 8px 0 0;
+  margin: 4px 0 0;
   font-size: var(--text-muted-size);
+}
+
+.workout-insights-kicker + .workout-insights-list {
+  margin-top: 2px;
 }
 
 .workout-insights-list {
@@ -850,6 +979,7 @@
   align-items: center;
   gap: 4px;
   justify-self: start;
+  min-height: 44px;
 }
 
 .workout-insights-more svg {

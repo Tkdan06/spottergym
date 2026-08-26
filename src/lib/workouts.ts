@@ -87,15 +87,19 @@ export function formatSignedPercent(n: number | null | undefined) {
   return `${sign}${value}%`
 }
 
+function signedDelta(n: number) {
+  const sign = n > 0 ? '+' : ''
+  const value = Number.isInteger(n) ? String(n) : n.toFixed(1)
+  return `${sign}${value}`
+}
+
 /** Compact +/− next to a hero number. Hidden when there is no previous window. */
 export function formatCompactDelta(
   delta: number | null | undefined,
   previous: number | null | undefined,
 ) {
   if (delta == null || previous == null || previous <= 0 || delta === 0) return null
-  const sign = delta > 0 ? '+' : ''
-  const n = Number.isInteger(delta) ? String(delta) : delta.toFixed(1)
-  return `${sign}${n}`
+  return signedDelta(delta)
 }
 
 /** Hide comparison when the previous window is empty — no fake 0% / +N. */
@@ -104,9 +108,16 @@ export function formatVsPreviousPeriod(
   previous: number | null | undefined,
 ) {
   if (delta == null || previous == null || previous <= 0) return null
-  const sign = delta > 0 ? '+' : ''
-  const n = Number.isInteger(delta) ? String(delta) : delta.toFixed(1)
-  return `${sign}${n} к прошлому периоду`
+  return `${signedDelta(delta)} к прошлому периоду`
+}
+
+/** Same comparison, short enough to sit next to a tile number. */
+export function formatVsPreviousShort(
+  delta: number | null | undefined,
+  previous: number | null | undefined,
+) {
+  if (delta == null || previous == null || previous <= 0 || delta === 0) return null
+  return `${signedDelta(delta)} к прошлому`
 }
 
 export function formatVolume(n: number) {

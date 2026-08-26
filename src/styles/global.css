@@ -442,6 +442,11 @@ html.standalone .page {
   text-align: left;
 }
 
+.ui-hint--start .ui-hint-pop {
+  left: 0;
+  right: auto;
+}
+
 .stack {
   display: flex;
   flex-direction: column;
