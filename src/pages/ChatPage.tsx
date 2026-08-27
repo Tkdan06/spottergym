@@ -176,14 +176,10 @@ export function ChatPage() {
 
   /**
    * Pin the chat column to the visual viewport so the composer sits on the
-   * keyboard, not in the middle of the screen.
-   *
-   * iOS PWA otherwise does two things at once:
-   * 1. `.page` min-height: 100vh beats a smaller JS height (min-height wins over
-   *    max-height), so the column stays full-screen and the field sits under
-   *    the keyboard — WebKit then scrolls it toward the centre.
-   * 2. Focusing the textarea scrolls the document. Combined with translateY
-   *    that double-offsets the composer by ~a thumb or two.
+   * keyboard. Height-only math fails on iOS PWA: innerHeight often shrinks
+   * with the keyboard, so overlap reads as 0 and safe-area padding stays —
+   * leaving a gap above the keys. `top` + `bottom` follow the visible box
+   * instead; padding drops while the composer is focused.
    */
   useEffect(() => {
     const root = document.documentElement
@@ -197,20 +193,45 @@ export function ChatPage() {
     root.style.overflow = 'hidden'
     body.style.overflow = 'hidden'
 
+    const desktop = () => window.matchMedia('(min-width: 900px)').matches
+
+    const clearPin = () => {
+      page.classList.remove('chat-page--pinned', 'is-keyboard')
+      page.style.top = ''
+      page.style.bottom = ''
+      page.style.paddingBottom = ''
+    }
+
     const sync = () => {
+      if (desktop()) {
+        clearPin()
+        return
+      }
       if (window.scrollY !== 0 || window.scrollX !== 0) window.scrollTo(0, 0)
       const vv = window.visualViewport
+      const top = Math.round(vv?.offsetTop ?? 0)
       const visible = Math.round(vv?.height ?? window.innerHeight)
-      const offsetTop = Math.round(vv?.offsetTop ?? 0)
-      const keyboard = Math.max(0, window.innerHeight - visible - offsetTop)
-      const size = `${visible}px`
-      page.style.minHeight = size
-      page.style.height = size
-      page.style.maxHeight = size
-      page.style.transform = offsetTop ? `translateY(${offsetTop}px)` : ''
-      page.style.paddingBottom = keyboard > 40 ? '0px' : ''
-      root.style.setProperty('--chat-keyboard', `${keyboard}px`)
-      if (keyboard > 40) scrollThreadToEnd()
+      const bottomGap = Math.max(0, window.innerHeight - top - visible)
+      const focused = document.activeElement === inputRef.current
+      const keyboardOpen = focused || bottomGap > 40
+
+      page.classList.add('chat-page--pinned')
+      page.classList.toggle('is-keyboard', keyboardOpen)
+      page.style.top = `${top}px`
+      page.style.bottom = `${bottomGap}px`
+      page.style.paddingBottom = keyboardOpen ? '0px' : ''
+      root.style.setProperty('--chat-keyboard', `${bottomGap}px`)
+      if (keyboardOpen) scrollThreadToEnd()
+    }
+
+    let focusTimer = 0
+    const onFocusIn = () => {
+      window.clearTimeout(focusTimer)
+      sync()
+    }
+    const onFocusOut = () => {
+      window.clearTimeout(focusTimer)
+      focusTimer = window.setTimeout(sync, 280)
     }
 
     sync()
@@ -218,18 +239,19 @@ export function ChatPage() {
     vv?.addEventListener('resize', sync)
     vv?.addEventListener('scroll', sync)
     window.addEventListener('resize', sync)
+    document.addEventListener('focusin', onFocusIn)
+    document.addEventListener('focusout', onFocusOut)
     return () => {
+      window.clearTimeout(focusTimer)
       vv?.removeEventListener('resize', sync)
       vv?.removeEventListener('scroll', sync)
       window.removeEventListener('resize', sync)
+      document.removeEventListener('focusin', onFocusIn)
+      document.removeEventListener('focusout', onFocusOut)
       root.classList.remove('chat-viewport-lock')
       root.style.overflow = prevHtmlOverflow
       body.style.overflow = prevBodyOverflow
-      page.style.minHeight = ''
-      page.style.height = ''
-      page.style.maxHeight = ''
-      page.style.transform = ''
-      page.style.paddingBottom = ''
+      clearPin()
       root.style.removeProperty('--chat-keyboard')
     }
   }, [conversationId, hydrate, conversation?.id, other?.id, user?.id])

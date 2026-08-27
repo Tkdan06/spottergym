@@ -649,6 +649,8 @@
   align-items: stretch;
   gap: 10px;
   min-width: 0;
+  position: relative;
+  overflow: visible;
 }
 
 .workout-progress-tile {
@@ -673,21 +675,23 @@
   overflow: visible;
 }
 
+.workout-metric-heading .ui-hint,
+.workout-metric-heading .ui-hint-pop {
+  white-space: normal;
+}
+
 .workout-progress-metric .ui-hint {
   position: static;
 }
 
-.workout-progress-metric .section-title .ui-hint-pop {
+.workout-progress-pair .section-title .ui-hint-pop {
+  top: calc(100% + 8px);
   right: 0;
   left: auto;
   width: min(280px, calc(100vw - 32px));
-  max-width: min(280px, calc(100vw - 32px));
-}
-
-.workout-progress-pair .section-title .ui-hint-pop {
-  /* Right column: grow left from the tile edge so the panel stays on-screen. */
-  right: 0;
-  left: auto;
+  max-width: min(280px, 100%);
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .workout-progress-metric-empty {

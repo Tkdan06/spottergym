@@ -28,6 +28,26 @@ html.standalone .page.chat-page,
   min-height: 0;
 }
 
+.chat-page.chat-page--pinned {
+  position: fixed;
+  left: max(0px, calc((100% - var(--app-max)) / 2));
+  right: max(0px, calc((100% - var(--app-max)) / 2));
+  width: auto;
+  height: auto;
+  max-height: none;
+  min-height: 0;
+  z-index: 6;
+  transform: none;
+}
+
+.chat-page.chat-page--pinned.is-keyboard {
+  padding-bottom: 0;
+}
+
+.chat-page.chat-page--pinned.is-keyboard .chat-input {
+  padding-bottom: 0;
+}
+
 .chat-header {
   display: flex;
   align-items: center;
