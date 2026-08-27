@@ -175,37 +175,61 @@ export function ChatPage() {
   }, [conversationId, apiOnline, markRead])
 
   /**
-   * Lock the chat page to the visual viewport (Telegram-style):
-   * composer stays glued above the keyboard; no layout jump on send.
+   * Pin the chat column to the visual viewport so the composer sits on the
+   * keyboard, not in the middle of the screen.
+   *
+   * iOS PWA otherwise does two things at once:
+   * 1. `.page` min-height: 100vh beats a smaller JS height (min-height wins over
+   *    max-height), so the column stays full-screen and the field sits under
+   *    the keyboard — WebKit then scrolls it toward the centre.
+   * 2. Focusing the textarea scrolls the document. Combined with translateY
+   *    that double-offsets the composer by ~a thumb or two.
    */
   useEffect(() => {
     const root = document.documentElement
+    const body = document.body
     const page = pageRef.current
-    const vv = window.visualViewport
-    if (!vv || !page) return
+    if (!page) return
+
+    const prevHtmlOverflow = root.style.overflow
+    const prevBodyOverflow = body.style.overflow
+    root.classList.add('chat-viewport-lock')
+    root.style.overflow = 'hidden'
+    body.style.overflow = 'hidden'
 
     const sync = () => {
-      const offsetTop = vv.offsetTop
-      const height = vv.height
-      page.style.height = `${height}px`
-      page.style.maxHeight = `${height}px`
+      if (window.scrollY !== 0 || window.scrollX !== 0) window.scrollTo(0, 0)
+      const vv = window.visualViewport
+      const visible = Math.round(vv?.height ?? window.innerHeight)
+      const offsetTop = Math.round(vv?.offsetTop ?? 0)
+      const keyboard = Math.max(0, window.innerHeight - visible - offsetTop)
+      const size = `${visible}px`
+      page.style.minHeight = size
+      page.style.height = size
+      page.style.maxHeight = size
       page.style.transform = offsetTop ? `translateY(${offsetTop}px)` : ''
-      const keyboard = Math.max(0, window.innerHeight - height - offsetTop)
+      page.style.paddingBottom = keyboard > 40 ? '0px' : ''
       root.style.setProperty('--chat-keyboard', `${keyboard}px`)
       if (keyboard > 40) scrollThreadToEnd()
     }
 
     sync()
-    vv.addEventListener('resize', sync)
-    vv.addEventListener('scroll', sync)
+    const vv = window.visualViewport
+    vv?.addEventListener('resize', sync)
+    vv?.addEventListener('scroll', sync)
     window.addEventListener('resize', sync)
     return () => {
-      vv.removeEventListener('resize', sync)
-      vv.removeEventListener('scroll', sync)
+      vv?.removeEventListener('resize', sync)
+      vv?.removeEventListener('scroll', sync)
       window.removeEventListener('resize', sync)
+      root.classList.remove('chat-viewport-lock')
+      root.style.overflow = prevHtmlOverflow
+      body.style.overflow = prevBodyOverflow
+      page.style.minHeight = ''
       page.style.height = ''
       page.style.maxHeight = ''
       page.style.transform = ''
+      page.style.paddingBottom = ''
       root.style.removeProperty('--chat-keyboard')
     }
   }, [conversationId, hydrate, conversation?.id, other?.id, user?.id])

@@ -681,12 +681,13 @@
   right: 0;
   left: auto;
   width: min(280px, calc(100vw - 32px));
-  max-width: none;
+  max-width: min(280px, calc(100vw - 32px));
 }
 
-.workout-progress-metric .section-title .ui-hint--start .ui-hint-pop {
-  left: 0;
-  right: auto;
+.workout-progress-pair .section-title .ui-hint-pop {
+  /* Right column: grow left from the tile edge so the panel stays on-screen. */
+  right: 0;
+  left: auto;
 }
 
 .workout-progress-metric-empty {

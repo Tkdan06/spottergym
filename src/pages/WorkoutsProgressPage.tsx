@@ -343,7 +343,7 @@ function InsightsBlocks({ insights }: { insights: WorkoutInsights }) {
           <SectionTitle>
             <span className="workout-metric-heading">
               Объём
-              <HintTip label="Что считается объёмом" popAlign="start">
+              <HintTip label="Что считается объёмом">
                 Сумма вес × повторы всех рабочих подходов за выбранный период.
               </HintTip>
             </span>

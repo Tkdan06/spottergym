@@ -3,6 +3,9 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  /* min-height: 0 so standalone `.page { min-height: 100vh }` cannot keep the
+     column taller than the visual viewport (that floats the composer). */
+  min-height: 0;
   height: 100dvh;
   height: 100svh;
   max-height: 100dvh;
@@ -18,8 +21,11 @@
   );
   overflow: hidden;
   box-sizing: border-box;
-  /* No transition: padding lag makes the composer crawl under the keyboard */
-  will-change: transform;
+}
+
+html.standalone .page.chat-page,
+.page.chat-page {
+  min-height: 0;
 }
 
 .chat-header {
@@ -301,12 +307,15 @@
   display: block;
 }
 
+.app-shell.chat-open,
 .app-shell.chat-open .app-main {
-  min-height: 100dvh;
+  min-height: 0;
   overflow: hidden;
+  overscroll-behavior: none;
 }
 
-.app-shell.chat-open {
+html.chat-viewport-lock,
+html.chat-viewport-lock body {
   overflow: hidden;
   overscroll-behavior: none;
 }
