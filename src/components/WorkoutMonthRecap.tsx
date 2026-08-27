@@ -39,23 +39,17 @@ function RecapItem({
   title,
   text,
   detail,
-  value,
-  valueTone = 'up',
   href,
   onTitleClick,
 }: {
   title: string
   text: string
   detail?: string | null
-  value?: string | null
-  valueTone?: 'up' | 'flat'
   href?: string
   onTitleClick?: () => void
 }) {
   const heading = title.trim()
   const body = text.trim()
-  const rawAside = value?.trim() || ''
-  const aside = rawAside && !heading.includes(rawAside) ? rawAside : null
   const note = detail?.trim() || null
   if (!heading && !body && !note) return null
 
@@ -71,18 +65,7 @@ function RecapItem({
 
   return (
     <li className="workout-recap-item">
-      {titleNode || aside ? (
-        <div className="workout-recap-item-head">
-          {titleNode}
-          {aside ? (
-            <span
-              className={`workout-recap-item-value${valueTone === 'up' ? ' is-up' : ' is-flat'}`}
-            >
-              {aside}
-            </span>
-          ) : null}
-        </div>
-      ) : null}
+      {titleNode}
       {body ? <p className="muted">{body}</p> : null}
       {note ? <p className="dim workout-recap-item-detail">{note}</p> : null}
     </li>
@@ -174,28 +157,28 @@ export function WorkoutMonthRecap() {
   const facts = monthly?.facts
   const showFallback =
     Boolean(monthly && !letter && (monthly.status === 'offline' || monthly.status === 'failed'))
-  const recapTitle = (
+  const recapTitle = letter ? (
+    <div className="section-title">
+      <button
+        type="button"
+        className="workout-recap-head"
+        aria-expanded={open}
+        aria-controls="month-recap-panel"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="section-heading">Обзор месяца</span>
+        <span className="workout-recap-toggle" aria-hidden>
+          <ChevronDown size={16} className={open ? 'is-open' : undefined} />
+        </span>
+      </button>
+    </div>
+  ) : (
     <SectionTitle
       action={
-        letter ? (
-          <button
-            type="button"
-            className="section-action workout-recap-toggle"
-            aria-expanded={open}
-            aria-label={open ? 'Свернуть разбор месяца' : 'Посмотреть разбор'}
-            onClick={() => setOpen((v) => !v)}
-          >
-            <ChevronDown size={16} aria-hidden className={open ? 'is-open' : undefined} />
-          </button>
-        ) : monthly ? (
-          <span className="muted">
-            {monthly.periodLabel}
-            <span className="dim"> · цифры за 30 дней</span>
-          </span>
-        ) : null
+        monthly ? <span className="muted">{monthly.periodLabel}</span> : null
       }
     >
-      Твой месяц
+      Обзор месяца
     </SectionTitle>
   )
 
@@ -215,16 +198,15 @@ export function WorkoutMonthRecap() {
       ) : null}
 
       {!loading && monthly && letter ? (
-        <section className="surface workout-coach-block">
+        <section className="surface workout-coach-block workout-coach-block--toggle">
           {recapTitle}
           {open ? (
-            <div className="workout-recap-body">
+            <div id="month-recap-panel" className="workout-recap-body">
               <div className="workout-recap-lead">
-                <p className="workout-recap-caption dim">
-                  {monthly.periodLabel}
-                  <span> · цифры за 30 дней</span>
-                </p>
-                {letter.headline.title && letter.headline.title !== 'Твой месяц' ? (
+                <p className="workout-recap-caption dim">{monthly.periodLabel}</p>
+                {letter.headline.title &&
+                letter.headline.title !== 'Твой месяц' &&
+                letter.headline.title !== 'Обзор месяца' ? (
                   <p className="workout-recap-lead-title">{letter.headline.title}</p>
                 ) : null}
                 {letter.headline.text ? <p className="muted">{letter.headline.text}</p> : null}
@@ -240,8 +222,6 @@ export function WorkoutMonthRecap() {
                         title={item.title}
                         text={item.text}
                         detail={distinctDetail(item.text, item.why)}
-                        value={item.value}
-                        valueTone="up"
                       />
                     ))}
                   </ul>
@@ -258,8 +238,6 @@ export function WorkoutMonthRecap() {
                         title={item.title}
                         text={item.text}
                         detail={distinctDetail(item.text, item.why)}
-                        value={item.value}
-                        valueTone="flat"
                       />
                     ))}
                   </ul>
@@ -297,7 +275,7 @@ export function WorkoutMonthRecap() {
         <section className="surface workouts-empty">
           {recapTitle}
           <p className="empty-copy-title">
-            {monthly.status === 'failed' ? 'Твой месяц' : 'Собрать разбор месяца'}
+            {monthly.status === 'failed' ? 'Обзор месяца' : 'Собрать обзор месяца'}
           </p>
           <p className="muted">
             {monthly.status === 'failed'
@@ -315,7 +293,7 @@ export function WorkoutMonthRecap() {
               ? 'Собираем…'
               : monthly.status === 'failed'
                 ? 'Попробовать снова'
-                : 'Собрать разбор'}
+                : 'Собрать обзор'}
           </button>
         </section>
       ) : null}
@@ -329,12 +307,12 @@ export function WorkoutMonthRecap() {
               : monthly.status === 'skipped'
                 ? 'Пока без разбора'
                 : showFallback
-                  ? 'Твой месяц'
-                  : 'Разбор появится позже'}
+                  ? 'Обзор месяца'
+                  : 'Обзор появится позже'}
           </p>
           <p className="muted">
             {monthly.status === 'locked'
-              ? 'Разбор месяца сравнивает последние 30 дней с предыдущими. Нужно минимум четыре тренировки, чтобы было с чем сравнить.'
+              ? 'Обзор месяца сравнивает последние 30 дней с предыдущими. Нужно минимум четыре тренировки, чтобы было с чем сравнить.'
               : monthly.status === 'skipped'
                 ? 'За месяц цифры почти не сдвинулись. Новый разбор появится, когда будет рекорд, сдвиг объёма или частоты.'
                 : showFallback
@@ -348,7 +326,7 @@ export function WorkoutMonthRecap() {
       {!loading && !monthly && !error ? (
         <section className="surface workouts-empty">
           {recapTitle}
-          <p className="empty-copy-title">Разбор появится позже</p>
+          <p className="empty-copy-title">Обзор появится позже</p>
           <p className="muted">Не удалось получить статус. Обнови страницу.</p>
         </section>
       ) : null}

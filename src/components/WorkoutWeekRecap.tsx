@@ -105,7 +105,7 @@ export function WorkoutWeekRecap() {
     Boolean(insight && !letter && (insight.status === 'offline' || insight.status === 'failed'))
   const recapTitle = (
     <SectionTitle action={insight ? <span className="muted">{insight.periodLabel}</span> : null}>
-      Разбор недели
+      Обзор недели
     </SectionTitle>
   )
 

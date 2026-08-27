@@ -27,7 +27,6 @@ import {
   formatCompactDelta,
   formatDeltaLabel,
   formatKg,
-  formatMinutesRu,
   formatSetPair,
   formatSignedPercent,
   formatVolume,
@@ -211,9 +210,74 @@ function LiftRow({
   )
 }
 
-function InsightsBlocks({ insights }: { insights: WorkoutInsights }) {
+function RecordsBlock({ insights }: { insights: WorkoutInsights }) {
   const [prsOpen, setPrsOpen] = useState(false)
   const [prsAll, setPrsAll] = useState(false)
+  const prs = insights.prs.items
+  const prsVisible = prsAll ? prs : prs.slice(0, PR_PREVIEW)
+  const prsHidden = Math.max(0, prs.length - PR_PREVIEW)
+
+  return (
+    <section className="surface workout-progress-metric" aria-label="Рекорды">
+      <SectionTitle
+        action={
+          insights.prs.count > 0 ? (
+            <button
+              type="button"
+              className="section-action workout-insights-more"
+              aria-expanded={prsOpen}
+              onClick={() => {
+                setPrsOpen((v) => {
+                  if (v) setPrsAll(false)
+                  return !v
+                })
+              }}
+            >
+              {`${insights.prs.count} ${ruPlural(
+                insights.prs.count,
+                'новый рекорд',
+                'новых рекорда',
+                'новых рекордов',
+              )}`}
+              <ChevronDown size={16} aria-hidden className={prsOpen ? 'is-open' : undefined} />
+            </button>
+          ) : (
+            <span className="muted">Нет новых рекордов</span>
+          )
+        }
+      >
+        Рекорды
+      </SectionTitle>
+      {prsOpen && insights.prs.count > 0 ? (
+        <>
+          <ul className="workout-insights-list">
+            {prsVisible.map((pr) => (
+              <li key={`${pr.name}-${pr.at}-${pr.kind}`} className="workout-insights-lift">
+                <strong>{pr.name}</strong>
+                <div className="workout-insights-lift-meta">
+                  <span className="muted">{formatSetPair(pr.weightKg, pr.reps)}</span>
+                  <span className="workout-insights-lift-delta is-up">{prGainLabel(pr)}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+          {prsHidden > 0 && !prsAll ? (
+            <button
+              type="button"
+              className="section-action workout-insights-more"
+              onClick={() => setPrsAll(true)}
+            >
+              Ещё {prsHidden}
+              <ChevronDown size={16} aria-hidden />
+            </button>
+          ) : null}
+        </>
+      ) : null}
+    </section>
+  )
+}
+
+function InsightsBlocks({ insights }: { insights: WorkoutInsights }) {
   const insight = deriveProgressInsight(insights)
   const countDelta = formatCompactDelta(
     insights.workoutCount.delta,
@@ -231,34 +295,12 @@ function InsightsBlocks({ insights }: { insights: WorkoutInsights }) {
     .map((lift) => ({ lift, percent: liftProgressLabel(lift) }))
     .filter((row): row is { lift: WorkoutExerciseInsight; percent: string } => Boolean(row.percent))
   const listedRows = improvingRows.length ? improvingRows : decliningRows
-  const workoutN = insights.workoutCount.current
-  const prCount = insights.prs.count
-  const activity = insights.activity
-  const prs = insights.prs.items
-  const prsVisible = prsAll ? prs : prs.slice(0, PR_PREVIEW)
-  const prsHidden = Math.max(0, prs.length - PR_PREVIEW)
 
   return (
     <div className="workout-progress-cluster">
       <section className="surface workout-progress-metric" aria-label="Прогресс по упражнениям">
         <SectionTitle>Прогресс</SectionTitle>
-        <div className="workout-progress-plaque-intro">
-          <p className="workout-progress-plaque-lead">{insight.headline}</p>
-          <div className="workout-progress-plaque-stats">
-            <p className="workout-progress-plaque-stat">
-              <strong className="workout-progress-plaque-stat-value">{workoutN}</strong>
-              <span className="workout-progress-plaque-stat-label">
-                {ruPlural(workoutN, 'тренировка', 'тренировки', 'тренировок')}
-              </span>
-            </p>
-            <p className="workout-progress-plaque-stat">
-              <strong className="workout-progress-plaque-stat-value">{prCount}</strong>
-              <span className="workout-progress-plaque-stat-label">
-                {ruPlural(prCount, 'новый рекорд', 'новых рекорда', 'новых рекордов')}
-              </span>
-            </p>
-          </div>
-        </div>
+        <p className="workout-progress-plaque-lead">{insight.headline}</p>
         {listedRows.length ? (
           <ul className="workout-insights-list">
             {listedRows.map(({ lift, percent }) => (
@@ -298,106 +340,34 @@ function InsightsBlocks({ insights }: { insights: WorkoutInsights }) {
         </section>
 
         <section className="surface workout-progress-metric workout-progress-tile" aria-label="Объём">
-          <SectionTitle
-            action={
-              <HintTip label="Что считается объёмом">
+          <SectionTitle>
+            <span className="workout-metric-heading">
+              Объём
+              <HintTip label="Что считается объёмом" popAlign="start">
                 Сумма вес × повторы всех рабочих подходов за выбранный период.
               </HintTip>
-            }
-          >
-            Объём
+            </span>
           </SectionTitle>
           <div className="workout-progress-hero">
             <strong className="workout-progress-hero-value">
               {insights.volume.current > 0 ? `${formatVolume(insights.volume.current)} кг` : '—'}
             </strong>
-            <HeroDelta text={volumeHeroDelta} tone={volumeTone} />
           </div>
-          <p className="workout-progress-caption muted">{'\u00a0'}</p>
+          <p
+            className={`workout-progress-caption${
+              volumeHeroDelta
+                ? volumeTone === 'up'
+                  ? ' is-up'
+                  : volumeTone === 'down'
+                    ? ' is-down'
+                    : ' is-flat'
+                : ' muted'
+            }`}
+          >
+            {volumeHeroDelta || '\u00a0'}
+          </p>
         </section>
       </div>
-
-      <section className="surface workout-progress-metric" aria-label="Рекорды">
-        <SectionTitle
-          action={
-            insights.prs.count > 0 ? (
-              <button
-                type="button"
-                className="section-action workout-insights-more"
-                aria-expanded={prsOpen}
-                onClick={() => {
-                  setPrsOpen((v) => {
-                    if (v) setPrsAll(false)
-                    return !v
-                  })
-                }}
-              >
-                {`${insights.prs.count} ${ruPlural(
-                  insights.prs.count,
-                  'новый рекорд',
-                  'новых рекорда',
-                  'новых рекордов',
-                )}`}
-                <ChevronDown size={16} aria-hidden className={prsOpen ? 'is-open' : undefined} />
-              </button>
-            ) : (
-              <span className="muted">Нет новых рекордов</span>
-            )
-          }
-        >
-          Рекорды
-        </SectionTitle>
-        {prsOpen && insights.prs.count > 0 ? (
-          <>
-            <ul className="workout-insights-list">
-              {prsVisible.map((pr) => (
-                <li key={`${pr.name}-${pr.at}-${pr.kind}`} className="workout-insights-lift">
-                  <strong>{pr.name}</strong>
-                  <div className="workout-insights-lift-meta">
-                    <span className="muted">{formatSetPair(pr.weightKg, pr.reps)}</span>
-                    <span className="workout-insights-lift-delta is-up">{prGainLabel(pr)}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            {prsHidden > 0 && !prsAll ? (
-              <button
-                type="button"
-                className="section-action workout-insights-more"
-                onClick={() => setPrsAll(true)}
-              >
-                Ещё {prsHidden}
-                <ChevronDown size={16} aria-hidden />
-              </button>
-            ) : null}
-          </>
-        ) : null}
-      </section>
-
-      {activity ? (
-        <section className="surface workout-progress-metric" aria-label="Посещения зала">
-          <SectionTitle>
-            <span className="workout-metric-heading">
-              Посещения зала
-              <HintTip label="Что такое посещения зала" popAlign="start">
-                Отметки «Я в зале», не записанные тренировки.
-              </HintTip>
-            </span>
-          </SectionTitle>
-          <p className="workout-progress-stat-line">
-            {activity.visits}{' '}
-            <span className="workout-progress-stat-unit">
-              {ruPlural(activity.visits, 'посещение', 'посещения', 'посещений')}
-            </span>
-          </p>
-          <p className="workout-progress-caption muted">
-            {formatMinutesRu(activity.totalMinutes, 'long')}
-            {activity.avgMinutes > 0
-              ? ` · среднее ${formatMinutesRu(activity.avgMinutes, 'long')}`
-              : ''}
-          </p>
-        </section>
-      ) : null}
     </div>
   )
 }
@@ -781,6 +751,12 @@ export function WorkoutsProgressPage() {
                 ) : null}
             </section>
             ) : null}
+          </div>
+        ) : null}
+
+        {showInsights && progress ? (
+          <div className="workout-progress-cluster">
+            <RecordsBlock insights={progress.insights} />
           </div>
         ) : null}
       </div>
