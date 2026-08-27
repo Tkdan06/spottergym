@@ -175,11 +175,19 @@ export function ChatPage() {
   }, [conversationId, apiOnline, markRead])
 
   /**
-   * Pin the chat column to the visual viewport so the composer sits on the
-   * keyboard. Height-only math fails on iOS PWA: innerHeight often shrinks
-   * with the keyboard, so overlap reads as 0 and safe-area padding stays —
-   * leaving a gap above the keys. `top` + `bottom` follow the visible box
-   * instead; padding drops while the composer is focused.
+   * Keep the thread + composer in the visible hole above the keyboard.
+   *
+   * Why the previous attempts failed:
+   * - `position: fixed; bottom: 0` is the layout viewport on iOS PWA. The
+   *   keyboard overlays that viewport, so the composer sits *behind* the keys.
+   * - `innerHeight - visualViewport.height` is often 0 because WebKit already
+   *   shrank innerHeight, so we thought the keyboard was closed and left
+   *   home-indicator padding (gap) — or we zeroed padding and stretched
+   *   fixed-bottom under the keys.
+   *
+   * What works: document-flow column sized to visualViewport.height, shifted
+   * by offsetTop so header + thread + composer sit in the visible hole.
+   * Padding off while typing so the home indicator does not leave a gap.
    */
   useEffect(() => {
     const root = document.documentElement
@@ -193,13 +201,23 @@ export function ChatPage() {
     root.style.overflow = 'hidden'
     body.style.overflow = 'hidden'
 
+    let restVisible = Math.round(window.visualViewport?.height ?? window.innerHeight)
+
     const desktop = () => window.matchMedia('(min-width: 900px)').matches
 
     const clearPin = () => {
-      page.classList.remove('chat-page--pinned', 'is-keyboard')
+      page.classList.remove('is-keyboard')
+      page.style.height = ''
+      page.style.minHeight = ''
+      page.style.maxHeight = ''
+      page.style.paddingBottom = ''
       page.style.top = ''
       page.style.bottom = ''
-      page.style.paddingBottom = ''
+      page.style.left = ''
+      page.style.right = ''
+      page.style.width = ''
+      page.style.position = ''
+      page.style.transform = ''
     }
 
     const sync = () => {
@@ -208,30 +226,41 @@ export function ChatPage() {
         return
       }
       if (window.scrollY !== 0 || window.scrollX !== 0) window.scrollTo(0, 0)
-      const vv = window.visualViewport
-      const top = Math.round(vv?.offsetTop ?? 0)
-      const visible = Math.round(vv?.height ?? window.innerHeight)
-      const bottomGap = Math.max(0, window.innerHeight - top - visible)
-      const focused = document.activeElement === inputRef.current
-      const keyboardOpen = focused || bottomGap > 40
 
-      page.classList.add('chat-page--pinned')
+      const vv = window.visualViewport
+      const offsetTop = Math.round(vv?.offsetTop ?? 0)
+      const visible = Math.round(vv?.height ?? window.innerHeight)
+      const focused = document.activeElement === inputRef.current
+      if (!focused) restVisible = Math.max(restVisible, visible)
+
+      const keyboardOpen = focused || restVisible - visible > 80
+      const height = Math.max(1, visible)
+
       page.classList.toggle('is-keyboard', keyboardOpen)
-      page.style.top = `${top}px`
-      page.style.bottom = `${bottomGap}px`
+      page.style.position = 'relative'
+      page.style.top = ''
+      page.style.bottom = ''
+      page.style.height = `${height}px`
+      page.style.minHeight = `${height}px`
+      page.style.maxHeight = `${height}px`
+      page.style.transform = offsetTop ? `translateY(${offsetTop}px)` : ''
       page.style.paddingBottom = keyboardOpen ? '0px' : ''
-      root.style.setProperty('--chat-keyboard', `${bottomGap}px`)
+      root.style.setProperty('--chat-keyboard', keyboardOpen ? `${Math.max(0, restVisible - visible)}px` : '0px')
       if (keyboardOpen) scrollThreadToEnd()
     }
 
-    let focusTimer = 0
+    const focusTimers: number[] = []
     const onFocusIn = () => {
-      window.clearTimeout(focusTimer)
+      focusTimers.splice(0).forEach((id) => window.clearTimeout(id))
       sync()
+      // iOS fires visualViewport after the keyboard animation, not on focus.
+      ;[50, 180, 350].forEach((ms) => {
+        focusTimers.push(window.setTimeout(sync, ms))
+      })
     }
     const onFocusOut = () => {
-      window.clearTimeout(focusTimer)
-      focusTimer = window.setTimeout(sync, 280)
+      focusTimers.splice(0).forEach((id) => window.clearTimeout(id))
+      focusTimers.push(window.setTimeout(sync, 280))
     }
 
     sync()
@@ -242,7 +271,7 @@ export function ChatPage() {
     document.addEventListener('focusin', onFocusIn)
     document.addEventListener('focusout', onFocusOut)
     return () => {
-      window.clearTimeout(focusTimer)
+      focusTimers.splice(0).forEach((id) => window.clearTimeout(id))
       vv?.removeEventListener('resize', sync)
       vv?.removeEventListener('scroll', sync)
       window.removeEventListener('resize', sync)

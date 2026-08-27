@@ -688,10 +688,11 @@
   top: calc(100% + 8px);
   right: 0;
   left: auto;
-  width: min(280px, calc(100vw - 32px));
-  max-width: min(280px, 100%);
+  width: min(360px, calc(100vw - 32px));
+  max-width: min(360px, calc(100vw - 32px));
   white-space: normal;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 .workout-progress-metric-empty {

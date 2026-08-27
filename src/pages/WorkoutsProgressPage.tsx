@@ -344,7 +344,7 @@ function InsightsBlocks({ insights }: { insights: WorkoutInsights }) {
             <span className="workout-metric-heading">
               Объём
               <HintTip label="Что считается объёмом">
-                Сумма вес × повторы всех рабочих подходов за выбранный период.
+                Сколько килограммов ты поднял за выбранный период. Вес каждого рабочего подхода умножаем на повторы и складываем.
               </HintTip>
             </span>
           </SectionTitle>
