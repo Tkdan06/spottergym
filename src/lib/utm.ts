@@ -1,4 +1,10 @@
 const STORAGE_KEY = 'spotter_utm_v1'
+const SEARCH_TOUCH_KEY = 'spotter_search_touch_v1'
+
+export type SearchTouch = {
+  referrer: string
+  landingSearch: string
+}
 
 const UTM_KEYS = [
   'utm_source',
@@ -50,6 +56,44 @@ export function loadMarketingParams(): SpotterUtm {
     return out
   } catch {
     return {}
+  }
+}
+
+/** First-touch document.referrer + landing query (Google/Yandex). Do not overwrite. */
+export function captureSearchTouch() {
+  if (typeof window === 'undefined') return
+  try {
+    if (sessionStorage.getItem(SEARCH_TOUCH_KEY)) return
+    const payload: SearchTouch = {
+      referrer: typeof document !== 'undefined' ? document.referrer.slice(0, 500) : '',
+      landingSearch: window.location.search.slice(0, 400),
+    }
+    sessionStorage.setItem(SEARCH_TOUCH_KEY, JSON.stringify(payload))
+  } catch {
+    /* private mode / quota */
+  }
+}
+
+export function loadSearchTouch(): SearchTouch {
+  if (typeof window === 'undefined') return { referrer: '', landingSearch: '' }
+  try {
+    const raw = sessionStorage.getItem(SEARCH_TOUCH_KEY)
+    if (!raw) {
+      return {
+        referrer: typeof document !== 'undefined' ? document.referrer.slice(0, 500) : '',
+        landingSearch: window.location.search.slice(0, 400),
+      }
+    }
+    const parsed = JSON.parse(raw) as unknown
+    if (!parsed || typeof parsed !== 'object') return { referrer: '', landingSearch: '' }
+    const referrer = (parsed as SearchTouch).referrer
+    const landingSearch = (parsed as SearchTouch).landingSearch
+    return {
+      referrer: typeof referrer === 'string' ? referrer.slice(0, 500) : '',
+      landingSearch: typeof landingSearch === 'string' ? landingSearch.slice(0, 400) : '',
+    }
+  } catch {
+    return { referrer: '', landingSearch: '' }
   }
 }
 

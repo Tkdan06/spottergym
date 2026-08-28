@@ -115,26 +115,8 @@ export function LandingCoachesPage() {
   useEffect(() => {
     captureMarketingParams(search)
     captureMarketingParams(`from=${FROM}`)
-    trackLanding('view', { path: `/${FROM}` })
     return attachLandingScrollTracking()
   }, [search])
-
-  useEffect(() => {
-    const prev = document.title
-    document.title = LANDING_COACHES.metaTitle
-    let meta = document.querySelector('meta[name="description"]')
-    const prevDesc = meta?.getAttribute('content') ?? null
-    if (!meta) {
-      meta = document.createElement('meta')
-      meta.setAttribute('name', 'description')
-      document.head.appendChild(meta)
-    }
-    meta.setAttribute('content', LANDING_COACHES.metaDescription)
-    return () => {
-      document.title = prev
-      if (meta && prevDesc != null) meta.setAttribute('content', prevDesc)
-    }
-  }, [])
 
   return (
     <div className="app-shell">
@@ -226,6 +208,8 @@ export function LandingCoachesPage() {
             <a href="mailto:info@spottergym.ru">info@spottergym.ru</a>
             {' · '}
             <Link to="/terms?from=lp-coaches">Пользовательское соглашение</Link>
+            {' · '}
+            <Link to="/guide">Как это работает</Link>
             {' · '}
             <Link to="/lp">Основной лендинг</Link>
           </p>

@@ -1,6 +1,8 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AppLayout } from './components/AppLayout'
 import { InviteCapture } from './components/InviteCapture'
+import { PublicTrafficCapture } from './components/PublicTrafficCapture'
+import { SeoHead } from './components/SeoHead'
 import { GuestOnly, ProtectedRoute } from './components/ProtectedRoute'
 import { AppProvider } from './context/AppContext'
 import { MomentProvider } from './components/MomentFX'
@@ -25,6 +27,7 @@ import { ChatPage } from './pages/ChatPage'
 import { DiscoverPage } from './pages/DiscoverPage'
 import { FeedbackPage } from './pages/FeedbackPage'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
+import { GuideArticlePage, GuideIndexPage } from './pages/GuidePage'
 import { GymDetailPage } from './pages/GymDetailPage'
 import { HomePage } from './pages/HomePage'
 import { InstallGuidePage } from './pages/InstallGuidePage'
@@ -52,6 +55,8 @@ export default function App() {
       <MomentProvider>
       <BrowserRouter>
         <InviteCapture />
+        <SeoHead />
+        <PublicTrafficCapture />
         <Routes>
           <Route element={<GuestOnly />}>
             <Route path="/" element={<WelcomePage />} />
@@ -63,6 +68,8 @@ export default function App() {
           {/* Ad landings — public even if logged in (preview + cold traffic) */}
           <Route path="/lp" element={<LandingPage />} />
           <Route path="/lp-coaches" element={<LandingCoachesPage />} />
+          <Route path="/guide" element={<GuideIndexPage />} />
+          <Route path="/guide/:slug" element={<GuideArticlePage />} />
 
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />

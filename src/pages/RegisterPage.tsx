@@ -11,7 +11,7 @@ import {
 import { displayNameFieldProps } from '../lib/inputAttrs'
 import { persistInviteFrom } from '../lib/inviteShare'
 import { trackLanding } from '../lib/landingTrack'
-import { captureMarketingParams, loadMarketingParams } from '../lib/utm'
+import { captureMarketingParams, captureSearchTouch } from '../lib/utm'
 import { consumeTermsAcceptedFlag } from '../lib/termsAcceptance'
 import type { Gender } from '../types'
 import './AuthPages.css'
@@ -41,9 +41,8 @@ export function RegisterPage() {
   useEffect(() => {
     persistInviteFrom(searchParams.get('invite'))
     captureMarketingParams(location.search)
-    const fromLp =
-      searchParams.get('from') === 'lp' || loadMarketingParams().from === 'lp'
-    if (fromLp) trackLanding('register_view', { path: '/register' })
+    captureSearchTouch()
+    trackLanding('register_view', { path: '/register' })
   }, [searchParams, location.search])
 
   useEffect(() => {
@@ -62,9 +61,7 @@ export function RegisterPage() {
     setError('')
     try {
       await register(name.trim(), email, password, gender)
-      const fromLp =
-        searchParams.get('from') === 'lp' || loadMarketingParams().from === 'lp'
-      if (fromLp) trackLanding('register_success', { path: '/register' })
+      trackLanding('register_success', { path: '/register' })
       navigate('/onboarding')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось зарегистрироваться')

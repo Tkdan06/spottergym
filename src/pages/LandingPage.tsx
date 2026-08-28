@@ -207,26 +207,8 @@ export function LandingPage() {
   useEffect(() => {
     captureMarketingParams(search)
     captureMarketingParams('from=lp')
-    trackLanding('view', { path: '/lp' })
     return attachLandingScrollTracking()
   }, [search])
-
-  useEffect(() => {
-    const prev = document.title
-    document.title = LANDING.metaTitle
-    let meta = document.querySelector('meta[name="description"]')
-    const prevDesc = meta?.getAttribute('content') ?? null
-    if (!meta) {
-      meta = document.createElement('meta')
-      meta.setAttribute('name', 'description')
-      document.head.appendChild(meta)
-    }
-    meta.setAttribute('content', LANDING.metaDescription)
-    return () => {
-      document.title = prev
-      if (meta && prevDesc != null) meta.setAttribute('content', prevDesc)
-    }
-  }, [])
 
   return (
     <div className="app-shell">
@@ -304,6 +286,8 @@ export function LandingPage() {
             <a href="mailto:info@spottergym.ru">info@spottergym.ru</a>
             {' · '}
             <Link to="/terms?from=lp">Пользовательское соглашение</Link>
+            {' · '}
+            <Link to="/guide">Как это работает</Link>
           </p>
         </footer>
       </main>

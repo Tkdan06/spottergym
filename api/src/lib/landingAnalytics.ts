@@ -32,6 +32,11 @@ export async function logLandingEvent(input: {
   utmContent?: string
   utmTerm?: string
   fromParam?: string
+  referrer?: string
+  searchEngine?: string
+  searchKeyword?: string
+  clickId?: string
+  searchPaid?: boolean
   userAgent?: string
   ip?: string
   userId?: string | null
@@ -69,6 +74,11 @@ export async function logLandingEvent(input: {
         utmContent: clip(input.utmContent, 120),
         utmTerm: clip(input.utmTerm, 120),
         fromParam: clip(input.fromParam, 40),
+        referrer: clip(input.referrer, 500),
+        searchEngine: clip(input.searchEngine, 20),
+        searchKeyword: clip(input.searchKeyword, 120),
+        clickId: clip(input.clickId, 80),
+        searchPaid: Boolean(input.searchPaid),
         userAgent: clip(input.userAgent, 240),
         ip: clip(input.ip, 64),
         userId: input.userId || null,
@@ -108,15 +118,147 @@ async function countName(since: Date, name: LandingEventName) {
   return prisma.landingEvent.count({ where: { createdAt: { gte: since }, name } })
 }
 
-async function uniqueVisitors(since: Date, name?: LandingEventName) {
+async function uniqueVisitorsWhere(
+  since: Date,
+  extra: { name?: LandingEventName; searchEngine?: string; searchPaid?: boolean } = {},
+) {
   const rows = await prisma.landingEvent.groupBy({
     by: ['visitorId'],
     where: {
       createdAt: { gte: since },
-      ...(name ? { name } : { name: 'view' }),
+      ...(extra.name ? { name: extra.name } : { name: 'view' }),
+      ...(extra.searchEngine != null ? { searchEngine: extra.searchEngine } : {}),
+      ...(extra.searchPaid != null ? { searchPaid: extra.searchPaid } : {}),
     },
   })
   return rows.length
+}
+
+async function uniqueVisitors(since: Date, name?: LandingEventName) {
+  return uniqueVisitorsWhere(since, name ? { name } : {})
+}
+
+type SearchEngineRow = {
+  engine: string
+  views: number
+  uniqueVisitors: number
+  registerSuccess: number
+  registerUnique: number
+  paidViews: number
+  organicViews: number
+}
+
+type SearchKeywordRow = {
+  keyword: string
+  engine: string
+  views: number
+  registerSuccess: number
+}
+
+async function buildSearchWindow(since: Date) {
+  const engines = ['google', 'yandex', 'bing', 'other'] as const
+  const engineRows: SearchEngineRow[] = []
+  for (const engine of engines) {
+    const [views, unique, registerSuccess, registerUnique, paidViews, organicViews] = await Promise.all([
+      prisma.landingEvent.count({
+        where: { createdAt: { gte: since }, name: 'view', searchEngine: engine },
+      }),
+      uniqueVisitorsWhere(since, { name: 'view', searchEngine: engine }),
+      prisma.landingEvent.count({
+        where: { createdAt: { gte: since }, name: 'register_success', searchEngine: engine },
+      }),
+      uniqueVisitorsWhere(since, { name: 'register_success', searchEngine: engine }),
+      prisma.landingEvent.count({
+        where: { createdAt: { gte: since }, name: 'view', searchEngine: engine, searchPaid: true },
+      }),
+      prisma.landingEvent.count({
+        where: { createdAt: { gte: since }, name: 'view', searchEngine: engine, searchPaid: false },
+      }),
+    ])
+    if (views + registerSuccess === 0) continue
+    engineRows.push({
+      engine,
+      views,
+      uniqueVisitors: unique,
+      registerSuccess,
+      registerUnique,
+      paidViews,
+      organicViews,
+    })
+  }
+  engineRows.sort((a, b) => b.views - a.views || b.registerSuccess - a.registerSuccess)
+
+  const [viewKw, regKw] = await Promise.all([
+    prisma.landingEvent.groupBy({
+      by: ['searchKeyword', 'searchEngine'],
+      where: {
+        createdAt: { gte: since },
+        name: 'view',
+        searchKeyword: { not: '' },
+      },
+      _count: { _all: true },
+    }),
+    prisma.landingEvent.groupBy({
+      by: ['searchKeyword', 'searchEngine'],
+      where: {
+        createdAt: { gte: since },
+        name: 'register_success',
+        searchKeyword: { not: '' },
+      },
+      _count: { _all: true },
+    }),
+  ])
+
+  const kwMap = new Map<string, SearchKeywordRow>()
+  for (const row of viewKw) {
+    const key = `${row.searchEngine}\0${row.searchKeyword}`
+    kwMap.set(key, {
+      keyword: row.searchKeyword,
+      engine: row.searchEngine,
+      views: row._count._all,
+      registerSuccess: 0,
+    })
+  }
+  for (const row of regKw) {
+    const key = `${row.searchEngine}\0${row.searchKeyword}`
+    const cur = kwMap.get(key) || {
+      keyword: row.searchKeyword,
+      engine: row.searchEngine,
+      views: 0,
+      registerSuccess: 0,
+    }
+    cur.registerSuccess += row._count._all
+    kwMap.set(key, cur)
+  }
+
+  const keywords = [...kwMap.values()]
+    .sort((a, b) => b.registerSuccess - a.registerSuccess || b.views - a.views)
+    .slice(0, 30)
+
+  const [searchViews, searchRegisters, unknownKeywordViews] = await Promise.all([
+    prisma.landingEvent.count({
+      where: { createdAt: { gte: since }, name: 'view', searchEngine: { not: '' } },
+    }),
+    prisma.landingEvent.count({
+      where: { createdAt: { gte: since }, name: 'register_success', searchEngine: { not: '' } },
+    }),
+    prisma.landingEvent.count({
+      where: {
+        createdAt: { gte: since },
+        name: 'view',
+        searchEngine: { not: '' },
+        searchKeyword: '',
+      },
+    }),
+  ])
+
+  return {
+    searchViews,
+    searchRegisters,
+    unknownKeywordViews,
+    engines: engineRows,
+    keywords,
+  }
 }
 
 async function buildWindow(since: Date): Promise<WindowStats> {
@@ -191,7 +333,7 @@ export async function buildLandingAnalytics() {
   const t7 = new Date(now - 7 * 24 * 60 * 60 * 1000)
   const t30 = new Date(now - 30 * 24 * 60 * 60 * 1000)
 
-  const [last24h, last7d, last30d, campaignRows, recent] = await Promise.all([
+  const [last24h, last7d, last30d, campaignRows, recent, search7d, search30d] = await Promise.all([
     buildWindow(t24),
     buildWindow(t7),
     buildWindow(t30),
@@ -211,10 +353,15 @@ export async function buildLandingAnalytics() {
         utmCampaign: true,
         utmContent: true,
         fromParam: true,
+        searchEngine: true,
+        searchKeyword: true,
+        searchPaid: true,
         visitorId: true,
         createdAt: true,
       },
     }),
+    buildSearchWindow(t7),
+    buildSearchWindow(t30),
   ])
 
   type CampaignAgg = {
@@ -249,6 +396,8 @@ export async function buildLandingAnalytics() {
     last7d,
     last30d,
     campaigns7d,
+    search7d,
+    search30d,
     recent: recent.map((r) => ({
       ...r,
       createdAt: r.createdAt.toISOString(),

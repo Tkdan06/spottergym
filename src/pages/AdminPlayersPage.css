@@ -339,6 +339,12 @@
   padding-right: 2px;
 }
 
+.admin-search-keywords-title {
+  margin: 16px 0 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
 .admin-player-row {
   display: grid;
   gap: 4px;

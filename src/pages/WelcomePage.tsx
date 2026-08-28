@@ -67,6 +67,8 @@ export function WelcomePage() {
             <a href="mailto:info@spottergym.ru">info@spottergym.ru</a>
             {' · '}
             <Link to="/terms?from=welcome">Пользовательское соглашение</Link>
+            {' · '}
+            <Link to="/guide">Как это работает</Link>
           </p>
         </footer>
       </main>

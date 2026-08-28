@@ -883,6 +883,27 @@ export type LandingFunnelWindow = {
   viewToRegisterPct: number | null
 }
 
+export type LandingSearchWindow = {
+  searchViews: number
+  searchRegisters: number
+  unknownKeywordViews: number
+  engines: {
+    engine: string
+    views: number
+    uniqueVisitors: number
+    registerSuccess: number
+    registerUnique: number
+    paidViews: number
+    organicViews: number
+  }[]
+  keywords: {
+    keyword: string
+    engine: string
+    views: number
+    registerSuccess: number
+  }[]
+}
+
 export type LandingAnalytics = {
   generatedAt: string
   last24h: LandingFunnelWindow
@@ -894,6 +915,8 @@ export type LandingAnalytics = {
     ctaRegister: number
     registerSuccess: number
   }[]
+  search7d: LandingSearchWindow
+  search30d: LandingSearchWindow
   recent: {
     id: string
     name: string
@@ -902,6 +925,9 @@ export type LandingAnalytics = {
     utmCampaign: string
     utmContent: string
     fromParam: string
+    searchEngine: string
+    searchKeyword: string
+    searchPaid: boolean
     visitorId: string
     createdAt: string
   }[]

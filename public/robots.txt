@@ -1,12 +1,18 @@
 # Spotter — indexing rules for Googlebot & Yandex
 User-agent: *
 Allow: /
-Disallow: /app/messages
-Disallow: /app/settings
+Allow: /lp
+Allow: /lp-coaches
+Allow: /guide
+Allow: /register
+Allow: /login
+Allow: /terms
+Disallow: /app
 Disallow: /onboarding
+Disallow: /forgot-password
+Disallow: /reset-password
 
 # Ignore tracking params (Yandex Clean-param)
-Clean-param: utm_source&utm_medium&utm_campaign&utm_content&utm_term&yclid&gclid&fbclid /
+Clean-param: utm_source&utm_medium&utm_campaign&utm_content&utm_term&yclid&gclid&ysclid&fbclid /
 
-# Replace with your production domain before release
-Sitemap: https://spotter.app/sitemap.xml
+Sitemap: https://spottergym.ru/sitemap.xml

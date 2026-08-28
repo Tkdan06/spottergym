@@ -187,17 +187,23 @@ model LandingEvent {
   utmCampaign String   @default("")
   utmContent  String   @default("")
   utmTerm     String   @default("")
-  fromParam   String   @default("")
-  userAgent   String   @default("")
-  ip          String   @default("")
-  userId      String?
-  createdAt   DateTime @default(now())
+  fromParam     String   @default("")
+  referrer      String   @default("")
+  searchEngine  String   @default("")
+  searchKeyword String   @default("")
+  clickId       String   @default("")
+  searchPaid    Boolean  @default(false)
+  userAgent     String   @default("")
+  ip            String   @default("")
+  userId        String?
+  createdAt     DateTime @default(now())
 
   @@index([createdAt])
   @@index([name, createdAt])
   @@index([visitorId, name, createdAt])
   @@index([utmCampaign, createdAt])
   @@index([sessionId, name])
+  @@index([searchEngine, createdAt])
 }
 
 /** Web Push endpoints for installed PWA (home screen) */

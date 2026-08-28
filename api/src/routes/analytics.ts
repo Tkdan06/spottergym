@@ -4,6 +4,7 @@ import {
   isLandingEventName,
   logLandingEvent,
 } from '../lib/landingAnalytics.js'
+import { parseSearchAttribution } from '../lib/searchAttribution.js'
 import { clientIp, rateLimit } from '../middleware/rateLimit.js'
 
 export const analyticsRoutes = new Hono()
@@ -20,6 +21,8 @@ const eventSchema = z.object({
   utmContent: z.string().max(120).optional(),
   utmTerm: z.string().max(120).optional(),
   fromParam: z.string().max(40).optional(),
+  referrer: z.string().max(500).optional(),
+  landingSearch: z.string().max(400).optional(),
   userId: z.string().max(64).optional().nullable(),
 })
 
@@ -34,9 +37,31 @@ analyticsRoutes.post(
       return c.json({ error: 'Неизвестное событие' }, 400)
     }
 
+    const eventName = parsed.data.name
+    const rest = parsed.data
+    const search = parseSearchAttribution({
+      referrer: rest.referrer,
+      landingSearch: rest.landingSearch,
+    })
+
     const result = await logLandingEvent({
-      ...parsed.data,
-      name: parsed.data.name,
+      name: eventName,
+      visitorId: rest.visitorId,
+      sessionId: rest.sessionId,
+      placement: rest.placement,
+      path: rest.path,
+      utmSource: rest.utmSource,
+      utmMedium: rest.utmMedium,
+      utmCampaign: rest.utmCampaign,
+      utmContent: rest.utmContent,
+      utmTerm: rest.utmTerm,
+      fromParam: rest.fromParam,
+      referrer: rest.referrer,
+      searchEngine: search.searchEngine,
+      searchKeyword: search.searchKeyword || rest.utmTerm,
+      clickId: search.clickId,
+      searchPaid: search.paid,
+      userId: rest.userId,
       userAgent: c.req.header('user-agent') || '',
       ip: clientIp(c),
     })

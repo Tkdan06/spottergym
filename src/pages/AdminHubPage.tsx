@@ -291,8 +291,8 @@ export function AdminHubPage() {
             </Link>
             <Link to="/app/admin/landing" className="admin-hub-card">
               <Megaphone size={20} />
-              <strong>Лендинг /lp</strong>
-              <p className="muted">Визиты, скролл, CTA и регистрации с рекламы</p>
+              <strong>Трафик и поиск</strong>
+              <p className="muted">Лендинг, Google, Яндекс, ключи и регистрации</p>
             </Link>
           </>
         ) : null}

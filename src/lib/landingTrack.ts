@@ -1,5 +1,5 @@
 import { getApiBase } from './apiClient'
-import { loadMarketingParams } from './utm'
+import { loadMarketingParams, loadSearchTouch } from './utm'
 
 const VISITOR_KEY = 'spotter_lp_vid'
 const SESSION_KEY = 'spotter_lp_sid'
@@ -70,11 +70,17 @@ function markFired(key: string) {
 }
 
 /** Fire-and-forget landing funnel event (no throw). */
+function looksLikeBot() {
+  const ua = typeof navigator !== 'undefined' ? navigator.userAgent : ''
+  return /bot|crawl|spider|slurp|yandexbot|googlebot|bingbot|duckduckbot/i.test(ua)
+}
+
 export function trackLanding(
   name: LandingTrackName,
   opts: { placement?: string; path?: string; onceKey?: string } = {},
 ) {
   if (typeof window === 'undefined') return
+  if (looksLikeBot()) return
   const onceKey = opts.onceKey || name
   if (
     name === 'view' ||
@@ -87,6 +93,7 @@ export function trackLanding(
   }
 
   const utm = loadMarketingParams()
+  const touch = loadSearchTouch()
   const body = {
     name,
     visitorId: getLandingVisitorId(),
@@ -99,6 +106,8 @@ export function trackLanding(
     utmContent: utm.utm_content || '',
     utmTerm: utm.utm_term || '',
     fromParam: utm.from || '',
+    referrer: touch.referrer || '',
+    landingSearch: touch.landingSearch || window.location.search || '',
   }
 
   void fetch(`${getApiBase()}/analytics/lp`, {
