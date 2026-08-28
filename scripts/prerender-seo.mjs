@@ -98,3 +98,6 @@ for (const page of catalog.pages) {
   writeFileSync(file, next)
   console.log(`[seo] ${page.path} → ${file.replace(root + '/', '')}`)
 }
+
+writeFileSync(join(root, 'dist/.nojekyll'), '')
+writeFileSync(join(root, 'dist/guide/404.html'), readFileSync(join(root, 'dist/guide/index.html')))

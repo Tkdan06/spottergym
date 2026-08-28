@@ -29,7 +29,7 @@ export function GuideIndexPage() {
         <Link to="/" className="brand-mark auth-brand">
           SPOT<span>TER</span>
         </Link>
-        <p className="guide-kicker">Справка</p>
+        <p className="guide-kicker">Гид</p>
         <h1>Как устроен Spotter</h1>
         <p className="muted guide-lead">{GUIDE_INDEX_LEAD}</p>
         <ul className="guide-list">

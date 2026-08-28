@@ -23,7 +23,7 @@
 
 .guide-lead {
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .guide-list {
@@ -64,9 +64,8 @@
 }
 
 .guide-section p {
-  margin: 0 0 10px;
-  line-height: 1.5;
-  color: var(--text-muted);
+  margin: 0 0 12px;
+  line-height: 1.55;
 }
 
 .guide-section p:last-child {

@@ -1,6 +1,7 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { AppLayout } from './components/AppLayout'
 import { InviteCapture } from './components/InviteCapture'
+import { NormalizePathname } from './components/NormalizePathname'
 import { PublicTrafficCapture } from './components/PublicTrafficCapture'
 import { SeoHead } from './components/SeoHead'
 import { GuestOnly, ProtectedRoute } from './components/ProtectedRoute'
@@ -49,11 +50,17 @@ import { UiKitPage } from './pages/UiKitPage'
 import { UserProfilePage } from './pages/UserProfilePage'
 import { WelcomePage } from './pages/WelcomePage'
 
+function AppGuideRedirect() {
+  const { slug } = useParams()
+  return <Navigate to={slug ? `/guide/${slug}` : '/guide'} replace />
+}
+
 export default function App() {
   return (
     <AppProvider>
       <MomentProvider>
       <BrowserRouter>
+        <NormalizePathname />
         <InviteCapture />
         <SeoHead />
         <PublicTrafficCapture />
@@ -70,6 +77,7 @@ export default function App() {
           <Route path="/lp-coaches" element={<LandingCoachesPage />} />
           <Route path="/guide" element={<GuideIndexPage />} />
           <Route path="/guide/:slug" element={<GuideArticlePage />} />
+          <Route path="/guide/:slug/*" element={<GuideArticlePage />} />
 
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -112,6 +120,8 @@ export default function App() {
               <Route path="notifications" element={<NotificationsPage />} />
               <Route path="install" element={<InstallGuidePage />} />
               <Route path="settings" element={<SettingsPage />} />
+              <Route path="guide" element={<Navigate to="/guide" replace />} />
+              <Route path="guide/:slug" element={<AppGuideRedirect />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Route>

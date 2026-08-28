@@ -164,6 +164,12 @@
     <script>
       ;(function () {
         try {
+          var p = location.pathname
+          var next = p.replace(/\/index\.html$/i, '').replace(/\/+$/, '')
+          if (!next) next = '/'
+          if (next !== p) history.replaceState(null, '', next + location.search + location.hash)
+        } catch (e) {}
+        try {
           var n = window.navigator
           var standalone = n.standalone === true || window.matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches
           if (standalone) document.documentElement.classList.add('standalone')

@@ -14,6 +14,7 @@ import '@fontsource/onest/600.css'
 import App from './App'
 import { EmergencyOfflineGate } from './components/EmergencyOfflineGate'
 import { SiteLockGate } from './components/SiteLockGate'
+import { currentUrlAfterNormalize } from './lib/normalizePathname'
 import { startPwaViewportSync } from './lib/pwaViewport'
 import { registerSpotterServiceWorker } from './lib/push'
 import './styles/color-themes.css'
@@ -33,6 +34,12 @@ function markStandaloneLaunch() {
 }
 
 markStandaloneLaunch()
+try {
+  const normalized = currentUrlAfterNormalize()
+  if (normalized) window.history.replaceState(null, '', normalized)
+} catch {
+  /* ignore */
+}
 startPwaViewportSync()
 void registerSpotterServiceWorker()
 
