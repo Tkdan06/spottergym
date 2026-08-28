@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   ChevronDown,
   ChevronRight,
@@ -109,14 +109,7 @@ export function WorkoutsPage() {
     }
   }
 
-  const showStrip = useMemo(() => {
-    if (!progress) return false
-    const h = progress.highlight
-    return (
-      h.bodyLatestKg != null ||
-      (h.liftName != null && (h.liftDeltaWeightKg != null || h.liftDeltaReps != null))
-    )
-  }, [progress])
+  const showStrip = !loading && (list.length > 0 || totalCount > 0)
 
   if (!user) return <Navigate to="/login" replace />
 
@@ -159,14 +152,14 @@ export function WorkoutsPage() {
           </p>
         ) : null}
 
-        {!loading && showStrip && progress ? (
+        {!loading && showStrip ? (
           <Link to="/app/workouts/progress" className="workouts-progress-strip">
             <div className="workouts-progress-strip-icon" aria-hidden>
               <TrendingUp size={18} />
             </div>
             <div className="workouts-progress-strip-copy">
               <strong>Прогресс</strong>
-              {progress.highlight.bodyLatestKg != null ? (
+              {progress?.highlight.bodyLatestKg != null ? (
                 <span className="muted">
                   {formatKg(progress.highlight.bodyLatestKg)}
                   {bodyDeltaText ? ` · ${bodyDeltaText} за 30д` : ''}

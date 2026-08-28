@@ -538,7 +538,7 @@ export function WorkoutsProgressPage() {
   const navigate = useNavigate()
   const { user, apiOnline } = useApp()
   const [range, setRange] = useState<WorkoutProgressRange>(() =>
-    window.location.hash === '#week-recap' ? 7 : 30,
+    window.location.hash === '#month-recap' ? 30 : 7,
   )
   const [pickedExercise, setPickedExercise] = useState<string | undefined>()
   const [pickerOpen, setPickerOpen] = useState(false)

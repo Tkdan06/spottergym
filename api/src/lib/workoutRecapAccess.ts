@@ -1,8 +1,8 @@
 import { prisma } from '../db.js'
 import { resolveAdminFlags } from './admin.js'
 
-/** Keep in sync with src/lib/workoutRecap.ts. Flip both to false to open recap to everyone. */
-export const WORKOUT_RECAP_ADMIN_ONLY = true
+/** Keep in sync with src/lib/workoutRecap.ts. Flip both to true to restrict recap to admins. */
+export const WORKOUT_RECAP_ADMIN_ONLY = false
 
 export async function userCanUseWorkoutRecap(userId: string) {
   if (!WORKOUT_RECAP_ADMIN_ONLY) return true
