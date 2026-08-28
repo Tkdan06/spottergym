@@ -3,6 +3,7 @@ import { AppLayout } from './components/AppLayout'
 import { InviteCapture } from './components/InviteCapture'
 import { NormalizePathname } from './components/NormalizePathname'
 import { PublicTrafficCapture } from './components/PublicTrafficCapture'
+import { ScrollToTop } from './components/ScrollToTop'
 import { SeoHead } from './components/SeoHead'
 import { GuestOnly, ProtectedRoute } from './components/ProtectedRoute'
 import { AppProvider } from './context/AppContext'
@@ -29,6 +30,7 @@ import { DiscoverPage } from './pages/DiscoverPage'
 import { FeedbackPage } from './pages/FeedbackPage'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { GuideArticlePage, GuideIndexPage } from './pages/GuidePage'
+import { WorkoutsGuideArticlePage, WorkoutsGuideHubPage } from './pages/WorkoutsGuidePage'
 import { GymDetailPage } from './pages/GymDetailPage'
 import { HomePage } from './pages/HomePage'
 import { InstallGuidePage } from './pages/InstallGuidePage'
@@ -61,6 +63,7 @@ export default function App() {
       <MomentProvider>
       <BrowserRouter>
         <NormalizePathname />
+        <ScrollToTop />
         <InviteCapture />
         <SeoHead />
         <PublicTrafficCapture />
@@ -76,6 +79,9 @@ export default function App() {
           <Route path="/lp" element={<LandingPage />} />
           <Route path="/lp-coaches" element={<LandingCoachesPage />} />
           <Route path="/guide" element={<GuideIndexPage />} />
+          <Route path="/guide/workouts" element={<WorkoutsGuideHubPage />} />
+          <Route path="/guide/workouts/:article" element={<WorkoutsGuideArticlePage />} />
+          <Route path="/guide/partner-po-trenirovkam" element={<Navigate to="/guide/workouts" replace />} />
           <Route path="/guide/:slug" element={<GuideArticlePage />} />
           <Route path="/guide/:slug/*" element={<GuideArticlePage />} />
 

@@ -1,26 +1,8 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
-import { GUIDE_ARTICLES, GUIDE_INDEX_LEAD, guideBySlug } from '../content/guides'
-import { registerHref } from '../lib/inviteShare'
-import { trackLanding } from '../lib/landingTrack'
+import { GUIDE_INDEX_LEAD, guideBySlug, guideIndexCards } from '../content/guides'
+import { GuideBreadcrumbs, GuideFooter, GuideParagraphs } from './guideBlocks'
 import './AuthPages.css'
 import './GuidePage.css'
-
-function GuideFooter() {
-  return (
-    <footer className="guide-footer">
-      <Link to={registerHref()} className="btn btn-primary btn-block" onClick={() => trackLanding('cta_register', { placement: 'guide' })}>
-        Создать аккаунт
-      </Link>
-      <p className="muted">
-        <Link to="/">На главную</Link>
-        {' · '}
-        <Link to="/guide">Все материалы</Link>
-        {' · '}
-        <Link to="/terms">Соглашение</Link>
-      </p>
-    </footer>
-  )
-}
 
 export function GuideIndexPage() {
   return (
@@ -29,16 +11,22 @@ export function GuideIndexPage() {
         <Link to="/" className="brand-mark auth-brand">
           SPOT<span>TER</span>
         </Link>
+        <GuideBreadcrumbs
+          items={[
+            { to: '/', label: 'Главная' },
+            { to: '/guide', label: 'Журнал' },
+          ]}
+        />
         <p className="guide-kicker">Гид</p>
         <h1>Как устроен Spotter</h1>
         <p className="muted guide-lead">{GUIDE_INDEX_LEAD}</p>
         <ul className="guide-list">
-          {GUIDE_ARTICLES.map((article) => (
-            <li key={article.slug}>
-              <Link to={article.path} className="guide-card">
-                <span className="guide-card-kicker">{article.kicker}</span>
-                <h2>{article.title}</h2>
-                <span className="muted">{article.lead}</span>
+          {guideIndexCards().map((card) => (
+            <li key={card.path}>
+              <Link to={card.path} className="guide-card">
+                <span className="guide-card-kicker">{card.kicker}</span>
+                <h2>{card.title}</h2>
+                <span className="muted">{card.preview}</span>
               </Link>
             </li>
           ))}
@@ -47,14 +35,6 @@ export function GuideIndexPage() {
       </main>
     </div>
   )
-}
-
-function GuideParagraphs({ texts }: { texts: string[] }) {
-  return texts.map((p) => (
-    <p key={p.slice(0, 64)} className={p.startsWith('«') ? 'guide-quote' : undefined}>
-      {p}
-    </p>
-  ))
 }
 
 export function GuideArticlePage() {
@@ -68,17 +48,25 @@ export function GuideArticlePage() {
         <Link to="/" className="brand-mark auth-brand">
           SPOT<span>TER</span>
         </Link>
-        <article>
-          <p className="guide-kicker">{article.kicker}</p>
-          <h1>{article.title}</h1>
-          <p className="guide-lead">{article.lead}</p>
-          {article.intro?.length ? (
-            <div className="guide-intro">
-              <GuideParagraphs texts={article.intro} />
-            </div>
-          ) : null}
+        <GuideBreadcrumbs
+          items={[
+            { to: '/', label: 'Главная' },
+            { to: '/guide', label: 'Журнал' },
+            { to: article.path, label: article.kicker },
+          ]}
+        />
+        <article className="guide-article">
+          <header className="guide-head">
+            <p className="guide-kicker">{article.kicker}</p>
+            <h1>{article.title}</h1>
+            {(Array.isArray(article.lead) ? article.lead : [article.lead]).map((p) => (
+              <p key={p} className="guide-lead">
+                {p}
+              </p>
+            ))}
+          </header>
           {article.sections.map((section) => (
-            <section key={section.heading} className="guide-block">
+            <section key={section.heading} className="guide-section">
               <h2>{section.heading}</h2>
               <GuideParagraphs texts={section.body} />
             </section>

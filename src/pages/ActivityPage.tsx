@@ -11,6 +11,7 @@ import {
   type ActivityRange,
   type ActivityStats,
 } from '../lib/apiClient'
+import { haptic } from '../lib/haptic'
 import { useSheetA11y } from '../lib/sheetA11y'
 import { PERIOD_TABS } from '../lib/periodRange'
 import './ActivityPage.css'
@@ -207,7 +208,7 @@ export function ActivityPage() {
     longTimer.current = window.setTimeout(() => {
       longFired.current = true
       longTimer.current = null
-      if (navigator.vibrate) navigator.vibrate(12)
+      haptic('tap')
       askDeleteDay(date)
     }, LONG_PRESS_MS)
   }

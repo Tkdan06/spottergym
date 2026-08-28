@@ -216,10 +216,10 @@ export function LandingPage() {
         <header className="lp-hero">
           <div className="lp-hero-bg" aria-hidden />
           <p className="lp-kicker">{LANDING.hero.kicker}</p>
-          <h1 className="brand-mark lp-brand" aria-label="Spotter">
+          <p className="brand-mark lp-brand" aria-label="Spotter">
             SPOT<span>TER</span>
-          </h1>
-          <p className="lp-headline">{LANDING.hero.headline}</p>
+          </p>
+          <h1 className="lp-headline">{LANDING.hero.headline}</h1>
           <p className="lp-lead">{LANDING.hero.lead}</p>
           <CtaPair primaryLabel={LANDING.hero.ctaPrimary} placement="hero" />
 

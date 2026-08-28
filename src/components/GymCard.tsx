@@ -1,6 +1,7 @@
 import { MapPin, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { formatGymAddress } from '../data/mock'
+import { gymCoverSrc } from '../lib/imageUrl'
 import { formatMembersInSpotter } from '../lib/presenceCopy'
 import type { Gym } from '../types'
 import { GymMineBadge, GymPresenceBadge } from './GymBadges'
@@ -39,7 +40,7 @@ export function GymCard({
   const content = (
     <>
       <div className="gym-card-media">
-        <SmartImage src={gym.image} alt={gym.name} size="card" priority={priority} />
+        <SmartImage src={gymCoverSrc(gym)} alt={gym.name} size="card" priority={priority} />
         <GymPresenceBadge activeNow={activeNow} surface="card" />
       </div>
       <div className="gym-card-body">

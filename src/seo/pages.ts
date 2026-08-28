@@ -7,9 +7,14 @@ export type SeoPage = {
   title: string
   description: string
   index: boolean
+  h1?: string
+  crumb?: string
+  schemaType?: 'Article' | 'CollectionPage'
+  ogImage?: string
+  canonicalPath?: string
 }
 
-export const SEO_PAGES: SeoPage[] = catalog.pages
+export const SEO_PAGES: SeoPage[] = catalog.pages as SeoPage[]
 
 export function normalizeSeoPath(pathname: string) {
   if (!pathname || pathname === '/') return '/'
@@ -22,9 +27,15 @@ export function seoPageForPath(pathname: string): SeoPage | null {
   return SEO_PAGES.find((page) => page.path === path) ?? null
 }
 
-export function seoCanonical(pathname: string) {
-  const path = normalizeSeoPath(pathname)
+export function seoCanonical(pathname: string, page?: SeoPage | null) {
+  const target = page?.canonicalPath || normalizeSeoPath(pathname)
+  const path = normalizeSeoPath(target)
   return path === '/' ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}${path}`
+}
+
+export function seoOgImage(page?: SeoPage | null) {
+  if (!page?.ogImage) return `${SITE_ORIGIN}/og-share.png`
+  return `${SITE_ORIGIN}${page.ogImage}`
 }
 
 export function isSeoTrackedPath(pathname: string) {
@@ -43,4 +54,22 @@ export function shouldNoIndex(pathname: string) {
   const page = seoPageForPath(path)
   if (page) return !page.index
   return true
+}
+
+/** Indexable pages: index,follow. Aliases with canonicalPath: noindex,follow so the crawler can reach the canonical. */
+export function seoRobots(pathname: string, page?: SeoPage | null) {
+  if (!shouldNoIndex(pathname)) {
+    return {
+      robots: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+      googlebot: 'index, follow, max-image-preview:large, max-snippet:-1',
+      yandex: 'index, follow',
+    }
+  }
+  const follow = Boolean(page?.canonicalPath)
+  const value = follow ? 'noindex, follow' : 'noindex, nofollow'
+  return { robots: value, googlebot: value, yandex: value }
+}
+
+export function seoOgType(page?: SeoPage | null) {
+  return page?.schemaType === 'Article' ? 'article' : 'website'
 }

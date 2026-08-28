@@ -17,6 +17,25 @@ const QUALITY: Record<ImageSize, number> = {
   full: 78,
 }
 
+/** Фирменные заглушки сетей; остальные — стоки gym-01…05 */
+const NETWORK_COVERS: Record<string, string> = {
+  'spirit fitness': '/images/gyms/spirit.jpg',
+  'fitness house': '/images/gyms/fitness-house.jpg',
+  urbanfit: '/images/gyms/urbanfit.jpg',
+  'urban fit': '/images/gyms/urbanfit.jpg',
+  'urban fitness': '/images/gyms/urbanfit.jpg',
+}
+
+function networkKey(network: string) {
+  return network.replace(/\./g, '').replace(/\s+/g, ' ').trim().toLowerCase()
+}
+
+/** Обложка клуба: известная сеть → локальное фото, иначе то, что в каталоге. */
+export function gymCoverSrc(gym: { image: string; network?: string }): string {
+  if (!gym.network) return gym.image
+  return NETWORK_COVERS[networkKey(gym.network)] || gym.image
+}
+
 /** Старые Unsplash-баннеры залов → локальные копии в /public/images/gyms */
 const LOCAL_GYM_BANNERS: Record<string, string> = {
   'photo-1517836357463-d25dfeac3438': '/images/gyms/gym-01.jpg',

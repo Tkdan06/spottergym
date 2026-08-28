@@ -18,6 +18,7 @@ import {
 import { ApiError, apiFetchGym } from '../lib/apiClient'
 import { isDemoAccount } from '../lib/demoAccount'
 import { gymWithoutSeedStats, peekGym } from '../lib/gymCatalog'
+import { gymCoverSrc } from '../lib/imageUrl'
 import { getGymHours } from '../lib/gymHours'
 import { useGymPeople } from '../hooks/useGymPeople'
 import { getHallRank, sortByLikes } from '../lib/likes'
@@ -197,7 +198,7 @@ export function GymDetailPage() {
 
       <section className="gym-hero">
           <SmartImage
-            src={gym.image}
+            src={gymCoverSrc(gym)}
             alt=""
             size="hero"
             priority

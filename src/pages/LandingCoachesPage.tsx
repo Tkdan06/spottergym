@@ -124,10 +124,10 @@ export function LandingCoachesPage() {
         <header className="lp-hero">
           <div className="lp-hero-bg" aria-hidden />
           <p className="lp-kicker">{LANDING_COACHES.hero.kicker}</p>
-          <h1 className="brand-mark lp-brand" aria-label="Spotter">
+          <p className="brand-mark lp-brand" aria-label="Spotter">
             SPOT<span>TER</span>
-          </h1>
-          <p className="lp-headline">{LANDING_COACHES.hero.headline}</p>
+          </p>
+          <h1 className="lp-headline">{LANDING_COACHES.hero.headline}</h1>
           <p className="lp-lead">{LANDING_COACHES.hero.lead}</p>
           <CtaPair primaryLabel={LANDING_COACHES.hero.ctaPrimary} placement="hero" />
 

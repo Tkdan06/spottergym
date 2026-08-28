@@ -8,6 +8,7 @@ import { displayName, formatGymLabel, getContactGym, getGym } from '../data/mock
 import { profileImage, profileImageFallback } from '../lib/avatar'
 import { otherParticipantId } from '../lib/conversations'
 import { formatDialogTime } from '../lib/formatDialogTime'
+import { haptic } from '../lib/haptic'
 import { searchFieldProps } from '../lib/inputAttrs'
 import { useSheetA11y } from '../lib/sheetA11y'
 import { getCheckedInGymId } from '../lib/presence'
@@ -146,7 +147,7 @@ function ConversationRow({
       longFired.current = true
       longTimer.current = null
       clearSelection()
-      if (navigator.vibrate) navigator.vibrate(12)
+      haptic('tap')
       onLongPress(conversation)
     }, LONG_PRESS_MS)
   }

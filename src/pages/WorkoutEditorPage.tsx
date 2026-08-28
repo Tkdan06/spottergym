@@ -20,6 +20,7 @@ import {
   type WorkoutSessionDetail,
 } from '../lib/apiClient'
 import { WORKOUT_NOTE_MAX } from '../lib/fieldLimits'
+import { haptic } from '../lib/haptic'
 import { goWorkoutsHub } from '../lib/workoutsNav'
 import { getCheckInStartedAt } from '../lib/presence'
 import { useSheetA11y } from '../lib/sheetA11y'
@@ -282,6 +283,7 @@ export function WorkoutEditorPage() {
     }
     setSaving(true)
     setError('')
+    haptic('save')
     try {
       let saved
       if (isNew) {

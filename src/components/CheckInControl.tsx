@@ -8,6 +8,7 @@ import {
   getCheckedInGymId,
   isCheckInExpiringSoon,
 } from '../lib/presence'
+import { haptic } from '../lib/haptic'
 import { useSheetA11y } from '../lib/sheetA11y'
 import { useMoment } from './MomentFX'
 import './CheckInControl.css'
@@ -95,6 +96,7 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
     moment?: 'checkin' | 'checkout',
   ) => {
     if (busy) return
+    if (moment) haptic(moment)
     setBusy(true)
     setError('')
     try {

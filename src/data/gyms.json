@@ -3622,7 +3622,7 @@
     "address": "улица Генерала Кныша, 2А",
     "membersCount": 83,
     "activeNow": 7,
-    "image": "/images/gyms/gym-03.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.5685,
     "lng": 30.1285
   },
@@ -3635,7 +3635,7 @@
     "address": "Европейский проспект, 21 стр.1",
     "membersCount": 161,
     "activeNow": 11,
-    "image": "/images/gyms/gym-04.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.9095,
     "lng": 30.5155
   },
@@ -3648,7 +3648,7 @@
     "address": "улица Главная, 60",
     "membersCount": 170,
     "activeNow": 2,
-    "image": "/images/gyms/gym-01.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 60.0525,
     "lng": 30.4485
   },
@@ -3661,7 +3661,7 @@
     "address": "улица Шувалова, 11",
     "membersCount": 90,
     "activeNow": 3,
-    "image": "/images/gyms/gym-05.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 60.0485,
     "lng": 30.4455
   },
@@ -3674,7 +3674,7 @@
     "address": "улица Богословская",
     "membersCount": 90,
     "activeNow": 11,
-    "image": "/images/gyms/gym-04.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 60.0285,
     "lng": 30.3485
   },
@@ -3687,7 +3687,7 @@
     "address": "проспект Большевиков",
     "membersCount": 119,
     "activeNow": 10,
-    "image": "/images/gyms/gym-04.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.9165,
     "lng": 30.4785
   },
@@ -3700,7 +3700,7 @@
     "address": "проспект Ветеранов",
     "membersCount": 157,
     "activeNow": 6,
-    "image": "/images/gyms/gym-04.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.8425,
     "lng": 30.2155
   },
@@ -3713,7 +3713,7 @@
     "address": "улица Ярослава Гашека",
     "membersCount": 159,
     "activeNow": 1,
-    "image": "/images/gyms/gym-05.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.8515,
     "lng": 30.3785
   },
@@ -3726,7 +3726,7 @@
     "address": "Дальневосточный проспект",
     "membersCount": 62,
     "activeNow": 6,
-    "image": "/images/gyms/gym-05.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.9085,
     "lng": 30.4585
   },
@@ -3739,7 +3739,7 @@
     "address": "улица Заречная",
     "membersCount": 137,
     "activeNow": 9,
-    "image": "/images/gyms/gym-01.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.9985,
     "lng": 30.2285
   },
@@ -3752,7 +3752,7 @@
     "address": "улица Камышовая",
     "membersCount": 105,
     "activeNow": 12,
-    "image": "/images/gyms/gym-03.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 60.0015,
     "lng": 30.2155
   },
@@ -3765,7 +3765,7 @@
     "address": "Комендантский проспект",
     "membersCount": 158,
     "activeNow": 0,
-    "image": "/images/gyms/gym-05.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 60.0088,
     "lng": 30.2585
   },
@@ -3778,7 +3778,7 @@
     "address": "улица Краснопутиловская",
     "membersCount": 154,
     "activeNow": 10,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.8585,
     "lng": 30.2885
   },
@@ -3791,7 +3791,7 @@
     "address": "Крестовский проспект",
     "membersCount": 108,
     "activeNow": 8,
-    "image": "/images/gyms/gym-05.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.9725,
     "lng": 30.2425
   },
@@ -3804,7 +3804,7 @@
     "address": "проспект Культуры",
     "membersCount": 133,
     "activeNow": 3,
-    "image": "/images/gyms/gym-03.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 60.0385,
     "lng": 30.3785
   },
@@ -3817,7 +3817,7 @@
     "address": "район метро Ладожская",
     "membersCount": 129,
     "activeNow": 5,
-    "image": "/images/gyms/gym-04.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.9325,
     "lng": 30.4385
   },
@@ -3830,7 +3830,7 @@
     "address": "Лахтинский проспект, 85",
     "membersCount": 72,
     "activeNow": 5,
-    "image": "/images/gyms/gym-04.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.9885,
     "lng": 30.1555
   },
@@ -3843,7 +3843,7 @@
     "address": "Ленинский проспект / Краснопутиловская",
     "membersCount": 87,
     "activeNow": 6,
-    "image": "/images/gyms/gym-01.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.8518,
     "lng": 30.2685
   },
@@ -3856,7 +3856,7 @@
     "address": "проспект Маршака",
     "membersCount": 160,
     "activeNow": 13,
-    "image": "/images/gyms/gym-03.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 60.0005,
     "lng": 30.4158
   },
@@ -3869,7 +3869,7 @@
     "address": "проспект Маршала Блюхера",
     "membersCount": 69,
     "activeNow": 6,
-    "image": "/images/gyms/gym-04.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.9725,
     "lng": 30.3785
   },
@@ -3882,7 +3882,7 @@
     "address": "проспект Маршала Говорова",
     "membersCount": 157,
     "activeNow": 4,
-    "image": "/images/gyms/gym-05.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.8685,
     "lng": 30.2685
   },
@@ -3895,7 +3895,7 @@
     "address": "улица Мебельная",
     "membersCount": 125,
     "activeNow": 8,
-    "image": "/images/gyms/gym-01.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.9985,
     "lng": 30.2485
   },
@@ -3908,7 +3908,7 @@
     "address": "улица Наличная",
     "membersCount": 156,
     "activeNow": 4,
-    "image": "/images/gyms/gym-04.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.9485,
     "lng": 30.2355
   },
@@ -3921,7 +3921,7 @@
     "address": "бульвар Новаторов",
     "membersCount": 116,
     "activeNow": 6,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.8505,
     "lng": 30.2555
   },
@@ -3934,7 +3934,7 @@
     "address": "п. Новогорелово, ул. Современников, 2А, ТЦ KRONUNG",
     "membersCount": 77,
     "activeNow": 4,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.7885,
     "lng": 30.1455
   },
@@ -3947,7 +3947,7 @@
     "address": "ТРЦ Охта Молл",
     "membersCount": 81,
     "activeNow": 10,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.9455,
     "lng": 30.4125
   },
@@ -3960,7 +3960,7 @@
     "address": "Пискарёвский проспект",
     "membersCount": 123,
     "activeNow": 10,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.9785,
     "lng": 30.4085
   },
@@ -3973,7 +3973,7 @@
     "address": "Политехническая улица",
     "membersCount": 166,
     "activeNow": 1,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 60.0055,
     "lng": 30.3725
   },
@@ -3986,7 +3986,7 @@
     "address": "Пражская улица",
     "membersCount": 64,
     "activeNow": 7,
-    "image": "/images/gyms/gym-03.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.8515,
     "lng": 30.3785
   },
@@ -3999,7 +3999,7 @@
     "address": "Пулковское шоссе",
     "membersCount": 99,
     "activeNow": 2,
-    "image": "/images/gyms/gym-05.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.8125,
     "lng": 30.3185
   },
@@ -4012,7 +4012,7 @@
     "address": "район Рыбацкое",
     "membersCount": 121,
     "activeNow": 0,
-    "image": "/images/gyms/gym-03.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.8385,
     "lng": 30.5085
   },
@@ -4025,7 +4025,7 @@
     "address": "улица Савушкина",
     "membersCount": 151,
     "activeNow": 3,
-    "image": "/images/gyms/gym-01.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.9855,
     "lng": 30.2685
   },
@@ -4038,7 +4038,7 @@
     "address": "улица Салова",
     "membersCount": 98,
     "activeNow": 5,
-    "image": "/images/gyms/gym-03.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.8885,
     "lng": 30.3685
   },
@@ -4051,7 +4051,7 @@
     "address": "Светлановский проспект",
     "membersCount": 82,
     "activeNow": 3,
-    "image": "/images/gyms/gym-03.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 60.0125,
     "lng": 30.3285
   },
@@ -4064,7 +4064,7 @@
     "address": "Северный проспект",
     "membersCount": 107,
     "activeNow": 13,
-    "image": "/images/gyms/gym-04.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 60.0385,
     "lng": 30.3585
   },
@@ -4077,7 +4077,7 @@
     "address": "Славянка",
     "membersCount": 83,
     "activeNow": 1,
-    "image": "/images/gyms/gym-05.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.7425,
     "lng": 30.4525
   },
@@ -4090,7 +4090,7 @@
     "address": "проспект Стачек",
     "membersCount": 101,
     "activeNow": 13,
-    "image": "/images/gyms/gym-01.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.8665,
     "lng": 30.2615
   },
@@ -4103,7 +4103,7 @@
     "address": "Таллинское шоссе",
     "membersCount": 76,
     "activeNow": 2,
-    "image": "/images/gyms/gym-05.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.8385,
     "lng": 30.1485
   },
@@ -4116,7 +4116,7 @@
     "address": "улица Фучика",
     "membersCount": 64,
     "activeNow": 7,
-    "image": "/images/gyms/gym-01.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.8685,
     "lng": 30.3785
   },
@@ -4129,7 +4129,7 @@
     "address": "улица Хасанская",
     "membersCount": 64,
     "activeNow": 2,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.9485,
     "lng": 30.4585
   },
@@ -4142,7 +4142,7 @@
     "address": "улица Хо Ши Мина",
     "membersCount": 167,
     "activeNow": 5,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 60.0085,
     "lng": 30.2685
   },
@@ -4155,7 +4155,7 @@
     "address": "улица Чкалова / Чкаловская",
     "membersCount": 150,
     "activeNow": 7,
-    "image": "/images/gyms/gym-01.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.9605,
     "lng": 30.2925
   },
@@ -4168,7 +4168,7 @@
     "address": "улица Шаврова",
     "membersCount": 105,
     "activeNow": 2,
-    "image": "/images/gyms/gym-03.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 60.0085,
     "lng": 30.2385
   },
@@ -4181,7 +4181,7 @@
     "address": "Шушары",
     "membersCount": 58,
     "activeNow": 1,
-    "image": "/images/gyms/gym-01.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.8085,
     "lng": 30.3785
   },
@@ -4194,7 +4194,7 @@
     "address": "Янино",
     "membersCount": 80,
     "activeNow": 8,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/fitness-house.jpg",
     "lat": 59.9485,
     "lng": 30.5755
   },
@@ -4350,7 +4350,7 @@
     "address": "г. Воронеж, ул. Кольцовская, 35, ТЦ «Галерея Чижова», 3 этаж",
     "membersCount": 128,
     "activeNow": 4,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 51.666289,
     "lng": 39.191996
   },
@@ -4363,7 +4363,7 @@
     "address": "Екатеринбург, ул. Вайнера, д. 48 ТЦ DESPORT 4-5 этаж",
     "membersCount": 131,
     "activeNow": 17,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 56.829931,
     "lng": 60.596262
   },
@@ -4376,7 +4376,7 @@
     "address": "г. Казань, ул Петербургская, д. 1, ТЦ Кольцо 4-й этаж",
     "membersCount": 259,
     "activeNow": 7,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.78643,
     "lng": 49.124335
   },
@@ -4389,7 +4389,7 @@
     "address": "пр-т Х. Ямашева, д.97, ТК XL 3-й этаж",
     "membersCount": 157,
     "activeNow": 9,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.825113,
     "lng": 49.152345
   },
@@ -4402,7 +4402,7 @@
     "address": "улица Красная / центр",
     "membersCount": 161,
     "activeNow": 13,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 45.0355,
     "lng": 38.9755
   },
@@ -4415,7 +4415,7 @@
     "address": "м. Автозаводская, ТРЦ Глобал Молл, ул. Ленинская Слобода, д. 26, стр. 2",
     "membersCount": 147,
     "activeNow": 9,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.712183,
     "lng": 37.656697
   },
@@ -4428,7 +4428,7 @@
     "address": "Алтуфьевское шоссе, д. 24, к. 1 ТЦ «Улей», 2-й этаж",
     "membersCount": 103,
     "activeNow": 5,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.862984,
     "lng": 37.585404
   },
@@ -4441,7 +4441,7 @@
     "address": "ул. Миклухо-Маклая, 18, к. 2 ТЦ «Беляево», 2-й этаж.",
     "membersCount": 242,
     "activeNow": 16,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.644902,
     "lng": 37.519422
   },
@@ -4454,7 +4454,7 @@
     "address": "Старопетровский пр., 1, стр. 2, ТЦ Baby Store, 1-й этаж",
     "membersCount": 122,
     "activeNow": 12,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.823773189044,
     "lng": 37.500401095423
   },
@@ -4467,7 +4467,7 @@
     "address": "ул. Вавилова, д. 3, ТРЦ \"Гагаринский\"",
     "membersCount": 81,
     "activeNow": 5,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.707124677602,
     "lng": 37.591268342335
   },
@@ -4480,7 +4480,7 @@
     "address": "пр-д Дежнева, 23 ТЦ «Вавилон - 92», 1 эт.",
     "membersCount": 195,
     "activeNow": 9,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.869542789221,
     "lng": 37.637283228836
   },
@@ -4493,7 +4493,7 @@
     "address": "Каширское ш., д. 80, ТЦ \"Борисовский\"",
     "membersCount": 102,
     "activeNow": 0,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.624590159818,
     "lng": 37.70892972976
   },
@@ -4506,7 +4506,7 @@
     "address": "Королев, ул. Коммунальная, д.3. ТЦ DESPORT",
     "membersCount": 70,
     "activeNow": 6,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.916236,
     "lng": 37.849675
   },
@@ -4519,7 +4519,7 @@
     "address": "ЖК «Оранж Парк», ул. Сосновая, 5",
     "membersCount": 145,
     "activeNow": 15,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.672470494106,
     "lng": 37.857911289688
   },
@@ -4532,7 +4532,7 @@
     "address": "м. Крылатское, Осенний б-р, 12, ТЦ Крылатский",
     "membersCount": 112,
     "activeNow": 8,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.759224,
     "lng": 37.409223
   },
@@ -4545,7 +4545,7 @@
     "address": "Большая Черемушкинская ул., д. 1 ТРЦ «РИО» Севастопольский, 3-й этаж",
     "membersCount": 103,
     "activeNow": 1,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.689078074328,
     "lng": 37.601752645477
   },
@@ -4558,7 +4558,7 @@
     "address": "Шереметьевская ул., 6 корпус 1, эт. -1",
     "membersCount": 186,
     "activeNow": 12,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.795796210399,
     "lng": 37.617130271164
   },
@@ -4571,7 +4571,7 @@
     "address": "Люблинская улица, 169 к2 ТРЦ \"Мариэль\", 4 этаж",
     "membersCount": 215,
     "activeNow": 17,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.650559,
     "lng": 37.746724
   },
@@ -4584,7 +4584,7 @@
     "address": "м. Аминьевская, ТЦ ОМА, Очаковское шоссе, 3А/8, 3 этаж",
     "membersCount": 41,
     "activeNow": 17,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.695163,
     "lng": 37.463499
   },
@@ -4597,7 +4597,7 @@
     "address": "г. Реутов, Носовихинское шоссе, д. 9",
     "membersCount": 81,
     "activeNow": 13,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.745544,
     "lng": 37.860171
   },
@@ -4610,7 +4610,7 @@
     "address": "г. Одинцово, Можайское шоссе, 32Б 2 этаж",
     "membersCount": 136,
     "activeNow": 0,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.677037,
     "lng": 37.281926
   },
@@ -4623,7 +4623,7 @@
     "address": "Прокшино, ТЦ «Сиеста» вн.тер.г. поселение Сосенское, ул. Николо-Хованская, 7с1",
     "membersCount": 74,
     "activeNow": 6,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.588883,
     "lng": 37.451528
   },
@@ -4636,7 +4636,7 @@
     "address": "Мичуринский пр., д. 27 ТЦ «Тиара», 3-й этаж",
     "membersCount": 255,
     "activeNow": 7,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.697549752634,
     "lng": 37.500215038071
   },
@@ -4649,7 +4649,7 @@
     "address": "поселение Внуковское, ул. Корнея Чуковского, д. 2 ТЦ “Сказка”, 3 этаж",
     "membersCount": 54,
     "activeNow": 4,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.63341,
     "lng": 37.336574
   },
@@ -4662,7 +4662,7 @@
     "address": "Рогожский вал, д.10",
     "membersCount": 137,
     "activeNow": 1,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.741084,
     "lng": 37.674187
   },
@@ -4675,7 +4675,7 @@
     "address": "Рязанский проспект, 30, к. 2, 4-й этаж",
     "membersCount": 96,
     "activeNow": 12,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.718337812305,
     "lng": 37.783883609787
   },
@@ -4688,7 +4688,7 @@
     "address": "Севастопольский пр-т, д. 28, корп 2, 2-й этаж",
     "membersCount": 62,
     "activeNow": 6,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.664764704064,
     "lng": 37.578253970792
   },
@@ -4701,7 +4701,7 @@
     "address": "Дмитровское шоссе, 85",
     "membersCount": 128,
     "activeNow": 8,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.862722,
     "lng": 37.547836
   },
@@ -4714,7 +4714,7 @@
     "address": "Семёновская площадь, д. 1, ТЦ \"Семеновский\", 5-й этаж",
     "membersCount": 224,
     "activeNow": 4,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.78296102459,
     "lng": 37.721347935473
   },
@@ -4727,7 +4727,7 @@
     "address": "Cтрогинский бул., д. 1, ТЦ \"Дарья\", 4-й этаж.",
     "membersCount": 175,
     "activeNow": 3,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.80589373638,
     "lng": 37.395792216949
   },
@@ -4740,7 +4740,7 @@
     "address": "просп. Андропова, 8, 4-й этаж ТРЦ \"Мегаполис\"",
     "membersCount": 118,
     "activeNow": 8,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.69587,
     "lng": 37.664905
   },
@@ -4753,7 +4753,7 @@
     "address": "Москва-Сити (Башня Федерация), Пресненская наб., д. 12, -4-й этаж",
     "membersCount": 143,
     "activeNow": 3,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.749753778757,
     "lng": 37.537392660852
   },
@@ -4766,7 +4766,7 @@
     "address": "пр-т Балаклавский, 16а",
     "membersCount": 152,
     "activeNow": 16,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.642245976534,
     "lng": 37.603548482803
   },
@@ -4779,7 +4779,7 @@
     "address": "ул. Авиационная, д. 66, этаж 2",
     "membersCount": 169,
     "activeNow": 5,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.809843605478,
     "lng": 37.459867616693
   },
@@ -4792,7 +4792,7 @@
     "address": "Проспект Вернадского, 86А, ТЦ Avenue Southwest, 4 этаж",
     "membersCount": 69,
     "activeNow": 13,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.662979086166,
     "lng": 37.48085181349
   },
@@ -4805,7 +4805,7 @@
     "address": "Ясногорская ул., 7А, ТЦ \"Этажи\", 3-й этаж",
     "membersCount": 130,
     "activeNow": 10,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.608676650002,
     "lng": 37.537529415096
   },
@@ -4818,7 +4818,7 @@
     "address": "Средний проспект В.О., дом 36/40, лит. А ТОЦ «Остров», 3-й этаж",
     "membersCount": 97,
     "activeNow": 15,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 59.941863,
     "lng": 30.276026
   },
@@ -4831,7 +4831,7 @@
     "address": "Невский пр., д.114-116, ТК \"Невский Центр\", 6 этаж",
     "membersCount": 229,
     "activeNow": 1,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 59.931941,
     "lng": 30.359149
   },
@@ -4844,7 +4844,7 @@
     "address": "г. Санкт-Петербург ул. Плесецкая, 8к2с1",
     "membersCount": 72,
     "activeNow": 12,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 60.033423,
     "lng": 30.21364
   },
@@ -4857,7 +4857,7 @@
     "address": "ул. Васи Алексеева, д. 4, стр 1 ТЦ «Форум», 2-й этаж",
     "membersCount": 183,
     "activeNow": 15,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 59.880369,
     "lng": 30.264556
   },
@@ -4870,7 +4870,7 @@
     "address": "Уфа, ул. Губайдуллина, д. 6 ТЦ Аркада, 2-й этаж",
     "membersCount": 115,
     "activeNow": 3,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 54.720316,
     "lng": 56.001772
   },
@@ -4883,7 +4883,7 @@
     "address": "ТРЦ \"Фокус\", Молдавская, 16",
     "membersCount": 206,
     "activeNow": 14,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/spirit.jpg",
     "lat": 55.19058,
     "lng": 61.303254
   },
@@ -4935,7 +4935,7 @@
     "address": "Европейский проспект, 13",
     "membersCount": 63,
     "activeNow": 0,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/urbanfit.jpg",
     "lat": 59.9086,
     "lng": 30.5135
   },
@@ -4948,7 +4948,7 @@
     "address": "Привокзальная площадь, 3А/1",
     "membersCount": 64,
     "activeNow": 11,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/urbanfit.jpg",
     "lat": 60.0505,
     "lng": 30.4422
   },
@@ -4961,7 +4961,7 @@
     "address": "улица Екатерининская, 18/3",
     "membersCount": 167,
     "activeNow": 5,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/urbanfit.jpg",
     "lat": 60.0512,
     "lng": 30.4428
   },
@@ -4974,7 +4974,7 @@
     "address": "Санкт-Петербургский проспект, 60",
     "membersCount": 140,
     "activeNow": 3,
-    "image": "/images/gyms/gym-01.jpg",
+    "image": "/images/gyms/urbanfit.jpg",
     "lat": 59.8778,
     "lng": 29.9075
   },
@@ -4987,7 +4987,7 @@
     "address": "проспект Науки, 23/2",
     "membersCount": 169,
     "activeNow": 12,
-    "image": "/images/gyms/gym-05.jpg",
+    "image": "/images/gyms/urbanfit.jpg",
     "lat": 60.0128,
     "lng": 30.3965
   },
@@ -5000,7 +5000,7 @@
     "address": "Большой проспект В.О., 68, ТЦ Балтийский",
     "membersCount": 147,
     "activeNow": 13,
-    "image": "/images/gyms/gym-04.jpg",
+    "image": "/images/gyms/urbanfit.jpg",
     "lat": 59.9345,
     "lng": 30.2558
   },
@@ -5013,7 +5013,7 @@
     "address": "проспект Большевиков, 7/2",
     "membersCount": 81,
     "activeNow": 1,
-    "image": "/images/gyms/gym-05.jpg",
+    "image": "/images/gyms/urbanfit.jpg",
     "lat": 59.9168,
     "lng": 30.4785
   },
@@ -5026,7 +5026,7 @@
     "address": "проспект Энгельса, 124/1",
     "membersCount": 96,
     "activeNow": 11,
-    "image": "/images/gyms/gym-05.jpg",
+    "image": "/images/gyms/urbanfit.jpg",
     "lat": 60.0388,
     "lng": 30.3235
   },
@@ -5039,7 +5039,7 @@
     "address": "Транспортный переулок, 1 литера А",
     "membersCount": 144,
     "activeNow": 7,
-    "image": "/images/gyms/gym-03.jpg",
+    "image": "/images/gyms/urbanfit.jpg",
     "lat": 59.9208,
     "lng": 30.3555
   },
@@ -5052,7 +5052,7 @@
     "address": "проспект Маршака, 10",
     "membersCount": 89,
     "activeNow": 12,
-    "image": "/images/gyms/gym-01.jpg",
+    "image": "/images/gyms/urbanfit.jpg",
     "lat": 60.0005,
     "lng": 30.4158
   },
@@ -5065,7 +5065,7 @@
     "address": "проспект Наставников, 24/1",
     "membersCount": 154,
     "activeNow": 8,
-    "image": "/images/gyms/gym-03.jpg",
+    "image": "/images/gyms/urbanfit.jpg",
     "lat": 59.9458,
     "lng": 30.4702
   },
@@ -5078,7 +5078,7 @@
     "address": "улица Красного Текстильщика, 10-12 литера C",
     "membersCount": 78,
     "activeNow": 1,
-    "image": "/images/gyms/gym-03.jpg",
+    "image": "/images/gyms/urbanfit.jpg",
     "lat": 59.9295,
     "lng": 30.3658
   },
@@ -5091,7 +5091,7 @@
     "address": "проспект Энгельса, 120",
     "membersCount": 137,
     "activeNow": 10,
-    "image": "/images/gyms/gym-04.jpg",
+    "image": "/images/gyms/urbanfit.jpg",
     "lat": 60.0368,
     "lng": 30.3218
   },
@@ -5104,7 +5104,7 @@
     "address": "Коломяжский проспект, 15/2",
     "membersCount": 94,
     "activeNow": 11,
-    "image": "/images/gyms/gym-03.jpg",
+    "image": "/images/gyms/urbanfit.jpg",
     "lat": 60.0026,
     "lng": 30.2975
   },
@@ -5117,7 +5117,7 @@
     "address": "проспект Просвещения, 80/1, ТК Прометей",
     "membersCount": 73,
     "activeNow": 6,
-    "image": "/images/gyms/gym-01.jpg",
+    "image": "/images/gyms/urbanfit.jpg",
     "lat": 60.0515,
     "lng": 30.3355
   },
@@ -5130,7 +5130,7 @@
     "address": "улица Академика Павлова, 5В",
     "membersCount": 85,
     "activeNow": 8,
-    "image": "/images/gyms/gym-04.jpg",
+    "image": "/images/gyms/urbanfit.jpg",
     "lat": 59.9728,
     "lng": 30.2685
   },
@@ -5143,7 +5143,7 @@
     "address": "проспект Маршала Жукова, 35/1",
     "membersCount": 110,
     "activeNow": 1,
-    "image": "/images/gyms/gym-02.jpg",
+    "image": "/images/gyms/urbanfit.jpg",
     "lat": 59.8545,
     "lng": 30.2125
   },
@@ -5156,7 +5156,7 @@
     "address": "улица Голландская, 9, мкр Янила Кантри",
     "membersCount": 78,
     "activeNow": 10,
-    "image": "/images/gyms/gym-01.jpg",
+    "image": "/images/gyms/urbanfit.jpg",
     "lat": 59.9485,
     "lng": 30.5825
   },

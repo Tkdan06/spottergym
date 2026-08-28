@@ -10,12 +10,12 @@ export function WelcomePage() {
         <div className="welcome-hero">
           <div className="welcome-glow" />
           <p className="welcome-kicker">Знакомства в зале</p>
-          <h1 className="brand-mark" aria-label="Spotter">
+          <p className="brand-mark" aria-label="Spotter">
             SPOT<span>TER</span>
-          </h1>
-          <p className="welcome-lead">
-            Найди людей в своём клубе: кто рядом, кто на тренировке и кто открыт к общению
           </p>
+          <h1 className="welcome-lead">
+            Найди людей в своём клубе: кто рядом, кто на тренировке и кто открыт к общению
+          </h1>
           <div className="welcome-actions">
             <Link to={registerHref()} className="btn btn-primary btn-block">
               Создать аккаунт
@@ -33,7 +33,7 @@ export function WelcomePage() {
               <Radio size={18} />
             </span>
             <div className="welcome-points-copy">
-              <h3>Живой статус зала</h3>
+              <h2>Живой статус зала</h2>
               <p className="muted">
                 Видно, кто сейчас на тренировке
                 <br />
@@ -46,7 +46,7 @@ export function WelcomePage() {
               <EyeOff size={18} />
             </span>
             <div className="welcome-points-copy">
-              <h3>Анонимность по желанию</h3>
+              <h2>Анонимность по желанию</h2>
               <p className="muted">Можно скрыть фото и имя, пока не решишь открыться</p>
             </div>
           </article>
@@ -55,7 +55,7 @@ export function WelcomePage() {
               <MessageSquare size={18} />
             </span>
             <div className="welcome-points-copy">
-              <h3>Запросы в чат</h3>
+              <h2>Запросы в чат</h2>
               <p className="muted">Переписка начинается только после принятия запроса</p>
             </div>
           </article>
