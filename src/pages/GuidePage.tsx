@@ -37,7 +37,7 @@ export function GuideIndexPage() {
             <li key={article.slug}>
               <Link to={article.path} className="guide-card">
                 <span className="guide-card-kicker">{article.kicker}</span>
-                <strong>{article.title}</strong>
+                <h2>{article.title}</h2>
                 <span className="muted">{article.lead}</span>
               </Link>
             </li>
@@ -47,6 +47,14 @@ export function GuideIndexPage() {
       </main>
     </div>
   )
+}
+
+function GuideParagraphs({ texts }: { texts: string[] }) {
+  return texts.map((p) => (
+    <p key={p.slice(0, 64)} className={p.startsWith('«') ? 'guide-quote' : undefined}>
+      {p}
+    </p>
+  ))
 }
 
 export function GuideArticlePage() {
@@ -60,17 +68,22 @@ export function GuideArticlePage() {
         <Link to="/" className="brand-mark auth-brand">
           SPOT<span>TER</span>
         </Link>
-        <p className="guide-kicker">{article.kicker}</p>
-        <h1>{article.title}</h1>
-        <p className="guide-lead">{article.lead}</p>
-        {article.sections.map((section) => (
-          <section key={section.heading} className="guide-section">
-            <h2>{section.heading}</h2>
-            {section.body.map((p) => (
-              <p key={p.slice(0, 48)}>{p}</p>
-            ))}
-          </section>
-        ))}
+        <article>
+          <p className="guide-kicker">{article.kicker}</p>
+          <h1>{article.title}</h1>
+          <p className="guide-lead">{article.lead}</p>
+          {article.intro?.length ? (
+            <div className="guide-intro">
+              <GuideParagraphs texts={article.intro} />
+            </div>
+          ) : null}
+          {article.sections.map((section) => (
+            <section key={section.heading} className="guide-block">
+              <h2>{section.heading}</h2>
+              <GuideParagraphs texts={section.body} />
+            </section>
+          ))}
+        </article>
         <GuideFooter />
       </main>
     </div>
