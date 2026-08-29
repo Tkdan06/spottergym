@@ -120,11 +120,11 @@ export function periodDelta(current: number, previous: number): WorkoutPeriodDel
   }
 }
 
-/** Working-set volume: weight × reps, reps > 0. */
+/** Working-set volume: weight × reps, only weight > 0 and reps > 0. */
 export function setsVolume(sets: AnalyticsSet[]): number {
   let v = 0
   for (const s of sets) {
-    if (s.reps <= 0) continue
+    if (!Number.isFinite(s.reps) || s.reps <= 0) continue
     const w = num(s.weightKg)
     if (Number.isFinite(w) && w > 0) v += w * s.reps
   }

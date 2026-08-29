@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useEffect, useRef, useState } from 'react'
 import { useApp } from '../context/useApp'
 import { getGym, getUserGyms } from '../data/mock'
@@ -9,6 +10,7 @@ import {
   isCheckInExpiringSoon,
 } from '../lib/presence'
 import { haptic } from '../lib/haptic'
+import { userFacingError } from '../lib/userError'
 import { useSheetA11y } from '../lib/sheetA11y'
 import { useMoment } from './MomentFX'
 import './CheckInControl.css'
@@ -85,9 +87,9 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
 
   if (!gyms.length || !targetId) {
     return (
-      <button type="button" className={`btn btn-primary ${className}`} disabled>
-        Сначала выбери зал
-      </button>
+      <Link to="/app/discover?from=home" className={`btn btn-primary ${className}`.trim()}>
+        Выбрать зал
+      </Link>
     )
   }
 
@@ -107,7 +109,7 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
         celebrate(moment)
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось обновить статус')
+      setError(userFacingError(err, 'Не удалось обновить статус'))
     } finally {
       setBusy(false)
     }
@@ -127,7 +129,7 @@ export function CheckInControl({ preferredGymId, compact, block, className = '' 
     try {
       await extendCheckIn()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось продлить')
+      setError(userFacingError(err, 'Не удалось продлить'))
     } finally {
       setExtending(false)
     }

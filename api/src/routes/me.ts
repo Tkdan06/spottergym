@@ -30,6 +30,7 @@ import {
   resolveExpiresAt,
 } from '../lib/checkInExpiry.js'
 import { moscowDayKey, moscowDayStartUtc } from '../lib/adminAnalytics.js'
+import { logAppEvent } from '../lib/appAnalytics.js'
 import { buildMyActivityStats, parseActivityRange } from '../lib/activityStats.js'
 import { notifyGymMembers } from '../lib/gymNotify.js'
 import {
@@ -39,7 +40,7 @@ import {
 } from '../lib/mediaStore.js'
 import { isAllowedAvatarRef, isAllowedPhotoRef } from '../lib/photos.js'
 import { isValidInstagram, normalizeInstagram } from '../lib/instagram.js'
-import { serializeUser } from '../lib/serialize.js'
+import { publicActorName, serializeUser } from '../lib/serialize.js'
 import {
   buildInviteCircle,
   getReferralStatsForUser,
@@ -97,7 +98,13 @@ const patchSchema = z.object({
   username: z.string().trim().min(USERNAME_MIN).max(USERNAME_MAX).optional(),
   /** Empty string clears the link */
   instagram: z.string().max(INSTAGRAM_MAX + 64).optional(),
-  age: z.coerce.number().min(18).max(80).transform((n) => Math.round(n)).optional(),
+  age: z.coerce
+    .number()
+    .int()
+    .min(18)
+    .max(80)
+    .transform((n) => Math.round(n))
+    .optional(),
   gender: z.enum(['female', 'male']).optional(),
   bio: z.string().min(BIO_MIN).max(BIO_MAX).optional(),
   photos: z.array(z.string().max(PHOTO_DATA_URL_MAX_CHARS)).max(PHOTO_MAX_COUNT).optional(),
@@ -128,10 +135,6 @@ const patchSchema = z.object({
   referralStatusVisible: z.boolean().optional(),
   onboardingDone: z.boolean().optional(),
 })
-
-function publicActorName(user: { name: string; privacy: string }) {
-  return user.privacy === 'anonymous' ? 'Аноним' : user.name
-}
 
 async function serializeMe(
   user: NonNullable<Awaited<ReturnType<typeof loadAuthedUser>>>,
@@ -482,6 +485,17 @@ meRoutes.post(
   }
 
   const now = new Date()
+  const open = await prisma.checkIn.findFirst({
+    where: { userId, checkedOutAt: null },
+    orderBy: { checkedInAt: 'desc' },
+  })
+  if (open && open.gymId === body.data.gymId) {
+    const user = await loadAuthedUser(userId)
+    return c.json({ user: user ? await serializeMe(user) : null })
+  }
+
+  const priorCount = await prisma.checkIn.count({ where: { userId } })
+
   await prisma.$transaction([
     prisma.checkIn.updateMany({
       where: { userId, checkedOutAt: null },
@@ -505,6 +519,14 @@ meRoutes.post(
 
   const user = await loadAuthedUser(userId)
   if (user) {
+    if (priorCount === 0) {
+      void logAppEvent({
+        name: 'first_checkin',
+        visitorId: `u:${userId}`,
+        userId,
+        path: '/app',
+      })
+    }
     const gym = await prisma.gym.findUnique({ where: { id: body.data.gymId } })
     const gymLabel = gym?.name || 'зале'
     const who = publicActorName(user)
@@ -597,7 +619,9 @@ meRoutes.post(
   rateLimit({ windowMs: 60_000, max: 30, route: 'me-gym-join' }),
   async (c) => {
   const userId = c.get('userId')
-  const gymId = c.req.param('gymId')
+  const gymIdRaw = z.string().min(1).max(GYM_ID_MAX).safeParse(c.req.param('gymId'))
+  if (!gymIdRaw.success) return c.json({ error: 'Некорректный зал' }, 400)
+  const gymId = gymIdRaw.data
   const gym = await prisma.gym.findUnique({ where: { id: gymId } })
   if (!gym) return c.json({ error: 'Зал не найден' }, 404)
 
@@ -642,7 +666,9 @@ meRoutes.delete(
   rateLimit({ windowMs: 60_000, max: 30, route: 'me-gym-leave' }),
   async (c) => {
   const userId = c.get('userId')
-  const gymId = c.req.param('gymId')
+  const gymIdRaw = z.string().min(1).max(GYM_ID_MAX).safeParse(c.req.param('gymId'))
+  if (!gymIdRaw.success) return c.json({ error: 'Некорректный зал' }, 400)
+  const gymId = gymIdRaw.data
 
   const membershipCount = await prisma.userGym.count({ where: { userId } })
   const isMember = await prisma.userGym.findUnique({

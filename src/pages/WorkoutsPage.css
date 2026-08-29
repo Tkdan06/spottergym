@@ -280,6 +280,18 @@
   padding: 16px;
 }
 
+.workout-saved-next {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.workout-saved-next .empty-copy-title {
+  margin: 0;
+  justify-self: start;
+  text-align: left;
+}
+
 .workout-view-meta p {
   margin: 0;
   line-height: 1.4;

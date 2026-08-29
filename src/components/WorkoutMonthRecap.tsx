@@ -14,6 +14,8 @@ import {
 } from '../lib/apiClient'
 import { formatSignedPercent, formatVsPreviousPeriod, ruPlural } from '../lib/workouts'
 import { WORKOUT_RECAP_ADMIN_ONLY } from '../lib/workoutRecap'
+import { trackApp } from '../lib/appTrack'
+import { userFacingError } from '../lib/userError'
 
 function sessionsWord(n: number) {
   const abs = Math.abs(n) % 100
@@ -100,6 +102,7 @@ export function WorkoutMonthRecap() {
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState('')
   const viewedFor = useRef<string | null>(null)
+  const generatingRef = useRef(false)
   const allowed = !WORKOUT_RECAP_ADMIN_ONLY || Boolean(user?.isAdmin)
 
   const load = useCallback(async () => {
@@ -112,7 +115,7 @@ export function WorkoutMonthRecap() {
     try {
       setMonthly(await apiFetchWorkoutMonthly())
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось загрузить разбор месяца')
+      setError(userFacingError(err, 'Не удалось загрузить разбор месяца'))
       setMonthly(null)
     } finally {
       setLoading(false)
@@ -122,6 +125,10 @@ export function WorkoutMonthRecap() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    if (allowed) trackApp('ai_analysis_opened', { range: '30' })
+  }, [allowed])
 
   useEffect(() => {
     if (!monthly?.letter || !apiOnline || !allowed) return
@@ -136,20 +143,26 @@ export function WorkoutMonthRecap() {
   if (!allowed) return null
 
   const generate = async () => {
-    if (!allowed || !apiOnline || generating) return
+    if (!allowed || !apiOnline || generatingRef.current) return
+    generatingRef.current = true
     setGenerating(true)
     setError('')
+    trackApp('ai_analysis_requested', { range: '30' })
     try {
       setMonthly(await apiGenerateWorkoutMonthly())
       setOpen(true)
+      trackApp('ai_analysis_completed', { range: '30' })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось собрать разбор месяца')
+      trackApp('ai_analysis_failed', { range: '30', reason: 'request' })
+      setError(userFacingError(err, 'Не удалось собрать разбор месяца'))
     } finally {
+      generatingRef.current = false
       setGenerating(false)
     }
   }
 
   const markRecClick = () => {
+    trackApp('ai_recommendation_viewed', { range: '30' })
     void apiMarkWorkoutMonthlyRecommendationClicked().catch(() => {})
   }
 
@@ -184,7 +197,7 @@ export function WorkoutMonthRecap() {
 
   return (
     <div id="month-recap" className="workout-week-recap workout-month-recap">
-      {error ? (
+      {error && monthly ? (
         <p className="feedback-error" role="alert">
           {error}
         </p>
@@ -323,11 +336,25 @@ export function WorkoutMonthRecap() {
         </section>
       ) : null}
 
+      {!loading && error && !monthly ? (
+        <section className="surface workouts-empty">
+          {recapTitle}
+          <p className="empty-copy-title">Не удалось загрузить разбор</p>
+          <p className="empty-copy-lead">{error}</p>
+          <button type="button" className="btn btn-primary btn-block" onClick={() => void load()}>
+            Повторить
+          </button>
+        </section>
+      ) : null}
+
       {!loading && !monthly && !error ? (
         <section className="surface workouts-empty">
           {recapTitle}
           <p className="empty-copy-title">Обзор появится позже</p>
-          <p className="muted">Не удалось получить статус. Обнови страницу.</p>
+          <p className="empty-copy-lead">Не удалось получить статус</p>
+          <button type="button" className="btn btn-primary btn-block" onClick={() => void load()}>
+            Повторить
+          </button>
         </section>
       ) : null}
     </div>

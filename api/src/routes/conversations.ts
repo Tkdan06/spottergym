@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { Prisma } from '@prisma/client'
 import { z } from 'zod'
 import { prisma } from '../db.js'
 import { areUsersBlocked } from '../lib/blocks.js'
@@ -10,12 +11,14 @@ import {
   serializeChatMessage,
   serializeConversation,
 } from '../lib/chat.js'
+import { publicActorName } from '../lib/serialize.js'
 import {
   CHAT_MESSAGE_MAX,
   GREETING_MESSAGE_MAX,
 } from '../lib/fieldLimits.js'
 import { resolveAdminFlags } from '../lib/admin.js'
 import { createNotification, pushChatMessage } from '../lib/notify.js'
+import { logAppEvent } from '../lib/appAnalytics.js'
 import { loadAuthedUser, requireAuth, type AuthedEnv } from '../middleware/auth.js'
 import { rateLimit } from '../middleware/rateLimit.js'
 
@@ -31,7 +34,14 @@ const userInclude = {
 const INBOX_PAGE = 50
 const MESSAGES_PAGE = 80
 
-async function loadConvForUser(conversationId: string, userId: string) {
+function parseConvId(raw: string) {
+  const id = z.string().min(1).max(64).safeParse(raw)
+  return id.success ? id.data : null
+}
+
+async function loadConvForUser(rawId: string, userId: string) {
+  const conversationId = parseConvId(rawId)
+  if (!conversationId) return null
   const conv = await prisma.conversation.findUnique({ where: { id: conversationId } })
   if (!conv || !isParticipant(conv, userId)) return null
   return conv
@@ -128,21 +138,36 @@ conversationRoutes.post(
       }
     }
 
+    let created = false
     if (!conv) {
       const now = new Date()
-      conv = await prisma.conversation.create({
-        data: {
-          userLowId: low,
-          userHighId: high,
-          initiatedById: me,
-          status: 'pending',
-          lastMessageText: text || 'Новый запрос',
-          lastMessageAt: now,
-          unreadLow: low === otherId ? 1 : 0,
-          unreadHigh: high === otherId ? 1 : 0,
-        },
-      })
+      try {
+        conv = await prisma.conversation.create({
+          data: {
+            userLowId: low,
+            userHighId: high,
+            initiatedById: me,
+            status: 'pending',
+            lastMessageText: text || 'Новый запрос',
+            lastMessageAt: now,
+            unreadLow: low === otherId ? 1 : 0,
+            unreadHigh: high === otherId ? 1 : 0,
+          },
+        })
+        created = true
+      } catch (err) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+          conv = await prisma.conversation.findUnique({
+            where: { userLowId_userHighId: { userLowId: low, userHighId: high } },
+          })
+        } else {
+          throw err
+        }
+      }
+      if (!conv) return c.json({ error: 'Не получилось открыть чат' }, 500)
+    }
 
+    if (created) {
       if (text) {
         await prisma.chatMessage.create({
           data: {
@@ -152,14 +177,30 @@ conversationRoutes.post(
             status: 'sent',
           },
         })
+        void logAppEvent({
+          name: 'first_message_sent',
+          visitorId: `u:${me}`,
+          userId: me,
+          path: '/app/messages',
+        })
       }
 
-      const meUser = await prisma.user.findUnique({ where: { id: me }, select: { name: true } })
+      void logAppEvent({
+        name: 'chat_request_sent',
+        visitorId: `u:${me}`,
+        userId: me,
+        path: '/app/messages',
+      })
+
+      const meUser = await prisma.user.findUnique({
+        where: { id: me },
+        select: { name: true, privacy: true },
+      })
       await createNotification({
         userId: otherId,
         type: 'chat_request',
         title: 'Запрос в чат',
-        body: `${meUser?.name || 'Кто-то'} хочет начать переписку`,
+        body: `${publicActorName(meUser)} хочет начать переписку`,
         href: `/app/messages/${conv.id}`,
         actorId: me,
       })
@@ -208,10 +249,13 @@ conversationRoutes.post(
       conv = await prisma.conversation.findUniqueOrThrow({ where: { id: conv.id } })
 
       if (conv.status === 'accepted') {
-        const meUser = await prisma.user.findUnique({ where: { id: me }, select: { name: true } })
+        const meUser = await prisma.user.findUnique({
+          where: { id: me },
+          select: { name: true, privacy: true },
+        })
         void pushChatMessage({
           userId: otherId,
-          senderName: meUser?.name || 'Новое сообщение',
+          senderName: publicActorName(meUser),
           text,
           conversationId: conv.id,
         }).catch((err) => console.warn('[push] chat message', err))
@@ -349,13 +393,23 @@ conversationRoutes.post(
       }),
     ])
 
-    const meUser = await prisma.user.findUnique({ where: { id: userId }, select: { name: true } })
+    const meUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true, privacy: true },
+    })
     void pushChatMessage({
       userId: otherId,
-      senderName: meUser?.name || 'Новое сообщение',
+      senderName: publicActorName(meUser),
       text,
       conversationId: conv.id,
     }).catch((err) => console.warn('[push] chat message', err))
+
+    void logAppEvent({
+      name: 'first_message_sent',
+      visitorId: `u:${userId}`,
+      userId,
+      path: '/app/messages',
+    })
 
     return c.json({ message: serializeChatMessage(message) }, 201)
   },
@@ -391,17 +445,27 @@ conversationRoutes.post(
       data: { status: 'accepted' },
     })
 
+    void logAppEvent({
+      name: 'chat_request_accepted',
+      visitorId: `u:${userId}`,
+      userId,
+      path: '/app/messages',
+    })
+
     const other = await prisma.user.findUnique({
       where: { id: otherUserId(updated, userId) },
       include: userInclude,
     })
 
-    const me = await prisma.user.findUnique({ where: { id: userId }, select: { name: true } })
+    const me = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true, privacy: true },
+    })
     await createNotification({
       userId: conv.initiatedById,
       type: 'chat_request',
       title: 'Запрос принят',
-      body: `${me?.name || 'Собеседник'} принял переписку`,
+      body: `${publicActorName(me)} принял переписку`,
       href: `/app/messages/${conv.id}`,
       actorId: userId,
     })

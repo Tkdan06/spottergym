@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { Check, ChevronDown, Info } from 'lucide-react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, Link, useNavigate } from 'react-router-dom'
 import { SectionTitle } from '../components/SectionTitle'
 import { SOFT_LOADER_DELAY_MS, SoftLoader } from '../components/SoftLoader'
 import { SubpageHeader } from '../components/SubpageHeader'
@@ -37,6 +37,8 @@ import { goWorkoutsHub } from '../lib/workoutsNav'
 import { WorkoutWeekRecap } from '../components/WorkoutWeekRecap'
 import { WorkoutMonthRecap } from '../components/WorkoutMonthRecap'
 import { WORKOUT_RECAP_ADMIN_ONLY } from '../lib/workoutRecap'
+import { trackApp } from '../lib/appTrack'
+import { userFacingError } from '../lib/userError'
 import './WorkoutsPage.css'
 import './FeedbackPage.css'
 
@@ -562,7 +564,7 @@ export function WorkoutsProgressPage() {
       const next = await apiFetchWorkoutProgress(range, pickedExercise)
       setProgress(next)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось загрузить прогресс')
+      setError(userFacingError(err, 'Не удалось загрузить прогресс'))
       setProgress(null)
     } finally {
       setLoading(false)
@@ -572,6 +574,10 @@ export function WorkoutsProgressPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    trackApp('progress_opened')
+  }, [])
 
   const bodyPoints: ChartPoint[] = useMemo(
     () => (progress?.body.points || []).map((p) => ({ at: p.at, value: p.kg })),
@@ -653,7 +659,17 @@ export function WorkoutsProgressPage() {
         ))}
       </div>
 
-      {error ? (
+      {error && !progress ? (
+        <div className="empty-copy-actions">
+          <div className="empty-copy" role="alert">
+            <p className="empty-copy-title">Не удалось загрузить прогресс</p>
+            <p className="empty-copy-lead">{error}</p>
+          </div>
+          <button type="button" className="btn btn-primary btn-block" onClick={() => void load()}>
+            Повторить
+          </button>
+        </div>
+      ) : error ? (
         <p className="feedback-error" role="alert">
           {error}
         </p>
@@ -664,7 +680,8 @@ export function WorkoutsProgressPage() {
           <SoftLoader delayMs={SOFT_LOADER_DELAY_MS} label="Загружаем прогресс…" />
         ) : null}
 
-        {!loading &&
+        {progress &&
+        !noWorkouts &&
         (!WORKOUT_RECAP_ADMIN_ONLY || user.isAdmin) &&
         (range === 7 || range === 30) ? (
           <div className="workout-progress-cluster">
@@ -674,17 +691,22 @@ export function WorkoutsProgressPage() {
         ) : null}
 
         {!loading && (!progress || noWorkouts) && !error ? (
-          <section className="empty-copy">
-            <p className="empty-copy-title">Пока пусто</p>
-            <p className="empty-copy-lead">
-              Запиши первую тренировку, чтобы Spotter начал отслеживать твой прогресс.
-            </p>
-          </section>
+          <div className="empty-copy-actions">
+            <section className="empty-copy" role="status">
+              <p className="empty-copy-title">Пока пусто</p>
+              <p className="empty-copy-lead">
+                Запиши первую тренировку — здесь появится динамика по весам и объёму
+              </p>
+            </section>
+            <Link to="/app/workouts/new" className="btn btn-primary btn-block">
+              Записать тренировку
+            </Link>
+          </div>
         ) : null}
 
-        {showInsights && progress ? <InsightsBlocks insights={progress.insights} /> : null}
+        {showInsights && progress && !noWorkouts ? <InsightsBlocks insights={progress.insights} /> : null}
 
-        {progress && !bothEmpty ? (
+        {progress && !noWorkouts && !bothEmpty ? (
           <div className="workout-progress-cluster">
             {strengthPoints.length > 0 || progress.exercises.length > 0 ? (
             <section className="surface workout-progress-metric" aria-label="Сила">

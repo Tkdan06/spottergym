@@ -5,6 +5,7 @@ import { useApp } from '../context/useApp'
 import { displayName, experienceLabel, intentLabel } from '../data/mock'
 import { profileImage, profileImageFallback } from '../lib/avatar'
 import { breakLabel, isOnBreak } from '../lib/schedule'
+import { userFacingError } from '../lib/userError'
 import type { UserProfile } from '../types'
 import { LikesRow } from './LikesRow'
 import { ReferralBadge, referralChromeClass } from './ReferralBadge'
@@ -21,6 +22,8 @@ interface Props {
   enableLike?: boolean
   /** Read-only preview — no navigation */
   staticPreview?: boolean
+  /** Parent route after opening this profile (same-app path) */
+  backTo?: string
 }
 
 export function UserCard({
@@ -30,6 +33,7 @@ export function UserCard({
   priority = false,
   enableLike = true,
   staticPreview = false,
+  backTo = '/app',
 }: Props) {
   const navigate = useNavigate()
   const { user: me, getLikesFor, toggleLike } = useApp()
@@ -52,7 +56,7 @@ export function UserCard({
 
   const goProfile = () => {
     if (staticPreview) return
-    navigate(profileTo, { state: isMe ? undefined : { person: user } })
+    navigate(profileTo, { state: isMe ? undefined : { person: user, from: backTo } })
   }
 
   return (
@@ -153,7 +157,7 @@ export function UserCard({
                 e.stopPropagation()
                 setLikeError('')
                 void Promise.resolve(toggleLike(user.id)).catch((err: unknown) => {
-                  setLikeError(err instanceof Error ? err.message : 'Не удалось поставить лайк')
+                  setLikeError(userFacingError(err, 'Не удалось поставить лайк'))
                 })
               }}
             >

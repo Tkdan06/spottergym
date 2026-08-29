@@ -18,6 +18,7 @@ import {
 import { BIO_MAX, BIO_MIN } from '../lib/fieldLimits'
 import { gymMatchesQuery } from '../lib/gymSearch'
 import { buildRealGymStatsMap } from '../lib/gymStats'
+import { trackApp } from '../lib/appTrack'
 import { ageFieldProps, bioFieldProps, searchFieldProps } from '../lib/inputAttrs'
 import {
   clearOnboardingDraft,
@@ -355,6 +356,7 @@ export function OnboardingPage() {
   }
 
   const finish = async () => {
+    if (finishing) return
     const parsedAge = Math.round(typeof age === 'number' ? age : Number(age))
     if (!Number.isFinite(parsedAge) || parsedAge < 18 || parsedAge > 80) return
     if (!intent || !experienceLevel) return
@@ -384,6 +386,8 @@ export function OnboardingPage() {
         return
       }
       clearOnboardingDraft()
+      trackApp(gymIds.length ? 'gym_selected' : 'gym_skipped', { source: 'onboarding' })
+      trackApp('profile_completed', { source: 'onboarding' })
     } catch {
       setFinishError('Не удалось сохранить данные. Проверь интернет и начни заново')
       setFinishing(false)

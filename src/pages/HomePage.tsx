@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Bell, ChartNoAxesColumn, ChevronRight, ClipboardList, MapPin } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { CheckInControl } from '../components/CheckInControl'
@@ -18,7 +18,8 @@ import { getGym, getUserGyms } from '../data/mock'
 import { getHallRank, sortByLikes } from '../lib/likes'
 import { useCheckInElapsed } from '../hooks/useCheckInElapsed'
 import { useGymPeople } from '../hooks/useGymPeople'
-import { getCheckInStartedAt, getCheckedInGymId } from '../lib/presence'
+import { trackApp } from '../lib/appTrack'
+import { getCheckedInGymId, getCheckInStartedAt } from '../lib/presence'
 import './HomePage.css'
 
 function shortGymName(name: string) {
@@ -55,6 +56,9 @@ export function HomePage() {
     fromApi: peopleFromApi,
     error: peopleError,
     retry: retryPeople,
+    hasMore: peopleHasMore,
+    loadingMore: peopleLoadingMore,
+    loadMore: loadMorePeople,
   } = useGymPeople({
     gymId: floorGymId,
     user,
@@ -63,6 +67,10 @@ export function HomePage() {
     blockedUserIds,
   })
   const peopleLoadFailed = Boolean(peopleError && !peopleLoading && !showLoader && !peopleFromApi)
+
+  useEffect(() => {
+    if (hasGym && peopleFromApi) trackApp('people_list_viewed', { surface: 'home' })
+  }, [hasGym, peopleFromApi])
 
   const people = useMemo(() => {
     let list = floorPeople
@@ -93,6 +101,9 @@ export function HomePage() {
   const activeNow = floorPeople.filter((p) => p.isActive).length
   const multi = myGyms.length > 1
   const gymLabel = hasGym ? shortGymName(gym!.name) || gym!.name : ''
+  const floorEmpty = !peopleLoading && !peopleLoadFailed && !showLoader && floorPeople.length === 0
+  const filteredEmpty =
+    !peopleLoading && !peopleLoadFailed && !showLoader && people.length === 0 && floorPeople.length > 0
 
   return (
     <main className="page home-page">
@@ -111,15 +122,20 @@ export function HomePage() {
           <div className="home-empty-icon" aria-hidden>
             <MapPin size={28} />
           </div>
-          <h2>Добавь свой клуб</h2>
-          <p className="muted">
-            Выбери зал в каталоге — здесь появятся люди рядом. Если клуба нет в списке, запроси
-            добавление — добавим.
-          </p>
+          <div className="empty-copy" role="status">
+            <p className="empty-copy-title">Ты ещё не выбрал зал</p>
+            <p className="empty-copy-lead">
+              Выбери зал в каталоге — здесь появятся люди рядом. Если клуба нет в списке, запроси
+              добавление — добавим.
+            </p>
+          </div>
           <Link to="/app/discover?from=home" className="btn btn-primary btn-block">
             Выбрать зал
           </Link>
           <div className="home-empty-more">
+            <Link to="/app/workouts" className="section-action">
+              Дневник тренировок
+            </Link>
             <Link to="/app/feedback?topic=gym" className="section-action">
               Запросить добавление зала
             </Link>
@@ -207,6 +223,7 @@ export function HomePage() {
               </span>
             </div>
 
+            {!floorEmpty ? (
             <FloorFilters
               intent={filter}
               gender={genderFilter}
@@ -217,6 +234,7 @@ export function HomePage() {
               onAgeChange={setAgeFilter}
               onLevelChange={setLevelFilter}
             />
+            ) : null}
 
             <div className="card-list card-list--cards">
               {showLoader ? (
@@ -227,32 +245,74 @@ export function HomePage() {
                     <p className="empty-copy-title">Не удалось загрузить людей</p>
                     <p className="empty-copy-lead">{peopleError}</p>
                   </div>
-                  <button type="button" className="btn btn-soft btn-block" onClick={retryPeople}>
+                  <button type="button" className="btn btn-primary btn-block" onClick={retryPeople}>
                     Повторить
                   </button>
                 </div>
               ) : peopleLoading ? null : people.length ? (
-                people.map((person, index) => (
+                <>
+                {people.map((person, index) => (
                   <UserCard
                     key={person.id}
                     user={person}
                     rank={getHallRank(person.id, people, likes, likeCounts)}
                     priority={index < 4}
+                    backTo="/app"
                   />
-                ))
-              ) : (
+                ))}
+                {peopleHasMore ? (
+                  <button
+                    type="button"
+                    className="btn btn-soft btn-sm btn-block"
+                    disabled={peopleLoadingMore}
+                    onClick={() => void loadMorePeople()}
+                  >
+                    {peopleLoadingMore ? 'Загружаем…' : 'Показать ещё'}
+                  </button>
+                ) : null}
+                </>
+              ) : filteredEmpty ? (
                 <div className="empty-copy-actions">
                   <div className="empty-copy" role="status">
                     <p className="empty-copy-title">Пока никого по этому фильтру</p>
-                    <p className="empty-copy-lead">Загляни позже или смени фильтр</p>
+                    <p className="empty-copy-lead">Сбрось фильтр или загляни позже</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-block"
+                    onClick={() => {
+                      setFilter('all')
+                      setGenderFilter('all')
+                      setAgeFilter('all')
+                      setLevelFilter('all')
+                    }}
+                  >
+                    Сбросить фильтры
+                  </button>
+                </div>
+              ) : (
+                <div className="empty-copy-actions">
+                  <div className="empty-copy" role="status">
+                    <p className="empty-copy-title">Сейчас никого нет</p>
+                    <p className="empty-copy-lead">
+                      Позови тех, с кем тренируешься — они появятся здесь
+                    </p>
                   </div>
                   <InviteFriendsButton
                     userId={user.id}
                     gymName={gymLabel}
-                    className="btn btn-soft btn-sm btn-block"
+                    className="btn btn-primary btn-block"
                   >
-                    Поделиться ссылкой
+                    Пригласить в зал
                   </InviteFriendsButton>
+                  <div className="home-empty-more">
+                    <Link to="/app/invite" className="section-action">
+                      Мой круг
+                    </Link>
+                    <Link to="/app/discover?from=home" className="section-action">
+                      Выбрать другой зал
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>

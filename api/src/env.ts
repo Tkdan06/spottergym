@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 /** Fill process.env from api/.env if the process was started without --env-file. */
@@ -114,6 +115,22 @@ export const env = {
     const n = Number(process.env.GIGACHAT_COACH_PERIOD_DAYS || 7)
     if (!Number.isFinite(n)) return 7
     return Math.min(14, Math.max(1, Math.round(n)))
+  })(),
+  /**
+   * PEM of НУЦ Минцифры (Russian Trusted Root CA). Required for GigaChat TLS.
+   * Override with GIGACHAT_CA_FILE / GIGACHAT_CA_BUNDLE_FILE.
+   */
+  gigachatCaFile: (() => {
+    const fromEnv = String(
+      process.env.GIGACHAT_CA_FILE || process.env.GIGACHAT_CA_BUNDLE_FILE || '',
+    ).trim()
+    if (fromEnv) return fromEnv
+    const here = path.dirname(fileURLToPath(import.meta.url))
+    const candidates = [
+      path.resolve(here, '../certs/russian_trusted_root_ca.pem'),
+      path.resolve(process.cwd(), 'certs/russian_trusted_root_ca.pem'),
+    ]
+    return candidates.find((p) => existsSync(p)) || ''
   })(),
 }
 

@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { exerciseIdentity, feltTimeline, parseWorkoutFelt } from './workouts.ts'
+import {
+  bestSet,
+  buildExerciseTrackIndex,
+  exerciseIdentity,
+  feltTimeline,
+  parseWorkoutFelt,
+  pickExerciseTrackKey,
+} from './workouts.ts'
 import {
   lookupIdempotentWorkout,
   payloadHash,
@@ -48,6 +55,63 @@ describe('exerciseIdentity', () => {
   it('folds ё so лежа and лёжа match', () => {
     assert.equal(exerciseIdentity({ name: 'Жим лёжа' }), exerciseIdentity({ name: 'Жим лежа' }))
     assert.equal(exerciseIdentity({ name: 'жим лёжа' }), exerciseIdentity({ name: 'Жим Лёжа' }))
+  })
+})
+
+describe('bestSet', () => {
+  it('picks max weight then more reps and ignores invalid sets', () => {
+    assert.equal(bestSet([]), null)
+    assert.equal(
+      bestSet([
+        { weightKg: 0, reps: 10 },
+        { weightKg: 80, reps: 0 },
+        { weightKg: -100, reps: 5 },
+        { weightKg: NaN, reps: 5 },
+        { weightKg: 80, reps: 5 },
+        { weightKg: 80, reps: 8 },
+        { weightKg: 70, reps: 12 },
+      ])?.reps,
+      8,
+    )
+  })
+})
+
+describe('pickExerciseTrackKey', () => {
+  it('keeps a client key that already exists in history', () => {
+    const index = buildExerciseTrackIndex([
+      { name: 'Жим лёжа', trackKey: 'bench1' },
+    ])
+    assert.equal(
+      pickExerciseTrackKey({ name: 'Жим штанги лёжа', trackKey: 'bench1' }, index),
+      'bench1',
+    )
+  })
+
+  it('reuses the key for the same normalized name on a new client uuid', () => {
+    const index = buildExerciseTrackIndex([
+      { name: 'Жим лёжа', trackKey: 'bench1' },
+    ])
+    assert.equal(
+      pickExerciseTrackKey({ name: 'жим лежа', trackKey: 'brandnewuuid' }, index),
+      'bench1',
+    )
+  })
+
+  it('does not merge different names', () => {
+    const index = buildExerciseTrackIndex([
+      { name: 'Жим лёжа', trackKey: 'bench1' },
+    ])
+    const picked = pickExerciseTrackKey(
+      { name: 'Жим штанги на горизонтальной скамье', trackKey: 'otheruuid' },
+      index,
+    )
+    assert.equal(picked, 'otheruuid')
+  })
+
+  it('stays nameless to match legacy rows without trackKey', () => {
+    const index = buildExerciseTrackIndex([{ name: 'Жим лёжа', trackKey: '' }])
+    assert.equal(pickExerciseTrackKey({ name: 'жим лежа', trackKey: 'newuuid' }, index), '')
+    assert.equal(exerciseIdentity({ name: 'Жим лёжа', trackKey: '' }), 'n:жим лежа')
   })
 })
 

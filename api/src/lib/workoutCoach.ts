@@ -315,6 +315,8 @@ export async function generateCoachLetter(userId: string, userEmail: string) {
     where: { userId_periodStart: { userId, periodStart: start } },
   })
   if (existing) {
+    const letter = letterFromJson(existing.letterJson)
+    if (letter) return { letter, createdAt: existing.createdAt.toISOString() }
     throw new CoachGenerateError('Следующий разбор — с понедельника', 429)
   }
 

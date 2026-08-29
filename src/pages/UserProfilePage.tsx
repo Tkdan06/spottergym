@@ -22,6 +22,10 @@ import { breakLabel, isOnBreak } from '../lib/schedule'
 import { InstagramIcon } from '../components/InstagramIcon'
 import { formatUsername } from '../lib/username'
 import { formatInstagram, instagramProfileUrl, normalizeInstagram } from '../lib/instagram'
+import { profileParentFromState } from '../lib/appNav'
+import { SOFT_LOADER_DELAY_MS, SoftLoader } from '../components/SoftLoader'
+import { trackApp } from '../lib/appTrack'
+import { userFacingError } from '../lib/userError'
 import type { UserProfile } from '../types'
 import './FeedbackPage.css'
 import './ProfileViews.css'
@@ -103,7 +107,7 @@ export function UserProfilePage() {
       })
       .catch((err) => {
         if (!cancelled && !localPerson) {
-          setLoadError(err instanceof Error ? err.message : 'Пользователь не найден')
+          setLoadError(userFacingError(err, 'Пользователь не найден'))
         }
       })
       .finally(() => {
@@ -125,6 +129,7 @@ export function UserProfilePage() {
   const [galleryOpen, setGalleryOpen] = useState(false)
   const [galleryIndex, setGalleryIndex] = useState(0)
   const likesInfo = getLikesFor(userId)
+  const profileBack = profileParentFromState(location.state)
 
   const existingConversationId = useMemo(() => {
     if (!person || !user) return null
@@ -132,10 +137,17 @@ export function UserProfilePage() {
     return found?.id ?? null
   }, [conversations, person, user])
 
+  useEffect(() => {
+    if (!person || person.isDeleted) return
+    if (user && person.id === user.id) return
+    trackApp('profile_viewed', { surface: 'profile' })
+  }, [person?.id, person?.isDeleted, user?.id])
+
   if (loading && !person) {
     return (
       <main className="page">
-        <p className="muted">Загрузка профиля…</p>
+        <SubpageBack onClick={() => navigate(profileBack)} />
+        <SoftLoader delayMs={SOFT_LOADER_DELAY_MS} label="Загружаем профиль…" />
       </main>
     )
   }
@@ -143,8 +155,18 @@ export function UserProfilePage() {
   if (!person) {
     return (
       <main className="page">
-        <p>{loadError || 'Пользователь не найден'}</p>
-        <Link to="/app">Назад</Link>
+        <SubpageBack onClick={() => navigate(profileBack)} />
+        <div className="empty-copy-actions">
+          <div className="empty-copy" role="status">
+            <p className="empty-copy-title">Профиль недоступен</p>
+            <p className="empty-copy-lead">
+              {loadError || 'Этого пользователя нет или ссылка устарела'}
+            </p>
+          </div>
+          <Link to="/app/messages" className="btn btn-primary btn-block">
+            Чаты
+          </Link>
+        </div>
       </main>
     )
   }
@@ -152,8 +174,8 @@ export function UserProfilePage() {
   if (person.isDeleted) {
     return (
       <main className="page">
-        <SubpageBack onClick={() => navigate(-1)} />
-        <div className="empty-copy" style={{ marginTop: 24 }}>
+        <SubpageBack onClick={() => navigate(profileBack)} />
+        <div className="empty-copy-actions">
           <SmartImage
             src="/images/deleted-user.svg"
             alt=""
@@ -166,8 +188,13 @@ export function UserProfilePage() {
               margin: '0 auto 12px',
             }}
           />
-          <p className="empty-copy-title">Удалённый пользователь</p>
-          <p className="empty-copy-lead">Этот аккаунт удалён. Переписку можно открыть в чатах.</p>
+          <div className="empty-copy" role="status">
+            <p className="empty-copy-title">Профиль недоступен</p>
+            <p className="empty-copy-lead">Этот аккаунт удалён</p>
+          </div>
+          <Link to="/app/messages" className="btn btn-primary btn-block">
+            Чаты
+          </Link>
         </div>
       </main>
     )
@@ -198,7 +225,7 @@ export function UserProfilePage() {
         setAdminRevealed(true)
       })
       .catch((err: unknown) => {
-        setRevealError(err instanceof Error ? err.message : 'Не удалось открыть')
+        setRevealError(userFacingError(err, 'Не удалось открыть'))
       })
       .finally(() => setRevealBusy(false))
   }
@@ -233,7 +260,7 @@ export function UserProfilePage() {
         navigate(`/app/messages/${cid}`, { state: { from: `/app/user/${person.id}` } })
         return
       }
-      setSendError(err instanceof Error ? err.message : 'Не удалось начать чат')
+      setSendError(userFacingError(err, 'Не удалось начать чат'))
     } finally {
       setSendBusy(false)
     }
@@ -255,14 +282,14 @@ export function UserProfilePage() {
         window.setTimeout(() => setLikeFlash(''), 1800)
       })
       .catch((err: unknown) => {
-        setLikeError(err instanceof Error ? err.message : 'Не удалось поставить лайк')
+        setLikeError(userFacingError(err, 'Не удалось поставить лайк'))
       })
   }
 
   return (
     <main className="page profile-view">
       <header className="profile-other-top">
-        <SubpageBack onClick={() => navigate(-1)} />
+        <SubpageBack onClick={() => navigate(profileBack)} />
         {!isSelf ? <SafetyActions person={person} /> : null}
       </header>
 

@@ -10,9 +10,11 @@ import {
 } from '../lib/fieldLimits'
 import { displayNameFieldProps } from '../lib/inputAttrs'
 import { persistInviteFrom } from '../lib/inviteShare'
+import { trackApp } from '../lib/appTrack'
 import { trackLanding } from '../lib/landingTrack'
 import { captureMarketingParams, captureSearchTouch } from '../lib/utm'
 import { consumeTermsAcceptedFlag } from '../lib/termsAcceptance'
+import { userFacingError } from '../lib/userError'
 import type { Gender } from '../types'
 import './AuthPages.css'
 
@@ -37,6 +39,7 @@ export function RegisterPage() {
   const [ageOk, setAgeOk] = useState(false)
   const [termsOk, setTermsOk] = useState(false)
   const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     persistInviteFrom(searchParams.get('invite'))
@@ -57,14 +60,18 @@ export function RegisterPage() {
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    if (!canSubmit || !gender) return
+    if (!canSubmit || !gender || submitting) return
     setError('')
+    setSubmitting(true)
     try {
       await register(name.trim(), email, password, gender)
       trackLanding('register_success', { path: '/register' })
+      trackApp('registration_completed')
       navigate('/onboarding')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось зарегистрироваться')
+      setError(userFacingError(err, 'Не удалось зарегистрироваться'))
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -176,9 +183,9 @@ export function RegisterPage() {
           <button
             className="btn btn-primary btn-block"
             type="submit"
-            disabled={!canSubmit}
+            disabled={!canSubmit || submitting}
           >
-            Продолжить
+            {submitting ? 'Создаём…' : 'Продолжить'}
           </button>
         </form>
 

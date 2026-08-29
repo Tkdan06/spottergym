@@ -14,16 +14,17 @@ import { MessageTicks } from '../components/MessageTicks'
 import { PresenceBadge } from '../components/PresenceBadge'
 import { SafetyActions } from '../components/SafetyActions'
 import { SmartImage } from '../components/SmartImage'
-import { SoftLoader } from '../components/SoftLoader'
+import { SOFT_LOADER_DELAY_MS, SoftLoader } from '../components/SoftLoader'
 import { useApp } from '../context/useApp'
-import { displayName, formatGymLabel, getContactGym, getUser } from '../data/mock'
+import { displayName, formatGymLabel, getContactGym, getUser, shortGymName } from '../data/mock'
 import { profileImage, profileImageFallback } from '../lib/avatar'
 import { apiMarkConversationRead } from '../lib/apiClient'
 import { otherParticipantId } from '../lib/conversations'
 import { CHAT_MESSAGE_MAX } from '../lib/fieldLimits'
 import { chatComposerProps } from '../lib/inputAttrs'
 import { setActiveChatForPush } from '../lib/push'
-import { shortGymName } from '../data/mock'
+import { inAppFromState } from '../lib/appNav'
+import { userFacingError } from '../lib/userError'
 import './ChatPage.css'
 import './FeedbackPage.css'
 
@@ -52,10 +53,7 @@ export function ChatPage() {
   } = useApp()
   const navigate = useNavigate()
   const location = useLocation()
-  const backTo =
-    typeof (location.state as { from?: unknown } | null)?.from === 'string'
-      ? (location.state as { from: string }).from
-      : null
+  const backTo = inAppFromState(location.state, '/app/messages')
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -316,7 +314,7 @@ export function ChatPage() {
         if (el) el.scrollTop = el.scrollHeight - prevHeight
       })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось загрузить историю')
+      setError(userFacingError(err, 'Не удалось загрузить историю'))
     } finally {
       setLoadingOlder(false)
     }
@@ -325,7 +323,7 @@ export function ChatPage() {
   if (hydrate === 'loading' && !conversation) {
     return (
       <main className="page chat-page" ref={pageRef}>
-        <SoftLoader label="Открываем чат…" />
+        <SoftLoader delayMs={SOFT_LOADER_DELAY_MS} label="Открываем чат…" />
       </main>
     )
   }
@@ -340,7 +338,7 @@ export function ChatPage() {
           </div>
           <button
             type="button"
-            className="btn btn-soft btn-block"
+            className="btn btn-primary btn-block"
             onClick={() => {
               setHydrate('loading')
               void refreshThread(conversationId)
@@ -413,7 +411,7 @@ export function ChatPage() {
     try {
       await sendMessage(conversation.id, trimmed)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось отправить')
+      setError(userFacingError(err, 'Не удалось отправить'))
       setText(trimmed)
     } finally {
       sendingRef.current = false
@@ -429,13 +427,14 @@ export function ChatPage() {
   }
 
   const onAccept = async () => {
+    if (busy) return
     setBusy(true)
     setError('')
     try {
       await acceptRequest(conversation.id)
       await refreshChats()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось принять')
+      setError(userFacingError(err, 'Не удалось принять'))
     } finally {
       setBusy(false)
     }
@@ -447,7 +446,7 @@ export function ChatPage() {
     try {
       await unblockUser(other.id)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось разблокировать')
+      setError(userFacingError(err, 'Не удалось разблокировать'))
     } finally {
       setBusy(false)
     }
@@ -489,19 +488,7 @@ export function ChatPage() {
     <main className="chat-page" ref={pageRef}>
       <h1 className="sr-only">Чат с {name}</h1>
       <header className="chat-header">
-        <SubpageBack
-          onClick={() => {
-            if (backTo) {
-              navigate(backTo)
-              return
-            }
-            if (window.history.length > 1) {
-              navigate(-1)
-              return
-            }
-            navigate('/app/messages')
-          }}
-        />
+        <SubpageBack onClick={() => navigate(backTo)} />
         {deleted ? (
           <div className="chat-user">
             <div className="chat-user-avatar">
@@ -519,7 +506,11 @@ export function ChatPage() {
             </div>
           </div>
         ) : (
-          <Link to={`/app/user/${other.id}`} className="chat-user">
+          <Link
+            to={`/app/user/${other.id}`}
+            state={{ from: `/app/messages/${conversationId}` }}
+            className="chat-user"
+          >
             <div className="chat-user-avatar">
               <SmartImage
                 src={profileImage(other)}

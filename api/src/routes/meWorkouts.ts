@@ -38,8 +38,17 @@ import type { AuthedEnv } from '../middleware/auth.js'
 import { rateLimit } from '../middleware/rateLimit.js'
 
 const setSchema = z.object({
-  weightKg: z.number().min(1).max(300),
-  reps: z.number().int().min(0).max(1000),
+  weightKg: z
+    .number()
+    .refine((n) => Number.isFinite(n), 'Некорректный вес')
+    .min(1)
+    .max(300),
+  reps: z
+    .number()
+    .int()
+    .refine((n) => Number.isFinite(n), 'Некорректные повторения')
+    .min(1)
+    .max(1000),
 })
 
 const exerciseSchema = z.object({
@@ -63,8 +72,9 @@ function parsePerformedAt(raw: string) {
   return d
 }
 
-function parseRange(raw: string | undefined): WorkoutProgressRange {
-  return parsePeriodRange(raw)
+function parseWorkoutId(raw: string) {
+  const id = z.string().min(1).max(64).safeParse(raw)
+  return id.success ? id.data : null
 }
 
 /** Mounted under /me — auth already applied by meRoutes.use */
@@ -94,7 +104,7 @@ workoutRoutes.get(
   '/workouts/progress',
   rateLimit({ windowMs: 60_000, max: 60, route: 'me-workouts-progress' }),
   async (c) => {
-    const range = parseRange(c.req.query('range'))
+    const range = parsePeriodRange(c.req.query('range'))
     const exercise = c.req.query('exercise')?.trim() || undefined
     const progress = await getWorkoutProgress(c.get('userId'), range, exercise)
     return c.json({ progress })
@@ -123,6 +133,7 @@ workoutRoutes.get(
 workoutRoutes.post(
   '/workouts/coach/generate',
   rateLimit({ windowMs: 60_000, max: 1, route: 'me-workouts-coach-gen' }),
+  rateLimit({ windowMs: 60_000, max: 1, route: 'me-workouts-coach-gen', by: 'user' }),
   async (c) => {
     if (!(await userCanUseWorkoutRecap(c.get('userId')))) {
       return c.json({ error: 'Недостаточно прав' }, 403)
@@ -155,11 +166,13 @@ workoutRoutes.get(
 workoutRoutes.post(
   '/workouts/insight/generate',
   rateLimit({ windowMs: 60_000, max: 1, route: 'me-workouts-insight-gen' }),
+  rateLimit({ windowMs: 60_000, max: 1, route: 'me-workouts-insight-gen', by: 'user' }),
   async (c) => {
     if (!(await userCanUseWorkoutRecap(c.get('userId')))) {
       return c.json({ error: 'Недостаточно прав' }, 403)
     }
     try {
+      // Workouts are loaded from the session user — ignore any client body.
       const insight = await generateWeeklyInsight(c.get('userId'), c.get('userEmail'))
       return c.json({ insight })
     } catch (err) {
@@ -198,6 +211,7 @@ workoutRoutes.get(
 workoutRoutes.post(
   '/workouts/monthly/generate',
   rateLimit({ windowMs: 60_000, max: 1, route: 'me-workouts-monthly-gen' }),
+  rateLimit({ windowMs: 60_000, max: 1, route: 'me-workouts-monthly-gen', by: 'user' }),
   async (c) => {
     if (!(await userCanUseWorkoutRecap(c.get('userId')))) {
       return c.json({ error: 'Недостаточно прав' }, 403)
@@ -260,7 +274,9 @@ workoutRoutes.patch(
     } catch {
       return c.json({ error: 'Некорректная оценка тренировки' }, 400)
     }
-    const workout = await setWorkoutFeedback(c.get('userId'), c.req.param('id'), {
+    const id = parseWorkoutId(c.req.param('id'))
+    if (!id) return c.json({ error: 'Тренировка не найдена' }, 404)
+    const workout = await setWorkoutFeedback(c.get('userId'), id, {
       ...(felt !== undefined ? { feedback: felt } : {}),
       prompted: parsed.data.prompted,
     })
@@ -273,7 +289,9 @@ workoutRoutes.get(
   '/workouts/:id',
   rateLimit({ windowMs: 60_000, max: 60, route: 'me-workouts-get' }),
   async (c) => {
-    const workout = await getWorkoutSession(c.get('userId'), c.req.param('id'))
+    const id = parseWorkoutId(c.req.param('id'))
+    if (!id) return c.json({ error: 'Тренировка не найдена' }, 404)
+    const workout = await getWorkoutSession(c.get('userId'), id)
     if (!workout) return c.json({ error: 'Тренировка не найдена' }, 404)
     return c.json({ workout })
   },
@@ -326,7 +344,9 @@ workoutRoutes.patch(
     if (isPerformedAtInFuture(performedAt)) {
       return c.json({ error: 'Дата не может быть в будущем' }, 400)
     }
-    const workout = await replaceWorkoutSession(c.get('userId'), c.req.param('id'), {
+    const id = parseWorkoutId(c.req.param('id'))
+    if (!id) return c.json({ error: 'Тренировка не найдена' }, 404)
+    const workout = await replaceWorkoutSession(c.get('userId'), id, {
       title: parsed.data.title,
       performedAt,
       bodyWeightKg: parsed.data.bodyWeightKg,
@@ -342,7 +362,9 @@ workoutRoutes.delete(
   '/workouts/:id',
   rateLimit({ windowMs: 60_000, max: 20, route: 'me-workouts-delete' }),
   async (c) => {
-    const ok = await deleteWorkoutSession(c.get('userId'), c.req.param('id'))
+    const id = parseWorkoutId(c.req.param('id'))
+    if (!id) return c.json({ error: 'Тренировка не найдена' }, 404)
+    const ok = await deleteWorkoutSession(c.get('userId'), id)
     if (!ok) return c.json({ error: 'Тренировка не найдена' }, 404)
     return c.json({ ok: true })
   },

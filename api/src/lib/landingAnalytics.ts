@@ -339,10 +339,11 @@ export async function buildLandingAnalytics() {
     buildWindow(t30),
     prisma.landingEvent.groupBy({
       by: ['utmCampaign', 'name'],
-      where: { createdAt: { gte: t7 } },
+      where: { createdAt: { gte: t7 }, name: { in: [...LANDING_EVENT_NAMES] } },
       _count: { _all: true },
     }),
     prisma.landingEvent.findMany({
+      where: { name: { in: [...LANDING_EVENT_NAMES] } },
       orderBy: { createdAt: 'desc' },
       take: 40,
       select: {

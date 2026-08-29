@@ -147,7 +147,7 @@ app.route('/admin', adminRoutes)
 app.notFound((c) => c.json({ error: 'Не найдено' }, 404))
 app.onError((err, c) => {
   console.error(err)
-  return c.json({ error: 'Внутренняя ошибка сервера' }, 500)
+  return c.json({ error: 'Не получилось выполнить запрос' }, 500)
 })
 
 serve({ fetch: app.fetch, port: env.port }, (info) => {

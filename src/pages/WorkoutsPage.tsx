@@ -26,6 +26,7 @@ import {
   formatWorkoutWhen,
   workoutFeltLabel,
 } from '../lib/workouts'
+import { userFacingError } from '../lib/userError'
 import './WorkoutsPage.css'
 import './FeedbackPage.css'
 
@@ -70,7 +71,7 @@ export function WorkoutsPage() {
       setTotalCount(page.totalCount)
       setAtRetentionCap(page.atRetentionCap)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось загрузить тренировки')
+      setError(userFacingError(err, 'Не удалось загрузить тренировки'))
       setList([])
       setHasMore(false)
       setTotalCount(0)
@@ -103,7 +104,7 @@ export function WorkoutsPage() {
       })
       setHasMore(page.hasMore)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось загрузить ещё')
+      setError(userFacingError(err, 'Не удалось загрузить ещё'))
     } finally {
       setLoadingMore(false)
     }
@@ -127,7 +128,17 @@ export function WorkoutsPage() {
     <main className="page workouts-page">
       <SubpageHeader title="Тренировки" onBack={() => exitWorkoutsSection(navigate)} />
 
-      {error ? (
+      {error && !list.length ? (
+        <div className="empty-copy-actions">
+          <div className="empty-copy" role="alert">
+            <p className="empty-copy-title">Не удалось загрузить тренировки</p>
+            <p className="empty-copy-lead">{error}</p>
+          </div>
+          <button type="button" className="btn btn-primary btn-block" onClick={() => void load()}>
+            Повторить
+          </button>
+        </div>
+      ) : error ? (
         <p className="feedback-error" role="alert">
           {error}
         </p>
@@ -170,11 +181,11 @@ export function WorkoutsPage() {
           </Link>
         ) : null}
 
-        {!loading && !list.length ? (
+        {!loading && !list.length && !error ? (
           <section className="workouts-empty">
             <ClipboardList size={28} aria-hidden />
             <p className="empty-copy-title">Пока пусто</p>
-            <p className="muted">
+            <p className="empty-copy-lead">
               Запиши первую тренировку — так появится история, и ты сможешь следить за прогрессом.
             </p>
           </section>

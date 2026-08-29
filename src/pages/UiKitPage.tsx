@@ -355,7 +355,7 @@ export function UiKitPage() {
           <div>
             <p className="dim ui-kit-meta">.activity-summary-total · Onest 600 · 1.5–1.75rem</p>
             <strong className="activity-summary-total">12</strong>
-            <p className="muted">тренировок</p>
+            <p className="muted">посещений</p>
           </div>
           <div>
             <p className="dim ui-kit-meta">SectionTitle · Onest 600 · 1.05rem + action Onest 500</p>

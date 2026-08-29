@@ -288,17 +288,17 @@
   color: var(--accent);
 }
 
-.home-empty-floor h2 {
-  margin: 4px 0 0;
-  font-size: 1.25rem;
-  line-height: 1.2;
+.home-empty-floor .empty-copy {
+  padding-bottom: 0;
 }
 
-.home-empty-floor > .muted {
+.home-empty-floor .empty-copy-title {
+  margin: 4px 0 0;
+}
+
+.home-empty-floor .empty-copy-lead {
   margin: 0 auto;
   max-width: 28ch;
-  font-size: 0.92rem;
-  line-height: 1.4;
 }
 
 .home-empty-floor .btn {

@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto'
+import { existsSync, readFileSync } from 'node:fs'
 import https from 'node:https'
+import tls from 'node:tls'
 import { env, isGigachatConfigured } from '../env.js'
 
 type ChatMessage = { role: 'system' | 'user' | 'assistant'; content: string }
@@ -16,6 +18,31 @@ const FALLBACK_MODELS = ['GigaChat', 'GigaChat:latest']
 
 let cachedToken = ''
 let tokenExpiresAt = 0
+
+/** Extra CA for Sber hosts (НУЦ Минцифры). Never disables verification. */
+function tlsOptions(): Pick<https.RequestOptions, 'ca' | 'rejectUnauthorized'> {
+  const extraPath = env.gigachatCaFile
+  const extra = extraPath && existsSync(extraPath) ? readFileSync(extraPath) : null
+  return {
+    rejectUnauthorized: true,
+    ...(extra ? { ca: [...tls.rootCertificates, extra] } : {}),
+  }
+}
+
+function tlsErrorMessage(err: unknown) {
+  const code =
+    err && typeof err === 'object' && 'code' in err ? String((err as { code?: unknown }).code) : ''
+  if (
+    code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE' ||
+    code === 'UNABLE_TO_GET_ISSUER_CERT_LOCALLY' ||
+    code === 'CERT_UNTRUSTED' ||
+    code === 'DEPTH_ZERO_SELF_SIGNED_CERT' ||
+    /certificate/i.test(err instanceof Error ? err.message : String(err))
+  ) {
+    return 'GigaChat TLS: certificate verify failed. Set GIGACHAT_CA_FILE to the Russian Trusted Root CA PEM.'
+  }
+  return err instanceof Error ? err.message : 'GigaChat request failed'
+}
 
 function sberRequest(
   url: string,
@@ -34,7 +61,7 @@ function sberRequest(
         path: `${u.pathname}${u.search}`,
         method: opts.method,
         headers,
-        rejectUnauthorized: false,
+        ...tlsOptions(),
       },
       (res) => {
         const chunks: Buffer[] = []
@@ -47,7 +74,7 @@ function sberRequest(
         })
       },
     )
-    req.on('error', reject)
+    req.on('error', (err) => reject(new Error(tlsErrorMessage(err))))
     if (opts.body) req.write(opts.body)
     req.end()
   })

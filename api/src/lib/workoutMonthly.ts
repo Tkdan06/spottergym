@@ -39,7 +39,7 @@ export const MONTHLY_SYSTEM_PROMPT = `Ты тренер зала в прилож
 Тебе дают JSON с уже посчитанными метриками за скользящие 30 дней (period/previous) и отдельно окно квоты (quota, календарный месяц по Москве). Не пересчитывай и не выдумывай числа, даты, упражнения.
 Цифры месяца бери только из period / workoutCount / volume / frequency / consistency / prs / improving / plateauCandidates.
 history90 — только для «устойчивый тренд» или «долгое плато». Не подменяй им 30-дневные цифры.
-activity — факт посещений зала, не восстановление и не доказательство отдыха.
+activity — факт посещений зала (отметки «Я в зале»), не записанные тренировки и не доказательство отдыха. Не называй visits тренировками.
 Не перечисляй все упражнения. Не повторяй каждую цифру. Каждый win/attention отвечает «почему это важно». Рекомендация — «что конкретно попробовать».
 Не медицина, не перетрен, не травмы, не лечение, не утверждения о здоровье. Не пиши «как ИИ», «я проанализировал». Без мотивационного буллшита.
 Тон: на «ты», коротко, спокойно, без эмодзи. Если мало сигнала — честно в headline, wins/attention/recommendations пустые.
@@ -571,7 +571,7 @@ export async function generateMonthlyInsight(
     promptVersion: MONTHLY_PROMPT_VERSION,
   })
   if (claim === 'exists') {
-    throw new InsightGenerateError('Следующий разбор — с 1-го', 429)
+    return getMonthlyInsightState(userId, userEmail)
   }
   if (claim === 'busy') {
     throw new InsightGenerateError('Разбор уже собирается', 429)

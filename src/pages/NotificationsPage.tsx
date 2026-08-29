@@ -130,10 +130,7 @@ export function NotificationsPage() {
     <main className="page notifications-page">
       <SubpageHeader
         title="Уведомления"
-        onBack={() => {
-          if (window.history.length > 1) navigate(-1)
-          else navigate('/app')
-        }}
+        onBack={() => navigate('/app')}
         action={
           unreadNotifications > 0 ? (
             <button

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "test": "tsx --test src/lib/workoutAnalytics.test.ts src/lib/workoutInsight.test.ts src/lib/workoutMonthly.test.ts src/lib/workoutFeedback.test.ts src/lib/searchAttribution.test.ts",
+    "test": "tsx --test src/lib/workoutAnalytics.test.ts src/lib/workoutInsight.test.ts src/lib/workoutMonthly.test.ts src/lib/workoutFeedback.test.ts src/lib/searchAttribution.test.ts src/lib/serialize.privacy.test.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "db:generate": "prisma generate",

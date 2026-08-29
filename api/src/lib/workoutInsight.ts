@@ -24,6 +24,7 @@ import {
 
 const DEMO_EMAIL = 'demo@demo.ru'
 const INSIGHT_KIND = 'weekly'
+export const WEEKLY_PROMPT_VERSION = 'weekly-v1'
 const VOLUME_SIGNAL_PCT = 5
 
 export const INSIGHT_SYSTEM_PROMPT = `Ты тренер зала в приложении Spotter. Пишешь короткий еженедельный разбор.
@@ -33,6 +34,7 @@ P0: новый PR, заметный рост силы, заметное изме
 P1: изменение объёма, отдельных упражнений, поведения.
 P2: второстепенное — только если слотов меньше трёх.
 Не перечисляй всё. Одно выполнение упражнения — не прогресс. Одно снижение — не проблема.
+activity — отметки «Я в зале» (посещения клуба), не записанные тренировки. Не называй visits тренировками и не делай силовых выводов только из минут в зале.
 Не медицина, не травмы, не «нужен отдых» без данных. Не пиши «как ИИ», «я проанализировал», «ваши данные свидетельствуют». Без мотивационного буллшита и «ты молодец» без конкретной цифры из JSON.
 Тон: на «ты», коротко, спокойно, без эмодзи. Если значимых изменений нет — честно скажи в summary, insights и recommendations пустые.
 Максимум 2 рекомендации. Цифры в text/value бери только из JSON.
@@ -590,9 +592,10 @@ export async function generateWeeklyInsight(
     periodEnd: bundle.quota.end,
     inputJson: bundle.input as unknown as Prisma.InputJsonValue,
     inputHash: hashInsightInput(bundle.input),
+    promptVersion: WEEKLY_PROMPT_VERSION,
   })
   if (claim === 'exists') {
-    throw new InsightGenerateError('Следующий разбор — с понедельника', 429)
+    return getWeeklyInsightState(userId, userEmail)
   }
   if (claim === 'busy') {
     throw new InsightGenerateError('Разбор уже собирается', 429)
@@ -610,6 +613,7 @@ export async function generateWeeklyInsight(
       model: result.model,
       promptTokens: result.promptTokens,
       completionTokens: result.completionTokens,
+      promptVersion: WEEKLY_PROMPT_VERSION,
     })
     return baseState({
       status: 'cached',

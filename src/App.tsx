@@ -1,3 +1,4 @@
+import { lazy, Suspense, type ComponentType } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-dom'
 import { AppLayout } from './components/AppLayout'
 import { InviteCapture } from './components/InviteCapture'
@@ -5,6 +6,7 @@ import { NormalizePathname } from './components/NormalizePathname'
 import { PublicTrafficCapture } from './components/PublicTrafficCapture'
 import { ScrollToTop } from './components/ScrollToTop'
 import { SeoHead } from './components/SeoHead'
+import { SoftLoader } from './components/SoftLoader'
 import { GuestOnly, ProtectedRoute } from './components/ProtectedRoute'
 import { AppProvider } from './context/AppContext'
 import { MomentProvider } from './components/MomentFX'
@@ -12,29 +14,12 @@ import { ActivityPage } from './pages/ActivityPage'
 import { WorkoutEditorPage } from './pages/WorkoutEditorPage'
 import { WorkoutsPage } from './pages/WorkoutsPage'
 import { WorkoutsProgressPage } from './pages/WorkoutsProgressPage'
-import { WorkoutsCoachPage } from './pages/WorkoutsCoachPage'
-import { AdminBroadcastsPage } from './pages/AdminBroadcastsPage'
-import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage'
-import { AdminGeographyPage } from './pages/AdminGeographyPage'
-import { AdminHubPage } from './pages/AdminHubPage'
-import { AdminLandingPage } from './pages/AdminLandingPage'
-import { AdminOpsPage } from './pages/AdminOpsPage'
-import { AdminPasswordResetsPage } from './pages/AdminPasswordResetsPage'
-import { AdminPlayersPage } from './pages/AdminPlayersPage'
-import { AdminReferralsPage } from './pages/AdminReferralsPage'
-import { AdminStoragePage } from './pages/AdminStoragePage'
-import { AdminTicketsPage } from './pages/AdminTicketsPage'
-import { AdminUsersPage } from './pages/AdminUsersPage'
 import { ChatPage } from './pages/ChatPage'
 import { DiscoverPage } from './pages/DiscoverPage'
-import { FeedbackPage } from './pages/FeedbackPage'
-import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { GuideArticlePage, GuideIndexPage } from './pages/GuidePage'
 import { WorkoutsGuideArticlePage, WorkoutsGuideHubPage } from './pages/WorkoutsGuidePage'
 import { GymDetailPage } from './pages/GymDetailPage'
 import { HomePage } from './pages/HomePage'
-import { InstallGuidePage } from './pages/InstallGuidePage'
-import { InviteCirclePage } from './pages/InviteCirclePage'
 import { LandingCoachesPage } from './pages/LandingCoachesPage'
 import { LandingPage } from './pages/LandingPage'
 import { LikedPage } from './pages/LikedPage'
@@ -45,12 +30,51 @@ import { NotificationsPage } from './pages/NotificationsPage'
 import { OnboardingPage } from './pages/OnboardingPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { RegisterPage } from './pages/RegisterPage'
-import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { TermsPage } from './pages/TermsPage'
-import { UiKitPage } from './pages/UiKitPage'
 import { UserProfilePage } from './pages/UserProfilePage'
 import { WelcomePage } from './pages/WelcomePage'
+
+function lazyNamed<T extends Record<string, unknown>, K extends keyof T>(
+  loader: () => Promise<T>,
+  name: K,
+) {
+  return lazy(async () => {
+    const mod = await loader()
+    return { default: mod[name] as ComponentType }
+  })
+}
+
+const WorkoutsCoachPage = lazyNamed(() => import('./pages/WorkoutsCoachPage'), 'WorkoutsCoachPage')
+const AdminBroadcastsPage = lazyNamed(() => import('./pages/AdminBroadcastsPage'), 'AdminBroadcastsPage')
+const AdminAnalyticsPage = lazyNamed(() => import('./pages/AdminAnalyticsPage'), 'AdminAnalyticsPage')
+const AdminGeographyPage = lazyNamed(() => import('./pages/AdminGeographyPage'), 'AdminGeographyPage')
+const AdminHubPage = lazyNamed(() => import('./pages/AdminHubPage'), 'AdminHubPage')
+const AdminLandingPage = lazyNamed(() => import('./pages/AdminLandingPage'), 'AdminLandingPage')
+const AdminOpsPage = lazyNamed(() => import('./pages/AdminOpsPage'), 'AdminOpsPage')
+const AdminPasswordResetsPage = lazyNamed(
+  () => import('./pages/AdminPasswordResetsPage'),
+  'AdminPasswordResetsPage',
+)
+const AdminPlayersPage = lazyNamed(() => import('./pages/AdminPlayersPage'), 'AdminPlayersPage')
+const AdminReferralsPage = lazyNamed(() => import('./pages/AdminReferralsPage'), 'AdminReferralsPage')
+const AdminStoragePage = lazyNamed(() => import('./pages/AdminStoragePage'), 'AdminStoragePage')
+const AdminTicketsPage = lazyNamed(() => import('./pages/AdminTicketsPage'), 'AdminTicketsPage')
+const AdminUsersPage = lazyNamed(() => import('./pages/AdminUsersPage'), 'AdminUsersPage')
+const FeedbackPage = lazyNamed(() => import('./pages/FeedbackPage'), 'FeedbackPage')
+const ForgotPasswordPage = lazyNamed(() => import('./pages/ForgotPasswordPage'), 'ForgotPasswordPage')
+const InstallGuidePage = lazyNamed(() => import('./pages/InstallGuidePage'), 'InstallGuidePage')
+const InviteCirclePage = lazyNamed(() => import('./pages/InviteCirclePage'), 'InviteCirclePage')
+const ResetPasswordPage = lazyNamed(() => import('./pages/ResetPasswordPage'), 'ResetPasswordPage')
+const UiKitPage = lazyNamed(() => import('./pages/UiKitPage'), 'UiKitPage')
+
+function LazyFallback() {
+  return (
+    <main className="page">
+      <SoftLoader label="Загружаем…" />
+    </main>
+  )
+}
 
 function AppGuideRedirect() {
   const { slug } = useParams()
@@ -67,6 +91,7 @@ export default function App() {
         <InviteCapture />
         <SeoHead />
         <PublicTrafficCapture />
+        <Suspense fallback={<LazyFallback />}>
         <Routes>
           <Route element={<GuestOnly />}>
             <Route path="/" element={<WelcomePage />} />
@@ -134,6 +159,7 @@ export default function App() {
 
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        </Suspense>
       </BrowserRouter>
       </MomentProvider>
     </AppProvider>

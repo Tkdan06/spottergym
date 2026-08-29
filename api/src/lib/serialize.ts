@@ -37,6 +37,13 @@ function referralFromUser(
   return referralFields(statsFromCount(user.referralCreditedCount || 0))
 }
 
+/** Name safe to show other users and to put in notifications / push. */
+export function publicActorName(user: { name?: string | null; privacy?: string } | null | undefined) {
+  if (!user) return 'Кто-то'
+  if (user.privacy === 'anonymous') return 'Аноним'
+  return user.name?.trim() || 'Кто-то'
+}
+
 export function serializeUser(
   user: UserWithRels,
   opts?: { referral?: ReferralPublicStats | null },
@@ -194,30 +201,45 @@ export function serializePublicUser(
 
   if (full.isDeleted) {
     return {
-      ...base,
+      id: full.id,
       username: '',
       instagram: '',
       name: 'Удалённый пользователь',
       age: 0,
+      gender: full.gender,
       bio: '',
       photos: [] as string[],
       avatar: '',
+      gymIds: [] as string[],
+      homeGymId: '',
+      city: '',
+      intent: full.intent,
+      experienceLevel: full.experienceLevel,
       interests: [] as string[],
       sports: [] as string[],
       isCoach: false,
       coachSports: [] as string[],
       visitSlots: [] as unknown[],
+      breakUntil: null as string | null,
+      privacy: 'open' as const,
       lookingToMeet: false,
       isActive: false,
+      checkedInGymId: '',
+      checkedInAt: '',
+      checkedInExpiresAt: '',
+      checkInExtendCount: 0,
+      checkInCanExtend: false,
+      lastSeenAt: '',
       isDeleted: true,
+      verified: false,
       ...EMPTY_REFERRAL,
     }
   }
 
   if (full.privacy === 'anonymous' && !opts?.revealAnonymous) {
-    // Presence only — no gym graph / city / intent / lastSeen leakage
+    // Presence + break + chat flag only. No name, gym graph, city, schedule, lastSeen, which-gym.
     return {
-      ...base,
+      id: full.id,
       username: '',
       instagram: '',
       name: 'Аноним',
@@ -236,18 +258,18 @@ export function serializePublicUser(
       isCoach: false,
       coachSports: [] as string[],
       visitSlots: [] as unknown[],
-      // Keep real flag so @ник → «Написать» works when the user is open to chat
+      breakUntil: full.breakUntil,
+      privacy: 'anonymous' as const,
       lookingToMeet: full.lookingToMeet,
+      isActive: full.isActive,
+      checkedInGymId: '',
       checkedInAt: '',
       checkedInExpiresAt: '',
       checkInExtendCount: 0,
       checkInCanExtend: false,
       lastSeenAt: '',
-      // Keep gym-scoped presence (people route rewrites isActive for the viewed club)
-      isActive: full.isActive,
-      checkedInGymId: full.checkedInGymId,
-      breakUntil: full.breakUntil,
-      privacy: 'anonymous' as const,
+      isDeleted: false,
+      verified: false,
       ...EMPTY_REFERRAL,
     }
   }

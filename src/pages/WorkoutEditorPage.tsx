@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Copy, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
 import {
+  Link,
   Navigate,
   useLocation,
   useNavigate,
@@ -22,6 +23,8 @@ import {
 import { WORKOUT_NOTE_MAX } from '../lib/fieldLimits'
 import { haptic } from '../lib/haptic'
 import { goWorkoutsHub } from '../lib/workoutsNav'
+import { trackApp } from '../lib/appTrack'
+import { userFacingError } from '../lib/userError'
 import { getCheckInStartedAt } from '../lib/presence'
 import { useSheetA11y } from '../lib/sheetA11y'
 import { useMoment } from '../components/MomentFX'
@@ -133,11 +136,14 @@ function toPayload(
         name: ex.name.trim().slice(0, EXERCISE_NAME_MAX),
         sets: ex.sets
           .slice(0, MAX_SETS_PER_EXERCISE)
-          .map((s) => ({
-            weightKg: clampBarWeight(Number(String(s.weightKg).replace(',', '.')) || 0),
-            reps: Math.max(0, Math.floor(Number(s.reps) || 0)),
-          }))
-          .filter((s) => s.reps > 0 && s.weightKg >= BAR_WEIGHT_MIN_KG),
+          .flatMap((s) => {
+            const weightKg = Number(String(s.weightKg).replace(',', '.'))
+            const reps = Math.floor(Number(s.reps))
+            if (!Number.isFinite(weightKg) || weightKg <= 0) return []
+            if (!Number.isFinite(reps) || reps <= 0) return []
+            return [{ weightKg: clampBarWeight(weightKg), reps }]
+          })
+          .filter((s) => s.reps >= 1 && s.weightKg >= BAR_WEIGHT_MIN_KG),
       }))
       .filter((ex) => ex.name && ex.sets.length),
   }
@@ -159,8 +165,10 @@ export function WorkoutEditorPage() {
   const navigate = useNavigate()
   const { user, apiOnline } = useApp()
   const { celebrate } = useMoment()
-  const copyFromId = (location.state as { copyFromId?: string; askFelt?: boolean } | null)?.copyFromId
+  const copyFromId = (location.state as { copyFromId?: string; askFelt?: boolean; justSaved?: boolean } | null)
+    ?.copyFromId
   const askFelt = Boolean((location.state as { askFelt?: boolean } | null)?.askFelt)
+  const justSaved = Boolean((location.state as { justSaved?: boolean } | null)?.justSaved)
 
   const [title, setTitle] = useState('')
   const [when, setWhen] = useState(() => toDatetimeLocalValue(new Date()))
@@ -203,6 +211,10 @@ export function WorkoutEditorPage() {
     if (isNew && !copyFromId) setWhen(defaultWhen)
   }, [isNew, copyFromId, defaultWhen])
 
+  useEffect(() => {
+    if (isNew && !copyFromId) trackApp('workout_started')
+  }, [isNew, copyFromId])
+
   const loadId = isNew ? copyFromId : id
 
   useEffect(() => {
@@ -233,7 +245,7 @@ export function WorkoutEditorPage() {
       })
       .catch((err: unknown) => {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Не удалось загрузить')
+          setError(userFacingError(err, 'Не удалось загрузить'))
         }
       })
       .finally(() => {
@@ -248,7 +260,7 @@ export function WorkoutEditorPage() {
     if (!isViewing || !askFelt || !id || !apiOnline || promptedRef.current) return
     promptedRef.current = true
     setFeltSheetOpen(true)
-    navigate(`/app/workouts/${id}`, { replace: true, state: {} })
+    navigate(`/app/workouts/${id}`, { replace: true, state: { justSaved: true } })
     void apiPatchWorkoutFeedback(id, { prompted: true }).catch(() => {})
   }, [askFelt, apiOnline, id, isViewing, navigate])
 
@@ -294,7 +306,11 @@ export function WorkoutEditorPage() {
         saved = await apiUpdateWorkout(id!, payload)
       }
       celebrate('workout')
-      navigate(`/app/workouts/${saved.id}`, { replace: true, state: isNew ? { askFelt: true } : undefined })
+      trackApp('workout_saved')
+      navigate(`/app/workouts/${saved.id}`, {
+        replace: true,
+        state: isNew ? { askFelt: true, justSaved: true } : { justSaved: true },
+      })
       const draft = fromDetail(saved)
       setTitle(draft.title)
       setWhen(draft.when)
@@ -306,7 +322,7 @@ export function WorkoutEditorPage() {
       if (err instanceof ApiError && err.status >= 400 && err.status < 500) {
         createKeyRef.current = null
       }
-      setError(err instanceof Error ? err.message : 'Не удалось сохранить')
+      setError(userFacingError(err, 'Не удалось сохранить'))
     } finally {
       setSaving(false)
     }
@@ -320,7 +336,7 @@ export function WorkoutEditorPage() {
       await apiDeleteWorkout(id)
       goWorkoutsHub(navigate)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось удалить')
+      setError(userFacingError(err, 'Не удалось удалить'))
       setConfirmOpen(false)
     } finally {
       setDeleting(false)
@@ -338,7 +354,7 @@ export function WorkoutEditorPage() {
       setFeedback(saved.feedback)
     } catch (err) {
       setFeedback(previous)
-      setError(err instanceof Error ? err.message : 'Не удалось сохранить оценку')
+      setError(userFacingError(err, 'Не удалось сохранить оценку'))
     } finally {
       savingFeltRef.current = false
     }
@@ -383,6 +399,14 @@ export function WorkoutEditorPage() {
 
       {!loading && isViewing ? (
         <>
+          {justSaved ? (
+            <section className="surface workout-saved-next" aria-live="polite">
+              <p className="empty-copy-title">Тренировка сохранена</p>
+              <Link to="/app/workouts/progress" className="btn btn-primary btn-block">
+                Смотреть прогресс
+              </Link>
+            </section>
+          ) : null}
           <section className="surface workout-view-meta">
             <p className="muted">{formatWorkoutWhen(fromDatetimeLocalValue(when))}</p>
             {bodyWeightKg != null ? <p>Вес: {formatKg(bodyWeightKg)}</p> : null}
@@ -550,6 +574,7 @@ export function WorkoutEditorPage() {
               onClick={() => {
                 if (exercises.length >= MAX_EXERCISES_PER_WORKOUT) return
                 setExercises((prev) => [...prev, emptyExercise()])
+                trackApp('exercise_added')
               }}
             >
               <Plus size={16} /> Упражнение

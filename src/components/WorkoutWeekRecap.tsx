@@ -12,6 +12,8 @@ import {
 } from '../lib/apiClient'
 import { formatSignedPercent, ruPlural } from '../lib/workouts'
 import { WORKOUT_RECAP_ADMIN_ONLY } from '../lib/workoutRecap'
+import { trackApp } from '../lib/appTrack'
+import { userFacingError } from '../lib/userError'
 
 function sessionsWord(n: number) {
   const abs = Math.abs(n) % 100
@@ -51,6 +53,7 @@ export function WorkoutWeekRecap() {
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState('')
   const viewedFor = useRef<string | null>(null)
+  const generatingRef = useRef(false)
   const allowed = !WORKOUT_RECAP_ADMIN_ONLY || Boolean(user?.isAdmin)
 
   const load = useCallback(async () => {
@@ -63,7 +66,7 @@ export function WorkoutWeekRecap() {
     try {
       setInsight(await apiFetchWorkoutInsight())
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось загрузить разбор')
+      setError(userFacingError(err, 'Не удалось загрузить разбор'))
       setInsight(null)
     } finally {
       setLoading(false)
@@ -73,6 +76,10 @@ export function WorkoutWeekRecap() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    if (allowed) trackApp('ai_analysis_opened', { range: '7' })
+  }, [allowed])
 
   useEffect(() => {
     if (!insight?.letter || !apiOnline || !allowed) return
@@ -87,14 +94,19 @@ export function WorkoutWeekRecap() {
   if (!allowed) return null
 
   const generate = async () => {
-    if (!allowed || !apiOnline || generating) return
+    if (!allowed || !apiOnline || generatingRef.current) return
+    generatingRef.current = true
     setGenerating(true)
     setError('')
+    trackApp('ai_analysis_requested', { range: '7' })
     try {
       setInsight(await apiGenerateWorkoutInsight())
+      trackApp('ai_analysis_completed', { range: '7' })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось собрать разбор')
+      trackApp('ai_analysis_failed', { range: '7', reason: 'request' })
+      setError(userFacingError(err, 'Не удалось собрать разбор'))
     } finally {
+      generatingRef.current = false
       setGenerating(false)
     }
   }
@@ -111,7 +123,7 @@ export function WorkoutWeekRecap() {
 
   return (
     <div id="week-recap" className="workout-week-recap">
-      {error ? (
+      {error && insight ? (
         <p className="feedback-error" role="alert">
           {error}
         </p>
@@ -216,11 +228,25 @@ export function WorkoutWeekRecap() {
         </section>
       ) : null}
 
+      {!loading && error && !insight ? (
+        <section className="surface workouts-empty">
+          {recapTitle}
+          <p className="empty-copy-title">Не удалось загрузить разбор</p>
+          <p className="empty-copy-lead">{error}</p>
+          <button type="button" className="btn btn-primary btn-block" onClick={() => void load()}>
+            Повторить
+          </button>
+        </section>
+      ) : null}
+
       {!loading && !insight && !error ? (
         <section className="surface workouts-empty">
           {recapTitle}
           <p className="empty-copy-title">Разбор появится позже</p>
-          <p className="muted">Не удалось получить статус. Обнови страницу.</p>
+          <p className="empty-copy-lead">Не удалось получить статус</p>
+          <button type="button" className="btn btn-primary btn-block" onClick={() => void load()}>
+            Повторить
+          </button>
         </section>
       ) : null}
     </div>

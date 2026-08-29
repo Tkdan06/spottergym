@@ -9,6 +9,17 @@ function clientKey(ip: string, route: string) {
   return `${route}:${ip}`
 }
 
+function limiterKey(
+  c: { get?: (key: string) => unknown; req: { header: (name: string) => string | undefined }; env?: unknown },
+  opts: { route: string; by?: 'ip' | 'user' },
+) {
+  if (opts.by === 'user') {
+    const userId = typeof c.get === 'function' ? String(c.get('userId') || '') : ''
+    if (userId) return `${opts.route}:user:${userId}`
+  }
+  return clientKey(clientIp(c), opts.route)
+}
+
 /**
  * Client IP: prefer nginx X-Real-IP (set from $remote_addr).
  * Do not trust X-Forwarded-For from the client.
@@ -27,9 +38,9 @@ export function clientIp(c: { req: { header: (name: string) => string | undefine
 }
 
 /** Simple in-memory limiter (single-node). Bound map size against spoof floods. */
-export function rateLimit(opts: { windowMs: number; max: number; route: string }) {
+export function rateLimit(opts: { windowMs: number; max: number; route: string; by?: 'ip' | 'user' }) {
   return createMiddleware(async (c, next) => {
-    const key = clientKey(clientIp(c), opts.route)
+    const key = limiterKey(c, opts)
     const now = Date.now()
     const bucket = buckets.get(key)
     if (!bucket || now >= bucket.resetAt) {

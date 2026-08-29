@@ -106,6 +106,10 @@
   align-self: start;
 }
 
+.activity-empty .section-action {
+  justify-self: start;
+}
+
 .activity-empty .muted,
 .activity-empty .empty-copy-title,
 .activity-empty .empty-copy-lead {
@@ -284,9 +288,10 @@
 
 .activity-day-detail {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px 12px;
   padding: 4px 0 0;
   min-width: 0;
   min-height: 1.5rem;
@@ -308,6 +313,14 @@
 .activity-day-detail-copy span {
   color: var(--text-muted);
   font-size: 0.9rem;
+}
+
+.activity-day-workout-link {
+  flex: 1 1 100%;
+  margin: 2px 0 0;
+  font-size: 0.9rem;
+  font-weight: var(--text-ui-strong);
+  color: var(--accent);
 }
 
 .activity-day-detail-range {

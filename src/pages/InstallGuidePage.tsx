@@ -32,12 +32,7 @@ export function InstallGuidePage() {
   }
 
   const goBack = () => {
-    // Always pop history — never push /notifications again (that trapped users in install ↔ notifications)
-    if (window.history.length > 1) {
-      navigate(-1)
-      return
-    }
-    navigate('/app/notifications')
+    navigate('/app/notifications', { replace: true })
   }
 
   return (

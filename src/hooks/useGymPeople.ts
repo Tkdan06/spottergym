@@ -17,6 +17,7 @@ type Options = {
 const LOADER_DELAY_MS = 1000
 /** Quiet refresh while the floor/detail stays open */
 const POLL_MS = 45_000
+const PEOPLE_PAGE = 80
 
 function withSelfOnFloor(list: UserProfile[], user: AppUser, gymId: string) {
   if (!user.gymIds.includes(gymId)) return list
@@ -43,11 +44,14 @@ export function useGymPeople({ gymId, user, apiOnline, mode, blockedUserIds }: O
   const [showLoader, setShowLoader] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [retryTick, setRetryTick] = useState(0)
+  const [hasMore, setHasMore] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
   /** Last successful fetch key — avoid wiping list on presence-only updates */
   const loadedKeyRef = useRef<string | null>(null)
   const lastGoodKeyRef = useRef<string | null>(null)
   const fetchKeyRef = useRef('')
   const inFlightRef = useRef(false)
+  const loadedCountRef = useRef(0)
 
   const demo = Boolean(user && isDemoAccount(user.email))
   const useApi = Boolean(gymId && user && apiOnline && !demo)
@@ -73,9 +77,14 @@ export function useGymPeople({ gymId, user, apiOnline, mode, blockedUserIds }: O
       }
 
       try {
-        const people = await apiFetchGymPeople(gymId)
+        const take = opts.quiet
+          ? Math.min(240, Math.max(PEOPLE_PAGE, loadedCountRef.current || PEOPLE_PAGE))
+          : PEOPLE_PAGE
+        const page = await apiFetchGymPeople(gymId, { limit: take, offset: 0 })
         if (fetchKeyRef.current !== key) return
-        setRemote(people)
+        setRemote(page.people)
+        loadedCountRef.current = page.people.length
+        setHasMore(page.hasMore)
         loadedKeyRef.current = key
         lastGoodKeyRef.current = key
         setError(null)
@@ -104,13 +113,39 @@ export function useGymPeople({ gymId, user, apiOnline, mode, blockedUserIds }: O
     setRetryTick((n) => n + 1)
   }, [])
 
+  const loadMore = useCallback(async () => {
+    const key = fetchKeyRef.current
+    if (!useApi || !gymId || !key || !hasMore || loadingMore || inFlightRef.current) return
+    const offset = remote?.length ?? 0
+    if (!offset) return
+    setLoadingMore(true)
+    try {
+      const page = await apiFetchGymPeople(gymId, { limit: PEOPLE_PAGE, offset })
+      if (fetchKeyRef.current !== key) return
+      setRemote((prev) => {
+        const cur = prev || []
+        const seen = new Set(cur.map((p) => p.id))
+        const next = [...cur, ...page.people.filter((p) => !seen.has(p.id))]
+        loadedCountRef.current = next.length
+        return next
+      })
+      setHasMore(page.hasMore)
+    } catch {
+      /* keep current page */
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [useApi, gymId, hasMore, loadingMore, remote?.length])
+
   useEffect(() => {
     if (!useApi || !gymId || !fetchKey) {
       setRemote(null)
       setLoading(false)
       setError(null)
+      setHasMore(false)
       loadedKeyRef.current = null
       lastGoodKeyRef.current = null
+      loadedCountRef.current = 0
       return
     }
 
@@ -192,5 +227,8 @@ export function useGymPeople({ gymId, user, apiOnline, mode, blockedUserIds }: O
     /** Set when people fetch failed (may still show last good list) */
     error,
     retry,
+    hasMore: Boolean(useApi && hasMore),
+    loadingMore,
+    loadMore,
   }
 }

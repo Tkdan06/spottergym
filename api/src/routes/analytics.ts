@@ -4,7 +4,11 @@ import {
   isLandingEventName,
   logLandingEvent,
 } from '../lib/landingAnalytics.js'
+import { isAppEventName, logAppEvent } from '../lib/appAnalytics.js'
 import { parseSearchAttribution } from '../lib/searchAttribution.js'
+import { getCookie } from 'hono/cookie'
+import { verifySession } from '../lib/jwt.js'
+import { sessionCookieName } from '../middleware/auth.js'
 import { clientIp, rateLimit } from '../middleware/rateLimit.js'
 
 export const analyticsRoutes = new Hono()
@@ -66,6 +70,56 @@ analyticsRoutes.post(
       ip: clientIp(c),
     })
 
+    if (!result.ok && result.reason === 'visitor') {
+      return c.json({ error: 'Некорректные данные' }, 400)
+    }
+    return c.json({ ok: true, deduped: Boolean(result.ok && 'deduped' in result && result.deduped) })
+  },
+)
+
+const appEventSchema = z.object({
+  name: z.string().min(1).max(40),
+  visitorId: z.string().min(8).max(64),
+  sessionId: z.string().max(64).optional(),
+  path: z.string().max(80).optional(),
+  meta: z.record(z.string(), z.string().max(32)).optional(),
+})
+
+async function optionalUserId(c: Parameters<typeof getCookie>[0]) {
+  const token =
+    c.req.header('x-spotter-token') ||
+    (c.req.header('authorization')?.startsWith('Bearer ')
+      ? c.req.header('authorization')!.slice(7)
+      : '') ||
+    getCookie(c, sessionCookieName()) ||
+    ''
+  if (!token) return null
+  const session = await verifySession(token)
+  return session?.sub || null
+}
+
+analyticsRoutes.post(
+  '/app',
+  rateLimit({ windowMs: 60_000, max: 80, route: 'analytics-app' }),
+  async (c) => {
+    const body = await c.req.json().catch(() => null)
+    const parsed = appEventSchema.safeParse(body)
+    if (!parsed.success) return c.json({ error: 'Некорректные данные' }, 400)
+    if (!isAppEventName(parsed.data.name)) {
+      return c.json({ error: 'Неизвестное событие' }, 400)
+    }
+
+    const userId = await optionalUserId(c)
+    const result = await logAppEvent({
+      name: parsed.data.name,
+      visitorId: parsed.data.visitorId,
+      sessionId: parsed.data.sessionId,
+      path: parsed.data.path,
+      meta: parsed.data.meta,
+      userId,
+      userAgent: c.req.header('user-agent') || '',
+      ip: clientIp(c),
+    })
     if (!result.ok && result.reason === 'visitor') {
       return c.json({ error: 'Некорректные данные' }, 400)
     }

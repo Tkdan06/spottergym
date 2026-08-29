@@ -24,6 +24,7 @@ import { useGymPeople } from '../hooks/useGymPeople'
 import { getHallRank, sortByLikes } from '../lib/likes'
 import { formatMembersInSpotter } from '../lib/presenceCopy'
 import { isMemberOfGym } from '../lib/userGyms'
+import { trackApp } from '../lib/appTrack'
 import type { Gym } from '../types'
 import './GymDetailPage.css'
 
@@ -124,6 +125,9 @@ export function GymDetailPage() {
     fromApi,
     error: peopleError,
     retry: retryPeople,
+    hasMore: peopleHasMore,
+    loadingMore: peopleLoadingMore,
+    loadMore: loadMorePeople,
   } = useGymPeople({
     gymId,
     user,
@@ -131,6 +135,10 @@ export function GymDetailPage() {
     mode: 'gymPage',
     blockedUserIds,
   })
+
+  useEffect(() => {
+    if (fromApi) trackApp('people_list_viewed', { surface: 'gym' })
+  }, [fromApi])
 
   const people = useMemo(
     () => sortByLikes(floorPeople, likes, likeCounts),
@@ -146,8 +154,11 @@ export function GymDetailPage() {
       navigate('/app/discover?from=settings')
       return
     }
-    if (window.history.length > 1) navigate(-1)
-    else navigate('/app')
+    if (fromHome) {
+      navigate('/app')
+      return
+    }
+    navigate('/app/discover')
   }
 
   const runMembership = async (action: () => void | Promise<void>, failLabel: string) => {
@@ -364,7 +375,7 @@ export function GymDetailPage() {
                 <p className="empty-copy-title">Не удалось загрузить людей</p>
                 <p className="empty-copy-lead">{peopleError}</p>
               </div>
-              <button type="button" className="btn btn-soft btn-block" onClick={retryPeople}>
+              <button type="button" className="btn btn-primary btn-block" onClick={retryPeople}>
                 Повторить
               </button>
             </div>
@@ -384,8 +395,19 @@ export function GymDetailPage() {
                   user={person}
                   rank={getHallRank(person.id, people, likes, likeCounts)}
                   priority={index < 4}
+                  backTo={`/app/gym/${gymId}${from ? `?from=${from}` : ''}`}
                 />
               ))}
+              {peopleHasMore ? (
+                <button
+                  type="button"
+                  className="btn btn-soft btn-sm btn-block"
+                  disabled={peopleLoadingMore}
+                  onClick={() => void loadMorePeople()}
+                >
+                  {peopleLoadingMore ? 'Загружаем…' : 'Показать ещё'}
+                </button>
+              ) : null}
             </>
           ) : showEmptyInvite ? (
             <div className="empty-copy-actions">
@@ -397,9 +419,9 @@ export function GymDetailPage() {
                 <InviteFriendsButton
                   userId={user.id}
                   gymName={shortGymName(gym.name, gym.network) || gym.name}
-                  className="btn btn-soft btn-sm btn-block"
+                  className="btn btn-primary btn-block"
                 >
-                  Поделиться ссылкой
+                  Пригласить в зал
                 </InviteFriendsButton>
               ) : null}
             </div>

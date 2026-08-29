@@ -250,7 +250,7 @@ export function InviteCirclePage() {
               <ul className="invite-circle-friends">
                 {circle.friends.map((f) => (
                   <li key={f.id}>
-                    <Link to={`/app/user/${f.id}`}>
+                    <Link to={`/app/user/${f.id}`} state={{ from: '/app/invite' }}>
                       <strong>{f.name}</strong>
                       <span className="muted">
                         {f.username ? `@${f.username}` : f.city || 'в круге'} · {formatWhen(f.createdAt)}

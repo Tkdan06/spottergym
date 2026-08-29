@@ -160,11 +160,6 @@ export function SettingsPage() {
     }
     setInstagramError('')
 
-    if (gymIds.length < 1) {
-      setSaveError('Нужен хотя бы один зал')
-      return
-    }
-
     const nextBreak =
       breakOn && breakUntil && breakUntil >= todayISO() ? breakUntil : null
 

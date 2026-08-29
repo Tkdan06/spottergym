@@ -571,7 +571,9 @@ export function MessagesPage() {
             <FindResultCard
               key={person.id}
               person={person}
-              onOpen={() => navigate(`/app/user/${person.id}`)}
+              onOpen={() =>
+                navigate(`/app/user/${person.id}`, { state: { from: '/app/messages' } })
+              }
             />
           ))}
         </div>

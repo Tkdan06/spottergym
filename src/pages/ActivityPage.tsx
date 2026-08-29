@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { MoreHorizontal, RotateCcw, Trash2 } from 'lucide-react'
+import { ChevronRight, ClipboardList, MoreHorizontal, RotateCcw, Trash2, Users } from 'lucide-react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { SOFT_LOADER_DELAY_MS, SoftLoader } from '../components/SoftLoader'
 import { SubpageHeader } from '../components/SubpageHeader'
@@ -14,6 +14,8 @@ import {
 import { haptic } from '../lib/haptic'
 import { useSheetA11y } from '../lib/sheetA11y'
 import { PERIOD_TABS } from '../lib/periodRange'
+import { trackApp } from '../lib/appTrack'
+import { userFacingError } from '../lib/userError'
 import './ActivityPage.css'
 import './FeedbackPage.css'
 
@@ -81,10 +83,10 @@ function yAxisTicks(ceilingMinutes: number) {
 function sessionsLabel(count: number) {
   const n = Math.abs(count) % 100
   const n1 = n % 10
-  if (n > 10 && n < 20) return `${count} тренировок`
-  if (n1 === 1) return `${count} тренировка`
-  if (n1 >= 2 && n1 <= 4) return `${count} тренировки`
-  return `${count} тренировок`
+  if (n > 10 && n < 20) return `${count} посещений`
+  if (n1 === 1) return `${count} посещение`
+  if (n1 >= 2 && n1 <= 4) return `${count} посещения`
+  return `${count} посещений`
 }
 
 type SheetMode = 'closed' | 'menu' | 'confirm' | 'day'
@@ -142,8 +144,7 @@ export function ActivityPage() {
       })
     } catch (err) {
       if (gen !== loadGen.current) return
-      setError(err instanceof Error ? err.message : 'Не удалось загрузить статистику')
-      setStats(null)
+      setError(userFacingError(err, 'Не удалось загрузить статистику'))
     } finally {
       if (gen === loadGen.current) setLoading(false)
     }
@@ -156,6 +157,10 @@ export function ActivityPage() {
     }
     void load(range)
   }, [user, apiOnline, range, load])
+
+  useEffect(() => {
+    trackApp('activity_opened')
+  }, [])
 
   useEffect(() => () => clearLongPress(), [])
 
@@ -188,7 +193,7 @@ export function ActivityPage() {
       setSheet('closed')
       await load(range)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось сбросить активность')
+      setError(userFacingError(err, 'Не удалось сбросить активность'))
     } finally {
       setResetting(false)
     }
@@ -226,7 +231,7 @@ export function ActivityPage() {
       }
       await load(range)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось удалить день')
+      setError(userFacingError(err, 'Не удалось удалить день'))
     } finally {
       setResetting(false)
     }
@@ -241,7 +246,7 @@ export function ActivityPage() {
     <main className="page activity-page">
       <SubpageHeader
         title="Активность"
-        onBack={() => navigate(-1)}
+        onBack={() => navigate('/app')}
         action={
           <button
             type="button"
@@ -279,7 +284,21 @@ export function ActivityPage() {
         ))}
       </div>
 
-      {error ? (
+      {error && !stats ? (
+        <div className="empty-copy-actions">
+          <div className="empty-copy" role="alert">
+            <p className="empty-copy-title">Не удалось загрузить активность</p>
+            <p className="empty-copy-lead">{error}</p>
+          </div>
+          <button
+            type="button"
+            className="btn btn-primary btn-block"
+            onClick={() => void load(range)}
+          >
+            Повторить
+          </button>
+        </div>
+      ) : error ? (
         <p className="feedback-error" role="alert">
           {error}
         </p>
@@ -299,7 +318,7 @@ export function ActivityPage() {
             <span className="activity-summary-label">Всего за период</span>
             <strong className="activity-summary-total">{formatMinutes(stats.totalMinutes)}</strong>
             <p className="activity-summary-sessions">
-              {stats.totalSessions > 0 ? sessionsLabel(stats.totalSessions) : 'Пока без тренировок'}
+              {stats.totalSessions > 0 ? sessionsLabel(stats.totalSessions) : 'Пока без посещений'}
             </p>
           </section>
 
@@ -311,6 +330,9 @@ export function ActivityPage() {
               </p>
               <Link to="/app" className="btn btn-primary btn-block">
                 К отметке в зале
+              </Link>
+              <Link to="/app/workouts" className="section-action">
+                Дневник тренировок
               </Link>
             </section>
           ) : (
@@ -418,6 +440,11 @@ export function ActivityPage() {
                           {formatLocalTrainingWindow(selectedDay.intervals)}
                         </div>
                       ) : null}
+                      {selectedDay.minutes > 0 ? (
+                        <Link to="/app/workouts/new" className="activity-day-workout-link">
+                          Записать тренировку за этот день
+                        </Link>
+                      ) : null}
                     </>
                   ) : null}
                 </div>
@@ -452,6 +479,19 @@ export function ActivityPage() {
                   ) : null}
                 </section>
               ) : null}
+
+              <nav className="entry-tools entry-tools--2" aria-label="Дальше из активности">
+                <Link to="/app/workouts" className="entry-link">
+                  <ClipboardList size={18} aria-hidden />
+                  <span>Тренировки</span>
+                  <ChevronRight size={16} aria-hidden />
+                </Link>
+                <Link to="/app" className="entry-link">
+                  <Users size={18} aria-hidden />
+                  <span>Люди в зале</span>
+                  <ChevronRight size={16} aria-hidden />
+                </Link>
+              </nav>
             </>
           )}
         </>

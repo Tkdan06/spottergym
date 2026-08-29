@@ -152,25 +152,29 @@ function bodyKg(row: { bodyWeightKg: unknown }) {
   return Number.isFinite(n) ? round1(n) : null
 }
 
+export function isWorkingSet(s: { weightKg: unknown; reps: unknown }) {
+  const w = num(s.weightKg)
+  const r = typeof s.reps === 'number' ? s.reps : Number(s.reps)
+  return Number.isFinite(w) && w > 0 && Number.isFinite(r) && r > 0
+}
+
 export function bestSet(sets: { weightKg: unknown; reps: number }[]) {
-  if (!sets.length) return null
-  let best = sets[0]
-  let bestW = num(best.weightKg)
-  for (const s of sets.slice(1)) {
+  let best: { weightKg: number; reps: number } | null = null
+  for (const s of sets) {
+    if (!isWorkingSet(s)) continue
     const w = num(s.weightKg)
-    if (w > bestW || (w === bestW && s.reps > best.reps)) {
-      best = s
-      bestW = w
+    if (!best || w > best.weightKg || (w === best.weightKg && s.reps > best.reps)) {
+      best = { weightKg: w, reps: s.reps }
     }
   }
-  return { weightKg: bestW, reps: best.reps }
+  return best
 }
 
 function normalizeTitle(title: string) {
   return title.trim().toLowerCase().replace(/\s+/g, ' ')
 }
 
-function normalizeExerciseName(name: string) {
+export function normalizeExerciseName(name: string) {
   return name.trim().toLowerCase().replace(/ё/g, 'е').replace(/\s+/g, ' ')
 }
 
@@ -225,6 +229,74 @@ export function exerciseIdentity(ex: { name: string; trackKey?: string | null })
 
 function newTrackKey() {
   return crypto.randomUUID().replace(/-/g, '').slice(0, 24)
+}
+
+export type ExerciseTrackIndex = {
+  knownKeys: Set<string>
+  nameToKey: Map<string, string>
+  namelessNames: Set<string>
+}
+
+/** Newest-first rows: first keyed name wins. Does not rewrite history. */
+export function buildExerciseTrackIndex(
+  rows: { name: string; trackKey?: string | null }[],
+): ExerciseTrackIndex {
+  const knownKeys = new Set<string>()
+  const nameToKey = new Map<string, string>()
+  const namesWithKey = new Set<string>()
+  const namelessNames = new Set<string>()
+  for (const row of rows) {
+    const key = normalizeTrackKey(row.trackKey)
+    const name = normalizeExerciseName(row.name)
+    if (key) {
+      knownKeys.add(key)
+      if (name && !nameToKey.has(name)) nameToKey.set(name, key)
+      if (name) namesWithKey.add(name)
+    } else if (name) {
+      namelessNames.add(name)
+    }
+  }
+  for (const n of namesWithKey) namelessNames.delete(n)
+  return { knownKeys, nameToKey, namelessNames }
+}
+
+/**
+ * Keep a client key only if it already exists in the user's history (copy / rename).
+ * Otherwise reuse the key for the same normalized name, or stay nameless to match
+ * legacy rows. Never invent a merge across different names.
+ */
+export function pickExerciseTrackKey(
+  ex: { name: string; trackKey?: string | null },
+  index: ExerciseTrackIndex,
+): string {
+  const clientKey = normalizeTrackKey(ex.trackKey)
+  const name = normalizeExerciseName(ex.name)
+  if (clientKey && index.knownKeys.has(clientKey)) return clientKey
+  if (name) {
+    const fromName = index.nameToKey.get(name)
+    if (fromName) return fromName
+    if (index.namelessNames.has(name)) return ''
+  }
+  return clientKey || newTrackKey()
+}
+
+async function resolveExerciseInputs(
+  userId: string,
+  exercises: WorkoutInput['exercises'],
+): Promise<WorkoutInput['exercises']> {
+  const sessions = await prisma.workoutSession.findMany({
+    where: { userId },
+    orderBy: { performedAt: 'desc' },
+    take: 80,
+    select: {
+      exercises: { select: { name: true, trackKey: true } },
+    },
+  })
+  const index = buildExerciseTrackIndex(sessions.flatMap((s) => s.exercises))
+  return exercises.map((ex) => ({
+    ...ex,
+    trackKey: pickExerciseTrackKey(ex, index),
+  }))
 }
 
 type PrevSetMap = Map<string, Map<number, { weightKg: number; reps: number }>>
@@ -554,18 +626,23 @@ function normalizeNotes(raw: string | undefined | null) {
 }
 
 function exerciseCreates(exercises: WorkoutInput['exercises']) {
-  return exercises.map((ex, i) => ({
-    name: ex.name.trim(),
-    trackKey: normalizeTrackKey(ex.trackKey) || newTrackKey(),
-    sortOrder: i,
-    sets: {
-      create: ex.sets.map((s, j) => ({
-        setIndex: j,
-        weightKg: s.weightKg,
-        reps: s.reps,
-      })),
-    },
-  }))
+  return exercises
+    .map((ex, i) => {
+      const sets = ex.sets.filter((s) => isWorkingSet(s))
+      return {
+        name: ex.name.trim(),
+        trackKey: normalizeTrackKey(ex.trackKey),
+        sortOrder: i,
+        sets: {
+          create: sets.map((s, j) => ({
+            setIndex: j,
+            weightKg: s.weightKg,
+            reps: s.reps,
+          })),
+        },
+      }
+    })
+    .filter((ex) => ex.name && ex.sets.create.length)
 }
 
 export const PERFORMED_AT_FUTURE_SKEW_MS = 15 * 60 * 1000
@@ -576,6 +653,7 @@ export function isPerformedAtInFuture(d: Date, now = new Date()) {
 
 export async function createWorkoutSession(userId: string, input: WorkoutInput) {
   const title = input.title.trim()
+  const exercises = await resolveExerciseInputs(userId, input.exercises)
   const row = await prisma.workoutSession.create({
     data: {
       userId,
@@ -584,7 +662,7 @@ export async function createWorkoutSession(userId: string, input: WorkoutInput) 
       bodyWeightKg: normalizeBodyWeight(input.bodyWeightKg),
       notes: normalizeNotes(input.notes),
       exercises: {
-        create: exerciseCreates(input.exercises),
+        create: exerciseCreates(exercises),
       },
     },
     include: sessionInclude,
@@ -598,6 +676,8 @@ export async function replaceWorkoutSession(userId: string, id: string, input: W
   const existing = await prisma.workoutSession.findFirst({ where: { id, userId } })
   if (!existing) return null
 
+  const exercises = await resolveExerciseInputs(userId, input.exercises)
+
   await prisma.$transaction(async (tx) => {
     await tx.workoutExercise.deleteMany({ where: { sessionId: id } })
     await tx.workoutSession.update({
@@ -608,7 +688,7 @@ export async function replaceWorkoutSession(userId: string, id: string, input: W
         bodyWeightKg: normalizeBodyWeight(input.bodyWeightKg),
         notes: normalizeNotes(input.notes),
         exercises: {
-          create: exerciseCreates(input.exercises),
+          create: exerciseCreates(exercises),
         },
       },
     })

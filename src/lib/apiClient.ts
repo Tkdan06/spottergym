@@ -12,6 +12,7 @@ import type {
 } from '../types'
 import type { AdminAnalytics } from './adminAnalytics'
 import type { LikeCounts, LikesMap } from './likes'
+import { sanitizeApiErrorMessage } from './userError'
 import type { PeriodRange } from './periodRange'
 
 /** Legacy JWT key — cleared; session is httpOnly cookie only. */
@@ -71,12 +72,17 @@ async function request<T>(
     headers.set('Content-Type', 'application/json')
   }
 
-  const res = await fetch(`${getApiBase()}${path}`, {
-    ...options,
-    headers,
-    credentials: 'include',
-    body: options.json !== undefined ? JSON.stringify(options.json) : options.body,
-  })
+  let res: Response
+  try {
+    res = await fetch(`${getApiBase()}${path}`, {
+      ...options,
+      headers,
+      credentials: 'include',
+      body: options.json !== undefined ? JSON.stringify(options.json) : options.body,
+    })
+  } catch {
+    throw new ApiError('Нет соединения. Проверь интернет и попробуй ещё раз', 0)
+  }
 
   const data = (await res.json().catch(() => ({}))) as {
     error?: string
@@ -90,13 +96,7 @@ async function request<T>(
 
   if (!res.ok) {
     const raw = (data.error || '').trim()
-    const message =
-      !raw || /^not found$/i.test(raw)
-        ? res.status === 404
-          ? 'Сервис временно недоступен или ещё обновляется. Попробуй через минуту.'
-          : `Ошибка ${res.status}`
-        : raw
-    throw new ApiError(message, res.status)
+    throw new ApiError(sanitizeApiErrorMessage(raw, res.status), res.status)
   }
   return data as T
 }
@@ -718,11 +718,18 @@ export async function apiFetchGym(gymId: string) {
   return data.gym
 }
 
-export async function apiFetchGymPeople(gymId: string) {
-  const data = await request<{ people: AppUser[] }>(
-    `/gyms/${encodeURIComponent(gymId)}/people`,
+export async function apiFetchGymPeople(
+  gymId: string,
+  opts?: { limit?: number; offset?: number },
+) {
+  const sp = new URLSearchParams()
+  if (opts?.limit) sp.set('limit', String(opts.limit))
+  if (opts?.offset) sp.set('offset', String(opts.offset))
+  const qs = sp.toString()
+  const data = await request<{ people: AppUser[]; hasMore?: boolean }>(
+    `/gyms/${encodeURIComponent(gymId)}/people${qs ? `?${qs}` : ''}`,
   )
-  return data.people
+  return { people: data.people, hasMore: Boolean(data.hasMore) }
 }
 
 export async function apiLookupUsername(username: string) {

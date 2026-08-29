@@ -4,7 +4,8 @@ import { z } from 'zod'
 import { prisma } from '../db.js'
 import { areUsersBlocked } from '../lib/blocks.js'
 import { createNotification } from '../lib/notify.js'
-import { serializePublicUser } from '../lib/serialize.js'
+import { publicActorName, serializePublicUser } from '../lib/serialize.js'
+import { logAppEvent } from '../lib/appAnalytics.js'
 import { requireAuth, type AuthedEnv } from '../middleware/auth.js'
 import { rateLimit } from '../middleware/rateLimit.js'
 
@@ -125,15 +126,21 @@ likesRoutes.post(
         }
       }
       if (liked) {
+        void logAppEvent({
+          name: 'like_sent',
+          visitorId: `u:${fromUserId}`,
+          userId: fromUserId,
+          path: '/app',
+        })
         const me = await prisma.user.findUnique({
           where: { id: fromUserId },
-          select: { name: true, gender: true },
+          select: { name: true, gender: true, privacy: true },
         })
         await createNotification({
           userId: toUserId.data,
           type: 'like',
           title: 'Новый лайк',
-          body: likeNotificationBody(me?.name, me?.gender),
+          body: likeNotificationBody(publicActorName(me), me?.gender),
           href: '/app/likes',
           actorId: fromUserId,
         }).catch(() => undefined)

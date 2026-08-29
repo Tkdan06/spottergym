@@ -635,6 +635,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const notificationPrefsRef = useRef(notificationPrefs)
   /** Инкремент при login/logout — отсекает устаревшие apiLogout/apiMe */
   const sessionEpochRef = useRef(0)
+  const likeInFlightRef = useRef(new Set<string>())
+  const presenceBusyRef = useRef(false)
+  const startChatInFlightRef = useRef(new Map<string, Promise<string>>())
+  const acceptInFlightRef = useRef(new Set<string>())
   useEffect(() => {
     userEmailRef.current = user?.email || ''
   }, [user?.email])
@@ -1555,6 +1559,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     async (gymId: string) => {
       const snapshot = userRef.current
       if (!snapshot || !snapshot.gymIds.includes(gymId)) return
+      if (presenceBusyRef.current) return
+      presenceBusyRef.current = true
       const now = new Date().toISOString()
       const session = buildCheckInSessionFields(now, 0)
       const next = {
@@ -1568,15 +1574,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
       userRef.current = next
       setUser(next)
       persistSessionUser(next)
-      if (!apiOnlineRef.current || isDemoAccount(next.email)) return
       try {
-        const me = await apiCheckIn(gymId)
-        applyServerUser(me as AppUser)
-      } catch (err) {
-        userRef.current = snapshot
-        setUser(snapshot)
-        persistSessionUser(snapshot)
-        throw err instanceof Error ? err : new Error('Не удалось отметиться')
+        if (!apiOnlineRef.current || isDemoAccount(next.email)) return
+        try {
+          const me = await apiCheckIn(gymId)
+          applyServerUser(me as AppUser)
+        } catch (err) {
+          userRef.current = snapshot
+          setUser(snapshot)
+          persistSessionUser(snapshot)
+          throw err instanceof Error ? err : new Error('Не удалось отметиться')
+        }
+      } finally {
+        presenceBusyRef.current = false
       }
     },
     [applyServerUser],
@@ -1585,6 +1595,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const checkOut = useCallback(async () => {
     const snapshot = userRef.current
     if (!snapshot) return
+    if (presenceBusyRef.current) return
+    presenceBusyRef.current = true
     const next = {
       ...snapshot,
       isActive: false,
@@ -1598,49 +1610,59 @@ export function AppProvider({ children }: { children: ReactNode }) {
     userRef.current = next
     setUser(next)
     persistSessionUser(next)
-    if (!apiOnlineRef.current || isDemoAccount(next.email)) return
     try {
-      const me = await apiCheckOut()
-      applyServerUser(me as AppUser)
-    } catch (err) {
-      userRef.current = snapshot
-      setUser(snapshot)
-      persistSessionUser(snapshot)
-      throw err instanceof Error ? err : new Error('Не удалось снять статус')
+      if (!apiOnlineRef.current || isDemoAccount(next.email)) return
+      try {
+        const me = await apiCheckOut()
+        applyServerUser(me as AppUser)
+      } catch (err) {
+        userRef.current = snapshot
+        setUser(snapshot)
+        persistSessionUser(snapshot)
+        throw err instanceof Error ? err : new Error('Не удалось снять статус')
+      }
+    } finally {
+      presenceBusyRef.current = false
     }
   }, [applyServerUser])
 
   const extendCheckIn = useCallback(async () => {
     const prev = userRef.current
     if (!prev?.isActive || !canExtendCheckInLocal(prev)) return
+    if (presenceBusyRef.current) return
+    presenceBusyRef.current = true
 
-    // Online: server is source of truth — no silent local success on API fail
-    if (apiOnlineRef.current && getStoredToken() && !isDemoAccount(prev.email)) {
-      try {
-        const me = await apiExtendCheckIn()
-        applyServerUser(me as AppUser)
-      } catch (err) {
-        throw err instanceof Error ? err : new Error('Не удалось продлить')
+    try {
+      // Online: server is source of truth — no silent local success on API fail
+      if (apiOnlineRef.current && getStoredToken() && !isDemoAccount(prev.email)) {
+        try {
+          const me = await apiExtendCheckIn()
+          applyServerUser(me as AppUser)
+        } catch (err) {
+          throw err instanceof Error ? err : new Error('Не удалось продлить')
+        }
+        return
       }
-      return
+
+      setUser((current) => {
+        if (!current?.isActive || !canExtendCheckInLocal(current)) return current
+        const expires = Date.parse(getCheckInExpiresAt(current) || '')
+        const base = Number.isFinite(expires) ? expires : Date.now()
+        const nextCount = (current.checkInExtendCount || 0) + 1
+        const next: AppUser = {
+          ...current,
+          checkedInExpiresAt: new Date(Math.max(base, Date.now()) + CHECK_IN_EXTEND_MS).toISOString(),
+          checkInExtendCount: nextCount,
+          checkInCanExtend: nextCount < CHECK_IN_MAX_EXTENDS,
+          lastSeenAt: new Date().toISOString(),
+        }
+        userRef.current = next
+        persistSessionUser(next)
+        return next
+      })
+    } finally {
+      presenceBusyRef.current = false
     }
-
-    setUser((current) => {
-      if (!current?.isActive || !canExtendCheckInLocal(current)) return current
-      const expires = Date.parse(getCheckInExpiresAt(current) || '')
-      const base = Number.isFinite(expires) ? expires : Date.now()
-      const nextCount = (current.checkInExtendCount || 0) + 1
-      const next: AppUser = {
-        ...current,
-        checkedInExpiresAt: new Date(Math.max(base, Date.now()) + CHECK_IN_EXTEND_MS).toISOString(),
-        checkInExtendCount: nextCount,
-        checkInCanExtend: nextCount < CHECK_IN_MAX_EXTENDS,
-        lastSeenAt: new Date().toISOString(),
-      }
-      userRef.current = next
-      persistSessionUser(next)
-      return next
-    })
   }, [applyServerUser])
 
   // Auto check-out when 3h (+extends) window ends — local soft fallback + sync
@@ -1806,8 +1828,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     rememberUserRef.current = rememberUser
     rememberUsersRef.current = rememberUsers
   }, [rememberUser, rememberUsers])
-
-  const likeInFlightRef = useRef(new Set<string>())
 
   const toggleLike = useCallback(
     async (userId: string) => {
@@ -2058,7 +2078,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   )
 
   const startConversation = useCallback(
-    async (userId: string, text: string) => {
+    (userId: string, text: string) => {
+      const pending = startChatInFlightRef.current.get(userId)
+      if (pending) return pending
+      const run = (async () => {
       if (!user) throw new Error('Нужен вход')
       if (blockedUserIds.includes(userId)) {
         throw new Error('Пользователь в чёрном списке')
@@ -2169,6 +2192,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         simulateDelivery(msgId, true)
       }
       return conversationId
+      })()
+      startChatInFlightRef.current.set(userId, run)
+      void run.finally(() => {
+        startChatInFlightRef.current.delete(userId)
+      })
+      return run
     },
     [
       conversations,
@@ -2185,6 +2214,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const acceptRequest = useCallback(
     async (conversationId: string) => {
+      if (acceptInFlightRef.current.has(conversationId)) return
+      acceptInFlightRef.current.add(conversationId)
+      try {
       if (apiOnlineRef.current && getStoredToken()) {
         await apiAcceptConversation(conversationId)
         await refreshChats()
@@ -2207,6 +2239,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         persistMsgs(next)
         return next
       })
+      } finally {
+        acceptInFlightRef.current.delete(conversationId)
+      }
     },
     [persistChats, persistMsgs, refreshChats, refreshThread],
   )

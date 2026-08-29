@@ -112,59 +112,74 @@ gymRoutes.get('/:gymId', async (c) => {
 
 gymRoutes.get('/:gymId/people', requireAuth, async (c) => {
   const gymId = c.req.param('gymId')
+  if (!gymId || gymId.length > 64) return c.json({ error: 'Некорректный зал' }, 400)
   const gym = await prisma.gym.findUnique({ where: { id: gymId } })
   if (!gym) return c.json({ error: 'Зал не найден' }, 404)
 
+  const limitRaw = Number(c.req.query('limit'))
+  const offsetRaw = Number(c.req.query('offset'))
+  const limit = Math.min(240, Math.max(1, Number.isFinite(limitRaw) ? Math.floor(limitRaw) : 80))
+  const offset = Math.max(0, Number.isFinite(offsetRaw) ? Math.floor(offsetRaw) : 0)
+
   const viewerId = c.get('userId')
   scheduleExpireStaleCheckIns()
-  const [hidden, members] = await Promise.all([
-    listHiddenUserIds(viewerId),
-    prisma.userGym.findMany({
-      where: { gymId, user: { deletedAt: null } },
-      select: {
-        userId: true,
-        user: {
-          select: {
-            id: true,
-            username: true,
-            instagram: true,
-            name: true,
-            age: true,
-            gender: true,
-            bio: true,
-            photos: true,
-            avatar: true,
-            homeGymId: true,
-            city: true,
-            intent: true,
-            experienceLevel: true,
-            sports: true,
-            isCoach: true,
-            coachSports: true,
-            breakUntil: true,
-            privacy: true,
-            lookingToMeet: true,
-            lastSeenAt: true,
-            referralStatusVisible: true,
-            referralCreditedCount: true,
-            checkIns: {
-              where: { checkedOutAt: null },
-              take: 1,
-              select: {
-                gymId: true,
-                checkedInAt: true,
-                expiresAt: true,
-                extendCount: true,
-              },
+  const hidden = await listHiddenUserIds(viewerId)
+  const hiddenSet = new Set(hidden)
+
+  const members = await prisma.userGym.findMany({
+    where: {
+      gymId,
+      user: {
+        deletedAt: null,
+        ...(hiddenSet.size ? { id: { notIn: [...hiddenSet] } } : {}),
+      },
+    },
+    orderBy: { user: { lastSeenAt: 'desc' } },
+    skip: offset,
+    take: limit + 1,
+    select: {
+      userId: true,
+      user: {
+        select: {
+          id: true,
+          username: true,
+          instagram: true,
+          name: true,
+          age: true,
+          gender: true,
+          bio: true,
+          photos: true,
+          avatar: true,
+          homeGymId: true,
+          city: true,
+          intent: true,
+          experienceLevel: true,
+          sports: true,
+          isCoach: true,
+          coachSports: true,
+          breakUntil: true,
+          privacy: true,
+          lookingToMeet: true,
+          lastSeenAt: true,
+          referralStatusVisible: true,
+          referralCreditedCount: true,
+          checkIns: {
+            where: { checkedOutAt: null },
+            take: 1,
+            select: {
+              gymId: true,
+              checkedInAt: true,
+              expiresAt: true,
+              extendCount: true,
             },
           },
         },
       },
-    }),
-  ])
-  const hiddenSet = new Set(hidden)
-  const visible = hiddenSet.size ? members.filter((m) => !hiddenSet.has(m.userId)) : members
-  const memberIds = visible.map((m) => m.userId)
+    },
+  })
+  const hasMore = members.length > limit
+  const page = hasMore ? members.slice(0, limit) : members
+  const memberIds = page.map((m) => m.userId)
 
   const [likeRows, tierMap] = await Promise.all([
     memberIds.length
@@ -181,9 +196,10 @@ gymRoutes.get('/:gymId/people', requireAuth, async (c) => {
   const likeMap = new Map(likeRows.map((r) => [r.toUserId, r._count._all]))
 
   return c.json({
-    people: visible.map((m) => ({
+    people: page.map((m) => ({
       ...serializePublicCard(m.user, gymId, tierMap.get(m.userId)),
       likeCount: likeMap.get(m.userId) || 0,
     })),
+    hasMore,
   })
 })

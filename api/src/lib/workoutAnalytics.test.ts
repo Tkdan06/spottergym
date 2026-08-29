@@ -55,6 +55,22 @@ describe('setsVolume / sessionVolume', () => {
     ])
     assert.equal(sessionVolume(row), 1280)
   })
+
+  it('skips zero, negative, empty, NaN and non-finite weights', () => {
+    assert.equal(
+      setsVolume([
+        { weightKg: 0, reps: 8 },
+        { weightKg: -80, reps: 8 },
+        { weightKg: '', reps: 8 },
+        { weightKg: NaN, reps: 8 },
+        { weightKg: null, reps: 8 },
+        { weightKg: undefined, reps: 8 },
+        { weightKg: 80, reps: -5 },
+        { weightKg: 80, reps: 5 },
+      ]),
+      400,
+    )
+  })
 })
 
 describe('pctDelta', () => {

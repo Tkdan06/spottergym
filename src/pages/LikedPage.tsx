@@ -22,6 +22,7 @@ function LikedRow({
   onToggleLike,
   likeMode,
   messageBusy,
+  from,
 }: {
   person: UserProfile
   myGymIds: string[]
@@ -30,6 +31,7 @@ function LikedRow({
   onToggleLike: () => void
   likeMode: LikesMode
   messageBusy?: boolean
+  from: string
 }) {
   const name = displayName(person)
   const isAnon = person.privacy === 'anonymous'
@@ -53,7 +55,7 @@ function LikedRow({
 
   return (
     <article className="liked-row">
-      <Link to={`/app/user/${person.id}`} className="liked-main">
+      <Link to={`/app/user/${person.id}`} state={{ from }} className="liked-main">
         <div className="avatar-wrap">
           <SmartImage
             src={profileImage(person)}
@@ -198,6 +200,7 @@ export function LikedPage({ mode = 'received' }: { mode?: LikesMode }) {
                 myGymIds={user.gymIds}
                 likedByMe={likedByMe}
                 likeMode={mode}
+                from={listPath}
                 messageBusy={msgBusyId === person.id}
                 onMessage={() => openChat(person.id)}
                 onToggleLike={() => {
