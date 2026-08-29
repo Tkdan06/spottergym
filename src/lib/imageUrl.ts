@@ -24,6 +24,14 @@ const NETWORK_COVERS: Record<string, string> = {
   urbanfit: '/images/gyms/urbanfit.jpg',
   'urban fit': '/images/gyms/urbanfit.jpg',
   'urban fitness': '/images/gyms/urbanfit.jpg',
+  'ddx fitness': '/images/gyms/ddx.jpg',
+  ddx: '/images/gyms/ddx.jpg',
+  'crocus fitness': '/images/gyms/crocus.jpg',
+  crocus: '/images/gyms/crocus.jpg',
+  'world class': '/images/gyms/world-class.jpg',
+  worldclass: '/images/gyms/world-class.jpg',
+  'encore fitness': '/images/gyms/encore.jpg',
+  encore: '/images/gyms/encore.jpg',
 }
 
 function networkKey(network: string) {
