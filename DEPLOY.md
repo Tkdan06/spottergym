@@ -53,7 +53,21 @@ nginx -t && systemctl reload nginx
 
 apt install -y certbot python3-certbot-nginx
 certbot --nginx -d spottergym.ru -d www.spottergym.ru
+sudo ./deploy/fix-nginx-canonical.sh
 ```
+
+Канонический хост — `https://spottergym.ru`. `www` должен отвечать **301** на apex (и HTTP, и HTTPS). Не копируй `deploy/nginx.conf` поверх живого файла после certbot — затрёшь SSL; патч правит текущий конфиг.
+
+Проверка:
+
+```bash
+curl -sI --max-redirs 0 https://www.spottergym.ru/ | grep -iE 'HTTP/|location:'
+# 301  Location: https://spottergym.ru/
+curl -sI --max-redirs 0 http://www.spottergym.ru/ | grep -iE 'HTTP/|location:'
+# 301  Location: https://spottergym.ru/
+```
+
+В Яндекс Вебмастере: добавь `https://www.spottergym.ru` при необходимости → **Индексирование → Переезд сайта** на HTTP/www-сайте → главное зеркало `https://spottergym.ru`.
 
 DNS A/AAAA → IP VPS. Если раньше был GitHub Pages — отключи для домена.
 
@@ -97,4 +111,6 @@ rsync -a --delete dist/ /var/www/spottergym/dist/
 # Optional Webmaster: VITE_YANDEX_VERIFICATION / VITE_GOOGLE_SITE_VERIFICATION.
 # If photos show stubs again after a certbot/nginx edit:
 # sudo ./deploy/fix-nginx-media.sh
+# If https://www still serves 200 instead of 301 to apex:
+# sudo ./deploy/fix-nginx-canonical.sh
 ```
