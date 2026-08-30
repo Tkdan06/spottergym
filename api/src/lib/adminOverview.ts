@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import { prisma } from '../db.js'
 import {
   addMoscowDays,
@@ -556,6 +557,14 @@ export async function buildAdminOverview(range: OverviewRange): Promise<AdminOve
   }
 }
 
+/** Prisma binds JS numbers as INT8; Postgres has `date + int4`, not `date + bigint`. */
+export function sqlSafeInt(value: number): Prisma.Sql {
+  if (!Number.isInteger(value) || value < 0 || value > 366) {
+    throw new Error('Некорректный целочисленный параметр')
+  }
+  return Prisma.raw(String(value))
+}
+
 async function retentionBuckets(
   nDays: number,
   from: Date,
@@ -563,18 +572,19 @@ async function retentionBuckets(
   todayKey: string,
 ): Promise<{ total: number; retained: number }[]> {
   const latestObservable = addMoscowDays(todayKey, -(nDays + 1))
+  const dayOffset = sqlSafeInt(nDays)
   const rows = await prisma.$queryRaw<{ total: bigint; retained: bigint }[]>`
     SELECT
       COUNT(*)::bigint AS total,
       COUNT(*) FILTER (
         WHERE (timezone('Europe/Moscow', u."lastSeenAt"))::date
-            = (timezone('Europe/Moscow', u."registeredAt"))::date + ${nDays}
+            = (timezone('Europe/Moscow', u."registeredAt"))::date + ${dayOffset}
       )::bigint AS retained
     FROM "User" u
     WHERE u."deletedAt" IS NULL
       AND u."registeredAt" >= ${from}
       AND u."registeredAt" < ${to}
-      AND (timezone('Europe/Moscow', u."registeredAt"))::date <= ${latestObservable}::date
+      AND (timezone('Europe/Moscow', u."registeredAt"))::date <= (${latestObservable})::date
     GROUP BY (timezone('Europe/Moscow', u."registeredAt"))::date
   `
   return rows.map((row) => ({ total: n(row.total), retained: n(row.retained) }))

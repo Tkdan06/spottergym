@@ -12,6 +12,7 @@ import {
   formatOverviewCount,
   isMoscowDayKey,
   parseOverviewRange,
+  sqlSafeInt,
 } from './adminOverview.js'
 
 describe('parseOverviewRange', () => {
@@ -170,6 +171,16 @@ describe('retention averaging', () => {
     assert.equal(point.cohortUsers, 12)
     assert.equal(point.retained, 4)
     assert.equal(point.rate, (0.2 + 1) / 2)
+  })
+})
+
+describe('sqlSafeInt', () => {
+  it('inlines trusted day offsets so Postgres gets int, not Prisma INT8', () => {
+    const sql = sqlSafeInt(7)
+    assert.deepEqual(sql.strings, ['7'])
+    assert.deepEqual(sql.values, [])
+    assert.throws(() => sqlSafeInt(7.5))
+    assert.throws(() => sqlSafeInt(-1))
   })
 })
 
