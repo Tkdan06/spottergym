@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
 import {
   ArrowUpRight,
+  ListTree,
   Ban,
   MessageCircle,
   MessageSquare,
@@ -571,6 +572,14 @@ export function AdminPlayersPage() {
                 >
                   <ArrowUpRight size={18} />
                 </button>
+                <Link
+                  to={`/app/admin/timeline?userId=${encodeURIComponent(selected.id)}`}
+                  className="admin-action-icon"
+                  title="Таймлайн"
+                  aria-label="Таймлайн"
+                >
+                  <ListTree size={18} />
+                </Link>
                 {!selected.isDemoSeed && selected.id !== user?.id ? (
                   <button
                     type="button"

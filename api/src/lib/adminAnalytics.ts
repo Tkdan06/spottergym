@@ -64,7 +64,7 @@ export function moscowDayStartUtc(dayKey: string): Date {
   return new Date(`${dayKey}T00:00:00+03:00`)
 }
 
-function addDaysKey(dayKey: string, days: number): string {
+export function addMoscowDays(dayKey: string, days: number): string {
   const start = moscowDayStartUtc(dayKey)
   return moscowDayKey(new Date(start.getTime() + days * 24 * 60 * 60 * 1000))
 }
@@ -75,8 +75,8 @@ function computeDayNRetention(
   todayKey: string,
 ): AdminRetentionPoint {
   // Cohorts D where D+N is before today (fully observed)
-  const latestCohort = addDaysKey(todayKey, -(n + 1))
-  const earliestCohort = addDaysKey(latestCohort, -(RR_COHORT_WINDOW - 1))
+  const latestCohort = addMoscowDays(todayKey, -(n + 1))
+  const earliestCohort = addMoscowDays(latestCohort, -(RR_COHORT_WINDOW - 1))
 
   const byRegDay = new Map<string, { total: number; retained: number }>()
   for (const u of users) {
@@ -84,7 +84,7 @@ function computeDayNRetention(
     if (regKey < earliestCohort || regKey > latestCohort) continue
     const bucket = byRegDay.get(regKey) || { total: 0, retained: 0 }
     bucket.total += 1
-    const targetDay = addDaysKey(regKey, n)
+    const targetDay = addMoscowDays(regKey, n)
     if (moscowDayKey(u.lastSeenAt) === targetDay) bucket.retained += 1
     byRegDay.set(regKey, bucket)
   }

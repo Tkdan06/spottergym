@@ -50,6 +50,12 @@ const AdminBroadcastsPage = lazyNamed(() => import('./pages/AdminBroadcastsPage'
 const AdminAnalyticsPage = lazyNamed(() => import('./pages/AdminAnalyticsPage'), 'AdminAnalyticsPage')
 const AdminGeographyPage = lazyNamed(() => import('./pages/AdminGeographyPage'), 'AdminGeographyPage')
 const AdminHubPage = lazyNamed(() => import('./pages/AdminHubPage'), 'AdminHubPage')
+const AdminOverviewPage = lazyNamed(() => import('./pages/AdminOverviewPage'), 'AdminOverviewPage')
+const AdminProductPage = lazyNamed(() => import('./pages/AdminProductPage'), 'AdminProductPage')
+const AdminCohortsPage = lazyNamed(() => import('./pages/AdminCohortsPage'), 'AdminCohortsPage')
+const AdminGrowthPage = lazyNamed(() => import('./pages/AdminGrowthPage'), 'AdminGrowthPage')
+const AdminGymsPage = lazyNamed(() => import('./pages/AdminGymsPage'), 'AdminGymsPage')
+const AdminTimelinePage = lazyNamed(() => import('./pages/AdminTimelinePage'), 'AdminTimelinePage')
 const AdminLandingPage = lazyNamed(() => import('./pages/AdminLandingPage'), 'AdminLandingPage')
 const AdminOpsPage = lazyNamed(() => import('./pages/AdminOpsPage'), 'AdminOpsPage')
 const AdminPasswordResetsPage = lazyNamed(
@@ -136,6 +142,14 @@ export default function App() {
               <Route path="feedback" element={<FeedbackPage />} />
               <Route path="feedback/:ticketId" element={<FeedbackPage />} />
               <Route path="admin" element={<AdminHubPage />} />
+              <Route path="admin/overview" element={<AdminOverviewPage />} />
+              <Route path="admin/product" element={<Navigate to="/app/admin/product/funnels" replace />} />
+              <Route path="admin/product/:section" element={<AdminProductPage />} />
+              <Route path="admin/cohorts" element={<AdminCohortsPage />} />
+              <Route path="admin/growth" element={<Navigate to="/app/admin/growth/acquisition" replace />} />
+              <Route path="admin/growth/:section" element={<AdminGrowthPage />} />
+              <Route path="admin/gyms" element={<AdminGymsPage />} />
+              <Route path="admin/timeline" element={<AdminTimelinePage />} />
               <Route path="admin/players" element={<AdminPlayersPage />} />
               <Route path="admin/analytics" element={<AdminAnalyticsPage />} />
               <Route path="admin/geography" element={<AdminGeographyPage />} />

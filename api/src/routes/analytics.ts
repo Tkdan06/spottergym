@@ -30,6 +30,19 @@ const eventSchema = z.object({
   userId: z.string().max(64).optional().nullable(),
 })
 
+async function optionalUserId(c: Parameters<typeof getCookie>[0]) {
+  const token =
+    c.req.header('x-spotter-token') ||
+    (c.req.header('authorization')?.startsWith('Bearer ')
+      ? c.req.header('authorization')!.slice(7)
+      : '') ||
+    getCookie(c, sessionCookieName()) ||
+    ''
+  if (!token) return null
+  const session = await verifySession(token)
+  return session?.sub || null
+}
+
 analyticsRoutes.post(
   '/lp',
   rateLimit({ windowMs: 60_000, max: 60, route: 'analytics-lp' }),
@@ -48,6 +61,7 @@ analyticsRoutes.post(
       landingSearch: rest.landingSearch,
     })
 
+    const userId = await optionalUserId(c)
     const result = await logLandingEvent({
       name: eventName,
       visitorId: rest.visitorId,
@@ -65,7 +79,7 @@ analyticsRoutes.post(
       searchKeyword: search.searchKeyword || rest.utmTerm,
       clickId: search.clickId,
       searchPaid: search.paid,
-      userId: rest.userId,
+      userId,
       userAgent: c.req.header('user-agent') || '',
       ip: clientIp(c),
     })
@@ -84,19 +98,6 @@ const appEventSchema = z.object({
   path: z.string().max(80).optional(),
   meta: z.record(z.string(), z.string().max(32)).optional(),
 })
-
-async function optionalUserId(c: Parameters<typeof getCookie>[0]) {
-  const token =
-    c.req.header('x-spotter-token') ||
-    (c.req.header('authorization')?.startsWith('Bearer ')
-      ? c.req.header('authorization')!.slice(7)
-      : '') ||
-    getCookie(c, sessionCookieName()) ||
-    ''
-  if (!token) return null
-  const session = await verifySession(token)
-  return session?.sub || null
-}
 
 analyticsRoutes.post(
   '/app',

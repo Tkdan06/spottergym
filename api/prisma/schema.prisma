@@ -139,6 +139,7 @@ model User {
   @@index([deletedAt])
   @@index([signupIp])
   @@index([lastSeenAt])
+  @@index([deletedAt, registeredAt])
 }
 
 /** One-time password reset links (raw token never stored — only sha256 hash). */
@@ -204,6 +205,7 @@ model LandingEvent {
   @@index([utmCampaign, createdAt])
   @@index([sessionId, name])
   @@index([searchEngine, createdAt])
+  @@index([userId, name, createdAt])
 }
 
 /** Web Push endpoints for installed PWA (home screen) */
@@ -309,6 +311,8 @@ model Conversation {
   @@unique([userLowId, userHighId])
   @@index([userLowId, lastMessageAt])
   @@index([userHighId, lastMessageAt])
+  @@index([createdAt])
+  @@index([initiatedById, createdAt])
 }
 
 model ChatMessage {
@@ -324,6 +328,7 @@ model ChatMessage {
 
   @@index([conversationId, createdAt])
   @@index([senderId])
+  @@index([createdAt])
 }
 
 model Gym {
@@ -391,6 +396,7 @@ model Like {
   @@unique([fromUserId, toUserId])
   @@index([toUserId])
   @@index([fromUserId])
+  @@index([createdAt])
 }
 
 model Notification {
@@ -507,6 +513,7 @@ model WorkoutSession {
 
   @@index([userId, performedAt(sort: Desc)])
   @@index([userId, title])
+  @@index([performedAt])
 }
 
 model WorkoutExercise {
@@ -576,6 +583,7 @@ model WorkoutAiInsight {
 
   @@unique([userId, kind, periodStart])
   @@index([userId, createdAt])
+  @@index([createdAt])
 }
 
 /** Failed API requests for the admin “site health” board. */

@@ -3,6 +3,12 @@ import {
   BarChart3,
   Bell,
   Activity,
+  Gauge,
+  Waypoints,
+  Layers,
+  TrendingUp,
+  Building2,
+  ListTree,
   HardDrive,
   KeyRound,
   MapPin,
@@ -119,6 +125,14 @@ export function AdminHubPage() {
 
       {canViewUsers ? (
         <>
+          <Link to="/app/admin/overview" className="surface admin-inline-metric">
+            <div>
+              <strong>Обзор</strong>
+              <p className="dim">Что происходит сейчас · воронка, KPI и сигналы за период</p>
+            </div>
+            <span className="muted">Открыть</span>
+          </Link>
+
           <section className="admin-stat-grid" aria-label="Продукт">
             <article className="admin-stat-card">
               <span className="muted">Пользователи</span>
@@ -135,7 +149,7 @@ export function AdminHubPage() {
               <strong>
                 {analytics?.dau ?? '—'} / {analytics?.mau ?? '—'}
               </strong>
-              <p className="dim">Заходили сегодня · 30 дней (МСК)</p>
+              <p className="dim">Сегодня МСК · MAU = 30×24ч от сейчас</p>
             </Link>
             <Link to="/app/admin/players?filter=checkedInToday" className="admin-stat-card">
               <span className="muted">В зале сегодня</span>
@@ -225,6 +239,36 @@ export function AdminHubPage() {
       <div className="admin-hub-grid">
         {canViewUsers ? (
           <>
+            <Link to="/app/admin/overview" className="admin-hub-card">
+              <Gauge size={20} />
+              <strong>Обзор</strong>
+              <p className="muted">Главный экран аналитики · период, воронка, drop-off</p>
+            </Link>
+            <Link to="/app/admin/product/funnels" className="admin-hub-card">
+              <Waypoints size={20} />
+              <strong>Продукт</strong>
+              <p className="muted">Воронки, core loop, знакомства, чаты, тренировки, AI</p>
+            </Link>
+            <Link to="/app/admin/cohorts" className="admin-hub-card">
+              <Layers size={20} />
+              <strong>Когорты</strong>
+              <p className="muted">Неделя/месяц · R1–R60 · Aha (корреляция, не причина)</p>
+            </Link>
+            <Link to="/app/admin/growth/acquisition" className="admin-hub-card">
+              <TrendingUp size={20} />
+              <strong>Рост</strong>
+              <p className="muted">Acquisition, landing, SEO, качество рефералов</p>
+            </Link>
+            <Link to="/app/admin/gyms" className="admin-hub-card">
+              <Building2 size={20} />
+              <strong>Залы</strong>
+              <p className="muted">Плотность сети · current vs viewed · low density как возможность</p>
+            </Link>
+            <Link to="/app/admin/timeline" className="admin-hub-card">
+              <ListTree size={20} />
+              <strong>Таймлайн</strong>
+              <p className="muted">Product timeline пользователя · event debugger</p>
+            </Link>
             <Link to="/app/admin/players" className="admin-hub-card">
               <Users size={20} />
               <strong>Пользователи</strong>

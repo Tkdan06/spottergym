@@ -11,6 +11,12 @@ import type {
   UserProfile,
 } from '../types'
 import type { AdminAnalytics } from './adminAnalytics'
+import type { AdminAhaPayload, AdminCohortsPayload, AhaAction } from './adminCohorts'
+import type { AdminEventDebugPayload, AdminTimelinePayload, TimelineSearchHit } from './adminTimeline'
+import type { AdminGymsPayload, GymSortKey } from './adminGyms'
+import type { AdminGrowthPayload, GrowthView } from './adminGrowth'
+import type { AdminProductPayload, ProductView } from './adminProductAnalytics'
+import type { AdminProductOverview, OverviewPreset } from './adminProductOverview'
 import type { LikeCounts, LikesMap } from './likes'
 import { sanitizeApiErrorMessage } from './userError'
 import type { PeriodRange } from './periodRange'
@@ -802,6 +808,169 @@ export async function apiAdminFetchUsers(opts?: {
 export async function apiAdminFetchAnalytics() {
   const data = await request<{ analytics: AdminAnalytics }>('/admin/analytics')
   return data.analytics
+}
+
+export async function apiAdminFetchOverview(query: {
+  preset: OverviewPreset
+  from?: string
+  to?: string
+}) {
+  const sp = new URLSearchParams()
+  sp.set('preset', query.preset)
+  if (query.preset === 'custom') {
+    if (query.from) sp.set('from', query.from)
+    if (query.to) sp.set('to', query.to)
+  }
+  const data = await request<{ overview: AdminProductOverview }>(`/admin/overview?${sp}`)
+  return data.overview
+}
+
+export async function apiAdminFetchProduct(query: {
+  view: ProductView
+  preset: OverviewPreset
+  from?: string
+  to?: string
+  gym?: string
+  source?: string
+  referral?: string
+}) {
+  const sp = new URLSearchParams()
+  sp.set('view', query.view)
+  sp.set('preset', query.preset)
+  if (query.preset === 'custom') {
+    if (query.from) sp.set('from', query.from)
+    if (query.to) sp.set('to', query.to)
+  }
+  if (query.gym) sp.set('gym', query.gym)
+  if (query.source) sp.set('source', query.source)
+  if (query.referral && query.referral !== 'all') sp.set('referral', query.referral)
+  const data = await request<{ product: AdminProductPayload }>(`/admin/product?${sp}`)
+  return data.product
+}
+
+export async function apiAdminFetchCohorts(query: {
+  preset: OverviewPreset
+  from?: string
+  to?: string
+  grain?: string
+  acq?: string
+  acqValue?: string
+  product?: string
+}) {
+  const sp = new URLSearchParams()
+  sp.set('preset', query.preset)
+  if (query.preset === 'custom') {
+    if (query.from) sp.set('from', query.from)
+    if (query.to) sp.set('to', query.to)
+  }
+  if (query.grain) sp.set('grain', query.grain)
+  if (query.acq && query.acq !== 'all') sp.set('acq', query.acq)
+  if (query.acqValue) sp.set('acqValue', query.acqValue)
+  if (query.product && query.product !== 'all') sp.set('product', query.product)
+  const data = await request<{ cohorts: AdminCohortsPayload }>(`/admin/cohorts?${sp}`)
+  return data.cohorts
+}
+
+export async function apiAdminFetchAha(query: {
+  preset: OverviewPreset
+  from?: string
+  to?: string
+  action: AhaAction
+}) {
+  const sp = new URLSearchParams()
+  sp.set('preset', query.preset)
+  sp.set('action', query.action)
+  if (query.preset === 'custom') {
+    if (query.from) sp.set('from', query.from)
+    if (query.to) sp.set('to', query.to)
+  }
+  const data = await request<{ aha: AdminAhaPayload }>(`/admin/aha?${sp}`)
+  return data.aha
+}
+
+export async function apiAdminFetchGrowth(query: {
+  view: GrowthView
+  preset: OverviewPreset
+  from?: string
+  to?: string
+}) {
+  const sp = new URLSearchParams()
+  sp.set('view', query.view)
+  sp.set('preset', query.preset)
+  if (query.preset === 'custom') {
+    if (query.from) sp.set('from', query.from)
+    if (query.to) sp.set('to', query.to)
+  }
+  const data = await request<{ growth: AdminGrowthPayload }>(`/admin/growth?${sp}`)
+  return data.growth
+}
+
+export async function apiAdminFetchGyms(query: {
+  preset: OverviewPreset
+  from?: string
+  to?: string
+  sort?: GymSortKey
+}) {
+  const sp = new URLSearchParams()
+  sp.set('preset', query.preset)
+  if (query.preset === 'custom') {
+    if (query.from) sp.set('from', query.from)
+    if (query.to) sp.set('to', query.to)
+  }
+  if (query.sort) sp.set('sort', query.sort)
+  const data = await request<{ gyms: AdminGymsPayload }>(`/admin/gyms?${sp}`)
+  return data.gyms
+}
+
+export async function apiAdminSearchTimelineUsers(q: string) {
+  const sp = new URLSearchParams()
+  sp.set('q', q)
+  const data = await request<{ users: TimelineSearchHit[] }>(`/admin/timeline/search?${sp}`)
+  return data.users
+}
+
+export async function apiAdminFetchTimeline(query: {
+  userId: string
+  preset: OverviewPreset
+  from?: string
+  to?: string
+  domain?: string
+  event?: string
+  source?: string
+  cursor?: string
+}) {
+  const sp = new URLSearchParams()
+  sp.set('userId', query.userId)
+  sp.set('preset', query.preset)
+  if (query.preset === 'custom') {
+    if (query.from) sp.set('from', query.from)
+    if (query.to) sp.set('to', query.to)
+  }
+  if (query.domain) sp.set('domain', query.domain)
+  if (query.event) sp.set('event', query.event)
+  if (query.source) sp.set('source', query.source)
+  if (query.cursor) sp.set('cursor', query.cursor)
+  const data = await request<{ timeline: AdminTimelinePayload }>(`/admin/timeline?${sp}`)
+  return data.timeline
+}
+
+export async function apiAdminFetchEventDebug(query: {
+  preset: OverviewPreset
+  from?: string
+  to?: string
+  name?: string
+  userId?: string
+}) {
+  const sp = new URLSearchParams()
+  sp.set('preset', query.preset)
+  if (query.preset === 'custom') {
+    if (query.from) sp.set('from', query.from)
+    if (query.to) sp.set('to', query.to)
+  }
+  if (query.name) sp.set('name', query.name)
+  if (query.userId) sp.set('userId', query.userId)
+  const data = await request<{ debug: AdminEventDebugPayload }>(`/admin/events/debug?${sp}`)
+  return data.debug
 }
 
 export type PasswordResetAnalytics = {

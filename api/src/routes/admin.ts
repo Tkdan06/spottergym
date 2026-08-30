@@ -12,6 +12,14 @@ import {
   moscowDayKey,
   moscowDayStartUtc,
 } from '../lib/adminAnalytics.js'
+import { buildAdminOverview, parseOverviewRange } from '../lib/adminOverview.js'
+import { buildAdminAha, buildAdminCohorts, parseAhaAction, parseCohortFilters } from '../lib/adminCohorts.js'
+import { buildAdminGrowth } from '../lib/adminGrowth.js'
+import { isGrowthView } from '../lib/adminGrowthMath.js'
+import { buildAdminGyms } from '../lib/adminGyms.js'
+import { buildAdminTimeline, buildEventDebug, searchTimelineUsers } from '../lib/adminTimeline.js'
+import { buildAdminProduct, parseProductFilters } from '../lib/adminProduct.js'
+import { isProductView } from '../lib/adminProductMath.js'
 import { buildLandingAnalytics } from '../lib/landingAnalytics.js'
 import { buildOpsHealth } from '../lib/opsFaults.js'
 import { buildPasswordResetAnalytics } from '../lib/passwordResetAnalytics.js'
@@ -63,6 +71,148 @@ adminRoutes.get('/analytics', async (c) => {
   if (!gate.ok) return c.json({ error: gate.error }, gate.status)
   const analytics = await buildAdminAnalytics()
   return c.json({ analytics })
+})
+
+adminRoutes.get('/overview', async (c) => {
+  const gate = await requirePerm(c.get('userId'), 'viewUsers')
+  if (!gate.ok) return c.json({ error: gate.error }, gate.status)
+  const range = parseOverviewRange({
+    preset: c.req.query('preset'),
+    from: c.req.query('from'),
+    to: c.req.query('to'),
+  })
+  if ('error' in range) return c.json({ error: range.error }, 400)
+  const overview = await buildAdminOverview(range)
+  return c.json({ overview })
+})
+
+adminRoutes.get('/product', async (c) => {
+  const gate = await requirePerm(c.get('userId'), 'viewUsers')
+  if (!gate.ok) return c.json({ error: gate.error }, gate.status)
+  const viewRaw = c.req.query('view')
+  const view = isProductView(viewRaw) ? viewRaw : 'funnels'
+  const range = parseOverviewRange({
+    preset: c.req.query('preset'),
+    from: c.req.query('from'),
+    to: c.req.query('to'),
+  })
+  if ('error' in range) return c.json({ error: range.error }, 400)
+  const product = await buildAdminProduct(
+    view,
+    range,
+    parseProductFilters({
+      gym: c.req.query('gym'),
+      source: c.req.query('source'),
+      referral: c.req.query('referral'),
+    }),
+  )
+  return c.json({ product })
+})
+
+adminRoutes.get('/cohorts', async (c) => {
+  const gate = await requirePerm(c.get('userId'), 'viewUsers')
+  if (!gate.ok) return c.json({ error: gate.error }, gate.status)
+  const range = parseOverviewRange({
+    preset: c.req.query('preset'),
+    from: c.req.query('from'),
+    to: c.req.query('to'),
+  })
+  if ('error' in range) return c.json({ error: range.error }, 400)
+  const cohorts = await buildAdminCohorts(
+    range,
+    parseCohortFilters({
+      grain: c.req.query('grain'),
+      acq: c.req.query('acq'),
+      acqValue: c.req.query('acqValue'),
+      product: c.req.query('product'),
+    }),
+  )
+  return c.json({ cohorts })
+})
+
+adminRoutes.get('/aha', async (c) => {
+  const gate = await requirePerm(c.get('userId'), 'viewUsers')
+  if (!gate.ok) return c.json({ error: gate.error }, gate.status)
+  const range = parseOverviewRange({
+    preset: c.req.query('preset'),
+    from: c.req.query('from'),
+    to: c.req.query('to'),
+  })
+  if ('error' in range) return c.json({ error: range.error }, 400)
+  const aha = await buildAdminAha(range, parseAhaAction(c.req.query('action')))
+  return c.json({ aha })
+})
+
+adminRoutes.get('/growth', async (c) => {
+  const gate = await requirePerm(c.get('userId'), 'viewUsers')
+  if (!gate.ok) return c.json({ error: gate.error }, gate.status)
+  const viewRaw = c.req.query('view')
+  const view = isGrowthView(viewRaw) ? viewRaw : 'acquisition'
+  const range = parseOverviewRange({
+    preset: c.req.query('preset'),
+    from: c.req.query('from'),
+    to: c.req.query('to'),
+  })
+  if ('error' in range) return c.json({ error: range.error }, 400)
+  const growth = await buildAdminGrowth(view, range)
+  return c.json({ growth })
+})
+
+adminRoutes.get('/gyms', async (c) => {
+  const gate = await requirePerm(c.get('userId'), 'viewUsers')
+  if (!gate.ok) return c.json({ error: gate.error }, gate.status)
+  const range = parseOverviewRange({
+    preset: c.req.query('preset'),
+    from: c.req.query('from'),
+    to: c.req.query('to'),
+  })
+  if ('error' in range) return c.json({ error: range.error }, 400)
+  const gyms = await buildAdminGyms(range, c.req.query('sort'))
+  return c.json({ gyms })
+})
+
+adminRoutes.get('/timeline/search', async (c) => {
+  const gate = await requirePerm(c.get('userId'), 'viewUsers')
+  if (!gate.ok) return c.json({ error: gate.error }, gate.status)
+  const result = await searchTimelineUsers(c.req.query('q'))
+  if ('error' in result) return c.json({ error: result.error }, 400)
+  return c.json(result)
+})
+
+adminRoutes.get('/timeline', async (c) => {
+  const gate = await requirePerm(c.get('userId'), 'viewUsers')
+  if (!gate.ok) return c.json({ error: gate.error }, gate.status)
+  const range = parseOverviewRange({
+    preset: c.req.query('preset'),
+    from: c.req.query('from'),
+    to: c.req.query('to'),
+  })
+  if ('error' in range) return c.json({ error: range.error }, 400)
+  const timeline = await buildAdminTimeline(c.req.query('userId') || '', range, {
+    domain: c.req.query('domain'),
+    event: c.req.query('event'),
+    source: c.req.query('source'),
+    cursor: c.req.query('cursor'),
+    limit: c.req.query('limit'),
+  })
+  if ('error' in timeline) return c.json({ error: timeline.error }, timeline.status)
+  return c.json({ timeline })
+})
+
+adminRoutes.get('/events/debug', async (c) => {
+  const gate = await requirePerm(c.get('userId'), 'viewUsers')
+  if (!gate.ok) return c.json({ error: gate.error }, gate.status)
+  const range = parseOverviewRange({
+    preset: c.req.query('preset'),
+    from: c.req.query('from'),
+    to: c.req.query('to'),
+  })
+  if ('error' in range) return c.json({ error: range.error }, 400)
+  const debug = await buildEventDebug(range, {
+    name: c.req.query('name'),
+    userId: c.req.query('userId'),
+  })
+  return c.json({ debug })
 })
 
 adminRoutes.get('/password-resets', async (c) => {
