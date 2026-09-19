@@ -248,7 +248,22 @@ export function GymDetailPage() {
         <section className="gym-hours surface">
           <SectionTitle className="gym-hours-title">Часы работы</SectionTitle>
           <ul className="gym-hours-list">
-            {hours.weekdays === hours.weekend ? (
+            {hours.saturday && hours.sunday ? (
+              <>
+                <li>
+                  <span>Будни</span>
+                  <strong>{hours.weekdays}</strong>
+                </li>
+                <li>
+                  <span>Сб</span>
+                  <strong>{hours.saturday}</strong>
+                </li>
+                <li>
+                  <span>Вс</span>
+                  <strong>{hours.sunday}</strong>
+                </li>
+              </>
+            ) : hours.weekdays === hours.weekend ? (
               <li>
                 <span>Ежедневно</span>
                 <strong>{hours.weekdays}</strong>
@@ -261,7 +276,7 @@ export function GymDetailPage() {
                 </li>
                 <li>
                   <span>Сб, Вс{hours.source === 'club' ? ' и праздники' : ''}</span>
-                  <strong>{hours.weekend}</strong>
+                  <strong>{hours.weekend || 'Уточняйте в клубе'}</strong>
                 </li>
               </>
             )}

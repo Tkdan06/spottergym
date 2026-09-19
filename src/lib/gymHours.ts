@@ -2,7 +2,11 @@ import type { Gym } from '../types'
 
 export type GymHours = {
   weekdays: string
-  weekend: string
+  /** Общий график для субботы и воскресенья. */
+  weekend?: string
+  /** Используются, когда суббота и воскресенье работают по разному графику. */
+  saturday?: string
+  sunday?: string
   /** Короткая строка для UI */
   label: string
   /** Откуда взяли: сеть / уточнение по клубу */
@@ -55,6 +59,17 @@ const NETWORK_HOURS: Record<string, Omit<GymHours, 'source'>> = {
 
 /** Уточнения по отдельным клубам (из карточек сетей / контактов) */
 const CLUB_HOURS: Record<string, Omit<GymHours, 'source'>> = {
+  'gym-nezavisimyy-susanin-fitness-parnas-sankt-peterburg': {
+    weekdays: '07:00–00:00',
+    weekend: '09:00–23:00',
+    label: 'Будни 07:00–00:00 · Сб, Вс и праздники 09:00–23:00',
+  },
+  'gym-nezavisimyy-crossfit-flash-horoshevskiy-moskva': {
+    weekdays: '07:00–23:00',
+    saturday: '10:00–17:00',
+    sunday: '11:00–15:00',
+    label: 'Будни 07:00–23:00 · Сб 10:00–17:00 · Вс 11:00–15:00',
+  },
   'gym-spirit-fitness-spirit-fitness-matveevskiy-moskva': {
     weekdays: 'Круглосуточно',
     weekend: 'Круглосуточно',

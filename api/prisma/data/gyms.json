@@ -8578,5 +8578,31 @@
     "image": "/images/gyms/gym-01.jpg",
     "lat": 56.24,
     "lng": 43.88
+  },
+  {
+    "id": "gym-nezavisimyy-susanin-fitness-parnas-sankt-peterburg",
+    "name": "Сусанин Фитнес Парнас",
+    "network": "Независимый",
+    "city": "Санкт-Петербург",
+    "district": "Выборгский",
+    "address": "улица Фёдора Абрамова, 8, литера А",
+    "membersCount": 0,
+    "activeNow": 0,
+    "image": "/images/gyms/gym-03.jpg",
+    "lat": 60.0738,
+    "lng": 30.3386
+  },
+  {
+    "id": "gym-nezavisimyy-crossfit-flash-horoshevskiy-moskva",
+    "name": "CrossFit Flash",
+    "network": "Независимый",
+    "city": "Москва",
+    "district": "Хорошёвский",
+    "address": "проезд Берёзовой Рощи, 12, 2 этаж",
+    "membersCount": 0,
+    "activeNow": 0,
+    "image": "/images/gyms/gym-04.jpg",
+    "lat": 55.790518,
+    "lng": 37.519599
   }
 ]
