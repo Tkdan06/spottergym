@@ -98,6 +98,25 @@
   gap: 12px;
 }
 
+.lp-pillar-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.lp-pillar-icon.is-people {
+  color: var(--online);
+  background: var(--online-soft);
+}
+
+.lp-pillar-icon.is-progress {
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+
 .lp-actions .btn {
   width: 100%;
   min-height: 50px;
@@ -405,6 +424,46 @@
   margin: 0 0 16px;
   max-width: 40ch;
   font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.lp-pillars {
+  padding-top: 32px;
+}
+
+.lp-pillar-list {
+  display: grid;
+  gap: 10px;
+}
+
+.lp-pillar {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+}
+
+.lp-pillar-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+}
+
+.lp-pillar h3 {
+  margin: 1px 0 4px;
+  font-size: 0.98rem;
+  font-weight: var(--text-ui-strong);
+  line-height: 1.25;
+}
+
+.lp-pillar p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
   line-height: 1.45;
 }
 
@@ -776,6 +835,15 @@
 
   .lp-status-list {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .lp-pillar-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .lp-pillar {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .lp-coach-grid {

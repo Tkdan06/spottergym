@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowRight, Heart, MessageCircle } from 'lucide-react'
+import { ArrowRight, ChartNoAxesColumn, Dumbbell, Heart, MessageCircle, UsersRound } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { LANDING, type LandingDemoProfile } from '../content/landing'
 import {
@@ -24,10 +24,12 @@ function CtaPair({
 }: {
   primaryLabel: string
   secondaryLabel?: string
-  placement: 'hero' | 'mid' | 'final'
+  placement: 'hero_v2' | 'final_v2'
 }) {
+  const isHero = placement === 'hero_v2'
+  const isFinal = placement === 'final_v2'
   return (
-    <div className={`lp-actions${placement === 'hero' ? ' lp-actions-hero' : ''}`}>
+    <div className={`lp-actions${isHero ? ' lp-actions-hero' : ''}`}>
       <Link
         to={registerPath()}
         className="btn btn-primary btn-block"
@@ -36,7 +38,7 @@ function CtaPair({
         {primaryLabel}
         <ArrowRight size={18} aria-hidden />
       </Link>
-      {placement === 'final' ? (
+      {isFinal ? (
         <Link
           to={loginPath()}
           className="lp-login-quiet"
@@ -49,14 +51,18 @@ function CtaPair({
   )
 }
 
+const pillarIcons = {
+  people: UsersRound,
+  workout: Dumbbell,
+  progress: ChartNoAxesColumn,
+} as const
+
 function DemoProfileCard({ profile }: { profile: LandingDemoProfile }) {
   return (
     <Link
       to={registerPath()}
       className={`lp-demo-card${profile.isCoach ? ' lp-demo-card-coach' : ''}`}
-      onClick={() =>
-        trackLanding('cta_register', { placement: `demo_profile:${profile.id}` })
-      }
+      onClick={() => trackLanding('cta_register', { placement: `demo_profile:${profile.id}` })}
       aria-label={`${profile.name}, ${profile.age}. ${profile.gym}`}
     >
       <div className="lp-demo-aside">
@@ -77,9 +83,7 @@ function DemoProfileCard({ profile }: { profile: LandingDemoProfile }) {
         <p className="muted lp-demo-line">{profile.line}</p>
         <div className="lp-demo-pills">
           {profile.isCoach ? <span className="lp-pill lp-pill-coach">Тренер</span> : null}
-          {profile.open ? (
-            <span className="lp-pill lp-pill-open">Открыт к общению</span>
-          ) : null}
+          {profile.open ? <span className="lp-pill lp-pill-open">Открыт к общению</span> : null}
         </div>
         <div className="lp-demo-meta">
           <div className="lp-demo-likes" aria-label={`${profile.likeCount} лайков`}>
@@ -88,9 +92,7 @@ function DemoProfileCard({ profile }: { profile: LandingDemoProfile }) {
                 <img key={src} src={src} alt="" className="lp-demo-liker" width={22} height={22} />
               ))}
               {profile.likeCount > profile.likerPhotos.length ? (
-                <span className="lp-demo-likes-extra">
-                  +{profile.likeCount - profile.likerPhotos.length}
-                </span>
+                <span className="lp-demo-likes-extra">+{profile.likeCount - profile.likerPhotos.length}</span>
               ) : null}
             </div>
             <span className="lp-demo-likes-count">
@@ -104,6 +106,29 @@ function DemoProfileCard({ profile }: { profile: LandingDemoProfile }) {
         </div>
       </div>
     </Link>
+  )
+}
+
+function Pillars() {
+  return (
+    <section className="lp-section lp-pillars" aria-labelledby="lp-pillars">
+      <h2 id="lp-pillars" className="lp-section-title">{LANDING.pillars.title}</h2>
+      <p className="lp-section-lead muted">{LANDING.pillars.lead}</p>
+      <div className="lp-pillar-list">
+        {LANDING.pillars.items.map((item) => {
+          const Icon = pillarIcons[item.id]
+          return (
+            <article key={item.id} className="lp-pillar">
+              <span className={`lp-pillar-icon is-${item.id}`} aria-hidden><Icon size={20} /></span>
+              <div>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </div>
+            </article>
+          )
+        })}
+      </div>
+    </section>
   )
 }
 
@@ -221,8 +246,7 @@ export function LandingPage() {
           </p>
           <h1 className="lp-headline">{LANDING.hero.headline}</h1>
           <p className="lp-lead">{LANDING.hero.lead}</p>
-          <CtaPair primaryLabel={LANDING.hero.ctaPrimary} placement="hero" />
-
+          <CtaPair primaryLabel={LANDING.hero.ctaPrimary} placement="hero_v2" />
           <div className="lp-status-demo" aria-label="Примеры профилей в Spotter">
             {LANDING.demoProfiles.map((profile) => (
               <DemoProfileCard key={profile.id} profile={profile} />
@@ -230,29 +254,14 @@ export function LandingPage() {
           </div>
         </header>
 
-        <section className="lp-section" aria-labelledby="lp-pain-offer">
-          <h2 id="lp-pain-offer" className="lp-section-title">
-            {LANDING.painOffer.title}
-          </h2>
-          <div className="lp-stack">
-            {LANDING.painOffer.items.map((item) => (
-              <article key={item.pain} className="lp-block lp-pain-offer">
-                <p className="lp-pain">{item.pain}</p>
-                <p className="lp-fix">
-                  <span className="lp-fix-label">В Spotter</span>
-                  {item.fix}
-                </p>
-              </article>
-            ))}
-          </div>
-        </section>
+        <Pillars />
 
         <section className="lp-section" aria-labelledby="lp-steps">
           <h2 id="lp-steps" className="lp-section-title">
-            {LANDING.steps.title}
+            {LANDING.visitFlow.title}
           </h2>
           <ol className="lp-steps">
-            {LANDING.steps.items.map((item) => (
+            {LANDING.visitFlow.items.map((item) => (
               <li key={item.step} className="lp-block lp-step">
                 <span className="lp-step-num" aria-hidden>
                   {item.step}
@@ -276,7 +285,7 @@ export function LandingPage() {
           <CtaPair
             primaryLabel={LANDING.finalCta.ctaPrimary}
             secondaryLabel={LANDING.finalCta.ctaSecondary}
-            placement="final"
+            placement="final_v2"
           />
         </section>
 
