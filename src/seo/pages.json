@@ -9,8 +9,8 @@
     },
     {
       "path": "/lp",
-      "title": "SPOTTER — знакомства и партнёры в зале",
-      "description": "Spotter — сервис для тех, кто ходит в зал: знакомства и партнёры в твоём клубе. Увидел в зале — написал. Чат после принятия запроса.",
+      "title": "SPOTTER — социальная сеть твоего зала",
+      "description": "Spotter — социальная сеть для тех, кто ходит в зал: люди в клубе, дневник тренировок, активность и личный прогресс в одном месте.",
       "index": true
     },
     {
@@ -64,6 +64,16 @@
       "crumb": "Тренировки",
       "schemaType": "CollectionPage",
       "ogImage": "/images/guide/og-workouts.png"
+    },
+    {
+      "path": "/guide/workouts/prilozhenie-dlya-trenirovok-v-zale",
+      "title": "Приложение для тренировок в тренажёрном зале | Spotter",
+      "description": "Приложение для тренировок в зале: записывай упражнения, вес, повторения и подходы, сохраняй историю и отслеживай прогресс.",
+      "index": true,
+      "h1": "Приложение для тренировок в тренажёрном зале: дневник, прогресс и история",
+      "crumb": "Приложение для тренировок",
+      "schemaType": "Article",
+      "ogImage": "/images/guide/og-training-diary.png"
     },
     {
       "path": "/guide/workouts/training-diary",
@@ -124,6 +134,26 @@
       "crumb": "Анализ",
       "schemaType": "Article",
       "ogImage": "/images/guide/og-training-analysis.png"
+    },
+    {
+      "path": "/guide/workouts/progressive-overload",
+      "title": "Прогрессивная перегрузка: вес, повторы и подходы | Spotter",
+      "description": "Как добавлять вес, повторения и подходы в тренировках, почему это разные сигналы прогресса и как сравнивать одинаковые упражнения.",
+      "index": true,
+      "h1": "Прогрессивная перегрузка: как добавлять вес, повторы и подходы",
+      "crumb": "Прогрессия нагрузки",
+      "schemaType": "Article",
+      "ogImage": "/images/guide/og-progress.png"
+    },
+    {
+      "path": "/guide/workouts/training-program",
+      "title": "Как составить программу тренировок в тренажёрном зале | Spotter",
+      "description": "Как собрать и вести программу тренировок в зале: выбрать реалистичный ритм, повторять упражнения, фиксировать изменения и смотреть историю.",
+      "index": true,
+      "h1": "Как составить программу тренировок в тренажёрном зале и вести её без хаоса",
+      "crumb": "Программа тренировок",
+      "schemaType": "Article",
+      "ogImage": "/images/guide/og-workouts.png"
     },
     {
       "path": "/guide/partner-po-trenirovkam",

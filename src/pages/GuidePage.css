@@ -100,6 +100,57 @@
   margin-bottom: 0;
 }
 
+.guide-faq {
+  margin-top: 4px;
+}
+
+.guide-faq-list {
+  display: grid;
+  gap: 8px;
+}
+
+.guide-faq-item {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg-card);
+}
+
+.guide-faq-item summary {
+  cursor: pointer;
+  padding: 14px 42px 14px 14px;
+  color: var(--text);
+  font-weight: var(--text-ui-strong);
+  line-height: 1.35;
+  list-style: none;
+  position: relative;
+}
+
+.guide-faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.guide-faq-item summary::after {
+  content: '+';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  translate: 0 -50%;
+  color: var(--accent);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.guide-faq-item[open] summary::after {
+  content: '−';
+}
+
+.guide-faq-item p {
+  margin: 0;
+  padding: 0 14px 14px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
 .guide-examples {
   display: grid;
   gap: 8px;

@@ -53,7 +53,7 @@ The production topology and exact deployment commands are in [`OPERATIONS.md`](O
 - `src/data/gyms.json` — frontend catalog/fallback source.
 - `api/prisma/data/gyms.json` — packaged production seed copy; it must match the frontend catalog exactly.
 - `src/data/cities.json` — city metadata/counts; update when catalog city totals change.
-- `src/content/`, `src/seo/`, `public/sitemap.xml` — guide and SEO content.
+- `src/content/`, `src/seo/`, `public/sitemap.xml` — guide and SEO content. See `SEO.md` for content and reindexing operations.
 
 ## Before changing a cross-cutting area
 

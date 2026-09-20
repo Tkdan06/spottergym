@@ -1,4 +1,4 @@
-import { WORKOUTS_HUB } from './workoutsGuide'
+import { WORKOUTS_HUB } from './workoutsGuide.ts'
 
 export type GuideArticle = {
   slug: string

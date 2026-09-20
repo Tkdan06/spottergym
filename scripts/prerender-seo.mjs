@@ -7,6 +7,8 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { GUIDE_ARTICLES, GUIDE_INDEX_LEAD, guideIndexCards } from '../src/content/guides.ts'
+import { WORKOUTS_ARTICLES, WORKOUTS_HUB, WORKOUTS_HUB_PATH } from '../src/content/workoutsGuide.ts'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const catalog = JSON.parse(readFileSync(join(root, 'src/seo/pages.json'), 'utf8'))
@@ -41,6 +43,111 @@ function stripHomepageOnlyBlocks(html, pagePath) {
   return out
 }
 
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function inlineHtml(value) {
+  return escapeHtml(value)
+    .replace(/\[([^\]]+)\]\((\/[^)]+)\)/g, '<a href="$2">$1</a>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+}
+
+function guideBrand() {
+  return '<a href="/" class="brand-mark auth-brand">SPOT<span>TER</span></a>'
+}
+
+function breadcrumbs(items) {
+  return `<nav class="guide-crumbs" aria-label="Навигация по разделу"><ol>${items
+    .map((item, index) => {
+      const last = index === items.length - 1
+      return `<li>${last ? `<span aria-current="page">${escapeHtml(item.label)}</span>` : `<a href="${item.to}">${escapeHtml(item.label)}</a>`}</li>`
+    })
+    .join('')}</ol></nav>`
+}
+
+function articleBody(article) {
+  const lead = (Array.isArray(article.lead) ? article.lead : [article.lead])
+    .map((paragraph) => `<p class="guide-lead">${inlineHtml(paragraph)}</p>`)
+    .join('')
+  const sections = article.sections
+    .map(
+      (section) =>
+        `<section class="guide-section"><h2>${escapeHtml(section.heading)}</h2>${section.body
+          .map((paragraph) => `<p>${inlineHtml(paragraph)}</p>`)
+          .join('')}</section>`,
+    )
+    .join('')
+  const faq = article.faqs?.length
+    ? `<section class="guide-block guide-faq"><h2>Частые вопросы</h2><div class="guide-faq-list">${article.faqs
+        .map(
+          (item) =>
+            `<details class="guide-faq-item"><summary>${escapeHtml(item.question)}</summary><p>${escapeHtml(item.answer)}</p></details>`,
+        )
+        .join('')}</div></section>`
+    : ''
+  return `<article class="guide-article"><header class="guide-head"><p class="guide-kicker">${escapeHtml(article.kicker)}</p><h1>${escapeHtml(article.h1 || article.title)}</h1>${lead}</header>${sections}${faq}</article>`
+}
+
+function staticGuidePage(path) {
+  if (path === '/guide') {
+    const cards = guideIndexCards()
+      .map(
+        (card) =>
+          `<li><a href="${card.path}" class="guide-card"><span class="guide-card-kicker">${escapeHtml(card.kicker)}</span><h2>${escapeHtml(card.title)}</h2><span class="muted">${inlineHtml(card.preview)}</span></a></li>`,
+      )
+      .join('')
+    return `<main class="page no-nav guide-page seo-static-fallback">${guideBrand()}${breadcrumbs([
+      { to: '/', label: 'Главная' },
+      { to: '/guide', label: 'Журнал' },
+    ])}<p class="guide-kicker">Гид</p><h1>Как устроен Spotter</h1><p class="muted guide-lead">${escapeHtml(GUIDE_INDEX_LEAD)}</p><ul class="guide-list">${cards}</ul></main>`
+  }
+
+  if (path === WORKOUTS_HUB_PATH) {
+    const cards = WORKOUTS_ARTICLES.map(
+      (article) =>
+        `<li><a href="${article.path}" class="guide-catalog-card"><span class="guide-card-kicker">${escapeHtml(article.kicker)}</span><h3>${escapeHtml(article.cardTitle)}</h3><p class="muted">${escapeHtml(article.cardLead)}</p></a></li>`,
+    ).join('')
+    return `<main class="page no-nav guide-page guide-hub seo-static-fallback">${guideBrand()}${breadcrumbs([
+      { to: '/', label: 'Главная' },
+      { to: '/guide', label: 'Журнал' },
+      { to: WORKOUTS_HUB_PATH, label: 'Тренировки' },
+    ])}<header class="guide-head"><p class="guide-kicker">${escapeHtml(WORKOUTS_HUB.kicker)}</p><h1>${escapeHtml(WORKOUTS_HUB.h1)}</h1><p class="muted guide-lead">${escapeHtml(WORKOUTS_HUB.lead)}</p></header><section class="guide-block"><h2>Все материалы о тренировках</h2><ul class="guide-catalog">${cards}</ul></section></main>`
+  }
+
+  const workout = WORKOUTS_ARTICLES.find((article) => article.path === path)
+  if (workout) {
+    return `<main class="page no-nav guide-page seo-static-fallback">${guideBrand()}${breadcrumbs([
+      { to: '/', label: 'Главная' },
+      { to: '/guide', label: 'Журнал' },
+      { to: WORKOUTS_HUB_PATH, label: 'Тренировки' },
+      { to: workout.path, label: workout.crumb },
+    ])}${articleBody(workout)}</main>`
+  }
+
+  const guide = GUIDE_ARTICLES.find((article) => article.path === path)
+  if (guide) {
+    return `<main class="page no-nav guide-page seo-static-fallback">${guideBrand()}${breadcrumbs([
+      { to: '/', label: 'Главная' },
+      { to: '/guide', label: 'Журнал' },
+      { to: guide.path, label: guide.kicker },
+    ])}${articleBody(guide)}</main>`
+  }
+
+  return ''
+}
+
+function injectStaticContent(html, page) {
+  const content = staticGuidePage(page.path)
+  if (!content) return html
+  return html.replace('<div id="root"></div>', `<div id="root">${content}</div>`)
+}
+
 function applyPage(html, page, origin) {
   const canonicalPath = page.canonicalPath || page.path
   const canonical = canonicalPath === '/' ? `${origin}/` : `${origin}${canonicalPath}`
@@ -49,7 +156,7 @@ function applyPage(html, page, origin) {
   const image = page.ogImage ? `${origin}${page.ogImage}` : `${origin}/og-share.png`
   const robots = robotsForPage(page)
   const ogType = page.schemaType === 'Article' ? 'article' : 'website'
-  let out = stripHomepageOnlyBlocks(html, page.path)
+  let out = injectStaticContent(stripHomepageOnlyBlocks(html, page.path), page)
   out = replaceAttr(out, /<title>[^<]*<\/title>/, `<title>${title}</title>`)
   out = replaceAttr(
     out,

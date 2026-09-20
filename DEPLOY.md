@@ -107,7 +107,7 @@ git pull
 docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
 npm ci && VITE_API_URL= VITE_SITE_LOCK_ENABLED=false npm run build
 rsync -a --delete dist/ /var/www/spottergym/dist/
-# Build writes unique HTML for /lp, /guide, /register (scripts/prerender-seo.mjs).
+# Build writes unique metadata for public pages and static guide content for crawlers (scripts/prerender-seo.mjs; Node 22.6+).
 # Optional Webmaster: VITE_YANDEX_VERIFICATION / VITE_GOOGLE_SITE_VERIFICATION.
 # If photos show stubs again after a certbot/nginx edit:
 # sudo ./deploy/fix-nginx-media.sh

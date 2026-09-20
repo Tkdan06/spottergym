@@ -326,6 +326,19 @@ export function WorkoutsGuideArticlePage() {
               {i + 1 === article.inlineAfter ? <WorkoutsVisual kind={article.inlineVisual} /> : null}
             </section>
           ))}
+          {article.faqs?.length ? (
+            <section className="guide-block guide-faq" aria-labelledby={`${article.slug}-faq`}>
+              <h2 id={`${article.slug}-faq`}>Частые вопросы</h2>
+              <div className="guide-faq-list">
+                {article.faqs.map((faq) => (
+                  <details key={faq.question} className="guide-faq-item">
+                    <summary>{faq.question}</summary>
+                    <p>{faq.answer}</p>
+                  </details>
+                ))}
+              </div>
+            </section>
+          ) : null}
         </article>
 
         <section className="guide-block" aria-labelledby="workouts-related">
