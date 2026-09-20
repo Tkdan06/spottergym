@@ -22,7 +22,6 @@ const HEIGHT = 1920
 const MAX_EXERCISES = 6
 // Keep important content clear of the Stories chrome (progress/header at the top,
 // reply field at the bottom). Background decoration may extend beyond this area.
-const STORY_SAFE_TOP = 270
 const STORY_SAFE_BOTTOM = 380
 const CONTENT_BOTTOM = HEIGHT - STORY_SAFE_BOTTOM
 const ROW_TOP = 700
@@ -107,9 +106,31 @@ export function createWorkoutShareSvg(data: WorkoutShareCardData) {
   const endY = ROW_TOP + exercises.length * ROW_HEIGHT
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}">
-    <rect width="${WIDTH}" height="${HEIGHT}" fill="#0b0f0e" />
-    <circle cx="980" cy="${STORY_SAFE_TOP - 66}" r="190" fill="#c8f542" opacity="0.12" />
-    <circle cx="102" cy="1694" r="216" fill="#c8f542" opacity="0.08" />
+    <defs>
+      <linearGradient id="story-base" x1="0" y1="0" x2="1080" y2="1920" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#0a0f0d" />
+        <stop offset="0.48" stop-color="#101914" />
+        <stop offset="1" stop-color="#070a09" />
+      </linearGradient>
+      <linearGradient id="story-ribbon-top" x1="562" y1="108" x2="1080" y2="926" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#42624c" stop-opacity="0.42" />
+        <stop offset="0.44" stop-color="#203d31" stop-opacity="0.24" />
+        <stop offset="1" stop-color="#0d1713" stop-opacity="0" />
+      </linearGradient>
+      <linearGradient id="story-ribbon-bottom" x1="-86" y1="1194" x2="756" y2="1834" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#244536" stop-opacity="0" />
+        <stop offset="0.52" stop-color="#315743" stop-opacity="0.24" />
+        <stop offset="1" stop-color="#14251d" stop-opacity="0.12" />
+      </linearGradient>
+      <filter id="story-soften" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="22" />
+      </filter>
+    </defs>
+    <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#story-base)" />
+    <path d="M722 -120C949 88 1142 157 1164 479c16 231-112 438-324 535-94 43-202 67-301 152 115-206 231-287 265-482 35-202-80-340-203-465 52-5 79-50 121-120Z" fill="url(#story-ribbon-top)" filter="url(#story-soften)" />
+    <path d="M-184 1354c214-176 402-219 602-107 181 102 239 294 468 381 90 34 162 65 242 146H-92c45-131 82-280-92-420Z" fill="url(#story-ribbon-bottom)" filter="url(#story-soften)" />
+    <path d="M723 18c157 150 249 257 260 408" fill="none" stroke="#6e9676" stroke-opacity="0.14" stroke-width="5" />
+    <path d="M-64 1507c199-98 343-41 510 84" fill="none" stroke="#577961" stroke-opacity="0.13" stroke-width="4" />
     <text x="540" y="405" text-anchor="middle" fill="#eef5ef" font-family="Syne, Arial, sans-serif" font-size="58" font-weight="800" letter-spacing="-2.3">SPOT<tspan fill="#c8f542">TER</tspan></text>
     <text x="88" y="520" fill="#eef5ef" font-family="Arial, sans-serif" font-size="76" font-weight="800">Моя тренировка сегодня</text>
     <text x="88" y="587" fill="#94a39a" font-family="Arial, sans-serif" font-size="34" font-weight="500">${escapeXml(truncate(data.title || 'Тренировка', 44))} · ${escapeXml(formatDate(data.performedAt))}</text>
