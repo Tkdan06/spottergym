@@ -91,7 +91,18 @@ function articleBody(article) {
         )
         .join('')}</div></section>`
     : ''
-  return `<article class="guide-article"><header class="guide-head"><p class="guide-kicker">${escapeHtml(article.kicker)}</p><h1>${escapeHtml(article.h1 || article.title)}</h1>${lead}</header>${sections}${faq}</article>`
+  const cover = article.coverImage
+    ? `<figure class="guide-cover"><img src="${escapeHtml(article.coverImage.src)}" alt="${escapeHtml(article.coverImage.alt)}" /></figure>`
+    : ''
+  const sources = article.sources?.length
+    ? `<section class="guide-block guide-sources"><h2>Источники и исследования</h2><ul>${article.sources
+        .map(
+          (source) =>
+            `<li><a href="${escapeHtml(source.href)}" target="_blank" rel="noreferrer">${escapeHtml(source.title)}</a>${source.note ? `<p>${escapeHtml(source.note)}</p>` : ''}</li>`,
+        )
+        .join('')}</ul></section>`
+    : ''
+  return `<article class="guide-article"><header class="guide-head"><p class="guide-kicker">${escapeHtml(article.kicker)}</p><h1>${escapeHtml(article.h1 || article.title)}</h1>${lead}</header>${cover}${sections}${faq}${sources}</article>`
 }
 
 function staticGuidePage(path) {
@@ -102,10 +113,16 @@ function staticGuidePage(path) {
           `<li><a href="${card.path}" class="guide-card"><span class="guide-card-kicker">${escapeHtml(card.kicker)}</span><h2>${escapeHtml(card.title)}</h2><span class="muted">${inlineHtml(card.preview)}</span></a></li>`,
       )
       .join('')
+    const newest = WORKOUTS_ARTICLES.slice(0, 3)
+      .map(
+        (article) =>
+          `<li><a href="${article.path}" class="guide-card guide-card--article">${article.coverImage ? `<img src="${escapeHtml(article.coverImage.src)}" alt="${escapeHtml(article.coverImage.alt)}" />` : ''}<span class="guide-card-kicker">${escapeHtml(article.kicker)}</span><h3>${escapeHtml(article.cardTitle)}</h3><span class="muted">${escapeHtml(article.cardLead)}</span></a></li>`,
+      )
+      .join('')
     return `<main class="page no-nav guide-page seo-static-fallback">${guideBrand()}${breadcrumbs([
       { to: '/', label: 'Главная' },
       { to: '/guide', label: 'Журнал' },
-    ])}<p class="guide-kicker">Гид</p><h1>Как устроен Spotter</h1><p class="muted guide-lead">${escapeHtml(GUIDE_INDEX_LEAD)}</p><ul class="guide-list">${cards}</ul></main>`
+    ])}<p class="guide-kicker">Журнал Spotter</p><h1>Тренировки, люди и привычки, которые остаются</h1><p class="muted guide-lead">${escapeHtml(GUIDE_INDEX_LEAD)}</p><section class="guide-block"><h2>Новое в журнале</h2><ul class="guide-list">${newest}</ul></section><section class="guide-block"><h2>Темы журнала</h2><ul class="guide-list">${cards}</ul></section></main>`
   }
 
   if (path === WORKOUTS_HUB_PATH) {

@@ -318,7 +318,13 @@ export function WorkoutsGuideArticlePage() {
               </p>
             ))}
           </header>
-          <WorkoutsVisual kind={article.visual} />
+          {article.coverImage ? (
+            <figure className="guide-cover">
+              <img src={article.coverImage.src} alt={article.coverImage.alt} />
+            </figure>
+          ) : (
+            <WorkoutsVisual kind={article.visual} />
+          )}
           {article.sections.map((section, i) => (
             <section key={section.heading} className="guide-section">
               <h2>{section.heading}</h2>
@@ -337,6 +343,21 @@ export function WorkoutsGuideArticlePage() {
                   </details>
                 ))}
               </div>
+            </section>
+          ) : null}
+          {article.sources?.length ? (
+            <section className="guide-block guide-sources" aria-labelledby={`${article.slug}-sources`}>
+              <h2 id={`${article.slug}-sources`}>Источники и исследования</h2>
+              <ul>
+                {article.sources.map((source) => (
+                  <li key={source.href}>
+                    <a href={source.href} target="_blank" rel="noreferrer">
+                      {source.title}
+                    </a>
+                    {source.note ? <p>{source.note}</p> : null}
+                  </li>
+                ))}
+              </ul>
             </section>
           ) : null}
         </article>

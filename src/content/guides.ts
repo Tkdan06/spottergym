@@ -186,7 +186,7 @@ export const GUIDE_ARTICLES: GuideArticle[] = [
 ]
 
 export const GUIDE_INDEX_LEAD =
-  'Три направления: знакомства в своём зале, тренировки с дневником и прогрессом, и общение без лишнего давления.'
+  'Практичные материалы о тренировках, кардио, данных трекеров и людях в зале. Мы отделяем проверяемые факты от личного опыта и даём ссылки на источники там, где они нужны.'
 
 export function guideIndexCards() {
   const dating = GUIDE_ARTICLES.find((a) => a.slug === 'znakomstva-v-zale')

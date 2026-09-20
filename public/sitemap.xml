@@ -31,6 +31,21 @@
     <priority>0.85</priority>
   </url>
   <url>
+    <loc>https://spottergym.ru/guide/workouts/puls-dlya-kardio</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://spottergym.ru/guide/workouts/hodba-v-gorku-ili-beg</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://spottergym.ru/guide/workouts/fitnes-braslet-v-trenazhernom-zale</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://spottergym.ru/guide/workouts/prilozhenie-dlya-trenirovok-v-zale</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>

@@ -78,6 +78,27 @@
   letter-spacing: normal;
 }
 
+.guide-card h3 {
+  margin: 0;
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-weight: var(--text-ui-strong);
+  line-height: 1.3;
+  letter-spacing: normal;
+}
+
+.guide-card--article {
+  gap: 8px;
+}
+
+.guide-card--article img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 10px;
+  background: var(--bg);
+}
+
 .guide-section {
   padding: 16px;
   border-radius: var(--radius);
@@ -192,6 +213,60 @@
 .guide-section a:focus-visible {
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+.guide-cover {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+}
+
+.guide-cover img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.guide-sources {
+  margin-top: 4px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+}
+
+.guide-sources ul {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding-left: 1.15em;
+}
+
+.guide-sources li {
+  padding-left: 2px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.guide-sources a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.guide-sources a:hover,
+.guide-sources a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.guide-sources p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  line-height: 1.45;
 }
 
 .guide-bullets {

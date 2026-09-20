@@ -21,6 +21,7 @@ The build uses Node's TypeScript stripping to consume the content source. Use No
 - Use a specific H1, meaningful H2 hierarchy, readable paragraphs, useful internal links and a product CTA appropriate to the article.
 - Keep workout data semantics exact: a manual workout is not a check-in; `Я в зале` is the source of activity/presence.
 - Do not make medical claims, prescribe training or present a universal plan as appropriate for everyone.
+- For health, physiology or wearable-device claims, add a visible source list with direct links to primary research, clinical guidance or another authoritative source. Explain the study's limits when they matter; never imply a source proves an individual result.
 - Visible FAQ blocks are for readers. Do not add FAQPage structured data solely to chase a rich result.
 
 ## Before release

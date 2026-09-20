@@ -1,5 +1,6 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { GUIDE_INDEX_LEAD, guideBySlug, guideIndexCards } from '../content/guides'
+import { WORKOUTS_ARTICLES } from '../content/workoutsGuide'
 import { GuideBreadcrumbs, GuideFooter, GuideParagraphs } from './guideBlocks'
 import './AuthPages.css'
 import './GuidePage.css'
@@ -17,9 +18,26 @@ export function GuideIndexPage() {
             { to: '/guide', label: 'Журнал' },
           ]}
         />
-        <p className="guide-kicker">Гид</p>
-        <h1>Как устроен Spotter</h1>
+        <p className="guide-kicker">Журнал Spotter</p>
+        <h1>Тренировки, люди и привычки, которые остаются</h1>
         <p className="muted guide-lead">{GUIDE_INDEX_LEAD}</p>
+        <section className="guide-block" aria-labelledby="guide-new">
+          <h2 id="guide-new">Новое в журнале</h2>
+          <ul className="guide-list">
+            {WORKOUTS_ARTICLES.slice(0, 3).map((article) => (
+              <li key={article.slug}>
+                <Link to={article.path} className="guide-card guide-card--article">
+                  {article.coverImage ? <img src={article.coverImage.src} alt={article.coverImage.alt} /> : null}
+                  <span className="guide-card-kicker">{article.kicker}</span>
+                  <h3>{article.cardTitle}</h3>
+                  <span className="muted">{article.cardLead}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section className="guide-block" aria-labelledby="guide-topics">
+          <h2 id="guide-topics">Темы журнала</h2>
         <ul className="guide-list">
           {guideIndexCards().map((card) => (
             <li key={card.path}>
@@ -31,6 +49,7 @@ export function GuideIndexPage() {
             </li>
           ))}
         </ul>
+        </section>
         <GuideFooter />
       </main>
     </div>

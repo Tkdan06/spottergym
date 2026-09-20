@@ -39,10 +39,10 @@
     },
     {
       "path": "/guide",
-      "title": "Как устроен Spotter — знакомства и тренировки",
-      "description": "Журнал Spotter: знакомства в своём зале, дневник тренировок и прогресс, общение без лишнего давления.",
+      "title": "Журнал Spotter — тренировки, кардио и люди в зале",
+      "description": "Журнал Spotter: практичные материалы о тренировках, кардио, фитнес-трекерах, прогрессе и людях в зале с проверяемыми источниками.",
       "index": true,
-      "h1": "Как устроен Spotter",
+      "h1": "Тренировки, люди и привычки, которые остаются",
       "crumb": "Журнал",
       "schemaType": "CollectionPage"
     },
@@ -64,6 +64,36 @@
       "crumb": "Тренировки",
       "schemaType": "CollectionPage",
       "ogImage": "/images/guide/og-workouts.png"
+    },
+    {
+      "path": "/guide/workouts/puls-dlya-kardio",
+      "title": "Пульс для кардио: почему нет одной жиросжигающей зоны | Spotter",
+      "description": "Как использовать пульс на кардио без магических цифр: разговорный тест, регулярность и ограничения фитнес-трекера.",
+      "index": true,
+      "h1": "Пульс для кардио: почему нет одной «жиросжигающей зоны»",
+      "crumb": "Пульс для кардио",
+      "schemaType": "Article",
+      "ogImage": "/images/guide/cardio-heart-rate-cover.png"
+    },
+    {
+      "path": "/guide/workouts/hodba-v-gorku-ili-beg",
+      "title": "Ходьба в горку или бег: как выбрать кардио | Spotter",
+      "description": "Ходьба с уклоном или бег: как выбрать комфортный формат кардио, который можно регулярно повторять.",
+      "index": true,
+      "h1": "Ходьба в горку или бег: как выбрать формат кардио без лишнего героизма",
+      "crumb": "Ходьба в горку или бег",
+      "schemaType": "Article",
+      "ogImage": "/images/guide/incline-walking-cover.png"
+    },
+    {
+      "path": "/guide/workouts/fitnes-braslet-v-trenazhernom-zale",
+      "title": "Фитнес-браслет в тренажёрном зале: какие цифры полезны | Spotter",
+      "description": "Как использовать фитнес-браслет в зале: пульс, шаги, калории и ограничения потребительских трекеров.",
+      "index": true,
+      "h1": "Фитнес-браслет в тренажёрном зале: какие цифры полезны, а каким не стоит верить буквально",
+      "crumb": "Фитнес-браслет в зале",
+      "schemaType": "Article",
+      "ogImage": "/images/guide/fitness-tracker-cover.png"
     },
     {
       "path": "/guide/workouts/prilozhenie-dlya-trenirovok-v-zale",
