@@ -23,7 +23,7 @@
       "path": "/register",
       "title": "Регистрация — SPOTTER",
       "description": "Создай аккаунт Spotter: люди твоего клуба, статус «в зале» и чат только после принятия запроса.",
-      "index": true
+      "index": false
     },
     {
       "path": "/login",

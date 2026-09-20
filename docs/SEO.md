@@ -2,7 +2,7 @@
 
 ## What is indexable
 
-- Public discovery pages live under `/`, `/lp`, `/lp-coaches`, `/guide` and `/guide/workouts/*`.
+- Public discovery pages live under `/`, `/lp`, `/lp-coaches`, `/guide` and `/guide/workouts/*`. The registration page is intentionally `noindex` and is not in the sitemap.
 - Authenticated product routes under `/app` are intentionally `noindex`.
 - Canonical metadata lives in `src/seo/pages.json`.
 - `public/robots.txt` points to the root sitemap. The committed `public/sitemap.xml` is a development/source copy; production `dist/sitemap.xml` is generated from `src/seo/pages.json` on every frontend build.
@@ -30,6 +30,7 @@ The build uses Node's TypeScript stripping to consume the content source. Use No
 3. Confirm `dist/sitemap.xml` contains only canonical, indexable URLs.
 4. In Yandex Webmaster, use **Indexing → Check page** and **JavaScript page rendering** for at least one new URL on mobile.
 5. In Google Search Console, use URL Inspection on the same URL and confirm that Google-selected canonical matches the declared canonical.
+6. On production, canonical public URLs must return `200 OK` with no redirect. `deploy/fix-nginx-guide-routes.sh` repairs the older nginx SPA rule that redirects a path without a trailing slash to a directory URL.
 
 ## Reindexing after production deployment
 

@@ -113,4 +113,6 @@ rsync -a --delete dist/ /var/www/spottergym/dist/
 # sudo ./deploy/fix-nginx-media.sh
 # If https://www still serves 200 instead of 301 to apex:
 # sudo ./deploy/fix-nginx-canonical.sh
+# If public SEO routes redirect `/guide/workouts` → `/guide/workouts/`:
+# sudo ./deploy/fix-nginx-guide-routes.sh
 ```
