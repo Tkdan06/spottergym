@@ -316,39 +316,59 @@ export function ProfilePage() {
       />
 
       <section className="profile-block status-panel">
-        <SectionTitle>Общение и видимость</SectionTitle>
-        <button
-          type="button"
-          className="toggle-row"
-          role="switch"
-          aria-checked={user.lookingToMeet}
-          onClick={() => void patch({ lookingToMeet: !user.lookingToMeet })}
-        >
-          <div>
-            <strong>Открыт к знакомству</strong>
-            <p className="muted">Разрешить сообщения от других</p>
-          </div>
-          <span className={`toggle ${user.lookingToMeet ? 'on' : ''}`} />
-        </button>
-        <button
-          type="button"
-          className="toggle-row"
-          role="switch"
-          aria-checked={user.privacy === 'anonymous'}
-          onClick={() =>
-            void patch({ privacy: user.privacy === 'open' ? 'anonymous' : 'open' })
-          }
-        >
-          <div>
-            <strong>Анонимный режим</strong>
-            <p className="muted">
-              {user.privacy === 'anonymous'
-                ? 'Информация в профиле скрыта'
-                : 'Информация в профиле открыта'}
-            </p>
-          </div>
-          <span className={`toggle ${user.privacy === 'anonymous' ? 'on' : ''}`} />
-        </button>
+        <SectionTitle>Общение и приватность</SectionTitle>
+        <div className="profile-privacy-subsection">
+          <p className="profile-privacy-label">Знакомства</p>
+          <button
+            type="button"
+            className="toggle-row"
+            role="switch"
+            aria-checked={user.lookingToMeet}
+            onClick={() => void patch({ lookingToMeet: !user.lookingToMeet })}
+          >
+            <div>
+              <strong>Открыт к знакомству</strong>
+              <p className="muted">Разрешить сообщения от других</p>
+            </div>
+            <span className={`toggle ${user.lookingToMeet ? 'on' : ''}`} />
+          </button>
+        </div>
+        <div className="profile-privacy-subsection">
+          <p className="profile-privacy-label">Посещения</p>
+          <button
+            type="button"
+            className="toggle-row"
+            role="switch"
+            aria-checked={user.lastGymVisitVisible === true}
+            onClick={() =>
+              void patch({ lastGymVisitVisible: user.lastGymVisitVisible !== true })
+            }
+          >
+            <div>
+              <strong>Показывать последнее посещение</strong>
+              <p className="muted">Дата и время последней отметки в зале</p>
+            </div>
+            <span className={`toggle ${user.lastGymVisitVisible === true ? 'on' : ''}`} />
+          </button>
+        </div>
+        <div className="profile-privacy-subsection profile-privacy-anonymous">
+          <p className="profile-privacy-label">Приватность</p>
+          <button
+            type="button"
+            className="toggle-row"
+            role="switch"
+            aria-checked={user.privacy === 'anonymous'}
+            onClick={() =>
+              void patch({ privacy: user.privacy === 'open' ? 'anonymous' : 'open' })
+            }
+          >
+            <div>
+              <strong>Анонимный режим</strong>
+              <p className="muted">Скрыть имя, фото и данные профиля</p>
+            </div>
+            <span className={`toggle ${user.privacy === 'anonymous' ? 'on' : ''}`} />
+          </button>
+        </div>
       </section>
 
       <section className="profile-block profile-invite-block">

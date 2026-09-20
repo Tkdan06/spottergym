@@ -77,14 +77,25 @@ describe('bestSet', () => {
 })
 
 describe('pickExerciseTrackKey', () => {
-  it('keeps a client key that already exists in history', () => {
+  it('keeps a known client key for the same normalized exercise name', () => {
     const index = buildExerciseTrackIndex([
       { name: 'Жим лёжа', trackKey: 'bench1' },
     ])
     assert.equal(
-      pickExerciseTrackKey({ name: 'Жим штанги лёжа', trackKey: 'bench1' }, index),
+      pickExerciseTrackKey({ name: 'жим лежа', trackKey: 'bench1' }, index),
       'bench1',
     )
+  })
+
+  it('does not let a copied card key connect a different exercise name', () => {
+    const index = buildExerciseTrackIndex([
+      { name: 'Жим лёжа', trackKey: 'bench1' },
+    ])
+    const picked = pickExerciseTrackKey(
+      { name: 'Тяга верхнего блока', trackKey: 'bench1' },
+      index,
+    )
+    assert.notEqual(picked, 'bench1')
   })
 
   it('reuses the key for the same normalized name on a new client uuid', () => {

@@ -58,6 +58,8 @@ export interface UserProfile {
   breakUntil?: string | null
   privacy: PrivacyMode
   lookingToMeet: boolean
+  /** Explicit opt-in: show a time of the latest check-in in the viewed gym. */
+  lastGymVisitVisible?: boolean
   /** Total likes received — set on gym floor payload for ranking */
   likeCount?: number
   /** Сейчас в каком-то зале */
@@ -72,6 +74,8 @@ export interface UserProfile {
   checkInExtendCount?: number
   /** Можно ли нажать «Ещё здесь» */
   checkInCanExtend?: boolean
+  /** Latest check-in in the gym whose people list produced this card. */
+  lastGymVisitAt?: string
   lastSeenAt: string
   /** Soft-deleted account — chats kept, show «Удалённый пользователь» */
   isDeleted?: boolean

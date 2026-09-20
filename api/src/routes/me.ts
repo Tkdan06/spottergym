@@ -132,6 +132,7 @@ const patchSchema = z.object({
   breakUntil: z.string().max(BREAK_UNTIL_MAX).nullable().optional(),
   privacy: z.enum(['open', 'anonymous']).optional(),
   lookingToMeet: z.boolean().optional(),
+  lastGymVisitVisible: z.boolean().optional(),
   referralStatusVisible: z.boolean().optional(),
   onboardingDone: z.boolean().optional(),
 })

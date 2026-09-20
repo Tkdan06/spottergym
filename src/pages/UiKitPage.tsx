@@ -493,7 +493,7 @@ export function UiKitPage() {
                   </button>
                 </div>
                 <button type="button" className="workouts-board-expand" aria-expanded={false}>
-                  <span className="dim workouts-row-meta">3 упр. · 12 подх.</span>
+                  <span className="dim workouts-row-meta">3 упр. · 12 подходов</span>
                   <ChevronDown size={16} className="workouts-board-chevron" aria-hidden />
                 </button>
               </li>
@@ -510,7 +510,7 @@ export function UiKitPage() {
                   </button>
                 </div>
                 <button type="button" className="workouts-board-expand" aria-expanded={false}>
-                  <span className="dim workouts-row-meta">4 упр. · 16 подх.</span>
+                  <span className="dim workouts-row-meta">4 упр. · 16 подходов</span>
                   <ChevronDown size={16} className="workouts-board-chevron" aria-hidden />
                 </button>
               </li>

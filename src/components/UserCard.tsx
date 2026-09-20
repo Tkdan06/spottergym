@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Heart } from 'lucide-react'
+import { Clock3, Heart } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/useApp'
 import { displayName, experienceLabel, intentLabel } from '../data/mock'
@@ -24,6 +24,19 @@ interface Props {
   staticPreview?: boolean
   /** Parent route after opening this profile (same-app path) */
   backTo?: string
+}
+
+function formatLastGymVisit(raw: string | undefined) {
+  if (!raw) return ''
+  const at = new Date(raw)
+  if (Number.isNaN(at.getTime())) return ''
+  return at.toLocaleString('ru-RU', {
+    timeZone: 'Europe/Moscow',
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 export function UserCard({
@@ -51,6 +64,10 @@ export function UserCard({
   const isTop = rank === 1 && count > 0
   const onBreak = isOnBreak(user.breakUntil)
   const breakText = breakLabel(user.breakUntil)
+  const lastGymVisit =
+    !onBreak && !user.isActive && user.privacy === 'open'
+      ? formatLastGymVisit(user.lastGymVisitAt)
+      : ''
 
   const profileTo = isMe ? '/app/profile' : `/app/user/${user.id}`
 
@@ -118,6 +135,11 @@ export function UserCard({
               : 'Тренер'
             : intentLabel(user.intent)}
         </p>
+        {lastGymVisit ? (
+          <p className="user-card-last-visit">
+            <Clock3 size={14} aria-hidden /> В зале · {lastGymVisit}
+          </p>
+        ) : null}
         {!compact && user.privacy === 'open' && user.bio ? (
           <p className="bio">{user.bio}</p>
         ) : null}

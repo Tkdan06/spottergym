@@ -2,6 +2,29 @@
   gap: 16px;
 }
 
+.admin-page {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+/*
+ * Analytics screens contain tables, IDs and event names received from the API.
+ * A grid/flex child defaults to `min-width: auto`, so one long value can make
+ * the whole page wider than the viewport. Keep that overflow local to the
+ * component which owns it (the table wrapper), never the page itself.
+ */
+.admin-page > *,
+.admin-page .surface,
+.admin-page .admin-stat-card,
+.admin-page .admin-filter-bar,
+.admin-page .admin-overview-signals,
+.admin-page .admin-product-filters {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .admin-page .text-link {
   color: var(--accent);
   font-weight: 600;
@@ -159,6 +182,10 @@
   margin-bottom: 4px;
 }
 
+.admin-inline-metric > div {
+  min-width: 0;
+}
+
 .admin-inline-metric strong {
   display: block;
   font-size: 0.95rem;
@@ -259,6 +286,12 @@
   font-size: 0.88rem;
 }
 
+.admin-breakdown li > :first-child,
+.admin-overview-signal-list li > :first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .admin-players-toolbar {
   display: grid;
   gap: 10px;
@@ -268,6 +301,8 @@
   display: flex;
   gap: 4px;
   padding: 4px;
+  min-width: 0;
+  max-width: 100%;
   overflow-x: auto;
   scrollbar-width: none;
   border-radius: var(--radius);
@@ -592,7 +627,10 @@
 }
 
 .admin-overview-table-wrap {
+  min-width: 0;
+  max-width: 100%;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
 }
 
 .admin-overview-table {
@@ -758,7 +796,7 @@
 }
 
 .admin-timeline-search {
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
 }
 
@@ -777,6 +815,19 @@
   margin: 0 0 12px;
   padding: 0;
   list-style: none;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.admin-timeline-hits li {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.admin-timeline-hits .admin-filter-btn {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .admin-timeline-list {

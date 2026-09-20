@@ -23,6 +23,7 @@ import {
 import {
   formatBodyDelta,
   formatKg,
+  formatSetCount,
   formatWorkoutWhen,
   workoutFeltLabel,
 } from '../lib/workouts'
@@ -206,7 +207,7 @@ export function WorkoutsPage() {
             {list.map((w) => {
               const open = expandedId === w.id
               const exercises = Array.isArray(w.exercises) ? w.exercises : []
-              const metaLabel = `${w.exerciseCount} упр. · ${w.setCount} подх.`
+              const metaLabel = `${w.exerciseCount} упр. · ${formatSetCount(w.setCount)}`
               return (
                 <li key={w.id} className={`workouts-board ${open ? 'is-open' : ''}`}>
                   <div className="workouts-board-top">

@@ -52,6 +52,10 @@ export type WorkoutExerciseInsight = {
   name: string
   sessionCount: number
   setCount: number
+  /** Working sets in the latest matching workout in the selected period. */
+  latestSetCount: number | null
+  /** Latest matching workout vs the first one in the selected period. */
+  setCountDelta: number | null
   volume: number
   maxWeightKg: number | null
   bestSet: WorkoutBestSet | null
@@ -204,7 +208,7 @@ function rangeSpanDays(minWeight: number, maxWeight: number): boolean {
 }
 
 export function isPlateauCandidate(opts: {
-  range: WorkoutProgressRange
+  range: number
   sessionCount: number
   spanDays: number
   minWeightKg: number | null
@@ -233,7 +237,7 @@ export function activitySummaryFromStats(
   }
 }
 
-function perWeek(count: number, range: WorkoutProgressRange): number {
+function perWeek(count: number, range: number): number {
   return round1(count / (range / 7))
 }
 
@@ -332,18 +336,22 @@ function accumulate(rows: AnalyticsSession[]) {
   return byId
 }
 
-function detectPrs(sessions: AnalyticsSession[], currentStart: Date, now: Date): WorkoutPrItem[] {
+function detectPrs(
+  sessions: AnalyticsSession[],
+  currentStart: Date,
+  currentEnd: Date,
+): WorkoutPrItem[] {
   const running = new Map<
     string,
     { maxWeight: number; maxVolume: number; repsAtMaxWeight: number; repsAtMaxVolume: number }
   >()
   const items: WorkoutPrItem[] = []
-  const nowMs = now.getTime()
+  const currentEndMs = currentEnd.getTime()
 
   for (const row of sessions) {
     const t = row.performedAt.getTime()
-    if (t > nowMs) continue
-    const inCurrent = t >= currentStart.getTime()
+    if (t >= currentEndMs) continue
+    const inCurrent = t >= currentStart.getTime() && t < currentEndMs
     const lifts = mergeSessionLifts(row)
     const sessionBest = new Map<string, WorkoutPrItem>()
 
@@ -427,17 +435,44 @@ function pickPlateau(exercises: WorkoutExerciseInsight[]): WorkoutExerciseInsigh
     .slice(0, 3)
 }
 
-export function buildWorkoutInsights(
-  range: WorkoutProgressRange,
+export type WorkoutInsightBounds = {
+  currentStart: Date
+  currentEnd: Date
+  previousStart: Date
+  previousEnd: Date
+}
+
+function daysBetween(start: Date, end: Date) {
+  return Math.max(1, (end.getTime() - start.getTime()) / DAY_MS)
+}
+
+/**
+ * Builds comparable workout analytics from explicit, half-open time windows.
+ * This is used by calendar reports where a calendar month must not be silently
+ * replaced by a rolling 30-day period.
+ */
+export function buildWorkoutInsightsForBounds(
   sessions: AnalyticsSession[],
+  bounds: WorkoutInsightBounds,
   activity?: ActivityStatsInput | null,
-  now: Date = new Date(),
 ): WorkoutInsights {
-  const nowMs = now.getTime()
+  const currentStartMs = bounds.currentStart.getTime()
+  const currentEndMs = bounds.currentEnd.getTime()
+  const previousStartMs = bounds.previousStart.getTime()
+  const previousEndMs = bounds.previousEnd.getTime()
+  const currentDays = daysBetween(bounds.currentStart, bounds.currentEnd)
+  const previousDays = daysBetween(bounds.previousStart, bounds.previousEnd)
   const chronological = [...sessions]
-    .filter((row) => row.performedAt.getTime() <= nowMs)
+    .filter((row) => row.performedAt.getTime() < currentEndMs)
     .sort((a, b) => a.performedAt.getTime() - b.performedAt.getTime())
-  const { current, previous, currentStart } = splitSessions(chronological, range, now)
+  const current = chronological.filter((row) => {
+    const at = row.performedAt.getTime()
+    return at >= currentStartMs && at < currentEndMs
+  })
+  const previous = chronological.filter((row) => {
+    const at = row.performedAt.getTime()
+    return at >= previousStartMs && at < previousEndMs
+  })
 
   const currentVolume = current.reduce((sum, row) => sum + sessionVolume(row), 0)
   const previousVolume = previous.reduce((sum, row) => sum + sessionVolume(row), 0)
@@ -457,6 +492,8 @@ export function buildWorkoutInsights(
         ? { ...last.best, at: last.at.toISOString() }
         : null
       const sessionCount = lift.points.length
+      const latestSetCount = last?.setCount ?? null
+      const setCountDelta = first && last && sessionCount >= 2 ? last.setCount - first.setCount : null
       const weightDeltaKg =
         firstBest && lastBest && sessionCount >= 2
           ? round1(lastBest.weightKg - firstBest.weightKg)
@@ -485,7 +522,7 @@ export function buildWorkoutInsights(
         repsDelta,
       }
       const plateauCandidate = isPlateauCandidate({
-        range,
+        range: currentDays,
         sessionCount,
         spanDays,
         minWeightKg,
@@ -508,6 +545,8 @@ export function buildWorkoutInsights(
         name: lift.name,
         sessionCount,
         setCount: lift.setCount,
+        latestSetCount,
+        setCountDelta,
         volume: round1(lift.volume),
         maxWeightKg: lift.maxWeightKg > 0 ? round1(lift.maxWeightKg) : null,
         bestSet: overallBest,
@@ -524,11 +563,11 @@ export function buildWorkoutInsights(
       }
     })
 
-  const prItems = detectPrs(chronological, currentStart, now)
+  const prItems = detectPrs(chronological, bounds.currentStart, bounds.currentEnd)
   const trainingDates = current.map((row) => row.performedAt)
   const trainingDays = new Set(trainingDates.map((d) => moscowDayKey(d))).size
-  const freqCurrent = perWeek(current.length, range)
-  const freqPrevious = perWeek(previous.length, range)
+  const freqCurrent = perWeek(current.length, currentDays)
+  const freqPrevious = perWeek(previous.length, previousDays)
 
   return {
     workoutCount: periodDelta(current.length, previous.length),
@@ -543,7 +582,10 @@ export function buildWorkoutInsights(
       trainingDays,
       sessionCount: current.length,
       perWeek: freqCurrent,
-      consecutiveWeeks: consecutiveTrainingWeeks(trainingDates, now),
+      consecutiveWeeks: consecutiveTrainingWeeks(
+        trainingDates,
+        new Date(bounds.currentEnd.getTime() - 1),
+      ),
     },
     prs: { count: prItems.length, items: prItems },
     exercises,
@@ -551,4 +593,26 @@ export function buildWorkoutInsights(
     plateauCandidates: pickPlateau(exercises),
     activity: activitySummaryFromStats(activity),
   }
+}
+
+export function buildWorkoutInsights(
+  range: WorkoutProgressRange,
+  sessions: AnalyticsSession[],
+  activity?: ActivityStatsInput | null,
+  now: Date = new Date(),
+): WorkoutInsights {
+  const { currentStart, previousStart } = periodBounds(range, now)
+  return buildWorkoutInsightsForBounds(
+    sessions,
+    {
+      currentStart,
+      // Preserve the legacy rolling-window behavior where a workout stamped
+      // exactly at `now` belongs to the current period. Calendar callers use
+      // their own exact half-open bounds above.
+      currentEnd: new Date(now.getTime() + 1),
+      previousStart,
+      previousEnd: currentStart,
+    },
+    activity,
+  )
 }

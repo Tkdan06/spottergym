@@ -1,7 +1,7 @@
 import type { Prisma } from '@prisma/client'
 import { prisma } from '../db.js'
 import { buildMyActivityStats } from './activityStats.js'
-import { WORKOUT_NOTE_MAX } from './fieldLimits.js'
+import { WORKOUT_EXERCISE_NOTE_MAX, WORKOUT_NOTE_MAX } from './fieldLimits.js'
 import { invalidateUserWorkoutInsights } from './insightClaim.js'
 import type { PeriodRange } from './periodRange.js'
 import { buildWorkoutInsights, type WorkoutInsights } from './workoutAnalytics.js'
@@ -19,9 +19,12 @@ export type WorkoutSetDto = {
 export type WorkoutExerciseDto = {
   id?: string
   name: string
+  note: string
   /** Stable across renames; empty on legacy rows → name matching. */
   trackKey?: string
   sortOrder: number
+  /** Number of working sets vs the previous workout with the same title. */
+  setCountDelta?: number | null
   sets: WorkoutSetDto[]
 }
 
@@ -104,6 +107,7 @@ const listInclude = {
     orderBy: { sortOrder: 'asc' as const },
     select: {
       name: true,
+      note: true,
       trackKey: true,
       sortOrder: true,
       sets: {
@@ -125,6 +129,9 @@ export type WorkoutSetPreview = {
 
 export type WorkoutExercisePreview = {
   name: string
+  note: string
+  /** Number of working sets vs the previous workout with the same title. */
+  setCountDelta?: number | null
   sets: WorkoutSetPreview[]
 }
 
@@ -234,6 +241,7 @@ function newTrackKey() {
 export type ExerciseTrackIndex = {
   knownKeys: Set<string>
   nameToKey: Map<string, string>
+  keyToNames: Map<string, Set<string>>
   namelessNames: Set<string>
 }
 
@@ -243,6 +251,7 @@ export function buildExerciseTrackIndex(
 ): ExerciseTrackIndex {
   const knownKeys = new Set<string>()
   const nameToKey = new Map<string, string>()
+  const keyToNames = new Map<string, Set<string>>()
   const namesWithKey = new Set<string>()
   const namelessNames = new Set<string>()
   for (const row of rows) {
@@ -251,27 +260,38 @@ export function buildExerciseTrackIndex(
     if (key) {
       knownKeys.add(key)
       if (name && !nameToKey.has(name)) nameToKey.set(name, key)
+      if (name) {
+        const names = keyToNames.get(key) || new Set<string>()
+        names.add(name)
+        keyToNames.set(key, names)
+      }
       if (name) namesWithKey.add(name)
     } else if (name) {
       namelessNames.add(name)
     }
   }
   for (const n of namesWithKey) namelessNames.delete(n)
-  return { knownKeys, nameToKey, namelessNames }
+  return { knownKeys, nameToKey, keyToNames, namelessNames }
 }
 
 /**
- * Keep a client key only if it already exists in the user's history (copy / rename).
- * Otherwise reuse the key for the same normalized name, or stay nameless to match
- * legacy rows. Never invent a merge across different names.
+ * Keep a client key only if it already belongs to this normalized exercise name.
+ * A copied card whose name was replaced is a new exercise, not a renamed historical
+ * one: an opaque key must never override the explicit name the user sees. Otherwise
+ * reuse the key for the same normalized name, or stay nameless to match legacy rows.
  */
 export function pickExerciseTrackKey(
   ex: { name: string; trackKey?: string | null },
   index: ExerciseTrackIndex,
 ): string {
-  const clientKey = normalizeTrackKey(ex.trackKey)
+  let clientKey = normalizeTrackKey(ex.trackKey)
   const name = normalizeExerciseName(ex.name)
-  if (clientKey && index.knownKeys.has(clientKey)) return clientKey
+  if (clientKey && index.knownKeys.has(clientKey)) {
+    if (name && index.keyToNames.get(clientKey)?.has(name)) return clientKey
+    // The key came from a copied/replaced card. Do not let it bind a new title
+    // to the old exercise just because their cards share a position.
+    clientKey = ''
+  }
   if (name) {
     const fromName = index.nameToKey.get(name)
     if (fromName) return fromName
@@ -361,6 +381,8 @@ export function serializeSessionSummary(
     const prev = prevSets.get(exerciseIdentity(ex))
     return {
       name: ex.name,
+      note: ex.note || '',
+      setCountDelta: prev ? ex.sets.length - prev.size : null,
       sets: ex.sets.map((s) => {
         const last = prev?.get(s.setIndex)
         const weightKg = round1(num(s.weightKg))
@@ -400,8 +422,10 @@ export function serializeSessionDetail(
     return {
       id: ex.id,
       name: ex.name,
+      note: ex.note || '',
       trackKey: normalizeTrackKey(ex.trackKey) || undefined,
       sortOrder: ex.sortOrder,
+      setCountDelta: prevSets ? ex.sets.length - prevSets.size : null,
       sets: ex.sets.map((s) => {
         const prev = prevSets?.get(s.setIndex)
         return {
@@ -608,6 +632,7 @@ export type WorkoutInput = {
   exercises: {
     name: string
     trackKey?: string
+    note?: string
     sets: { weightKg: number; reps: number }[]
   }[]
 }
@@ -625,12 +650,19 @@ function normalizeNotes(raw: string | undefined | null) {
     .slice(0, WORKOUT_NOTE_MAX)
 }
 
+function normalizeExerciseNote(raw: string | undefined | null) {
+  return String(raw || '')
+    .trim()
+    .slice(0, WORKOUT_EXERCISE_NOTE_MAX)
+}
+
 function exerciseCreates(exercises: WorkoutInput['exercises']) {
   return exercises
     .map((ex, i) => {
       const sets = ex.sets.filter((s) => isWorkingSet(s))
       return {
         name: ex.name.trim(),
+        note: normalizeExerciseNote(ex.note),
         trackKey: normalizeTrackKey(ex.trackKey),
         sortOrder: i,
         sets: {

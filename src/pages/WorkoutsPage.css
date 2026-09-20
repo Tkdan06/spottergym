@@ -24,6 +24,11 @@
   gap: 8px;
 }
 
+.workout-save-actions {
+  display: grid;
+  gap: 8px;
+}
+
 .workouts-feed {
   display: grid;
   gap: 14px;
@@ -218,6 +223,22 @@
   font-size: 0.95rem;
 }
 
+.workout-readonly-ex-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.workout-readonly-ex-head strong {
+  min-width: 0;
+}
+
+.workout-readonly-ex-head .workout-delta {
+  flex-shrink: 0;
+}
+
 .workout-readonly-sets {
   list-style: none;
   margin: 0;
@@ -278,6 +299,8 @@
   display: grid;
   gap: 6px;
   padding: 16px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .workout-saved-next {
@@ -317,7 +340,10 @@
 }
 
 .workout-view-note {
+  min-width: 0;
+  max-width: 100%;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .workouts-form-block {
@@ -356,10 +382,69 @@
   color: var(--text-muted);
 }
 
+.workout-exercise-note-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  max-width: 100%;
+  margin: -2px 0 0;
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.workout-exercise-note-link:hover,
+.workout-exercise-note-link:focus-visible {
+  color: var(--accent);
+}
+
+.workout-exercise-note-link:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  outline-offset: 3px;
+}
+
+.workout-exercise-note-link span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workout-exercise-note-link .muted {
+  color: var(--text-dim);
+}
+
+.workout-exercise-note {
+  margin: 2px 0 0;
+  min-width: 0;
+  max-width: 100%;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .workout-note-sheet textarea {
   width: 100%;
   min-height: 120px;
   resize: vertical;
+}
+
+/* Both workout and exercise notes use this sheet. Extra inner space lifts its
+   controls into the visual viewport when iOS overlays the on-screen keyboard. */
+.workout-note-sheet {
+  max-height: calc(100dvh - 12px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: calc(16px + var(--safe-bottom) + var(--workout-note-keyboard, 0px));
 }
 
 .workout-note-count {
@@ -392,12 +477,16 @@
 .workouts-exercises {
   display: grid;
   gap: 12px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .workout-exercise-card {
   display: grid;
   gap: 10px;
   padding: 14px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .workout-exercise-head {
@@ -1451,6 +1540,3 @@ a.workout-recap-item-title {
   font-size: var(--text-muted-size);
   line-height: 1.4;
 }
-
-
-

@@ -94,6 +94,8 @@ model User {
   breakUntil       String?
   privacy          PrivacyMode     @default(open)
   lookingToMeet    Boolean         @default(true)
+  /** Let people in the same viewed gym see the time of the latest check-in there. */
+  lastGymVisitVisible Boolean      @default(false)
   /** Show circle status sticker / chrome on the public avatar */
   referralStatusVisible Boolean    @default(true)
   /** Cached credited invitees — keep in sync on onboard / attach / delete */
@@ -381,6 +383,7 @@ model CheckIn {
   @@index([userId, checkedOutAt])
   @@index([expiresAt, checkedOutAt])
   @@index([checkedInAt])
+  @@index([userId, gymId, checkedInAt(sort: Desc)])
 }
 
 /** fromUser лайкнул toUser */
@@ -520,6 +523,7 @@ model WorkoutExercise {
   id        String @id @default(cuid())
   sessionId String
   name      String
+  note      String @default("")
   /** Stable id across renames — used for deltas / progress (empty = name fallback). */
   trackKey  String @default("")
   sortOrder Int    @default(0)

@@ -1,4 +1,5 @@
 import { prisma } from '../db.js'
+import { resolveExpiresAt } from './checkInExpiry.js'
 import { isEmergencyShutdown } from './emergency.js'
 import { createNotification } from './notify.js'
 
@@ -13,6 +14,7 @@ const DAY_MAP: Record<string, string> = {
 }
 
 type Slot = { day?: string; from?: string; to?: string }
+type OpenCheckIn = { checkedInAt: Date; expiresAt: Date | null }
 
 function moscowParts(now = new Date()) {
   const parts = new Intl.DateTimeFormat('en-GB', {
@@ -49,20 +51,37 @@ function isOnBreak(breakUntil: string | null | undefined, dateKey: string) {
   return breakUntil >= dateKey
 }
 
+/** A reminder is irrelevant when the person is already present in any gym. */
+export function hasActiveCheckIn(checkIns: OpenCheckIn[], now = new Date()) {
+  return checkIns.some(
+    (checkIn) => resolveExpiresAt(checkIn.checkedInAt, checkIn.expiresAt).getTime() > now.getTime(),
+  )
+}
+
 /** Fire once when Moscow time is exactly 60 minutes before a visit slot start. */
 export async function runWorkoutRemindersTick() {
-  const { dayRu, dateKey, minutesOfDay } = moscowParts()
+  const now = new Date()
+  const { dayRu, dateKey, minutesOfDay } = moscowParts(now)
   if (!dayRu) return 0
 
   const users = await prisma.user.findMany({
     where: { onboardingDone: true },
-    select: { id: true, visitSlots: true, breakUntil: true },
+    select: {
+      id: true,
+      visitSlots: true,
+      breakUntil: true,
+      checkIns: {
+        where: { checkedOutAt: null },
+        select: { checkedInAt: true, expiresAt: true },
+      },
+    },
     take: 5000,
   })
 
   let sent = 0
   for (const user of users) {
     if (isOnBreak(user.breakUntil, dateKey)) continue
+    if (hasActiveCheckIn(user.checkIns, now)) continue
     const slots = Array.isArray(user.visitSlots) ? (user.visitSlots as Slot[]) : []
     for (const slot of slots) {
       if (!slot || slot.day !== dayRu || !slot.from) continue

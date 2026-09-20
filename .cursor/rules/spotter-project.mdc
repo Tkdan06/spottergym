@@ -1,0 +1,16 @@
+---
+description: Core Spotter product, architecture, safety, and documentation rules
+alwaysApply: true
+---
+
+# Spotter project rule
+
+- Read `AGENTS.md` before changing code. Read the relevant document in `docs/` for cross-cutting work.
+- Runtime code, Prisma schema/migrations, and tests are the technical source of truth. Report documentation conflicts; do not guess.
+- Search for and extend existing implementations. Make the smallest compatible change and preserve unrelated working-tree changes.
+- Preserve these invariants: Activity/check-in is not Workout; gym selection is optional; other gyms are viewable; chat is request → accept; privacy redaction remains strict; AI is available to all and makes no medical claims.
+- Use `src/lib/apiClient.ts` for client API work and preserve server authorization/validation boundaries.
+- Gym catalog edits must keep `src/data/gyms.json` and `api/prisma/data/gyms.json` identical; do not invent live counts.
+- Update a `docs/` file only when changing a durable product rule, contract, architecture, operation, or UI convention. Add an ADR for significant decisions.
+- Run relevant typecheck, lint, build, and tests; state clearly whether failures pre-existed.
+- Never deploy, push, or change external state without explicit user authorization.

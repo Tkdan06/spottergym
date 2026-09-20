@@ -30,6 +30,8 @@ export const FEEDBACK_MESSAGE_MAX = 2000
 export const ADMIN_MESSAGE_MAX = 2000
 /** Optional freeform note on a workout session */
 export const WORKOUT_NOTE_MAX = 1000
+/** Optional freeform note on one exercise in a workout session */
+export const WORKOUT_EXERCISE_NOTE_MAX = 300
 
 /** Reject oversized JSON bodies before parsing into memory (несколько фото) */
 export const HTTP_BODY_MAX_BYTES = 8 * 1024 * 1024

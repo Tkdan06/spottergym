@@ -1,0 +1,20 @@
+.workout-share-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.workout-share-panel h3,
+.workout-share-panel > .muted {
+  margin: 0;
+}
+
+.workout-share-preview {
+  display: block;
+  width: min(100%, 270px);
+  max-height: 440px;
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--bg-soft);
+  object-fit: contain;
+}

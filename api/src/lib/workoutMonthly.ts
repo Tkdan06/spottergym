@@ -4,11 +4,10 @@ import { z } from 'zod'
 import { prisma } from '../db.js'
 import { isGigachatConfigured, normalizeEmail } from '../env.js'
 import { moscowDayKey } from './adminAnalytics.js'
-import { buildMyActivityStats } from './activityStats.js'
 import { gigachatChat } from './gigachat.js'
 import {
   buildWorkoutInsights,
-  periodBounds,
+  buildWorkoutInsightsForBounds,
   type WorkoutInsights,
 } from './workoutAnalytics.js'
 import { formatPeriodLabel } from './workoutCoachFacts.js'
@@ -30,15 +29,17 @@ import {
 } from './insightClaim.js'
 
 const DEMO_EMAIL = 'demo@demo.ru'
-const MONTHLY_KIND = 'monthly'
-export const MONTHLY_PROMPT_VERSION = 'monthly-v1'
+// Keep v1 rolling snapshots under `monthly` intact. A distinct kind prevents
+// a mid-month v1 cache from occupying the same completed-month report key.
+const MONTHLY_KIND = 'monthly-calendar'
+export const MONTHLY_PROMPT_VERSION = 'monthly-v2'
 const VOLUME_SIGNAL_PCT = 5
 const MIN_WORKOUTS = 4
 
-export const MONTHLY_SYSTEM_PROMPT = `Ты тренер зала в приложении Spotter. Пишешь короткий разбор месяца.
-Тебе дают JSON с уже посчитанными метриками за скользящие 30 дней (period/previous) и отдельно окно квоты (quota, календарный месяц по Москве). Не пересчитывай и не выдумывай числа, даты, упражнения.
+export const MONTHLY_SYSTEM_PROMPT = `Ты тренер зала в приложении Spotter. Пишешь короткие итоги ЗА ЗАВЕРШЁННЫЙ календарный месяц.
+Тебе дают JSON с уже посчитанными метриками за полный календарный месяц по Москве (period) и предыдущий полный календарный месяц (previous). Не пересчитывай и не выдумывай числа, даты, упражнения.
 Цифры месяца бери только из period / workoutCount / volume / frequency / consistency / prs / improving / plateauCandidates.
-history90 — только для «устойчивый тренд» или «долгое плато». Не подменяй им 30-дневные цифры.
+history90 — только для «устойчивый тренд» или «долгое плато». Не подменяй им цифры завершённого месяца.
 activity — факт посещений зала (отметки «Я в зале»), не записанные тренировки и не доказательство отдыха. Не называй visits тренировками.
 Не перечисляй все упражнения. Не повторяй каждую цифру. Каждый win/attention отвечает «почему это важно». Рекомендация — «что конкретно попробовать».
 Не медицина, не перетрен, не травмы, не лечение, не утверждения о здоровье. Не пиши «как ИИ», «я проанализировал». Без мотивационного буллшита.
@@ -94,9 +95,9 @@ const letterSchema = z.object({
 })
 
 export type MonthlyModelInput = {
-  period: { range: 30; start: string; end: string }
+  /** Complete calendar month, expressed as a half-open MSK interval. */
+  period: { start: string; end: string }
   previous: { start: string; end: string }
-  quota: { start: string; end: string }
   workoutCount: WorkoutInsights['workoutCount']
   frequency: WorkoutInsights['frequency']
   volume: WorkoutInsights['volume']
@@ -150,6 +151,13 @@ export type MonthlyState = {
   letter: MonthlyLetter | null
 }
 
+export type MonthlyReviewBounds = {
+  start: Date
+  end: Date
+  previousStart: Date
+  previousEnd: Date
+}
+
 function pad(n: number) {
   return String(n).padStart(2, '0')
 }
@@ -169,6 +177,19 @@ export function moscowMonthBounds(now = new Date()): { start: Date; end: Date } 
   return { start, end }
 }
 
+/** The latest finished calendar month and the complete month before it (MSK). */
+export function completedMoscowMonthBounds(now = new Date()): MonthlyReviewBounds {
+  const currentMonth = moscowMonthBounds(now)
+  const completedMonth = moscowMonthBounds(new Date(currentMonth.start.getTime() - 1))
+  const previousMonth = moscowMonthBounds(new Date(completedMonth.start.getTime() - 1))
+  return {
+    start: completedMonth.start,
+    end: completedMonth.end,
+    previousStart: previousMonth.start,
+    previousEnd: previousMonth.end,
+  }
+}
+
 function slimPrs(insights: WorkoutInsights): MonthlyModelInput['prs'] {
   return {
     count: insights.prs.count,
@@ -185,23 +206,17 @@ function slimPrs(insights: WorkoutInsights): MonthlyModelInput['prs'] {
 export function monthlyInsightsForModel(
   insights: WorkoutInsights,
   history90: WorkoutInsights,
-  metric: { currentStart: Date; previousStart: Date; now: Date },
-  quota: { start: Date; end: Date },
+  period: MonthlyReviewBounds,
   felt: { at: string; feedback: WorkoutFelt | null }[] = [],
 ): MonthlyModelInput {
   return {
     period: {
-      range: 30,
-      start: metric.currentStart.toISOString(),
-      end: metric.now.toISOString(),
+      start: period.start.toISOString(),
+      end: period.end.toISOString(),
     },
     previous: {
-      start: metric.previousStart.toISOString(),
-      end: metric.currentStart.toISOString(),
-    },
-    quota: {
-      start: quota.start.toISOString(),
-      end: quota.end.toISOString(),
+      start: period.previousStart.toISOString(),
+      end: period.previousEnd.toISOString(),
     },
     workoutCount: insights.workoutCount,
     frequency: insights.frequency,
@@ -347,7 +362,7 @@ export function monthlyLetterFromJson(raw: unknown): MonthlyLetter | null {
 function factsFromStored(raw: unknown): MonthlyModelInput | null {
   if (!raw || typeof raw !== 'object') return null
   const o = raw as MonthlyModelInput
-  if (!o.period || o.period.range !== 30 || !o.workoutCount || !o.volume || !o.prs || !o.history90) {
+  if (!o.period?.start || !o.period?.end || !o.workoutCount || !o.volume || !o.prs || !o.history90) {
     return null
   }
   return o
@@ -355,39 +370,40 @@ function factsFromStored(raw: unknown): MonthlyModelInput | null {
 
 async function loadMonthlyBundle(userId: string) {
   const now = new Date()
-  const [allRows, activity] = await Promise.all([
-    prisma.workoutSession.findMany({
-      where: { userId },
-      orderBy: { performedAt: 'desc' },
-      take: MAX_WORKOUT_SESSIONS,
-      select: {
-        performedAt: true,
-        feedback: true,
-        exercises: {
-          select: {
-            name: true,
-            trackKey: true,
-            sets: { select: { weightKg: true, reps: true } },
-          },
+  const allRows = await prisma.workoutSession.findMany({
+    where: { userId },
+    orderBy: { performedAt: 'desc' },
+    take: MAX_WORKOUT_SESSIONS,
+    select: {
+      performedAt: true,
+      feedback: true,
+      exercises: {
+        select: {
+          name: true,
+          trackKey: true,
+          sets: { select: { weightKg: true, reps: true } },
         },
       },
-    }),
-    buildMyActivityStats(userId, 30),
-  ])
+    },
+  })
   const chronological = [...allRows].reverse()
-  const stats = { totalSessions: activity.totalSessions, totalMinutes: activity.totalMinutes }
-  const insights = buildWorkoutInsights(30, chronological, stats, now)
-  const history90 = buildWorkoutInsights(90, chronological, null, now)
-  const metric = periodBounds(30, now)
-  const quota = moscowMonthBounds(now)
+  const period = completedMoscowMonthBounds(now)
+  const insights = buildWorkoutInsightsForBounds(chronological, {
+    currentStart: period.start,
+    currentEnd: period.end,
+    previousStart: period.previousStart,
+    previousEnd: period.previousEnd,
+  })
+  const completedEnd = new Date(period.end.getTime() - 1)
+  const history90 = buildWorkoutInsights(90, chronological, null, completedEnd)
   const felt = feltTimeline(
     chronological.map((row) => ({ performedAt: row.performedAt, feedback: row.feedback })),
-    metric.currentStart,
+    period.start,
     20,
-    now,
+    completedEnd,
   )
-  const input = monthlyInsightsForModel(insights, history90, metric, quota, felt)
-  return { now, insights, history90, input, quota }
+  const input = monthlyInsightsForModel(insights, history90, period, felt)
+  return { insights, history90, input, period }
 }
 
 async function askGigachat(input: MonthlyModelInput): Promise<{
@@ -437,7 +453,7 @@ function baseState(opts: {
   configured: boolean
   demo: boolean
   skipReason: MonthlyState['skipReason']
-  quota: { start: Date; end: Date }
+  period: { start: Date; end: Date }
   facts: MonthlyModelInput
   letter: MonthlyLetter | null
   eligible: boolean
@@ -451,10 +467,10 @@ function baseState(opts: {
     canGenerate,
     demo: opts.demo,
     skipReason: opts.skipReason,
-    periodStart: opts.quota.start.toISOString(),
-    periodEnd: opts.quota.end.toISOString(),
-    periodLabel: formatPeriodLabel(opts.quota.start, opts.quota.end),
-    nextAt: opts.quota.end.toISOString(),
+    periodStart: opts.period.start.toISOString(),
+    periodEnd: opts.period.end.toISOString(),
+    periodLabel: formatPeriodLabel(opts.period.start, opts.period.end),
+    nextAt: moscowMonthBounds(opts.period.end).end.toISOString(),
     facts: opts.facts,
     letter: opts.letter,
   }
@@ -463,13 +479,13 @@ function baseState(opts: {
 export async function getMonthlyInsightState(userId: string, userEmail: string): Promise<MonthlyState> {
   const demo = normalizeEmail(userEmail) === DEMO_EMAIL
   const configured = isGigachatConfigured()
-  const quota = moscowMonthBounds(new Date())
+  const period = completedMoscowMonthBounds(new Date())
   let row = await prisma.workoutAiInsight.findUnique({
     where: {
-      userId_kind_periodStart: { userId, kind: MONTHLY_KIND, periodStart: quota.start },
+      userId_kind_periodStart: { userId, kind: MONTHLY_KIND, periodStart: period.start },
     },
   })
-  if (row && (await dropStalePendingInsight(userId, MONTHLY_KIND, quota.start, row.createdAt, row.outputJson))) {
+  if (row && (await dropStalePendingInsight(userId, MONTHLY_KIND, period.start, row.createdAt, row.outputJson))) {
     row = null
   }
   if (row && isPendingInsightOutput(row.outputJson)) {
@@ -480,7 +496,7 @@ export async function getMonthlyInsightState(userId: string, userEmail: string):
       configured,
       demo,
       skipReason: null,
-      quota,
+      period,
       facts,
       letter: null,
       eligible: true,
@@ -496,7 +512,7 @@ export async function getMonthlyInsightState(userId: string, userEmail: string):
       configured,
       demo,
       skipReason: null,
-      quota,
+      period,
       facts,
       letter,
       eligible: true,
@@ -518,7 +534,7 @@ export async function getMonthlyInsightState(userId: string, userEmail: string):
     configured,
     demo,
     skipReason: gate.ok ? null : gate.reason,
-    quota: bundle.quota,
+    period: bundle.period,
     facts: bundle.input,
     letter: null,
     eligible: gate.ok,
@@ -543,8 +559,8 @@ export async function generateMonthlyInsight(
   if (!gate.ok) {
     const msg =
       gate.reason === 'need_workouts'
-        ? 'Пока недостаточно данных за месяц.'
-        : 'В этом месяце нет заметных изменений для разбора.'
+        ? 'Пока недостаточно данных за завершённый месяц.'
+        : 'В завершённом месяце нет заметных изменений для разбора.'
     throw new InsightGenerateError(msg, 422)
   }
 
@@ -554,7 +570,7 @@ export async function generateMonthlyInsight(
       configured,
       demo,
       skipReason: null,
-      quota: bundle.quota,
+      period: bundle.period,
       facts: bundle.input,
       letter: null,
       eligible: true,
@@ -564,8 +580,8 @@ export async function generateMonthlyInsight(
   const claim = await claimInsightPeriod({
     userId,
     kind: MONTHLY_KIND,
-    periodStart: bundle.quota.start,
-    periodEnd: bundle.quota.end,
+    periodStart: bundle.period.start,
+    periodEnd: bundle.period.end,
     inputJson: bundle.input as unknown as Prisma.InputJsonValue,
     inputHash: hashMonthlyInput(bundle.input),
     promptVersion: MONTHLY_PROMPT_VERSION,
@@ -584,7 +600,7 @@ export async function generateMonthlyInsight(
       prompt: result.promptTokens,
       completion: result.completionTokens,
     })
-    await finishInsightPeriod(userId, MONTHLY_KIND, bundle.quota.start, {
+    await finishInsightPeriod(userId, MONTHLY_KIND, bundle.period.start, {
       outputJson: result.letter as unknown as Prisma.InputJsonValue,
       model: result.model,
       promptTokens: result.promptTokens,
@@ -596,13 +612,13 @@ export async function generateMonthlyInsight(
       configured,
       demo,
       skipReason: null,
-      quota: bundle.quota,
+      period: bundle.period,
       facts: bundle.input,
       letter: result.letter,
       eligible: true,
     })
   } catch (err) {
-    await releaseInsightPeriod(userId, MONTHLY_KIND, bundle.quota.start)
+    await releaseInsightPeriod(userId, MONTHLY_KIND, bundle.period.start)
     if (err instanceof InsightGenerateError) throw err
     console.warn('[gigachat] monthly generate failed', err instanceof Error ? err.message : err)
     return baseState({
@@ -610,7 +626,7 @@ export async function generateMonthlyInsight(
       configured,
       demo,
       skipReason: null,
-      quota: bundle.quota,
+      period: bundle.period,
       facts: bundle.input,
       letter: null,
       eligible: true,
@@ -619,12 +635,12 @@ export async function generateMonthlyInsight(
 }
 
 export async function markMonthlyInsightViewed(userId: string): Promise<{ ok: true }> {
-  const quota = moscowMonthBounds(new Date())
+  const period = completedMoscowMonthBounds(new Date())
   await prisma.workoutAiInsight.updateMany({
     where: {
       userId,
       kind: MONTHLY_KIND,
-      periodStart: quota.start,
+      periodStart: period.start,
       viewedAt: null,
     },
     data: { viewedAt: new Date() },
@@ -633,12 +649,12 @@ export async function markMonthlyInsightViewed(userId: string): Promise<{ ok: tr
 }
 
 export async function markMonthlyRecommendationClicked(userId: string): Promise<{ ok: true }> {
-  const quota = moscowMonthBounds(new Date())
+  const period = completedMoscowMonthBounds(new Date())
   await prisma.workoutAiInsight.updateMany({
     where: {
       userId,
       kind: MONTHLY_KIND,
-      periodStart: quota.start,
+      periodStart: period.start,
       recommendationClickedAt: null,
     },
     data: { recommendationClickedAt: new Date() },

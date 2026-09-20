@@ -277,6 +277,8 @@ export type WorkoutSetInput = { weightKg: number; reps: number }
 
 export type WorkoutExercisePreview = {
   name: string
+  note: string
+  setCountDelta?: number | null
   sets: (WorkoutSetInput & {
     weightDelta?: number | null
     repsDelta?: number | null
@@ -286,8 +288,10 @@ export type WorkoutExercisePreview = {
 export type WorkoutExerciseDto = {
   id?: string
   name: string
+  note: string
   trackKey?: string
   sortOrder: number
+  setCountDelta?: number | null
   sets: (WorkoutSetInput & {
     id?: string
     setIndex: number
@@ -329,7 +333,7 @@ export type WorkoutSessionInput = {
   performedAt: string
   bodyWeightKg?: number | null
   notes?: string
-  exercises: { name: string; trackKey?: string; sets: WorkoutSetInput[] }[]
+  exercises: { name: string; trackKey?: string; note?: string; sets: WorkoutSetInput[] }[]
 }
 
 export type WorkoutProgressRange = PeriodRange
@@ -369,6 +373,8 @@ export type WorkoutExerciseInsight = {
   name: string
   sessionCount: number
   setCount: number
+  latestSetCount: number | null
+  setCountDelta: number | null
   volume: number
   maxWeightKg: number | null
   bestSet: WorkoutBestSet | null

@@ -26,6 +26,8 @@ export const REPORT_NOTE_MAX = 1000
 export const ADMIN_MESSAGE_MAX = 2000
 /** Optional freeform note on a workout session */
 export const WORKOUT_NOTE_MAX = 1000
+/** Optional freeform note on one exercise in a workout session */
+export const WORKOUT_EXERCISE_NOTE_MAX = 300
 
 export const CITY_MAX = 80
 export const SEARCH_QUERY_MAX = 80

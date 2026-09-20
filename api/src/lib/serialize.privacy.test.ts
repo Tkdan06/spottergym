@@ -24,7 +24,7 @@ function assertNoSecrets(payload: object) {
   }
 }
 
-const now = new Date('2026-08-29T12:00:00.000Z')
+const now = new Date()
 
 function stubUser(privacy: 'open' | 'anonymous', extra: Record<string, unknown> = {}) {
   return {
@@ -51,6 +51,7 @@ function stubUser(privacy: 'open' | 'anonymous', extra: Record<string, unknown> 
     breakUntil: '2026-09-10',
     privacy,
     lookingToMeet: true,
+    lastGymVisitVisible: true,
     referralStatusVisible: false,
     referralCreditedCount: 12,
     onboardingDone: true,
@@ -154,6 +155,7 @@ describe('serializePublicCard', () => {
     breakUntil: '2026-09-10',
     privacy,
     lookingToMeet: true,
+    lastGymVisitVisible: true,
     lastSeenAt: now,
     referralStatusVisible: false,
     referralCreditedCount: 12,
@@ -161,6 +163,7 @@ describe('serializePublicCard', () => {
       {
         gymId: 'gym_floor',
         checkedInAt: now,
+        checkedOutAt: null,
         expiresAt: new Date(now.getTime() + 3 * 60 * 60 * 1000),
         extendCount: 0,
       },
@@ -190,5 +193,25 @@ describe('serializePublicCard', () => {
     assert.deepEqual(card.photos, ['/media/u/photo1.jpg'])
     assert.deepEqual(card.visitSlots, [])
     assert.deepEqual(card.gymIds, ['gym_floor'])
+  })
+
+  it('shows an opted-in latest visit only for the viewed gym and never to anonymous cards', () => {
+    const user = cardUser('open')
+    user.breakUntil = null
+    user.checkIns = [
+      {
+        gymId: 'gym_floor',
+        checkedInAt: new Date('2026-08-20T16:30:00.000Z'),
+        checkedOutAt: new Date('2026-08-20T18:00:00.000Z'),
+        expiresAt: null,
+        extendCount: 0,
+      },
+    ]
+    assert.equal(
+      serializePublicCard(user, 'gym_floor').lastGymVisitAt,
+      '2026-08-20T16:30:00.000Z',
+    )
+    assert.equal(serializePublicCard(user, 'gym_other').lastGymVisitAt, '')
+    assert.equal(serializePublicCard(cardUser('anonymous'), 'gym_floor').lastGymVisitAt, '')
   })
 })

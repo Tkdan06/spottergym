@@ -19,6 +19,8 @@ function lift(name: string, over: Partial<WorkoutExerciseInsight> = {}): Workout
     name,
     sessionCount: 2,
     setCount: 6,
+    latestSetCount: 3,
+    setCountDelta: 0,
     volume: 1280,
     maxWeightKg: 90,
     bestSet: { weightKg: 90, reps: 8 },

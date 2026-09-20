@@ -50,6 +50,13 @@ export function formatDeltaParts(
   return parts.length ? parts : null
 }
 
+/** A workload change is deliberately separate from a weight/rep change. */
+export function formatSetCountDelta(delta: number | null | undefined) {
+  if (delta == null || delta === 0) return null
+  const sign = delta > 0 ? '+' : '−'
+  return `${sign}${formatSetCount(Math.abs(delta))}`
+}
+
 export function formatDeltaLabel(
   weightDelta: number | null | undefined,
   repsDelta: number | null | undefined,
@@ -147,6 +154,11 @@ export function ruPlural(n: number, one: string, few: string, many: string) {
   return many
 }
 
+/** Full, grammatically correct number of logged working sets. */
+export function formatSetCount(count: number) {
+  return `${count} ${ruPlural(count, 'подход', 'подхода', 'подходов')}`
+}
+
 export function formatBarWeightValue(kg: number) {
   const n = Math.round(kg * 10) / 10
   return Number.isInteger(n) ? String(n) : n.toFixed(1)
@@ -169,4 +181,3 @@ export function workoutFeltLabel(value: WorkoutFelt | null | undefined) {
   if (!value) return null
   return WORKOUT_FELT_OPTIONS.find((o) => o.id === value)?.label ?? null
 }
-

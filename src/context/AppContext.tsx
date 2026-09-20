@@ -467,6 +467,7 @@ function createDefaultUser(name: string, email: string, gender: Gender = 'male')
     breakUntil: null as string | null,
     privacy: 'open' as PrivacyMode,
     lookingToMeet: true,
+    lastGymVisitVisible: false,
     referralStatusVisible: true,
     isActive: false,
     checkedInGymId: '',
@@ -1532,6 +1533,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
           ...(safe.breakUntil !== undefined ? { breakUntil: safe.breakUntil } : {}),
           ...(safe.privacy !== undefined ? { privacy: safe.privacy } : {}),
           ...(safe.lookingToMeet !== undefined ? { lookingToMeet: safe.lookingToMeet } : {}),
+          ...(safe.lastGymVisitVisible !== undefined
+            ? { lastGymVisitVisible: safe.lastGymVisitVisible }
+            : {}),
           ...(safe.referralStatusVisible !== undefined
             ? { referralStatusVisible: safe.referralStatusVisible }
             : {}),

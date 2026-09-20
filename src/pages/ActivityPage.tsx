@@ -386,7 +386,10 @@ export function ActivityPage() {
                             } ${day.minutes <= 0 ? 'is-empty' : ''}`}
                             aria-pressed={isSelected}
                             aria-label={`${formatDayLabel(day.date)} · ${formatMinutes(day.minutes)}`}
-                            onPointerDown={() => startBarLongPress(day.date, day.minutes > 0)}
+                            onPointerDown={(event) => {
+                              event.currentTarget.setPointerCapture(event.pointerId)
+                              startBarLongPress(day.date, day.minutes > 0)
+                            }}
                             onPointerUp={clearLongPress}
                             onPointerCancel={clearLongPress}
                             onPointerLeave={clearLongPress}

@@ -509,6 +509,23 @@ a.profile-status-mark:focus-visible {
   background: transparent;
 }
 
+.profile-privacy-subsection {
+  display: grid;
+  gap: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.profile-privacy-label {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
 .likes-block-head {
   display: flex;
   align-items: center;

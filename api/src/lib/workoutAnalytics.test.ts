@@ -3,6 +3,7 @@ import { describe, it } from 'node:test'
 import {
   activitySummaryFromStats,
   buildWorkoutInsights,
+  buildWorkoutInsightsForBounds,
   classifyTrend,
   isPlateauCandidate,
   pctDelta,
@@ -267,10 +268,85 @@ describe('buildWorkoutInsights', () => {
     assert.equal(week.exercises[0]?.plateauCandidate, false)
   })
 
+  it('reports extra and removed working sets as workload changes without changing the strength trend', () => {
+    const rows = [
+      session(5, [
+        {
+          name: 'Жим',
+          sets: [
+            { weightKg: 80, reps: 8 },
+            { weightKg: 80, reps: 8 },
+          ],
+        },
+        {
+          name: 'Тяга',
+          sets: [
+            { weightKg: 60, reps: 10 },
+            { weightKg: 60, reps: 10 },
+            { weightKg: 60, reps: 10 },
+          ],
+        },
+      ]),
+      session(1, [
+        {
+          name: 'Жим',
+          sets: [
+            { weightKg: 80, reps: 8 },
+            { weightKg: 80, reps: 8 },
+            { weightKg: 80, reps: 8 },
+          ],
+        },
+        {
+          name: 'Тяга',
+          sets: [
+            { weightKg: 60, reps: 10 },
+            { weightKg: 60, reps: 10 },
+          ],
+        },
+      ]),
+    ]
+    const insights = buildWorkoutInsights(7, rows, null, NOW)
+    const press = insights.exercises.find((lift) => lift.name === 'Жим')
+    const row = insights.exercises.find((lift) => lift.name === 'Тяга')
+
+    assert.equal(press?.latestSetCount, 3)
+    assert.equal(press?.setCountDelta, 1)
+    assert.equal(press?.trend, 'stable')
+    assert.equal(row?.latestSetCount, 2)
+    assert.equal(row?.setCountDelta, -1)
+    assert.equal(row?.trend, 'stable')
+  })
+
   it('returns null activity when there are no check-ins', () => {
     assert.equal(activitySummaryFromStats({ totalSessions: 0, totalMinutes: 0 }), null)
     const insights = buildWorkoutInsights(7, [], { totalSessions: 0, totalMinutes: 0 }, NOW)
     assert.equal(insights.activity, null)
     assert.equal(insights.workoutCount.current, 0)
+  })
+})
+
+describe('buildWorkoutInsightsForBounds', () => {
+  it('uses exact calendar bounds and excludes workouts from the current unfinished month', () => {
+    const lift = (at: string, weightKg: number): AnalyticsSession => ({
+      performedAt: new Date(at),
+      exercises: [{ name: 'Жим', trackKey: null, sets: [{ weightKg, reps: 5 }] }],
+    })
+    const insights = buildWorkoutInsightsForBounds(
+      [
+        lift('2026-07-12T12:00:00.000Z', 80),
+        lift('2026-08-14T12:00:00.000Z', 85),
+        lift('2026-09-03T12:00:00.000Z', 100),
+      ],
+      {
+        currentStart: new Date('2026-07-31T21:00:00.000Z'),
+        currentEnd: new Date('2026-08-31T21:00:00.000Z'),
+        previousStart: new Date('2026-06-30T21:00:00.000Z'),
+        previousEnd: new Date('2026-07-31T21:00:00.000Z'),
+      },
+    )
+
+    assert.equal(insights.workoutCount.current, 1)
+    assert.equal(insights.workoutCount.previous, 1)
+    assert.equal(insights.exercises[0]?.maxWeightKg, 85)
   })
 })

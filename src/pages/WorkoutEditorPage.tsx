@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Copy, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
+import { Copy, MoreHorizontal, Pencil, Plus, Share2, Trash2 } from 'lucide-react'
 import {
   Link,
   Navigate,
@@ -8,6 +8,7 @@ import {
   useParams,
 } from 'react-router-dom'
 import { SubpageHeader } from '../components/SubpageHeader'
+import { SoftFlash } from '../components/SoftFlash'
 import { useApp } from '../context/useApp'
 import {
   ApiError,
@@ -20,13 +21,14 @@ import {
   type WorkoutFelt,
   type WorkoutSessionDetail,
 } from '../lib/apiClient'
-import { WORKOUT_NOTE_MAX } from '../lib/fieldLimits'
+import { WORKOUT_EXERCISE_NOTE_MAX, WORKOUT_NOTE_MAX } from '../lib/fieldLimits'
 import { haptic } from '../lib/haptic'
 import { goWorkoutsHub } from '../lib/workoutsNav'
 import { trackApp } from '../lib/appTrack'
 import { userFacingError } from '../lib/userError'
 import { getCheckInStartedAt } from '../lib/presence'
 import { useSheetA11y } from '../lib/sheetA11y'
+import { useKeyboardInset } from '../lib/useKeyboardInset'
 import { useMoment } from '../components/MomentFX'
 import { WeightKgSheet, BODY_WEIGHT_MAX_KG, BODY_WEIGHT_MIN_KG } from '../components/WeightKgSheet'
 import {
@@ -41,6 +43,7 @@ import {
 } from '../components/SetWeightSheet'
 import { WorkoutFeltSheet } from '../components/WorkoutFeltSheet'
 import { WorkoutReadonlySets } from '../components/WorkoutReadonlySets'
+import { WorkoutShareSheet } from '../components/WorkoutShareSheet'
 import { SOFT_LOADER_DELAY_MS, SoftLoader } from '../components/SoftLoader'
 import {
   formatKg,
@@ -61,6 +64,8 @@ type DraftSet = {
 type DraftExercise = {
   trackKey: string
   name: string
+  note: string
+  setCountDelta?: number | null
   sets: DraftSet[]
 }
 
@@ -76,7 +81,7 @@ function emptySet(): DraftSet {
 }
 
 function emptyExercise(): DraftExercise {
-  return { trackKey: newTrackKey(), name: '', sets: [emptySet()] }
+  return { trackKey: newTrackKey(), name: '', note: '', sets: [emptySet()] }
 }
 
 function clampBodyWeight(raw: number | null | undefined): number | null {
@@ -107,6 +112,8 @@ function fromDetail(w: WorkoutSessionDetail): {
     exercises: w.exercises.slice(0, MAX_EXERCISES_PER_WORKOUT).map((ex) => ({
       trackKey: ex.trackKey || newTrackKey(),
       name: ex.name.slice(0, EXERCISE_NAME_MAX),
+      note: String(ex.note || '').slice(0, WORKOUT_EXERCISE_NOTE_MAX),
+      setCountDelta: ex.setCountDelta,
       sets: ex.sets.slice(0, MAX_SETS_PER_EXERCISE).map((s) => ({
         weightKg: String(clampBarWeight(s.weightKg)),
         reps: String(s.reps),
@@ -134,6 +141,7 @@ function toPayload(
       .map((ex) => ({
         trackKey: ex.trackKey || newTrackKey(),
         name: ex.name.trim().slice(0, EXERCISE_NAME_MAX),
+        note: ex.note.trim().slice(0, WORKOUT_EXERCISE_NOTE_MAX),
         sets: ex.sets
           .slice(0, MAX_SETS_PER_EXERCISE)
           .flatMap((s) => {
@@ -176,17 +184,21 @@ export function WorkoutEditorPage() {
   const [notes, setNotes] = useState('')
   const [noteDraft, setNoteDraft] = useState('')
   const [noteSheetOpen, setNoteSheetOpen] = useState(false)
+  const [exerciseNoteTarget, setExerciseNoteTarget] = useState<number | null>(null)
+  const [exerciseNoteDraft, setExerciseNoteDraft] = useState('')
   const [weightSheetOpen, setWeightSheetOpen] = useState(false)
   const [barWeightTarget, setBarWeightTarget] = useState<{ ei: number; si: number } | null>(null)
   const [exercises, setExercises] = useState<DraftExercise[]>([emptyExercise()])
   const [loading, setLoading] = useState(!isNew || Boolean(copyFromId))
   const [saving, setSaving] = useState(false)
+  const [saveFlash, setSaveFlash] = useState('')
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [feedback, setFeedback] = useState<WorkoutFelt | null>(null)
   const [feltSheetOpen, setFeltSheetOpen] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
   const promptedRef = useRef(false)
   const savingFeltRef = useRef(false)
   const createKeyRef = useRef<string | null>(null)
@@ -194,9 +206,13 @@ export function WorkoutEditorPage() {
   const menuRef = useRef<HTMLDivElement>(null)
   const confirmRef = useRef<HTMLDivElement>(null)
   const noteSheetRef = useRef<HTMLDivElement>(null)
+  const exerciseNoteSheetRef = useRef<HTMLDivElement>(null)
   useSheetA11y(menuOpen, () => setMenuOpen(false), menuRef)
   useSheetA11y(confirmOpen, () => setConfirmOpen(false), confirmRef)
   useSheetA11y(noteSheetOpen, () => setNoteSheetOpen(false), noteSheetRef)
+  useSheetA11y(exerciseNoteTarget != null, () => setExerciseNoteTarget(null), exerciseNoteSheetRef)
+  // Keep the pre-keyboard viewport measurement alive before either note sheet opens.
+  useKeyboardInset('--workout-note-keyboard')
 
   const defaultWhen = useMemo(() => {
     if (!user) return toDatetimeLocalValue(new Date())
@@ -237,6 +253,8 @@ export function WorkoutEditorPage() {
           isNew
             ? draft.exercises.map((ex) => ({
                 ...ex,
+                note: '',
+                setCountDelta: null,
                 sets: ex.sets.map((s) => ({ ...s, weightDelta: null, repsDelta: null })),
               }))
             : draft.exercises,
@@ -282,7 +300,13 @@ export function WorkoutEditorPage() {
     }
   }, [isNew, apiOnline])
 
-  const onSave = async () => {
+  useEffect(() => {
+    if (!saveFlash) return
+    const timeout = window.setTimeout(() => setSaveFlash(''), 1800)
+    return () => window.clearTimeout(timeout)
+  }, [saveFlash])
+
+  const saveWorkout = async (finish = false) => {
     if (saving || !apiOnline) return
     const payload = toPayload(title, when, bodyWeightKg, notes, exercises)
     if (!payload.title) {
@@ -305,12 +329,7 @@ export function WorkoutEditorPage() {
       } else {
         saved = await apiUpdateWorkout(id!, payload)
       }
-      celebrate('workout')
       trackApp('workout_saved')
-      navigate(`/app/workouts/${saved.id}`, {
-        replace: true,
-        state: isNew ? { askFelt: true, justSaved: true } : { justSaved: true },
-      })
       const draft = fromDetail(saved)
       setTitle(draft.title)
       setWhen(draft.when)
@@ -318,6 +337,16 @@ export function WorkoutEditorPage() {
       setNotes(draft.notes)
       setExercises(draft.exercises)
       setFeedback(draft.feedback)
+      if (finish) {
+        celebrate('workout')
+        navigate(`/app/workouts/${saved.id}`, {
+          replace: true,
+          state: { askFelt: true, justSaved: true },
+        })
+      } else {
+        if (isNew) navigate(`/app/workouts/${saved.id}/edit`, { replace: true })
+        setSaveFlash('Сохранено')
+      }
     } catch (err) {
       if (err instanceof ApiError && err.status >= 400 && err.status < 500) {
         createKeyRef.current = null
@@ -327,6 +356,9 @@ export function WorkoutEditorPage() {
       setSaving(false)
     }
   }
+
+  const onSave = () => void saveWorkout()
+  const onFinish = () => void saveWorkout(true)
 
   const onDelete = async () => {
     if (!id || isNew || deleting) return
@@ -364,6 +396,15 @@ export function WorkoutEditorPage() {
     setExercises((prev) => prev.map((ex, i) => (i === index ? { ...ex, ...patch } : ex)))
   }, [])
 
+  const shareData = useMemo(
+    () => ({
+      title,
+      performedAt: fromDatetimeLocalValue(when),
+      exercises,
+    }),
+    [exercises, title, when],
+  )
+
   if (!user) return <Navigate to="/login" replace />
 
   const pageTitle = isNew ? 'Новая тренировка' : isViewing ? title || 'Тренировка' : 'Редактирование'
@@ -392,6 +433,7 @@ export function WorkoutEditorPage() {
           {error}
         </p>
       ) : null}
+      <SoftFlash message={saveFlash} />
 
       {loading ? (
         <SoftLoader delayMs={SOFT_LOADER_DELAY_MS} label="Загружаем тренировку…" />
@@ -401,7 +443,7 @@ export function WorkoutEditorPage() {
         <>
           {justSaved ? (
             <section className="surface workout-saved-next" aria-live="polite">
-              <p className="empty-copy-title">Тренировка сохранена</p>
+              <p className="empty-copy-title">Тренировка завершена</p>
               <Link to="/app/workouts/progress" className="btn btn-primary btn-block">
                 Смотреть прогресс
               </Link>
@@ -427,6 +469,13 @@ export function WorkoutEditorPage() {
               <p className="muted">Нет упражнений</p>
             )}
           </section>
+          <button
+            type="button"
+            className="btn btn-soft btn-block"
+            onClick={() => setShareOpen(true)}
+          >
+            <Share2 size={16} /> Поделиться тренировкой
+          </button>
         </>
       ) : null}
 
@@ -501,6 +550,19 @@ export function WorkoutEditorPage() {
                       </button>
                     ) : null}
                   </div>
+                  <button
+                    type="button"
+                    className="workout-exercise-note-link"
+                    onClick={() => {
+                      setExerciseNoteDraft(ex.note)
+                      setExerciseNoteTarget(ei)
+                    }}
+                  >
+                    <Pencil size={14} aria-hidden />
+                    <span className={ex.note.trim() ? '' : 'muted'}>
+                      {ex.note.trim() ? notePreview(ex.note) : 'Заметка к упражнению'}
+                    </span>
+                  </button>
                   <div className="workout-sets-head" aria-hidden>
                     <span>Подход</span>
                     <span>Кг</span>
@@ -584,14 +646,24 @@ export function WorkoutEditorPage() {
             </button>
           </section>
 
-          <button
-            type="button"
-            className="btn btn-primary btn-block"
-            disabled={saving || !apiOnline}
-            onClick={() => void onSave()}
-          >
-            {saving ? 'Сохраняем…' : 'Сохранить'}
-          </button>
+          <div className="workout-save-actions">
+            <button
+              type="button"
+              className="btn btn-primary btn-block"
+              disabled={saving || !apiOnline}
+              onClick={onSave}
+            >
+              {saving ? 'Сохраняем…' : 'Сохранить и продолжить'}
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost btn-block"
+              disabled={saving || !apiOnline}
+              onClick={onFinish}
+            >
+              Завершить тренировку
+            </button>
+          </div>
         </>
       ) : null}
 
@@ -736,6 +808,78 @@ export function WorkoutEditorPage() {
         </div>
       ) : null}
 
+      {exerciseNoteTarget != null ? (
+        <div
+          className="app-sheet"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="workout-exercise-note-title"
+        >
+          <button
+            type="button"
+            className="app-sheet-backdrop"
+            aria-label="Закрыть"
+            onClick={() => setExerciseNoteTarget(null)}
+          />
+          <div className="app-sheet-panel workout-note-sheet" ref={exerciseNoteSheetRef}>
+            <div className="app-sheet-grab" aria-hidden />
+            <h3 id="workout-exercise-note-title">Заметка к упражнению</h3>
+            <label className="field">
+              <textarea
+                value={exerciseNoteDraft}
+                onChange={(e) =>
+                  setExerciseNoteDraft(e.target.value.slice(0, WORKOUT_EXERCISE_NOTE_MAX))
+                }
+                maxLength={WORKOUT_EXERCISE_NOTE_MAX}
+                rows={4}
+                placeholder="Техника, положение, самочувствие…"
+                autoFocus
+              />
+            </label>
+            <p className="dim workout-note-count">
+              {exerciseNoteDraft.length}/{WORKOUT_EXERCISE_NOTE_MAX}
+            </p>
+            <button
+              type="button"
+              className="btn btn-primary btn-block"
+              onClick={() => {
+                const index = exerciseNoteTarget
+                if (index != null) {
+                  updateExercise(index, {
+                    note: exerciseNoteDraft.trim().slice(0, WORKOUT_EXERCISE_NOTE_MAX),
+                  })
+                }
+                setExerciseNoteTarget(null)
+              }}
+            >
+              Готово
+            </button>
+            {exerciseNoteDraft.trim() ? (
+              <button
+                type="button"
+                className="sheet-action"
+                onClick={() => {
+                  const index = exerciseNoteTarget
+                  if (index != null) updateExercise(index, { note: '' })
+                  setExerciseNoteDraft('')
+                  setExerciseNoteTarget(null)
+                }}
+              >
+                Убрать заметку
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="sheet-action"
+                onClick={() => setExerciseNoteTarget(null)}
+              >
+                Отмена
+              </button>
+            )}
+          </div>
+        </div>
+      ) : null}
+
       <WeightKgSheet
         open={weightSheetOpen}
         value={bodyWeightKg}
@@ -780,6 +924,7 @@ export function WorkoutEditorPage() {
         onSelect={(next) => void selectFelt(next)}
         onClose={() => setFeltSheetOpen(false)}
       />
+      <WorkoutShareSheet open={shareOpen && isViewing} data={shareData} onClose={() => setShareOpen(false)} />
     </main>
   )
 }

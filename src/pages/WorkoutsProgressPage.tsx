@@ -18,8 +18,10 @@ import { useSheetA11y } from '../lib/sheetA11y'
 import {
   deriveProgressInsight,
   liftProgressLabel,
+  liftWorkloadLabel,
   plateauDaysLabel,
   visibleDeclining,
+  visibleWorkloadChanges,
 } from '../lib/progressInsight'
 import {
   formatBarWeightValue,
@@ -163,11 +165,11 @@ function prGainLabel(pr: WorkoutPrItem) {
   if (pr.prevWeightKg == null && pr.prevReps == null) return 'впервые'
   if (pr.kind === 'weight') {
     const d = Math.round((pr.weightKg - (pr.prevWeightKg ?? 0)) * 10) / 10
-    if (d <= 0) return 'вес'
+    if (d <= 0) return 'новый рекорд'
     return `+${formatBarWeightValue(d)} кг`
   }
   const d = pr.reps - (pr.prevReps ?? 0)
-  if (d <= 0) return 'повторы'
+  if (d <= 0) return 'новый рекорд'
   return `+${d} ${ruPlural(d, 'повтор', 'повтора', 'повторов')}`
 }
 
@@ -296,6 +298,9 @@ function InsightsBlocks({ insights }: { insights: WorkoutInsights }) {
   const decliningRows = visibleDeclining(insights)
     .map((lift) => ({ lift, percent: liftProgressLabel(lift) }))
     .filter((row): row is { lift: WorkoutExerciseInsight; percent: string } => Boolean(row.percent))
+  const workloadRows = visibleWorkloadChanges(insights)
+    .map((lift) => ({ lift, label: liftWorkloadLabel(lift) }))
+    .filter((row): row is { lift: WorkoutExerciseInsight; label: string } => Boolean(row.label))
   const listedRows = improvingRows.length ? improvingRows : decliningRows
 
   return (
@@ -309,6 +314,16 @@ function InsightsBlocks({ insights }: { insights: WorkoutInsights }) {
               <LiftRow key={lift.identity} lift={lift} percent={percent} />
             ))}
           </ul>
+        ) : null}
+        {workloadRows.length ? (
+          <>
+            <p className="workout-insights-kicker muted">Изменение числа подходов</p>
+            <ul className="workout-insights-list">
+              {workloadRows.map(({ lift, label }) => (
+                <LiftRow key={`load-${lift.identity}`} lift={lift} percent={label} />
+              ))}
+            </ul>
+          </>
         ) : null}
         {insights.plateauCandidates.length ? (
           <>
@@ -826,4 +841,3 @@ export function WorkoutsProgressPage() {
     </main>
   )
 }
-

@@ -160,15 +160,20 @@ gymRoutes.get('/:gymId/people', requireAuth, async (c) => {
           breakUntil: true,
           privacy: true,
           lookingToMeet: true,
+          lastGymVisitVisible: true,
           lastSeenAt: true,
           referralStatusVisible: true,
           referralCreditedCount: true,
           checkIns: {
-            where: { checkedOutAt: null },
+            // The card shows only this gym's latest check-in — never activity
+            // in another club a viewer happened to browse.
+            where: { gymId },
+            orderBy: { checkedInAt: 'desc' },
             take: 1,
             select: {
               gymId: true,
               checkedInAt: true,
+              checkedOutAt: true,
               expiresAt: true,
               extendCount: true,
             },

@@ -127,7 +127,7 @@ export function WorkoutMonthRecap() {
   }, [load])
 
   useEffect(() => {
-    if (allowed) trackApp('ai_analysis_opened', { range: '30' })
+    if (allowed) trackApp('ai_analysis_opened', { range: 'month' })
   }, [allowed])
 
   useEffect(() => {
@@ -147,13 +147,13 @@ export function WorkoutMonthRecap() {
     generatingRef.current = true
     setGenerating(true)
     setError('')
-    trackApp('ai_analysis_requested', { range: '30' })
+    trackApp('ai_analysis_requested', { range: 'month' })
     try {
       setMonthly(await apiGenerateWorkoutMonthly())
       setOpen(true)
-      trackApp('ai_analysis_completed', { range: '30' })
+      trackApp('ai_analysis_completed', { range: 'month' })
     } catch (err) {
-      trackApp('ai_analysis_failed', { range: '30', reason: 'request' })
+      trackApp('ai_analysis_failed', { range: 'month', reason: 'request' })
       setError(userFacingError(err, 'Не удалось собрать разбор месяца'))
     } finally {
       generatingRef.current = false
@@ -179,7 +179,7 @@ export function WorkoutMonthRecap() {
         aria-controls="month-recap-panel"
         onClick={() => setOpen((v) => !v)}
       >
-        <span className="section-heading">Обзор месяца</span>
+        <span className="section-heading">Итоги месяца</span>
         <span className="workout-recap-toggle" aria-hidden>
           <ChevronDown size={16} className={open ? 'is-open' : undefined} />
         </span>
@@ -191,7 +191,7 @@ export function WorkoutMonthRecap() {
         monthly ? <span className="muted">{monthly.periodLabel}</span> : null
       }
     >
-      Обзор месяца
+      Итоги месяца
     </SectionTitle>
   )
 
@@ -288,12 +288,12 @@ export function WorkoutMonthRecap() {
         <section className="surface workouts-empty">
           {recapTitle}
           <p className="empty-copy-title">
-            {monthly.status === 'failed' ? 'Обзор месяца' : 'Собрать обзор месяца'}
+            {monthly.status === 'failed' ? 'Итоги месяца' : 'Собрать итоги месяца'}
           </p>
           <p className="muted">
             {monthly.status === 'failed'
               ? 'Разбор временно недоступен'
-              : 'Как ты тренировался в последние 30 дней и куда двигаешься.'}
+              : `Полный период завершён: ${monthly.periodLabel}. Сравним его с предыдущим месяцем.`}
           </p>
           {facts ? <FactsFallback facts={facts} /> : null}
           <button
@@ -306,7 +306,7 @@ export function WorkoutMonthRecap() {
               ? 'Собираем…'
               : monthly.status === 'failed'
                 ? 'Попробовать снова'
-                : 'Собрать обзор'}
+              : 'Собрать итоги'}
           </button>
         </section>
       ) : null}
@@ -320,14 +320,14 @@ export function WorkoutMonthRecap() {
               : monthly.status === 'skipped'
                 ? 'Пока без разбора'
                 : showFallback
-                  ? 'Обзор месяца'
+                  ? 'Итоги месяца'
                   : 'Обзор появится позже'}
           </p>
           <p className="muted">
             {monthly.status === 'locked'
-              ? 'Обзор месяца сравнивает последние 30 дней с предыдущими. Нужно минимум четыре тренировки, чтобы было с чем сравнить.'
+              ? `За период ${monthly.periodLabel} нужно минимум четыре тренировки, чтобы было с чем сравнить.`
               : monthly.status === 'skipped'
-                ? 'За месяц цифры почти не сдвинулись. Новый разбор появится, когда будет рекорд, сдвиг объёма или частоты.'
+                ? 'В этом завершённом месяце цифры почти не сдвинулись. Итоги следующего месяца появятся после его окончания.'
                 : showFallback
                   ? 'Разбор временно недоступен'
                   : 'Цифры — в блоках ниже.'}

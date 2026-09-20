@@ -1,5 +1,5 @@
 import type { WorkoutExerciseInsight, WorkoutInsights } from './apiClient'
-import { formatSignedPercent, ruPlural } from './workouts'
+import { formatSetCountDelta, formatSignedPercent, ruPlural } from './workouts'
 
 export type ProgressInsightKind =
   | 'positive_progress'
@@ -20,6 +20,22 @@ export function liftProgressLabel(lift: WorkoutExerciseInsight): string | null {
   if (lift.repsDelta == null || lift.repsDelta === 0) return null
   const sign = lift.repsDelta > 0 ? '+' : ''
   return `${sign}${lift.repsDelta} повт.`
+}
+
+/**
+ * A set-count change is a workload signal, not a strength verdict. It is kept
+ * separate from `liftProgressLabel`, which deliberately describes only the
+ * best working set (weight/reps).
+ */
+export function liftWorkloadLabel(lift: WorkoutExerciseInsight): string | null {
+  return formatSetCountDelta(lift.setCountDelta)
+}
+
+export function visibleWorkloadChanges(insights: WorkoutInsights): WorkoutExerciseInsight[] {
+  return insights.exercises
+    .filter((lift) => Boolean(liftWorkloadLabel(lift)))
+    .sort((a, b) => Math.abs(b.setCountDelta ?? 0) - Math.abs(a.setCountDelta ?? 0))
+    .slice(0, 5)
 }
 
 export function visibleImproving(insights: WorkoutInsights): WorkoutExerciseInsight[] {
@@ -54,6 +70,7 @@ function exerciseCountHeadline(verb: 'сильнее' | 'слабее', count: n
 export function deriveProgressInsight(insights: WorkoutInsights): ProgressInsightCopy {
   const improving = visibleImproving(insights)
   const decliningLifts = visibleDeclining(insights)
+  const workloadChanges = visibleWorkloadChanges(insights)
   const plateaus = insights.plateauCandidates
 
   if (improving.length > 0) {
@@ -67,6 +84,20 @@ export function deriveProgressInsight(insights: WorkoutInsights): ProgressInsigh
     return {
       kind: 'negative_progress',
       headline: exerciseCountHeadline('слабее', decliningLifts.length),
+    }
+  }
+
+  if (workloadChanges.some((lift) => (lift.setCountDelta ?? 0) > 0)) {
+    return {
+      kind: 'positive_progress',
+      headline: 'В последней тренировке стало больше работы.',
+    }
+  }
+
+  if (workloadChanges.some((lift) => (lift.setCountDelta ?? 0) < 0)) {
+    return {
+      kind: 'declining',
+      headline: 'В последней тренировке стало меньше работы.',
     }
   }
 

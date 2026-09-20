@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
-import { WORKOUT_NOTE_MAX } from '../lib/fieldLimits.js'
+import { WORKOUT_EXERCISE_NOTE_MAX, WORKOUT_NOTE_MAX } from '../lib/fieldLimits.js'
 import {
   createWorkoutSession,
   deleteWorkoutSession,
@@ -54,6 +54,7 @@ const setSchema = z.object({
 const exerciseSchema = z.object({
   name: z.string().trim().min(1).max(60),
   trackKey: z.string().trim().max(64).optional(),
+  note: z.string().max(WORKOUT_EXERCISE_NOTE_MAX).optional(),
   sets: z.array(setSchema).min(1).max(6),
 })
 

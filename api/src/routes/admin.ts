@@ -315,6 +315,7 @@ adminRoutes.get('/users', async (c) => {
       breakUntil: true,
       privacy: true,
       lookingToMeet: true,
+      lastGymVisitVisible: true,
       referralStatusVisible: true,
       referralCreditedCount: true,
       onboardingDone: true,

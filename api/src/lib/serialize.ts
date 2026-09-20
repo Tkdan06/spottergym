@@ -16,6 +16,21 @@ const EMPTY_REFERRAL: ReferralPublicStats = {
   referralChrome: 'none',
 }
 
+function moscowDateKey(now = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Moscow',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(now)
+  const get = (type: string) => parts.find((part) => part.type === type)?.value || ''
+  return `${get('year')}-${get('month')}-${get('day')}`
+}
+
+function isOnBreak(breakUntil: string | null, now = new Date()) {
+  return Boolean(breakUntil && /^\d{4}-\d{2}-\d{2}$/.test(breakUntil) && breakUntil >= moscowDateKey(now))
+}
+
 function referralFields(stats?: ReferralPublicStats | null) {
   const s = stats || EMPTY_REFERRAL
   return {
@@ -74,6 +89,7 @@ export function serializeUser(
       breakUntil: null as string | null,
       privacy: 'open' as const,
       lookingToMeet: false,
+      lastGymVisitVisible: false,
       referralStatusVisible: false,
       isActive: false,
       checkedInGymId: '',
@@ -129,6 +145,7 @@ export function serializeUser(
     breakUntil: user.breakUntil,
     privacy: user.privacy,
     lookingToMeet: user.lookingToMeet,
+    lastGymVisitVisible: user.lastGymVisitVisible === true,
     referralStatusVisible: user.referralStatusVisible !== false,
     isActive: Boolean(activeCheckIn),
     checkedInGymId: activeCheckIn?.gymId || '',
@@ -297,12 +314,14 @@ export type GymPeopleCardUser = {
   breakUntil: string | null
   privacy: User['privacy']
   lookingToMeet: boolean
+  lastGymVisitVisible?: boolean
   lastSeenAt: Date
   referralStatusVisible: boolean
   referralCreditedCount: number
   checkIns: Array<{
     gymId: string
     checkedInAt: Date
+    checkedOutAt?: Date | null
     expiresAt: Date | null
     extendCount: number
   }>
@@ -315,11 +334,25 @@ export function serializePublicCard(
   referralOverride?: ReferralPublicStats | null,
 ) {
   const now = new Date()
-  const open = user.checkIns[0]
-  const expiresAt = open ? resolveExpiresAt(open.checkedInAt, open.expiresAt) : null
+  const latestVisit = user.checkIns[0]
+  const expiresAt = latestVisit
+    ? resolveExpiresAt(latestVisit.checkedInAt, latestVisit.expiresAt)
+    : null
   const activeHere = Boolean(
-    open && expiresAt && expiresAt.getTime() > now.getTime() && open.gymId === gymId,
+    latestVisit &&
+      !latestVisit.checkedOutAt &&
+      expiresAt &&
+      expiresAt.getTime() > now.getTime() &&
+      latestVisit.gymId === gymId,
   )
+  const lastGymVisitAt =
+    user.privacy === 'open' &&
+    user.lastGymVisitVisible === true &&
+    !isOnBreak(user.breakUntil, now) &&
+    !activeHere &&
+    latestVisit?.gymId === gymId
+      ? latestVisit.checkedInAt.toISOString()
+      : ''
   const photo = (user.photos || []).find((p) => typeof p === 'string' && p.length > 0) || ''
   const referral = referralFromUser(user, referralOverride, true)
 
@@ -353,6 +386,7 @@ export function serializePublicCard(
       checkedInExpiresAt: '',
       checkInExtendCount: 0,
       checkInCanExtend: false,
+      lastGymVisitAt: '',
       lastSeenAt: '',
       isDeleted: false,
       verified: false,
@@ -385,12 +419,16 @@ export function serializePublicCard(
     lookingToMeet: user.lookingToMeet,
     isActive: activeHere,
     checkedInGymId: activeHere ? gymId : '',
-    checkedInAt: activeHere && open ? open.checkedInAt.toISOString() : '',
+    checkedInAt: activeHere && latestVisit ? latestVisit.checkedInAt.toISOString() : '',
     checkedInExpiresAt: activeHere && expiresAt ? expiresAt.toISOString() : '',
-    checkInExtendCount: activeHere && open ? open.extendCount : 0,
+    checkInExtendCount: activeHere && latestVisit ? latestVisit.extendCount : 0,
     checkInCanExtend: Boolean(
-      activeHere && open && expiresAt && canExtendCheckIn(open.extendCount, expiresAt, now),
+      activeHere &&
+        latestVisit &&
+        expiresAt &&
+        canExtendCheckIn(latestVisit.extendCount, expiresAt, now),
     ),
+    lastGymVisitAt,
     lastSeenAt: user.lastSeenAt.toISOString(),
     isDeleted: false,
     verified: false,

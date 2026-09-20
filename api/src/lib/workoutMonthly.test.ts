@@ -6,6 +6,7 @@ import {
   evaluateMonthlyEligibility,
   hashMonthlyInput,
   monthlyInsightsForModel,
+  completedMoscowMonthBounds,
   moscowMonthBounds,
   sanitizeMonthlyLetter,
 } from './workoutMonthly.ts'
@@ -19,6 +20,8 @@ function lift(name: string, over: Partial<WorkoutExerciseInsight> = {}): Workout
     name,
     sessionCount: 4,
     setCount: 12,
+    latestSetCount: 3,
+    setCountDelta: 0,
     volume: 4800,
     maxWeightKg: 100,
     bestSet: { weightKg: 100, reps: 5 },
@@ -66,11 +69,11 @@ function modelInput(
     insights(over),
     insights(historyOver),
     {
-      currentStart: new Date(NOW.getTime() - 30 * DAY),
+      start: new Date(NOW.getTime() - 30 * DAY),
+      end: NOW,
       previousStart: new Date(NOW.getTime() - 60 * DAY),
-      now: NOW,
+      previousEnd: new Date(NOW.getTime() - 30 * DAY),
     },
-    moscowMonthBounds(NOW),
   )
 }
 
@@ -79,6 +82,14 @@ describe('moscowMonthBounds', () => {
     const { start, end } = moscowMonthBounds(NOW)
     assert.equal(start.toISOString(), '2026-07-31T21:00:00.000Z')
     assert.equal(end.toISOString(), '2026-08-31T21:00:00.000Z')
+  })
+
+  it('selects the latest completed month, never the month still in progress', () => {
+    const bounds = completedMoscowMonthBounds(new Date('2026-09-07T12:00:00.000Z'))
+    assert.equal(bounds.start.toISOString(), '2026-07-31T21:00:00.000Z')
+    assert.equal(bounds.end.toISOString(), '2026-08-31T21:00:00.000Z')
+    assert.equal(bounds.previousStart.toISOString(), '2026-06-30T21:00:00.000Z')
+    assert.equal(bounds.previousEnd.toISOString(), '2026-07-31T21:00:00.000Z')
   })
 })
 
@@ -162,7 +173,8 @@ describe('monthlyInsightsForModel', () => {
     assert.equal(/email/i.test(raw), false)
     assert.equal(/userId/i.test(raw), false)
     assert.equal('exercises' in input, false)
-    assert.equal(input.period.range, 30)
+    assert.equal(input.period.start, new Date(NOW.getTime() - 30 * DAY).toISOString())
+    assert.equal(input.period.end, NOW.toISOString())
     assert.equal(input.prs.count, 2)
     assert.equal(input.volume.deltaPercent, 14.1)
     assert.equal(input.history90.range, 90)
@@ -182,11 +194,11 @@ describe('monthlyInsightsForModel', () => {
       insights({ workoutCount: { current: 12, previous: 9, delta: 3, deltaPercent: 33.3 } }),
       insights(),
       {
-        currentStart: new Date(NOW.getTime() - 30 * DAY),
+        start: new Date(NOW.getTime() - 30 * DAY),
+        end: NOW,
         previousStart: new Date(NOW.getTime() - 60 * DAY),
-        now: NOW,
+        previousEnd: new Date(NOW.getTime() - 30 * DAY),
       },
-      moscowMonthBounds(NOW),
       felt,
     )
     assert.equal(input.felt.length, 3)
